@@ -1986,7 +1986,7 @@
   id: totrans-241
   prefs: []
   type: TYPE_NORMAL
-  zh: 当然，如果愿意为了性能而接受非顺序一致程序的混乱，许多其他数据结构也可以从这种方法中受益。
+  zh:  推送操作必须继续尝试保留子队列，直到找到一个（或者，我们可以允许推送在一定次数尝试后失败，并向调用者发出队列太忙的信号）。弹出操作可能只保留一个子队列，却发现它是空的。在这种情况下，它必须尝试从另一个子队列中弹出（我们可以保持队列中元素的原子计数，以优化如果队列为空则快速返回）。
 - en: 'Of course, pop may fail on one thread and report that the queue is empty when
     in fact, it isn''t because another thread has pushed new data onto the queue.
     But this could happen with any concurrent queue: one thread checks the queue size,
@@ -2011,7 +2011,7 @@
   id: totrans-244
   prefs: []
   type: TYPE_NORMAL
-  zh: 在这个基准测试中，所有线程都进行推送和弹出操作，并且元素相当大（复制每个元素需要复制1KB的数据）。作为比较，使用自旋锁保护的`std::queue`在单个线程上提供相同的性能（约每秒170k个元素），但不会扩展（整个操作被锁定），性能会缓慢下降（由于锁定的开销）到每秒约130k个元素的最大线程数。
+  zh: '![图7.23 - 非顺序一致队列的性能'
 - en: '](img/Figure_7.23_B16229.jpg)'
   id: totrans-245
   prefs: []
@@ -2031,14 +2031,14 @@
   id: totrans-247
   prefs: []
   type: TYPE_NORMAL
-  zh: 推送操作必须继续尝试保留子队列，直到找到一个（或者，我们可以允许推送在一定次数尝试后失败，并向调用者发出队列太忙的信号）。弹出操作可能只保留一个子队列，却发现它是空的。在这种情况下，它必须尝试从另一个子队列中弹出（我们可以保持队列中元素的原子计数，以优化如果队列为空则快速返回）。
+  zh: 在这个基准测试中，所有线程都进行推送和弹出操作，并且元素相当大（复制每个元素需要复制1KB的数据）。作为比较，使用自旋锁保护的`std::queue`在单个线程上提供相同的性能（约每秒170k个元素），但不会扩展（整个操作被锁定），性能会缓慢下降（由于锁定的开销）到每秒约130k个元素的最大线程数。
 - en: Of course, many other data structures can benefit from this approach if you're
     willing to embrace the chaos of the non-sequentially-consistent programs for the
     sake of performance.
   id: totrans-248
   prefs: []
   type: TYPE_NORMAL
-  zh: 并发数据结构的内存管理
+  zh: 当然，如果愿意为了性能而接受非顺序一致程序的混乱，许多其他数据结构也可以从这种方法中受益。
 - en: The last subject we need to cover when it comes to concurrent sequential containers
     such as stack and queue is how to handle the situation when they need more memory.
   id: totrans-249
@@ -2050,7 +2050,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
-  zh: '![图7.23 - 非顺序一致队列的性能'
+  zh: '并发数据结构的内存管理'
 - en: 'So far, we persisted in pushing back on the issue of memory management and
     assumed that the initial memory allocation for the data structure would suffice,
     at least for lock-free data structures that do not make the entire operation single-threaded.
