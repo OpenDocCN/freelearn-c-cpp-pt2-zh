@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 游戏开发的程序化内容生成](README.md)
 +   [前言](prcd-cont-gen-cpp-gm-dev_00.md)
 +   [第一章：程序生成简介](prcd-cont-gen-cpp-gm-dev_01.md)
 +   [第二章：项目设置和分解](prcd-cont-gen-cpp-gm-dev_02.md)

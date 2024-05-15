@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [精通 Windows8 C++ 应用开发](README.md)
 +   [前言](ms-win8-cpp-appdev_00.md)
 +   [第一章：介绍 Windows 8 应用程序](ms-win8-cpp-appdev_01.md)
 +   [第二章：Windows 8 商店应用的 COM 和 C++](ms-win8-cpp-appdev_02.md)

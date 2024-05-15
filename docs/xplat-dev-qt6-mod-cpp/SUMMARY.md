@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ Qt6 跨平台开发](README.md)
 +   [前言](xplat-dev-qt6-mod-cpp_00.md)
 +   [第一部分：基础知识](xplat-dev-qt6-mod-cpp_01.md)
 +   [第一章：介绍 Qt 6](xplat-dev-qt6-mod-cpp_02.md)
