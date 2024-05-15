@@ -1,4 +1,3 @@
-+   [C++ 高级量化金融](docs/adv-quant-fin-cpp/README.md)
 +   [编写高效程序的艺术](docs/art-wrt-eff-prog/README.md)
 +   [Code::Blocks 和 C++ 应用开发](docs/cpp-appdev-cdblk/README.md)
 +   [C++ 游戏开发秘籍](docs/cpp-gm-dev-cb/README.md)
