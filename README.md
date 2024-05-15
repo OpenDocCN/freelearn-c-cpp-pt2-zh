@@ -12,24 +12,24 @@
 ### Docker
 
 ```
-docker pull apachecn0/apachecn-c-cpp-zh-pt2
-docker run -tid -p <port>:80 apachecn0/apachecn-c-cpp-zh-pt2
+docker pull apachecn0/freelearn-c-cpp-pt2-zh
+docker run -tid -p <port>:80 apachecn0/freelearn-c-cpp-pt2-zh
 # 访问 http://localhost:{port} 查看文档
 ```
 
 ### PYPI
 
 ```
-pip install apachecn-c-cpp-zh-pt2
-apachecn-c-cpp-zh-pt2 <port>
+pip install freelearn-c-cpp-pt2-zh
+freelearn-c-cpp-pt2-zh <port>
 # 访问 http://localhost:{port} 查看文档
 ```
 
 ### NPM
 
 ```
-npm install -g apachecn-c-cpp-zh-pt2
-apachecn-c-cpp-zh-pt2 <port>
+npm install -g freelearn-c-cpp-pt2-zh
+freelearn-c-cpp-pt2-zh <port>
 # 访问 http://localhost:{port} 查看文档
 ```
 

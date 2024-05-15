@@ -17,7 +17,7 @@
     +   [ApacheCN Golang 译文集📚](https://apachecn.github.io/apachecn-golang-zh)
     +   [ApacheCN Golang 译文集（二）📚](https://apachecn.github.io/apachecn-golang-zh-pt2)
     +   [FreeLearning C/C++译文集📚](https://apachecn.github.io/apachecn-c-cpp-zh)
-    +   [FreeLearning C/C++译文集（二）📚](https://apachecn.github.io/apachecn-c-cpp-zh-pt2)
+    +   [FreeLearning C/C++译文集（二）📚](https://apachecn.github.io/freelearn-c-cpp-pt2-zh)
     +   [FreeLearning C/C++译文集（三）📚](https://apachecn.github.io/apachecn-c-cpp-zh-pt3)
     +   [ApacheCN Java 译文集📚](https://apachecn.github.io/apachecn-java-zh)
     +   [ApacheCN Java 译文集（二）📚](https://apachecn.github.io/apachecn-java-zh-pt2)
