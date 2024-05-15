@@ -10,7 +10,7 @@
 > 
 > 我们不但善于破坏一个旧世界，我们还将善于建设一个新世界。——教员
 
-* [在线阅读](https://ccpp2.apachecn.org)
+* [在线阅读](https://flcc2.flygon.net)
 * [在线阅读（Gitee）](https://apachecn.gitee.io/doc-template/)
 * [ApacheCN 学习资源](http://docs.apachecn.org/)
 
