@@ -35,4 +35,4 @@ freelearn-c-cpp-pt2-zh <port>
 
 ## 赞助我们
 
-![](http://data.apachecn.org/img/about/donate.jpg)
+![](https://img-blog.csdnimg.cn/20200112005920729.png)
