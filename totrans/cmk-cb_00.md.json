@@ -1,1 +1,0 @@
-["```cpp\ncmake_minimum_required(VERSION 3.5 FATAL_ERROR)\n\nproject(recipe-01 LANGUAGES CXX)\n\nadd_executable(hello-world hello-world.cpp)\n```", "```cpp\n$ mkdir -p build\n$ cd build\n$ cmake ..\n```", "```cpp\n$ ./hello-world\n\nHello World!\n```"]
