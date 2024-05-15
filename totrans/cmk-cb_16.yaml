@@ -1,0 +1,883 @@
+- en: Porting a Project to CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In the final chapter of this book, we will combine a number of different building
+    blocks that we have discussed in the previous chapters and apply them to a real-life
+    project. Our goal will be to demonstrate step-by-step how to port a non-trivial
+    project to CMake and discuss the steps involved in such a process. We will provide
+    recommendations for porting your own projects or adding CMake support to legacy
+    code, be it from Autotools, from hand-written configure scripts and Makefiles,
+    or from Visual Studio project files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To have a tangible and realistic example, we will use the source code behind
+    the popular editor Vim ([https://www.vim.org](https://www.vim.org)) and attempt
+    to port the configuration and compilation from Autotools to CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To keep the discussion and the examples relatively simple, we will not attempt
+    to present a full port to CMake for the entire Vim code with all options. Instead,
+    we will single out and discuss the most important aspects and only build a core
+    version of Vim, without support for a graphical user interface (GUI). Nevertheless,
+    we will arrive at a working version of Vim, configured, built, and tested with
+    CMake and the other tools we have presented in the book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following topics will be covered in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Initial steps when porting a project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generating files and writing platform checks
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Detecting required dependencies and linking
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Reproducing compiler flags
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Porting tests
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Porting install targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Common pitfalls when converting projects to CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Where to start
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We will first show where to find our example online and then discuss the porting
+    example step by step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reproducing the porting example
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We will start from the `v8.1.0290` release tag of the Vim source code repository
+    ([https://github.com/vim/vim](https://github.com/vim/vim)) and base our work on
+    the Git commit hash `b476cb7`. The following steps can be reproduced by cloning
+    the source code repository of Vim and checking out that particular version of
+    the code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternatively, our solution can be found on the `cmake-support` branch at [https://github.com/dev-cafe/vim](https://github.com/dev-cafe/vim) and
+    cloned to your computer using this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, we will emulate a `./configure --enable-gui=no` configuration
+    in CMake, built with the GNU compiler collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For comparison with our solution later, and for additional inspiration, we encourage
+    readers to also study the Neovim project ([https://github.com/neovim/neovim](https://github.com/neovim/neovim)),
+    which is a fork of the traditional Vi editor and provides a CMake build system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a top-level CMakeLists.txt
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As a start, we create a top-level `CMakeLists.txt` in the root directory of
+    the source code repository where we set the minimum CMake version, the project
+    name, and supported languages, in this case C:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Before adding any targets or sources, we can already set the default build
+    type. In this case, we default to the `Release` configuration, which will turn
+    on certain compiler optimizations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also use portable install directory variables, as defined for GNU software:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As a sanity check, we can already try to configure and build the project, but
+    so far there are no targets so the output from the build step will be empty:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: We will start adding targets in a moment to put more flesh on the bones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to allow both conventional configuration and configuration with CMake at
+    the same time
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'A very nice feature of CMake is that we build *out-of-source*, the build directory
+    can be any directory, and it does not have to be a subdirectory of the project
+    directory. This means that we can port a project to CMake while not intruding
+    into the previous/present configuration and build mechanism. For the migration
+    of a non-trivial project, it is very useful that CMake files can coexist with
+    other build frameworks to allow a gradual migration, both in terms of options,
+    features, and portability, and to allow the developer community to adapt to the
+    new framework. To allow both traditional and CMake configurations to coexist for
+    a while, a typical strategy is to collect all CMake code in `CMakeLists.txt` files
+    and all auxiliary CMake source files under a `cmake` subdirectory. In our example,
+    we will not introduce a `cmake` subdirectory, but rather keep auxiliary files
+    closer to the targets and sources requiring them, but we will take care to keep
+    almost all files used by the traditional Autotools build unmodified, with one
+    exception: we will apply few modifications in order to place autogenerated files
+    under the build directory and not in the source tree.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Capturing a record of what the traditional build does
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before we add any targets to the configuration, it is often useful to first
+    capture a record of what the traditional build does, and save the output of the
+    configuration and the build step into a log file. For our Vim example, this can
+    be done using the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: In our case (the complete content of `build.log` is not shown here), we are
+    able to verify which sources are compiled and which compile flags are used (`-I.
+    -Iproto
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-DHAVE_CONFIG_H -g -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1`). From the log
+    file, we can deduce the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All objects are linked into a single binary
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: No libraries are produced
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The executable target is linked against the following libraries: `-lSM -lICE
+    -lXpm -lXt -lX11 -lXdmcp -lSM -lICE -lm -ltinfo -lelf -lnsl -lacl -lattr -lgpm
+    -ldl`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Debugging the migration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'When gradually moving targets and commands to the CMake side, it will be useful
+    to print values of variables using the `message` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: By adding options, targets, sources, and dependencies while debugging using
+    `message`, we will inch our way towards a working build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementing options
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Find out which options the traditional configuration offers to the users (for
+    example, by running `./configure --help`). The Vim project offers a very long
+    list of options and flags and to keep the discussion in this chapter simple, we
+    will implement only four of the options on the CMake side:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: We will also ignore any GUI support and emulate `--enable-gui=no`, since it
+    would complicate the example without significantly adding to the learning outcome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will place the following options and defaults in `CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will emulate the `--with-features` flag using a variable, `FEATURES`, that
+    can be defined with `cmake -D FEATURES=value`. We make sure that if `FEATURES`
+    is not set, it defaults to "huge":'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also make sure that users provide a valid value for `FEATURES`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: The last line, containing `set_property(CACHE FEATURES PROPERTY STRINGS ${_available_features})`,
+    has the nice effect that when configuring the project using `cmake-gui`, the user
+    is presented with a selection field for `FEATURES` listing all available features
+    that we have defined already (see also [https://blog.kitware.com/constraining-values-with-comboboxes-in-cmake-cmake-gui/](https://blog.kitware.com/constraining-values-with-comboboxes-in-cmake-cmake-gui/)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The options can either be placed in the top-level `CMakeLists.txt` (as we have
+    done here) or they can be defined close to the targets that query `ENABLE_NETBEANS`, `ENABLE_CHANNEL`, `ENABLE_TERMINAL`,
+    and `FEATURES`. The former strategy has the advantage that options are listed
+    in one place and one does not need to traverse a tree of `CMakeLists.txt` files
+    to find the definition of an option. Since we have not defined any targets yet,
+    we can start with keeping the options in a central file, but we may later move
+    the option definition closer to the targets to localize scope and arrive at more
+    reusable CMake building blocks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Start with the executable and very few targets, later localize scope
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Let us add some sources. In the Vim example, sources are under `src` and to
+    keep the main `CMakeLists.txt` readable and maintainable, we will create a new
+    file, `src/CMakeLists.txt`, and process this file in its own directory scope by
+    adding this to the main `CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Inside `src/CMakeLists.txt`, we could start out defining the executable target
+    and listing all sources that we have extracted from `build.log`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is a start. In this case, the code will not even configure since the list
+    of sources contains generated files. Before we discuss generated files and link
+    dependencies, we will split this long list up a bit to limit the scope of target
+    dependencies and to make the project more manageable. We will also make it easier
+    for CMake to scan source file dependencies and avoid a very long link line if
+    we group them to targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the Vim example, we can gain further insight into the grouping of sources
+    from `src/Makefile` and `src/configure.ac`. From these files, we can deduce that
+    most sources are basic and required. Some sources are optional (`netbeans.c` should
+    only be built if `ENABLE_NETBEANS` is `ON` and `channel.c` should only be built
+    when `ENABLE_CHANNEL` is `ON`). In addition, we can probably group all sources
+    under `src/libvterm/` and make their compilation optional with `ENABLE_TERMINAL`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With this, we reorganize the CMake structure to the following tree structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The top-level file adds `src/CMakeLists.txt` with `add_subdirectory(src)`.
+    The `src/CMakeLists.txt` file now contains three targets (one executable and two
+    libraries), each carrying compile definitions and include directories. We first
+    define the executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we define the required sources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we define the optional sources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The file also optionally processes and links `src/libvterm/` with the following
+    code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The corresponding `src/libvterm/CMakeLists.txt` contains the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have extracted the compile definitions from the recorded `build.log`. The
+    advantage of the tree structure is that targets are defined close to where sources
+    are located. If we decide to refactor the code and rename or move directories,
+    the CMake files describing the targets have the chance to move with the sources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our example code still does not even configure (unless this is tried after
+    a successful Autotools build):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: We need to generate `auto/pathdef.c` (and other files), which we will consider
+    in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating files and writing platform checks
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'It turns out that for the Vim code example, we need to generate three files
+    at configure time, `src/auto/pathdef.c`, `src/auto/config.h`, and `src/auto/osdef.h`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pathdef.c` records the install path, compile and link flags, the user who
+    compiled the code, and the hostname'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`config.h` contains compile definitions that are specific to the system environment'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`osdef.h` is a file containing compile definitions generated by `src/osdef.sh`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This situation is rather common. We will need to configure a file based on CMake
+    variables, perform a number of platform checks to generate `config.h`, and execute
+    a script at configure time. In particular, the platform checks are very common
+    for projects striving for portability to accommodate the subtle differences between
+    operating systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the original layout, files are generated under the `src` folder. We do not
+    like this approach and we will do it differently in our example CMake port: these
+    files will be generated in the build directory. The reason for this is that generated
+    files often depend on the chosen options, compiler, or build type and we wish
+    to keep the ability to configure multiple builds with the same source. To enable
+    generation in the build directory, we will have to apply minimal changes to the
+    script which generates one of the files listed before.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to structure files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We will collect functions that generate these files in `src/autogenerate.cmake`,
+    include this module, and call these functions in `src/CMakeLists.txt` before defining
+    the executable target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The included `src/autogenerate.cmake` contains other includes for functionality
+    that we will require to probe header files, functions, and libraries, as well
+    as the three functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We choose to generate files with functions rather than in macros or "naked"
+    CMake code. As we discussed in previous chapters, this sidesteps many pitfalls:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It lets us avoid files being generated multiple times, in case we accidentally
+    include the module multiple times. As noted in Recipe 5, *Redefining functions
+    and macros*, in [Chapter 7](b655f271-d579-4d7f-aaf4-cd2188f0a1b5.xhtml), *Structuring
+    Projects*, we could employ an include guard to protect against accidentally running
+    code multiple times.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It guarantees full control over the scope of variables defined within the functions.
+    This avoids that these definitions spill out and pollute the main scope.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring preprocessor definitions based on the system environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `config.h` file is generated from `src/config.h.in`, which contains preprocessor
+    flags that are configured depending on the system capabilities:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An example generated from `src/config.h` can start like this example (definitions
+    can differ depending on the environment):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: A great resource for platform checks is this page: [https://www.vtk.org/Wiki/CMake:How_To_Write_Platform_Checks](https://www.vtk.org/Wiki/CMake:How_To_Write_Platform_Checks).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `src/configure.ac`, we can examine which platform checks we need to perform
+    to set corresponding preprocessor definitions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We will make use of `#cmakedefine` ([https://cmake.org/cmake/help/v3.5/command/configure_file.html?highlight=cmakedefine](https://cmake.org/cmake/help/v3.5/command/configure_file.html?highlight=cmakedefine))
+    and to make sure we do not break the existing Autotools build, we will copy `config.h.in`
+    to `config.h.cmake.in` and change all `#undef SOME_DEFINITION` to `#cmakedefine
+    SOME_DEFINITION @SOME_DEFINITION@`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the `generate_config_h` function, we first define a couple of variables:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we perform a couple of type size checks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we loop over functions and check whether the system is able to resolve
+    them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We verify whether a particular library contains a particular function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we loop over header files and check whether they are available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we translate CMake options from the main `CMakeLists.txt` to preprocessor
+    definitions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And finally, we check whether we are able to compile a particular code snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The defined variables are then used to configure `src/config.h.cmake.in` to
+    `config.h`, which concludes the `generate_config_h` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Configuring files with paths and compiler flags
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We generate `pathdef.c` from `src/pathdef.c.in`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `generate_pathdef_c` function configures `src/pathdef.c.in`, but we leave
+    out link flags for simplicity:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Executing shell scripts at configure time
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Finally, we generate `osdef.h` using the following function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: In order to generate `osdef.h` in `${CMAKE_CURRENT_BINARY_DIR}/src/auto` instead
+    of `src/auto`, we had to adapt `osdef.sh` to accept `${CMAKE_CURRENT_BINARY_DIR}`
+    as a command line argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Inside `osdef.sh`, we check whether this argument is given:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And then, we generate `${target_directory}/auto/osdef.h`. To do so, we also
+    had to adjust the following compilation line inside `osdef.sh`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Detecting required dependencies and linking
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We have now all generated files in place, so let us retry the build. We should
+    be able to configure and compile the sources, but we will not be able to link:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Again, we can take the log file from the Autotools compilation and, in particular,
+    the link line as inspiration to resolve the missing dependencies by adding the
+    following code to `src/CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Observe how we can add one library dependency to the target at a time and do
+    not have to construct and carry around a list of libraries in a variable, which
+    would produce more brittle CMake code since the variable could get corrupted on
+    the way, in particular for larger projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With this change, the code compiles and links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can now try to execute the compiled binary and edit some files with our newly
+    compiled version of Vim!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reproducing compiler flags
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let us now try to adjust the compiler flags to mirror the reference build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining compiler flags
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: So far, we have not defined any custom compiler flags, but from the reference
+    Autotools build, we remember that the code was compiled with `-g -U_FORTIFY_SOURCE
+  prefs: []
+  type: TYPE_NORMAL
+- en: -D_FORTIFY_SOURCE=1 -O2` using the GNU C compiler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our first approach could be to define the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And, we would place this code on top of `src/CMakeLists.txt`, right before
+    generating source files (since `pathdef.c` uses `${CMAKE_C_FLAGS}`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A slight improvement to the compiler flag definitions would be to define `-O2`
+    as a `Release` configuration flag and to turn off optimization for a `Debug` configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Please verify with `make VERBOSE=1` that the build uses the expected flags.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scope of compiler flags
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this particular example project, all source files use the same compile flags.
+    For other projects, we may prefer to not define compile flags globally as we have
+    done above, but to define flags individually for each target using `target_compile_options`.
+    The advantage would be more flexibility and more local scope. The price to pay
+    in our example here would probably be unnecessary code duplication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Porting tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let us now discuss how to port tests from the reference build to our CMake build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting started
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If the project that is being ported contains a test target or any form of automated
+    testing or test scripts, the first step will again be to run the traditional test
+    step and record the commands used. For the Vim project, the place to start is `src/testdir/Makefile`.
+    It will probably make sense to define tests on the CMake side close to `src/testdir/Makefile`
+    and the test scripts, and we will choose to define tests in `src/testdir/CMakeLists.txt`.
+    To process such a file, we must reference it in `src/CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We should also enable the test target in the top-level `CMakeLists.txt`, right
+    before processing `src/CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: So far, the test target is empty before we populate `src/testdir/CMakeLists.txt`
+    with `add_test` directives. The minimum to specify in `add_test` is a test name
+    and a command to run. The command can be any script written in any language. The
+    essential part for CMake is that the script returns zero if the test is successful
+    and non-zero if the test fails. For more details, we refer the reader to [Chapter
+    4](5b1b2efb-2ce1-4f8f-b4dd-a05606d8b87c.xhtml), *Creating and Running Tests*.
+    In the case of Vim, we will need a bit more to accommodate multi-step tests, which
+    we will discuss in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Implementing a multi-step test
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The targets in `src/testdir/Makefile` indicate that the Vim code runs tests
+    as multi-step tests: first the `vim` executable processes a script and produces
+    an output file, then in a second step the output file is compared with a reference
+    file and if these files do not differ, the test is successful. Temporary files
+    are then removed in a third step. This can probably not be fitted into a single
+    `add_test` command in a portable way since `add_test` can only execute one command.
+    One solution would be to define the test steps in a Python script and to execute
+    the Python script with some arguments. The alternative we will present here, which
+    is also cross-platform, is to define the test steps in a separate CMake script
+    and to execute this script from `add_test`.  We will define the test steps in
+    `src/testdir/test.cmake`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Again, we choose a function over a macro to make sure variables do not escape
+    the function scope. We will process this script, which will call the `execute_test`
+    function. However, we have to make sure that `${VIM_EXECUTABLE}`, `${WORKING_DIR}`,
+    and `${TEST_SCRIPT}` are defined from outside. These are defined in `src/testdir/CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Vim project has many tests but in this example, we have ported only one
+    (test1) as a proof of concept.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recommendation for tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We can give at least two recommendations for porting tests. First, to make sure
+    that the test does not always report success, verify that the test fails if you
+    break the code or change the reference data. Second, add `COST` estimates to tests
+    so that when run in parallel, longer tests are started first to minimize the total
+    test time (see [Chapter 4](5b1b2efb-2ce1-4f8f-b4dd-a05606d8b87c.xhtml), *Creating
+    and Running Tests*, Recipe 8, *Running tests in parallel*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Porting install targets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We can now configure, compile, link, and test the code, but we are missing the
+    install target, which we will add in this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is the Autotools approach to building and installing code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And this is the CMake way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To add an install target, we add the following snippet in `src/CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, we only install the executable. The Vim project installs a
+    large number of files along with the binary (symbolic links and documentation
+    files). To keep this section digestible, we don't install all other files in this
+    example migration. For your own project, you should verify that the result of
+    the install step matches the install target of the legacy build framework.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further steps
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'After a successful port to CMake, the next step should be to localize the scope
+    of targets and variables even further: consider moving options, targets, and variables
+    closer to where they are used and modified. Avoid global variables since they
+    will enforce an order to CMake commands, and this order may not be evident and
+    will lead to a brittle CMake code. One approach to enforcing the separation of
+    variable scopes is to divide larger projects into CMake projects, which are composed
+    using the superbuild pattern (see [Chapter 8](2c4b0d92-f493-4e2c-9732-a1039be79580.xhtml),
+    *The Superbuild Pattern*). Consider splitting large `CMakeLists.txt` files into
+    smaller modules.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next steps can be to test the configuration and compilation on other platforms
+    and operating systems in order to generalize and bullet-proof the CMake code and
+    make it more portable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, when migrating projects to a new build framework, the developer community
+    needs to adapt to it too. Help your colleagues with training, documentation, and
+    code review. The hardest part in porting code to CMake can be to change the habits
+    of humans.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary and common pitfalls when converting projects to CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let us summarize what we have achieved in this chapter and what we learned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary of code changes
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this chapter, we have discussed how to port a project to CMake. We have
+    considered the Vim project as an example and added the following files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: The changes can be browsed online: [https://github.com/dev-cafe/vim/compare/b476cb7...cmake-support](https://github.com/dev-cafe/vim/compare/b476cb7...cmake-support).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This was an incomplete proof of concept port to CMake, where we left out many
+    options and tweaks for simplicity and tried to focus on the most salient features
+    and steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common pitfalls
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We would like to conclude this discussion by pointing out some common pitfalls
+    when moving to CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Global variables are code smell**: This is true for any programming language,
+    and CMake is no exception. Variables that are carried across CMake files, and
+    in particular "upwards" from leaf to parent `CMakeLists.txt` files, indicate code
+    smell. There is typically a better way to transfer dependencies. Ideally, dependencies
+    should be imported through targets. Instead of assembling a list of libraries
+    into a variable and carrying the variable across files, link to libraries one
+    by one close to where they are defined. Instead of assembling source files into
+    variables, add source files using `target_sources`. When linking to libraries
+    use imported targets when available, instead of variables.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Minimize the effect of order**: CMake is not a declarative language, but
+    we should not approach it with an imperative paradigm either. CMake sources that
+    enforce a strict order tend to be brittle. This also connects to the discussion
+    about variables (see previous paragraph). Some order of statements and modules
+    will be necessary, but to arrive at robust CMake frameworks, we should avoid unnecessary
+    enforcement of order. Use `target_sources`, `target_compile_definitions`, `target_include_directories`,
+    and `target_link_libraries`. Avoid global scope statements such as `add_definitions`,
+    `include_directories`, and `link_libraries`. Avoid global definitions of compile
+    flags. If possible, define compile flags per target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Do not place generated files outside the build directory**: It is highly
+    recommended to never place generated files outside the build directory. The reason
+    for this is that generated files often depend on the chosen options or compiler
+    or build type, and by writing into the source tree, we give up the possibility
+    to maintain several builds with the same source and we complicate reproducibility
+    of the build steps.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Prefer functions over macros**: They have different scopes and the function
+    scope is limited. All variable modifications need to be explicitly marked, which
+    also signals variable redefinitions to the reader. Use a macro when you must but
+    prefer functions if you can.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Avoid shell commands**: They may not be portable to other platforms (such
+    as Windows). Prefer using CMake equivalents. If no CMake equivalent is available,
+    consider calling a Python script.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**In Fortran projects, be careful with the suffix case**: Fortran sources that
+    need to be preprocessed should have an uppercase `.F90` suffix. Sources that are
+    not to be preprocessed should carry the `.f90` suffix.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Avoid explicit paths**: This is true both when defining targets and when
+    referencing files. Use `CMAKE_CURRENT_LIST_DIR` when referring to the current
+    path. The advantage of this is that when you move or rename a directory, it will
+    still work.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Module includes should not be function calls**: Modularizing the CMake code
+    into modules is a good strategy, but including a module should ideally not execute
+    CMake code. Instead, wrap CMake code into functions and macros and explicitly
+    call these after including the module. This protects against unintended effects
+    when accidentally including a module multiple times and makes the action of executing
+    CMake code modules more explicit to the reader.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

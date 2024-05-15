@@ -1,0 +1,559 @@
+- en: Building Documentation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this chapter, we will cover the following recipes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building documentation using Doxygen
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Building documentation using Sphinx
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Combining Doxygen and Sphinx
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Introduction
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Documentation is essential in all software projects: for users, to explain
+    how to obtain and build the code and to illustrate how to use your code or library
+    effectively, and also for developers, to describe the internal details of your
+    library and to help other programmers get involved with and contribute to your
+    project. This chapter will show how to use CMake to build code documentation,
+    using two popular frameworks: Doxygen and Sphinx.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building documentation using Doxygen
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-01](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-01),
+    and includes a C++ example. The recipe is valid with CMake version 3.5 (and higher)
+    and has been tested on GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Doxygen ([http://www.doxygen.nl](http://www.doxygen.nl)) is a very popular source
+    code documentation tool. You can add documentation tags as comments in your code.
+    Running Doxygen will extract these comments and create the documentation in a
+    format defined in the Doxyfile configuration file. Doxygen can output HTML, XML,
+    and even LaTeX or PDF. This recipe will show you how to use CMake to build your
+    Doxygen documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We will use a simplified version of the `message` library presented in previous
+    chapters. The source tree is organized as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We still have our sources under the `src` subdirectory, and we have custom
+    CMake modules in the `cmake` subdirectory. Since our emphasis is on the documentation,
+    we have removed the dependency on UUID and simplified the source code. The most
+    significant differences are the numerous code comments in the header file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: These comments are in the format `/*! */`, and include some special tags, which
+    are understood by Doxygen (see [http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'First, let us discuss the `CMakeLists.txt` file in the root directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As should be familiar, we declare a C++11 project, as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We define the output directories for shared and static libraries and executables,
+    as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We append the `cmake` subdirectory to `CMAKE_MODULE_PATH`. This is required
+    for CMake to find our custom modules:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `UseDoxygenDoc.cmake` custom module is included. We will discuss its content
+    later:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then add the `src` subdirectory:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `CMakeLists.txt` file in the `src` subdirectory contains the following
+    building blocks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We add a `message` static library, as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then add an executable target, `hello-world`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, the `hello-world` executable should be linked to the message library:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the last stanza in the root `CMakeLists.txt` file, we call the `add_doxygen_doc`
+    function. This adds a new `docs` target that will invoke Doxygen to build our
+    documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, let us look at the `UseDoxygenDoc.cmake` module, where the `add_doxygen_doc`
+    function is defined:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We find the `Doxygen` and `Perl` executables, as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we declare the `add_doxygen_doc` function. This function understands
+    one-value arguments: `BUILD_DIR`, `DOXY_FILE`, `TARGET_NAME`, and `COMMENT`. We
+    parse these using the `cmake_parse_arguments` standard CMake command:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `Doxyfile` contains all Doxygen settings to build the documentation. A
+    template `Doxyfile.in` is passed as the function argument `DOXY_FILE`, and is
+    parsed into the `DOXY_DOC_DOXY_FILE` variable. We configure the template file, `Doxyfile.in`,
+    as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then define a custom target, called `DOXY_DOC_TARGET_NAME`, which will execute
+    Doxygen with the settings in the `Doxyfile` and output the results in `DOXY_DOC_BUILD_DIR`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, a status message is printed for the user:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can configure the project as usual:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The documentation can be built by invoking our custom `docs` target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: You will notice that a `_build` subdirectory will have appeared in the build
+    tree. This contains the HTML documentation that Doxygen has generated from your
+    source files. Opening `index.html` with your favorite browser will show the Doxygen
+    welcome page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you navigate to the class list, you can for instance browse the documentation
+    for the `Message` class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/1b2323e8-2dc6-4a22-90e5-b1dfedcfc6d1.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake does not support documentation building by default. However, we can use
+    `add_custom_target` to perform arbitrary operations, and this is the mechanism
+    that we leveraged in the present recipe. The important point to note is that we
+    need to make sure that the tools necessary to build the documentation (Doxygen
+    and Perl in this particular case) are available on the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In addition, note that the `UseDoxygenDoc.cmake` custom module only does the
+    following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Performs a search for the Doxygen and Perl executables
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Defines a function
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The actual creation of the `docs` target is left to a later invocation of the
+    `add_doxygen_doc` function. This is an *explicit is better than implicit* pattern,
+    which we consider a good CMake practice: do not use module inclusion to perform
+    macro-like (or function-like) actions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We have implemented `add_doxygen_doc` by using a function, and not a macro,
+    in order to limit the scope and possible side-effects of variable definitions.
+    In this particular case, both a function and a macro would work (and would yield
+    the same result), but we recommend preferring functions over macros unless variables
+    in the parent scope need to be modified.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A new and improved `FindDoxygen.cmake` module was added in CMake 3.9\. The convenience
+    function `doxygen_add_docs` was implemented, which will behave as the macro that
+    we have presented in this recipe. For more details, check out the online documentation
+    at [https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html](https://cmake.org/cmake/help/v3.9/module/FindDoxygen.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building documentation using Sphinx
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-02](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-02),
+    and includes a C++ example. The recipe is valid with CMake version 3.5 (and higher)
+    and has been tested on GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sphinx is a Python program and a very popular documentation system ([http://www.sphinx-doc.org](http://www.sphinx-doc.org)).
+    When used with Python projects, it can parse the source file for so-called docstrings
+    and automatically produce documentation pages for functions and classes. However,
+    Sphinx is not limited to Python, and can also parse reStructuredText, Markdown
+    plain-text files, and generate HTML, ePUB, or PDF documentation. Coupled with
+    the online Read the Docs service ([https://readthedocs.org](https://readthedocs.org)),
+    it offers a great way to quickly get started with writing and deploying documentation.
+    This recipe will show you how to use CMake to build documentation based on Sphinx.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We wish to build a simple website documenting our messaging library. The source
+    tree now looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have some custom modules in the `cmake` subdirectory, and the `docs` subdirectory
+    contains the main page for our website in a plain-text reStructuredText format,
+    `index.rst`, and a Python template file, `conf.py.in`, with settings for Sphinx.
+    This file can be autogenerated using the `sphinx-quickstart` utility, which is
+    a part of the Sphinx installation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Compared to the previous recipe, we will modify the root `CMakeLists.txt` file,
+    and will also implement a function (`add_sphinx_doc`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After appending the `cmake` folder to the `CMAKE_MODULE_PATH`, we include the
+    `UseSphinxDoc.cmake` custom module, as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `UseSphinxDoc.cmake` module defines the `add_sphinx_doc` function. We call
+    this function with keyword arguments, in order to set up our Sphinx documentation
+    build. The custom documentation target will be called `docs`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `UseSphinxDoc.cmake` module follows the same *explicit is better than implicit*
+    pattern that we used in the previous recipe:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We need to find the Python interpreter and the `Sphinx` executable, as follows:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then define the `add_sphinx_doc` function with one-value keyword arguments.
+    These are parsed by the `cmake_parse_arguments` command:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The template file, `conf.py.in`, passed as the `CONF_FILE` keyword argument,
+    is configured to `conf.py` in the `SPHINX_DOC_BUILD_DIR`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We add a custom target, called `SPHINX_DOC_TARGET_NAME`, to orchestrate the
+    documentation building with Sphinx:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Lastly, we print out a status message to the user:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We configure the project and build the `docs` target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will produce the HTML documentation in the `SPHINX_DOC_HTML_DIR` subdirectory
+    of the build tree. Once again, you can use your favorite browser to open `index.html`
+    and see the shiny (but still sparse) documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/b3ae5f45-8d88-4aec-83e4-c44e4b8890c3.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Once again, we leveraged the power of `add_custom_target` to add an arbitrary
+    build target to our build system. In this case, the documentation will be built
+    using Sphinx. Since Sphinx is a Python program that can be extended with other
+    Python modules, the `docs` target will depend on the Python interpreter. We make
+    sure that dependencies are satisfied by using `find_package`. Note that the `FindSphinx.cmake`
+    module is not yet a standard CMake module; a copy of it is included with the project
+    source, under the `cmake` subdirectory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combining Doxygen and Sphinx
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-03](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-12/recipe-03),
+    and includes a C++ example. The recipe is valid with CMake version 3.5 (and higher)
+    and has been tested on GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We have a C++ project, and thus, Doxygen is the ideal choice to generate source
+    code documentation. However, we also wish to publish user-facing documentation,
+    explaining, for example, our design choices. We would rather use Sphinx for that,
+    because the generated HTML will also work on mobile devices, and because we can
+    deploy the documentation to Read the Docs ([https://readthedocs.org](https://readthedocs.org)).
+    This recipe will illustrate how to use the Breathe plugin ([https://breathe.readthedocs.io](https://breathe.readthedocs.io))
+    to bridge Doxygen and Sphinx.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The source tree for this recipe is similar to the two previous recipes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `docs` subdirectory now contains both a `Doxyfile.in` and a `conf.py.in`
+    template file, with settings for Doxygen and Sphinx, respectively. In addition,
+    we also have a `code-reference` subdirectory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The files following `code-reference` contain Breathe instructions, to include
+    Doxygen-generated documentation in Sphinx:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will output the documentation for the `Message` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `CMakeLists.txt` file in the `src` directory is unchanged. The only changes
+    in the root `CMakeLists.txt` file are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We include the `UseBreathe.cmake` custom module:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We call the `add_breathe_doc` function. This function is defined in the custom
+    module, and it accepts keyword arguments to set up the combined Doxygen and Sphinx
+    build:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let us examine the `UseBreatheDoc.cmake` module. This follows the same explicit
+    is better than implicit pattern that we described in the two previous recipes.
+    The module is described in detail, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The documentation generation depends on Doxygen:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also depend on the Python interpreter and `Sphinx`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In addition, we must also find the `breathe` Python module. We use the `FindPythonModule.cmake`
+    module:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We define the `add_breathe_doc` function. This function has a one-value keyword
+    argument, which we will parse using the `cmake_parse_arguments` command:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `BREATHE_DOC_CONF_FILE` template file for Sphinx is configured to `conf.py`
+    in `BREATHE_DOC_BUILD_DIR`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Correspondingly, the `BREATHE_DOC_DOXY_FILE` template file for Doxygen is configured
+    to `Doxyfile` in `BREATHE_DOC_BUILD_DIR`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then add our `BREATHE_DOC_TARGET_NAME` custom target. Note that only Sphinx
+    is run; the necessary calls to Doxygen happen within `BREATHE_DOC_SPHINX_FILE`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, a status message is printed to the user:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After configuring, we can build the documentation as usual:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The documentation will be available in the `BREATHE_DOC_HTML_DIR` subdirectory
+    of the build tree. After firing up your browser to open the `index.html` file,
+    you can navigate to the documentation for the `Message` class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/0f7ce5f6-86c1-47c7-aeb6-9f045c12b203.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You will note that both Doxygen and Sphinx are run, despite the fact that only
+    the invocation to Sphinx was given when declaring the custom `BREATHE_DOC_TARGET_NAME`
+    target. This is thanks to the following settings, defined in the `conf.py` file
+    for Sphinx:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Doxygen will generate XML output that the Breathe plugin will be able to render
+    in a form consistent with the chosen Sphinx documentation style.
+  prefs: []
+  type: TYPE_NORMAL

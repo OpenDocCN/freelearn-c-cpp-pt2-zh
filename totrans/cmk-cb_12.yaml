@@ -1,0 +1,1263 @@
+- en: Packaging Projects
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this chapter, we will cover the following recipes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating source and binary packages
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Distributing a C++/Python project built with CMake/pybind11 *via* PyPI
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Distributing a C/Fortran/Python project build with CMake/CFFI *via* PyPI
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Distributing a simple project as Conda package
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Distributing a project with dependencies as Conda package
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Introduction
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Up to this point, we have compiled and installed (example) software packages
+    "from sources" – this meant fetching the project *via* Git, and executing the
+    configure, build, test, and install steps manually. However, in practice, software
+    packages are often rather installed using package managers, such as Apt, DNF,
+    Pacman, pip, and Conda. We need to be able to distribute our code projects in
+    various formats: as source archives or as binary installer.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is what we refer to as packaging time in the now familiar scheme showing
+    the various phases of a project using CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/e63ce10f-4ef7-4d7d-a47d-56cffb9ee8b2.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: In this chapter, we will explore different packaging strategies. We will first
+    discuss packaging using the tool CPack in the CMake family. We will also provide
+    recipes for packaging and uploading CMake projects to the Python Package Index
+    (PyPI, [https://pypi.org](https://pypi.org)) and the Anaconda Cloud ([https://anaconda.org](https://anaconda.org))
+    – these are standard and popular platforms for distributing packages *via* the
+    package managers pip and Conda ([https://conda.io/docs/](https://conda.io/docs/)),
+    respectively. For PyPI, we will demonstrate how to package and distribute mixed
+    C++/Python or C/Fortran/Python projects. For Conda, we will show how to package
+    C++ projects with dependencies on other libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating source and binary packages
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-01](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-01).
+    The recipe is valid with CMake version 3.6 (and higher) and has been tested on
+    GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If your code is open source, users will expect to be able to download the sources
+    for your project and build by themselves using your perfectly tailored CMake scripts.
+    Of course, the packaging operation could be done with a script, but CPack offers
+    a more compact and portable alternative. This recipe will guide you through the
+    creation of a number of packaging alternatives:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Source code archives:** You can use these formats to ship the source code
+    directly as a compressed archive in your favorite format. Your users will not
+    have to worry about your specific version control system.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Binary archives:** Use these to package the freshly built targets into compressed
+    archives in your favorite format. These can be extremely useful, but might not
+    be robust enough to distribute libraries and executables.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Platform-native binary installers:** CPack is able to generate binary installers
+    in many different formats, so you can target the distribution of your software
+    to many different platforms. In particular, we will show how to generate installers:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In `.deb` format for Debian-based GNU/Linux distributions: [https://manpages.debian.org/unstable/dpkg-dev/deb.5.en.html](https://manpages.debian.org/unstable/dpkg-dev/deb.5.en.html)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In `.rpm` format for Red Hat-based GNU/Linux distributions: [http://rpm.org/](http://rpm.org/)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In `.dmg` format for macOS Bundles: [https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html](https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In NSIS format for Windows: [http://nsis.sourceforge.net/Main_Page](http://nsis.sourceforge.net/Main_Page)'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We will use the source code for the `message` library presented in [Chapter
+    10](72e949cc-6881-4be1-9710-9ac706c14a4d.xhtml), *Writing an Installer*, Recipe
+    3, *Exporting your targets*. The project tree consists of the following directories
+    and files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Since the emphasis in this recipe will be on effective usage of CPack, we will
+    not comment on the source code itself. We will only add packaging directives in
+    `CMakeCPack.cmake`, which we will discuss in a moment. In addition, we have added
+    `INSTALL.md` and a  `LICENSE` file: they contain installation instructions and
+    the license for the project and are required by the packaging directives.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Let us look at the packaging directives that need to be added to this project.
+    We will collect them in `CMakeCPack.cmake`, which is included at the end of `CMakeLists.txt`
+    using `include(CMakeCPack.cmake)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We declare the name of the package. This is the same as the name of the project
+    and hence we use the `PROJECT_NAME` CMake variable:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We declare the package vendor:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The packaged sources will include a description file. This is the plain-text
+    file with the installation instructions:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also add a brief summary of the package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The license file will also be included in the package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When installing from the distributed package, the files will be placed in the
+    `/opt/recipe-01` directory:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The major, minor, and patch versions of the packages are set as variables for
+    CPack:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We set a list of files and directories to be ignored during the packaging operations:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: We list the packaging generators for source code archives – in our case `ZIP`,
+    to generate a `.zip` archive, and `TGZ`, for a `.tar.gz` archive.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also list the binary archive generators:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We now declare also the platform-native binary installers, starting with the
+    DEB and RPM package generators, only available for GNU/Linux:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If we are on Windows, we will want to generate an NSIS installer:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On the other hand, on macOS, a bundle is our installer of choice:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We print an informative message to the user on the packaging generators available
+    on the current system:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we include the `CPack.cmake` standard module. This will add a `package` and
+    a `package_source` target to the build system:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can now configure the project as usual:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With the following command, we can list the available targets (the example
+    output is obtained on a GNU/Linux system with Unix Makefiles as generator):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can see that the `package` and `package_source` targets are available. The
+    source packages can be generated with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, we can build the binary packages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And, in our case, we obtained the following list of binary packages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'CPack can be used to generate many different types of packages for distribution.
+    When generating the build system, the CPack instructions we listed in `CMakeCPack.cmake`
+    are used to generate a `CPackConfig.cmake` file in the build directory. When running
+    the CMake command for the `package` or `package_source` targets, CPack is automatically
+    invoked with the autogenerated configuration file as argument. Indeed, these two
+    new targets are simple rules that wrap calls to CPack. Much as CMake, CPack also
+    has a concept of generators. Whereas generators in the context of CMake are the
+    tools that will be used to generate the native build scripts, for example, Unix
+    Makefiles or Visual Studio project files, in the context of CPack these are the
+    tools to be used for packaging. We listed these, exercising particular care for
+    the different platforms, using the `CPACK_SOURCE_GENERATOR` and the `CPACK_GENERATOR`
+    variables for the source and binary packages, respectively. Thus the Debian packaging
+    utilities will be invoked for the `DEB` package generator, whereas the appropriate
+    archiving tool on the given platform will be invoked for the `TGZ` generator.
+    We can invoke CPack directly from the `build` directory and select which generator
+    to use with the `-G` command-line option. The RPM package can be generated with
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For any distribution, be it source or binary, we need to package only those
+    contents that will be strictly necessary for the end user, hence the entire build
+    directory and any other file related to version control will have to be excluded
+    from the list of files to be packaged. In our example, the exclusion list was
+    declared with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: We also need to specify basic information about our package, such as the name,
+    a short description, and the version. This information is set by means of CMake
+    variables, which are then passed on to CPack when including the corresponding
+    module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since CMake 3.9 the `project()` command accepts a `DESCRIPTION` field, with
+    a short string describing the project. CMake will set a `PROJECT_DESCRIPTION`
+    which can be reused to set the `CPACK_PACKAGE_DESCRIPTION_SUMMARY`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let us look in detail at the instructions for the different kinds of packages
+    we can generate for our example project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Source archives
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In our example, we decided to use the `TGZ` and `ZIP` generators for the source
+    archive. These will result in `.tar.gz` and `.zip` archives, respectively. We
+    can inspect the contents of the generated `.tar.gz` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: As expected, only the contents of the source tree are included. Notice that
+    the `INSTALL.md` and `LICENSE` files are also included, as specified by means
+    of the `CPACK_PACKAGE_DESCRIPTION_FILE` and `CPACK_RESOURCE_FILE_LICENSE` variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `package_source` target is not understood by the Visual Studio family of
+    generators: [https://gitlab.kitware.com/cmake/cmake/issues/13058](https://gitlab.kitware.com/cmake/cmake/issues/13058).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binary archives
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'When creating binary archives, CPack will package the contents of the targets
+    described in our `CMakeCPack.cmake` file as described by the installation instructions.
+    Thus in our example the hello-world executable, the message shared library, and
+    the corresponding header files will all be packaged in the `.tar.gz` and `.zip`
+    formats. In addition, also the CMake configuration files will be packaged. This
+    is very useful for other projects that will need to link against our library.
+    The installation prefix used in the package may differ from the one used when
+    installing the project from the build tree. The `CPACK_PACKAGING_INSTALL_PREFIX`
+    variable may be used to achieve this. In our example, we set it to a specific
+    location on the system: `/opt/recipe-01`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can analyze the contents of the generated `.tar.gz` archive:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Platform-native binary installers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We expect the configuration for each platform-native binary installer to be
+    slightly different. These differences can be managed with CPack within a single
+    `CMakeCPack.cmake`, as we have done in our example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For GNU/Linux, the stanza configures both the `DEB` and `RPM` generators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Our example depends on the UUID library, and the `CPACK_DEBIAN_PACKAGE_DEPENDS`
+    and `CPACK_RPM_PACKAGE_REQUIRES` options let us specify dependencies between our
+    package and others in the database. We can use the `dpkg` and `rpm` programs to
+    analyze the contents of the generated `.deb` and `.rpm` packages, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that `CPACK_PACKAGING_INSTALL_PREFIX` also affects these package generators:
+    our package will be installed to `/opt/recipe-01`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake truly provides support for cross-platform and portable build systems.
+    The following stanza will create an installer using the Nullsoft Scriptable Install
+    System (NSIS):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, the following stanza will enable the Bundle packager if we are building
+    the project on macOS:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the macOS example, we first need to configure a property list file for the
+    package, something achieved by the `configure_file` command. The location of `Info.plist`
+    and the icon for the package are then set as variables for CPack.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can read more about the property list format here: [https://en.wikipedia.org/wiki/Property_list](https://en.wikipedia.org/wiki/Property_list).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is more
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Instead of listing the CPack configuration settings in `CMakeCPack.cmake` as
+    we have done for simplicity, we could have placed the per-generator settings of
+    `CPACK_*` variables in a separate file, such as `CMakeCPackOptions.cmake`, and
+    included these settings into `CMakeCPack.cmake` using `set(CPACK_PROJECT_CONFIG_FILE
+    "${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake")`.  This file can also be configured
+    at CMake time and then included at CPack time, providing a clean way to configure
+    multi-format package generators (see also: [https://cmake.org/cmake/help/v3.6/module/CPack.html](https://cmake.org/cmake/help/v3.6/module/CPack.html)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with all tools in the CMake family, CPack is powerful and versatile and offers
+    much more flexibility and options than what we have shown in this recipe. The
+    interested reader should read the official documentation for the command-line
+    interface to CPack ([https://cmake.org/cmake/help/v3.6/manual/cpack.1.html](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-01))
+    and the manual pages, which detail the additional generators that CPack knows
+    how to use to package projects ([https://cmake.org/cmake/help/v3.6/module/CPack.html](https://cmake.org/cmake/help/v3.6/module/CPack.html)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributing a C++/Python project built with CMake/pybind11 via PyPI
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-02](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-02).
+    The recipe is valid with CMake version 3.11 (and higher) and has been tested on
+    GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this recipe, we will take the pybind11 example from [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 5, *Building C++ and Python projects using pybind11*, as a starting
+    point, add relevant install targets and pip packaging information and upload the
+    project to PyPI. Our goal will be to arrive at a project that can be installed
+    using pip and runs CMake and fetches the pybind11 dependency under the hood.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To distribute a package *via *PyPI, you will need a user account at [https://pypi.org](https://pypi.org),[ ](https://pypi.org)but
+    it is possible to first exercise with installations from a local path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also generally recommend to install this and other Python packages with pip
+    using either Pipenv ([https://docs.pipenv.org](https://docs.pipenv.org/)) or Virtual
+    Environments ([https://virtualenv.pypa.io/en/stable/](https://virtualenv.pypa.io/en/stable/))
+    instead of installing them into the system environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our starting point is the pybind11 example from [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 5, *Building C++ and Python projects using pybind11*, which
+    contains a top-level `CMakeLists.txt` file and an `account/CMakeLists.txt` file
+    that configures the account example targets and uses the following project tree:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this recipe, we will keep `account.cpp`, `account.hpp`, and the `test.py`
+    script unchanged. We will modify `account/CMakeLists.txt` and add a couple of
+    files for pip to be able to build and install the package. For this, we will require
+    three additional files in the root directory: `README.rst`, `MANIFEST.in`, and `setup.py`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`README.rst` contains documentation about the project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`MANIFEST.in` lists files that should be installed along the Python modules
+    and packages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And, finally, `setup.py` contains instructions for building and installing
+    the project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will place `__init__.py` into the `account` subdirectory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will also place `version.py` into the `account` subdirectory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This means that we will arrive at the following file structure for our project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'This recipe builds on top of [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 5, *Building C++ and Python projects using pybind11*. Let us
+    see how in detail:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, we extend `account/CMakeLists.txt`. The only addition is the last directive,
+    which specifies the install target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And that''s it! With the install target and the `README.rst`, `MANIFEST.in`,
+    `setup.py`, `__init__.py`, and `version.py` files in place, we are ready to test
+    the installation of our example code which is interfaced using pybind11:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For this, create a new directory somewhere on your computer and we will test
+    the installation there.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Inside the newly created directory, we run `pipenv install` from a local path.
+    Adjust the local path to point to the directory that holds the `setup.py` script:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we spawn a Python shell inside the Pipenv environment:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Inside the Python shell, we can test our CMake package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `${CMAKE_CURRENT_BINARY_DIR}` directory contains the compiled `account.cpython-36m-x86_64-linux-gnu.so` Python
+    module built using pybind11, but note that its name depends on the operating system
+    (in this case, 64-bit Linux) and the Python environment (in this case, Python
+    3.6). The `setup.py` script will run CMake under the hood and install the Python
+    module into the correct path, depending on the selected Python environment (system
+    Python or Pipenv or Virtual Environment). But now we have two challenges when
+    installing the module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The naming can change.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The path is set outside of CMake.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We can solve this by using the following install target, where `setup.py` will
+    define the install target location:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we instruct CMake to install the compiled Python module file into the `account` subdirectory
+    relative to the install target location ([Chapter 10](72e949cc-6881-4be1-9710-9ac706c14a4d.xhtml),
+    *Writing an Installer*, discusses in detail how the target location can be set). The
+    latter will be set by `setup.py` by defining `CMAKE_INSTALL_PREFIX` to point to
+    the right path depending on the Python environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let us now inspect how we achieve this in `setup.py`; we will start from the
+    bottom of the script:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The script contains a number of placeholders and hopefully self-explaining
+    directives, but here we will focus on the last directive, `cmdclass`, where we
+    extend the default build step by a custom function, which we call `extend_build`.
+    This function subclasses the default build step:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'First, the function checks whether CMake is available on the system. The core
+    of the function executes two CMake commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here we have the possibility to change the default generator used by setting
+    the `CMAKE_GENERATOR` environment variable. The install prefix is defined as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `get_python_lib` function imported from `distutils.sysconfig` provides the
+    root directory for the install prefix. The `cmake --build _build_dir --target
+    install` command builds and installs our project in one step in a portable way.
+    The reason why we use the name `_build_dir` instead of simply `build` is that
+    your project might already contain a `build` directory when testing the local
+    install, which would conflict with a fresh installation. For packages already
+    uploaded to PyPI, the name of the build directory does not make a difference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is more
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we have the local install tested, we are ready to upload the package
+    to PyPI. But, before we do that, make sure that the metadata in `setup.py` (such
+    as the name of the project, and the contact and license information) is reasonable,
+    and that the project name is not already taken on PyPI. It is also good practice
+    to first test upload to and download from the PyPI test instance ([https://test.pypi.org](https://test.pypi.org))
+    before uploading to [https://pypi.org](https://pypi.org).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before the upload, we need to create a file called `.pypirc` in the home directory
+    containing (replace `yourusername` and `yourpassword`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will proceed in two steps. First, we create the distribution locally:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the second step, we upload the generated distribution data using Twine (we
+    install Twine into a local Pipenv):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As a next step, try to install from the test instance into an isolated environment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once this is working, we are ready to upload to production PyPI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: Distributing a C/Fortran/Python project build with CMake/CFFI via PyPI
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-03](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-03) and
+    has a C++ and Fortran example. The recipe is valid with CMake version 3.5 (and
+    higher) and has been tested on GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This recipe is a mashup of the previous recipe and [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects, *Recipe 6, *Mixing C, C++, Fortran, and Python using Python CFFI*. We
+    will reuse many building blocks from the previous recipe, but instead of using
+    pybind11, we will use Python CFFI to provide the Python interface. In this recipe,
+    our goal is to share a Fortran project *via* PyPI, but instead of Fortran, it
+    could equally be a C or C++ project or any language exposing a C interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We will start out with the following file tree:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The top-level `CMakeLists.txt` file and all sources below `account`, except `account/CMakeLists.txt`,
+    are unchanged from how they appeared in [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 6, *Mixing C, C++, Fortran, and Python using Python CFFI*. We
+    will shortly discuss the small changes we need to apply to `account/CMakeLists.txt`.
+    The `README.rst` file is identical with the previous recipe. The `setup.py` script
+    contains one extra line compared to the previous recipe (the line containing `install_requires=[''cffi''])`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`MANIFEST.in` lists files that should be installed along with the Python modules
+    and packages and contains the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Under the `account` subdirectory, we see two new files. Again, there is a `version.py`
+    file holding the project version for `setup.py`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The subdirectory also holds the `interface_file_names.cfg.in` file, which we
+    will be discussing soon:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Let usdiscuss the steps necessary to achieve the packaging:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We extend `account/CMakeLists.txt` from [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 6, *Mixing C, C++, Fortran, and Python using Python CFFI*. The
+    only additions are the following directives:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: And that's it! With the install target and the additional files in place, we
+    are ready to test the installation. For this, create a new directory somewhere
+    on your computer and we will test the installation there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Inside the newly created directory, we run `pipenv install` from a local path.
+    Adjust the local path to point to the directory that holds the `setup.py` script:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we spawn a Python shell inside the Pipenv environment:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Inside the Python shell, we can test our CMake package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The extension to install mixed-language projects using Python CFFI and CMake
+    compared to [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language
+    Projects*, Recipe 6, *Mixing C, C++, Fortran, and Python using Python CFFI* consists
+    of two additional steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We require the `setup.py` layer.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We install targets such that the header files and the shared library file(s)
+    required by the CFFI layer are installed in the correct paths depending on the
+    selected Python environment.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The structure of `setup.py` is almost identical to the previous recipe, and
+    we refer you to the previous recipe for a discussion of this file. The only addition
+    was a line containing `install_requires=[''cffi'']` to make sure that installing
+    our example package also fetches and installs the required Python CFFI. The `setup.py`
+    script will automatically install `__init__.py` and `version.py`, since these
+    are referenced from the `setup.py` script.  `MANIFEST.in` is slightly changed
+    to package not only `README.rst` and CMake files, but also the header and Fortran
+    source files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We have three challenges in this recipe to package a CMake project that uses
+    Python CFFI with `setup.py`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We need to copy the `account.h` and `account_export.h` header files as well
+    as the shared library to the Python module location which depends on the Python
+    environment.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We need to tell `__init__.py` where to locate these header files and the library.
+    In [Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language Projects*,
+    Recipe 6, *Mixing C, C++, Fortran, and Python using Python CFFI* we have solved
+    these using environment variables, but it would be unpractical to set these every
+    time we plan to use the Python module.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: On the Python side, we don't know the exact name (suffix) of the shared library
+    file, since it depends on the operating system.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let us start with the last point: we don''t know the exact name, but upon build
+    system generation CMake does and therefore we use the generator expression in
+    `interface_file_names.cfg.in` to expand the placeholder:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This input file is used to generate `${CMAKE_CURRENT_BINARY_DIR}/interface_file_names.cfg`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then define the two header files as `PUBLIC_HEADER` (see also [Chapter 10](72e949cc-6881-4be1-9710-9ac706c14a4d.xhtml), *Writing
+    an Installer*) and the configuration file as `RESOURCE`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we install the library, header files, and the configuration file to
+    a structure relative to a path defined by `setup.py`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that we set `DESTINATION` for both `LIBRARY` and `RUNTIME` to point to
+    `account/lib`. This is important for Windows, where shared libraries have executable
+    entry points and therefore we have to specify both.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Python package will be able to find these files thanks to this section
+    in `account/__init__.py`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, `_cfg_file` will be found and parsed and `setup.py` will find
+    the header file under `include` and the library under `lib` and pass these on
+    to CFFI to construct the library object. This is also the reason why we have used
+    `lib` as the install target `DESTINATION` and not `CMAKE_INSTALL_LIBDIR`, which
+    otherwise might confuse `account/__init__.py`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is more
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For follow-up steps for getting the package to the PyPI test and production
+    instances, we refer the reader to the previous recipe since these steps are analogous.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributing a simple project as Conda package
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-04](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-04).
+    The recipe is valid with CMake version 3.5 (and higher) and has been tested on
+    GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While PyPI is a standard and popular platform to distribute Python packages,
+    Anaconda ([https://anaconda.org](https://anaconda.org)) is more general in the
+    sense that it allows to not only distribute Python or mixed-language projects
+    with a Python interface but also allows packaging and dependency management for
+    non-Python projects. In this recipe, we will prepare a Conda package for a very
+    simple C++ example project configured and built using CMake without dependencies
+    other than C++. In the next recipe, we will prepare and discuss a more complex
+    Conda package.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Our goal will be to package the following simple example code (`example.cpp`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'This is how to proceed, step by step:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `CMakeLists.txt` file starts with the minimum version requirement, project
+    name, and supported language:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We wish to build the `hello-conda` executable, which is built from `example.cpp`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We conclude `CMakeLists.txt` by defining the install target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will describe the Conda package in a file called `meta.yaml`, which we will
+    place under `conda-recipe` to arrive at the following file structure:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `meta.yaml` file consists of the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can try to build the package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will see lots of output on the screen, but once the build is complete, we
+    can install the package. We will do this first locally:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we are ready to test it – open a new terminal (assuming Anaconda is activated)
+    and type the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After the successful test, we can remove the package again:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The install target in `CMakeLists.txt` is an essential component to this recipe:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This target makes sure that the binary is installed in `${CMAKE_INSTALL_PREFIX}/bin`.
+    The prefix variable is defined by Conda in the build step of `meta.yaml`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The build step configures the project, sets the install prefix to `${PREFIX}` (intrinsic
+    variable set by Conda), builds, and installs the project. The motivation to call
+    the build directory `build_conda` is similar to the previous recipes: a specific
+    build directory name makes it easier to experiment with local installs based on
+    directories that might already contain a directory called `build`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: By installing the package into the Anaconda environment, we made the executable
+    available to the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is more
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The configuration file `meta.yaml` can be used to specify build, test, and
+    install steps for projects of in principle any complexity. Please refer to the
+    official documentation for an in-depth discussion: [https://conda.io/docs/user-guide/tasks/build-packages/define-metadata.html.](https://conda.io/docs/user-guide/tasks/build-packages/define-metadata.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For an upload of a Conda package to the Anaconda cloud, please follow the official
+    Anaconda cloud documentation: [https://docs.anaconda.com/anaconda-cloud/user-guide/](https://docs.anaconda.com/anaconda-cloud/user-guide/).
+    Also, consider Miniconda as a lightweight alternative to Anaconda: [https://conda.io/miniconda.html](https://conda.io/miniconda.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributing a project with dependencies as Conda package
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The code for this recipe is available at [https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-05](https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-11/recipe-05).
+    The recipe is valid with CMake version 3.5 (and higher) and has been tested on
+    GNU/Linux, macOS, and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this recipe, we will build on the findings of the previous recipe and prepare
+    a more realistic and sophisticated Conda package for an example CMake project
+    that will depend on and utilize the implementation of the DGEMM function, for
+    matrix-matrix multiplication, available in the Intel Math Kernel Library (MKL).
+    Intel MKL is made available as a Conda package. This recipe will provide us with
+    a toolset to prepare and share Conda packages with dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting ready
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For this recipe, we will use the same file naming and directory structure as
+    in the previous simple Conda recipe:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The example source file (`example.cpp`) performs a matrix-matrix multiplication
+    and compares the result returned by the MKL library against a "noddy" implementation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also need a modified `meta.yaml`. However, the only change compared to the
+    previous recipe is a line listing the `mkl-devel` dependency under requirements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: How to do it
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'These are the steps to follow to prepare our package:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `CMakeLists.txt` file starts with the minimum version requirement, project
+    name, and supported language:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We wish to build the `dgemm-example` executable, which is built from `example.cpp`:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then need to locate MKL libraries installed *via *`mkl-devel`. We prepare
+    an `INTERFACE` library called `IntelMKL`. This can be used as any other target
+    and will set include directories, compiler options, and link libraries for any
+    dependent target. The setup is made to mimic what is suggested by the Intel MKL
+    link line advisor ([https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/)).
+    First, we set the compiler options:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, we search for the `mkl.h` header file and set the `include` directories
+    for the `IntelMKL` target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we locate the libraries and set the link libraries for the `IntelMKL`
+    target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We use the `cmake_print_properties` function to print out useful messages about
+    the `IntelMKL` target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We link the `dgemm-example` target against these libraries:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We conclude `CMakeLists.txt` by defining the install target:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can try to build the package:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will see lots of output on the screen, but once the build is complete, we
+    can install the package. We will do this first locally:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we are ready to test it – open a new terminal (assuming Anaconda is activated)
+    and type:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After the successful test, we can remove the package again:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE90]'
+  prefs: []
+  type: TYPE_PRE
+- en: How it works
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The only change in `meta.yaml` compared to the previous recipe is the `mkl-devel` dependency.
+    The challenge from the CMake perspective is to locate the MKL libraries that are
+    installed by Anaconda. Fortunately, we know that they are located in `${CMAKE_INSTALL_PREFIX}`.
+    The Intel MKL link line advisor available online ([https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/](https://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/))
+    can be used to look up how to link MKL into our project depending on the platform
+    and compiler chosen. We have decided to wrap this information into an `INTERFACE`
+    library. This solution is ideal for the case of MKL: the library is not a target
+    created by our project, or any subproject, but it still needs to be dealt with
+    in a possibly very convoluted manner; that is: setting compiler flags, include
+    directories, and link libraries. CMake `INTERFACE` libraries are targets in the
+    build system, but do not create any build output, at least directly. However,
+    since they are targets, we may set their properties on them. Just as "real" targets,
+    they can also be installed, exported, and imported.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First of all, we declare a new library called `IntelMKL` with the `INTERFACE`
+    attribute. We then need to set properties as needed and we follow the pattern
+    of calling the appropriate CMake command on the target with the `INTERFACE` attribute,
+    using the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`target_compile_options`, to set `INTERFACE_COMPILE_OPTIONS`. In our case,
+    `-m64` has to be set, but only if using the GNU or AppleClang compilers. Note
+    that we do this with a generator expression.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_include_directories`, to set the `INTERFACE_INCLUDE_DIRECTORIES`. These
+    can be set after finding the `mkl.h` header file on the system. This was done
+    with the `find_path` CMake command.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_link_libraries`, to set the `INTERFACE_LINK_LIBRARIES`. We decided
+    to link against the single dynamic library `libmkl_rt.so` and searched for it
+    with the `find_library` CMake command. The GNU or AppleClang compilers will also
+    need to link the executable to the native threading and mathematical libraries.
+    Once again, these cases are elegantly handled with generator expressions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The properties we have just set on the IntelMKL target can be printed out for
+    the user by means of the `cmake_print_properties` command. Finally, we link against
+    the `IntelMKL` target. As expected, this will set compiler flags, include directories,
+    and link libraries as necessary to compile successfully:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE91]'
+  prefs: []
+  type: TYPE_PRE
+- en: There is more
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The Anaconda cloud contains a wealth of packages. With the preceding recipes,
+    it is possible and relatively simple to build Conda packages for CMake projects
+    that may depend on other Conda packages. Explore the possibility and share your
+    software packages for others to build on your developments!
+  prefs: []
+  type: TYPE_NORMAL

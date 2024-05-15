@@ -1,0 +1,431 @@
+- en: Preface
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Computer software is present in almost every aspect of our daily lives: it
+    triggers our alarm clocks, fuels our communication, banking, weather forecasts,
+    bus schedules, calendars, meetings, travel, photo albums, television, music streaming,
+    social media, dinner and movie reservations, from dawn till dusk.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The software that surrounds us contains many layers: apps are built on top
+    of frameworks, frameworks on top of libraries, libraries use smaller libraries
+    and executables, all the way down to smaller and smaller software components.
+    Libraries and executables in turn need to be built from source code. Often we
+    only see the outermost layer, but all these layers need to be carefully organized
+    and built. This book is about how to build libraries and executables from sources
+    using CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake and its siblings, CTest, CPack, and CDash, have emerged as the leading
+    toolset for building software from sources, surpassing in usage and popularity
+    many other similar tools, such as the venerated GNU Autotools and the more recent,
+    Python-based, SCons build system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/17cb07da-5149-4d31-8a14-9d87764c72ce.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Search interest over time for three popular build systems: CMake, Automake,
+    and SCons. The interest is measured using the number of searches for the relevant
+    terms over time. The figure was obtained using data provided by Google Trends.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The history of the CMake project started in 1999, when Kitware, the company
+    behind its development, was commissioned to design a new set of tools to simplify
+    the day-to-day software work of researchers. The goal was clear: provide a set
+    of tools that would make it easier to configure, build, test, and deploy the same
+    project across different platforms. A fascinating account of the ensuing design
+    choices in the CMake project can be found at [https://www.aosabook.org/en/cmake.html](https://www.aosabook.org/en/cmake.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake is a *build-system generator*, offering a powerful domain-specific language
+    (DSL) to describe what the build system should achieve. In our opinion, this is
+    one of the main strengths of CMake, because it allows the generation of *platform-native
+    build systems* with the same set of CMake scripts. The CMake software toolset
+    gives developers full control over the whole life cycle of a given project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**CMake** lets you describe how your project, whether building an executable,
+    libraries, or both, has to be configured, built, and installed on all major hardware
+    and operating systems.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CTest** allows you to define tests, test suites, and set how they should
+    be executed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CPack** offers a DSL for all your packaging needs, whether your project should
+    be bundled and distributed in source code or platform-native binary form.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CDash** will be useful for reporting the results of tests for your project
+    to an online dashboard.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: An old adage goes that the deeper you dig, the more stones you will find. For
+    the preparation of this book we have carefully been digging deeper through many
+    software layers, with CMake being our quarry. The number of stones and artifacts
+    that we have hit when building various software components and libraries on various
+    platforms, each with their own quirks, has felt disheartening at times. But we
+    believe we have cleared the ground of many stones and we are happy to share our
+    findings and recipes with you, our readers. There will always be stones left but
+    each stone will bring new insight and we encourage you to share this insight with
+    the community.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Who this book is for
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Writing software that can run natively, reliably, and efficiently on many different
+    platforms is of paramount importance for all sectors of industry and society.
+    Software build systems take center stage in this task. They are a crucial part
+    in the management of the software development life cycle: from incubation and
+    prototype development to testing and all the way till packaging, deployment, and
+    distribution. CMake is designed to help you manage these operations: if you are
+    a software developer who wishes to manage the build system using CMake or who
+    would like to be able to understand and modify CMake code written by others, this
+    book is for you.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What this book covers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We have written this book as a progressive sequence of tasks and recipes. At
+    each point, we introduce enough information about CMake to show how to achieve
+    our goals, without overwhelming you with details. By the end of the book, you
+    will be able to tackle increasingly complex operations and leverage the contents
+    of the recipes in your own real-world projects with confidence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will cover these topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configure, build, test, and install code projects using CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Detect operating systems, processors, libraries, files, and programs for conditional
+    compilation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Increase the portability of your code
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Refactor a large code base into modules with the help of CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Build multi-language projects
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Know where and how to tweak CMake configuration files written by somebody else
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Package projects for distribution
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Port projects to CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The workflow of a project managed by CMake happens in a number of stages, which
+    we refer to as *times*. These can be summarized neatly in the following figure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/b31d9d2b-3e7f-49da-a4f1-e8f848fe6281.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: '**CMake time** or **configure time**. This is when CMake is running. In this
+    phase CMake will process the `CMakeLists.txt` files in your project and configure
+    it.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Generation time**. Upon successful configuration, CMake will generate the
+    scripts needed by the native build tools to perform subsequent steps in the project.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Build time**. This is when the native build tools are invoked on the platform-
+    and tool-native build scripts previously generated by CMake. At this point, the
+    compiler will be invoked and the targets (executables and libraries) will be built
+    in a specific build directory. Note the recursive CMake-time arrow: this can seem
+    baffling, but it is a mechanism we will use many times throughout the book to
+    achieve a truly platform-independent build.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CTest time** or **test time**. This is when we run the test suite of the
+    project to check whether the targets perform as intended.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CDash time** or **report time**. This is when the results of testing the
+    project are uploaded to a dashboard to be shared with other developers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Install time**. This is when the project''s targets, source files, executables,
+    and libraries are installed from the build directory to an install location.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CPack time** or **packaging time**. This is when we package our project for
+    distribution, either as source code or binary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Package install time**. This is when the newly minted package is installed
+    system-wide.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'This book is organized as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 1](037080e9-3b67-421a-b6ec-71b1e51dbe42.xhtml), *From a Simple Executable
+    to Libraries,* shows how to get started configuring and building simple executables
+    and libraries with CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 2](c1fec057-4e5f-4a9b-b404-30dc74f5d7b7.xhtml), *Detecting the Environment*,
+    explains how to interact with the operating system and processor architecture
+    using simple CMake commands.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 3](b290655b-ba55-46bf-80cf-9e65eab8a394.xhtml), *Detecting External
+    Libraries and Programs*, shows how CMake can simplify the detection of dependencies
+    for your project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 4](5b1b2efb-2ce1-4f8f-b4dd-a05606d8b87c.xhtml), *Creating and Running
+    Tests*, explains how to harness the power of CMake and CTest to define and run
+    tests.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 5](9612acc1-56f6-4158-a55f-9a9db3714759.xhtml), *Configure-time and
+    Build-time Operations*, shows how to perform custom operations at different stages
+    of the build process with cross-platform CMake commands.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 6](48392b14-6669-412e-909a-3185624a7ff2.xhtml), *Generating Source
+    Code*, discusses CMake commands to automatically generate source code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 7](b655f271-d579-4d7f-aaf4-cd2188f0a1b5.xhtml), *Structuring Projects*,
+    shows powerful CMake syntax for organizing your projects to make them more maintainable.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 8](2c4b0d92-f493-4e2c-9732-a1039be79580.xhtml), *The Superbuild Pattern*,
+    explains the powerful CMake superbuild pattern for managing critical project dependencies
+    with control over side effects.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 9](2fb9e4a6-0f37-45ab-a49c-d9da9b54ed41.xhtml), *Mixed-language Projects*,
+    shows how to build projects mixing different programming languages with the help
+    of CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 10](72e949cc-6881-4be1-9710-9ac706c14a4d.xhtml), *Writing an Installer*,
+    takes care of the installation of projects with the cross-platform power of CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 11](48392b14-6669-412e-909a-3185624a7ff2.xhtml), *Packaging Projects*,
+    shows how to use CPack to produce source and platform-native source archives and
+    how to build Python and Conda packages for distribution.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 12](9baf5cec-3fff-4b77-b2ac-d0630c2a7c84.xhtml), *Building Documentation*,
+    shows how to use CMake to also build the documentation for your code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 13](ea785243-b9e8-4993-ac0d-1038f181b496.xhtml), *Alternative Generators
+    and Cross-compilation*, shows how to use CMake to cross-compile projects between
+    platforms.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 14](6ba7b67c-0921-45f5-b7e0-948627e165ec.xhtml), *Testing Dashboards*,
+    shows how to report the results of tests to an online dashboard.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 15](91bc68d9-c09e-4f9e-b2b0-ae9b191028aa.xhtml), *Porting a Project
+    to CMake*, shows best practices, tips, and tricks that will help you port a project
+    to a CMake-based build system.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get the most out of this book
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'This is a book written by programmers, for programmers. We have assumed basic
+    knowledge and familiarity with the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The command line for your favorite operating system
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Native tools for building software on your favorite operating system
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The compiled languages C++, C, or Fortran, and the corresponding compilers on
+    your favorite operating system
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Python programming language
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Download the example code files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can download the example code examples for this book from [https://github.com/dev-cafe/cmake-cookbook](https://github.com/dev-cafe/cmake-cookbook).
+    For more details please see the *Setting up Your System* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download the color images
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We also provide a PDF file that has color images of the screenshots/diagrams
+    used in this book. You can download it here: [http://www.packtpub.com/sites/default/files/downloads/CMakeCookbook_ColorImages.pdf](http://www.packtpub.com/sites/default/files/downloads/CMakeCookbook_ColorImages.pdf).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conventions used
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are a number of text conventions used throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CodeInText`: Indicates code commands in text, folder names, filenames, module
+    names, and target names.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A block of code is set as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Any command-line input is written in bold and contains a `**$**` prompt in
+    front of the command to type:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To distinguish command-line input and output, we keep output non-bold:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Important notes appear like this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tips and tricks appear like this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additional reading resources
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The documentation for CMake available online is comprehensive and we will refer
+    to it throughout the book: [https://cmake.org/documentation/](https://cmake.org/documentation/)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In preparing this book we have been inspired also by other resources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The presentation by Daniel Pfeifer, available on GitHub: [https://github.com/boostcon/cppnow_presentations_2017/blob/master/05-19-2017_friday/effective_cmake__daniel_pfeifer__cppnow_05-19-2017.pdf](https://github.com/boostcon/cppnow_presentations_2017/blob/master/05-19-2017_friday/effective_cmake__daniel_pfeifer__cppnow_05-19-2017.pdf)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The CMake tutorial by Eric Noulard, available on GitHub: [https://github.com/TheErk/CMake-tutorial](https://github.com/TheErk/CMake-tutorial)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The CMake-related blog posts by Craig Scott: [https://crascit.com/tag/cmake/](https://crascit.com/tag/cmake/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We can also recommend to browse the curated list of CMake resources, scripts,
+    modules, and examples collected by Viktor Kirilov: [https://github.com/onqtam/awesome-cmake](https://github.com/onqtam/awesome-cmake).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It is also worth noting that our book is not the only one out there covering
+    CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Mastering CMake* by Ken Martin and Bill Hoffman, 2015, Kitware Inc.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Professional CMake* by Craig Scott: [https://crascit.com/professional-cmake/](https://crascit.com/professional-cmake/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Get in touch
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Feedback from our readers is always welcome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Source code improvements and issues**: Please direct pull requests towards [https://github.com/dev-cafe/cmake-cookbook](https://github.com/dev-cafe/cmake-cookbook)
+    and report specific issues with recipes *via* [https://github.com/dev-cafe/cmake-cookbook/issues](https://github.com/dev-cafe/cmake-cookbook/issues).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**General feedback**: Email `feedback@packtpub.com` and mention the book title
+    in the subject of your message. If you have questions about any aspect of this
+    book, please email us at `questions@packtpub.com`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Errata**: Although we have taken every care to ensure the accuracy of our
+    content, mistakes do happen. If you have found a mistake in this book, we would
+    be grateful if you would report this to us. Please visit [www.packtpub.com/submit-errata](http://www.packtpub.com/submit-errata),
+    selecting your book, clicking on the Errata Submission Form link, and entering
+    the details.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Piracy**: If you come across any illegal copies of our works in any form
+    on the Internet, we would be grateful if you would provide us with the location
+    address or website name. Please contact us at `copyright@packtpub.com` with a
+    link to the material.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**If you are interested in becoming an author**: If there is a topic that you
+    have expertise in and you are interested in either writing or contributing to
+    a book, please visit [authors.packtpub.com](http://authors.packtpub.com/).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reviews
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Please leave a review. Once you have read and used this book, why not leave
+    a review on the site that you purchased it from? Potential readers can then see
+    and use your unbiased opinion to make purchase decisions, we at Packt can understand
+    what you think about our products, and our authors can see your feedback on their
+    book. Thank you!
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information about Packt, please visit [packtpub.com](https://www.packtpub.com/).
+  prefs: []
+  type: TYPE_NORMAL
