@@ -120,7 +120,7 @@ UE4 中的材质定义和创建工具非常出色，更不用说其实时渲染�
 
 ### 提示
 
-通常情况下，UE4 着色器中无法同时使用高光和半透明效果。然而，表面每像素（实验性，功能有限）光照模式允许你同时启用两者。除了选择这种光照模式外，你还必须记住确保按下```cpp and type `r.ForwardLighting 1` in the Stats console window.
+通常情况下，UE4 着色器中无法同时使用高光和半透明效果。然而，表面每像素（实验性，功能有限）光照模式允许你同时启用两者。除了选择这种光照模式外，你还必须记住确保按下`` ` `` 并在状态控制台窗口中输入`r.ForwardLighting 1`。
 
 # Shader code via Custom node
 
@@ -140,7 +140,7 @@ You need a material shader, and a general mathematical function to implement. As
 6.  Select the output type. Here we chose to output a `float3`.
 7.  Enter the computation in the **Code** section at the top using the named variables you have created. The code we return here is as follows:
 
-    ```
+```
 
 return float3( x*x, y*y, z*z );
 
