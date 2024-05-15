@@ -1,6 +1,6 @@
-# Excel 2019 金融建模实用指南
+# Code::Blocks 和 C++ 应用开发
 
-> 原文：[`zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09`](https://zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09)
+> 原文：[`zh.annas-archive.org/md5/D136533EB1CB1D754CE9EE199A478703`](https://zh.annas-archive.org/md5/D136533EB1CB1D754CE9EE199A478703)
 > 
 > 译者：[飞龙](https://github.com/wizardforcel)
 > 

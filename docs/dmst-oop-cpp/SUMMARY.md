@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 面向对象编程揭秘](README.md)
 +   [前言](dmst-oop-cpp_00.md)
 +   [第一部分：C++构建块基础](dmst-oop-cpp_01.md)
 +   [第一章：理解基本的 C++假设](dmst-oop-cpp_02.md)

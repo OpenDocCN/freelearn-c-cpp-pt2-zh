@@ -1,6 +1,6 @@
-# Excel 2019 金融建模实用指南
+# LLVM12 学习手册
 
-> 原文：[`zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09`](https://zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09)
+> 原文：[`zh.annas-archive.org/md5/96A20F7680F39BBAA9B437BF26B65FE2`](https://zh.annas-archive.org/md5/96A20F7680F39BBAA9B437BF26B65FE2)
 > 
 > 译者：[飞龙](https://github.com/wizardforcel)
 > 

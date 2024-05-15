@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [Code::Blocks 和 C++ 应用开发](README.md)
 +   [前言](cpp-appdev-cdblk_0.md)
 +   [第一章：开始使用 Code::Blocks](cpp-appdev-cdblk_1.md)
 +   [第二章：使用 Code::Blocks 进行应用程序开发](cpp-appdev-cdblk_2.md)

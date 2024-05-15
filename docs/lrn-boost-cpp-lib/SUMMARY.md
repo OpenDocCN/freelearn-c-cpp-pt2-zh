@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [Boost C++ 库学习手册](README.md)
 +   [前言](lrn-boost-cpp-lib_00.md)
 +   [第一章：介绍 Boost](lrn-boost-cpp-lib_01.md)
 +   [第二章：Boost 实用程序的初次接触](lrn-boost-cpp-lib_02.md)
@@ -11,4 +11,4 @@
 +   [第九章：文件、目录和 IOStreams](lrn-boost-cpp-lib_09.md)
 +   [第十章：使用 Boost 进行并发](lrn-boost-cpp-lib_10.md)
 +   [第十一章：使用 Boost Asio 进行网络编程](lrn-boost-cpp-lib_11.md)
-+   [附录 A. C++11 语言特性模拟](lrn-boost-cpp-lib_12.md)
++   [附录 A：C++11 语言特性模拟](lrn-boost-cpp-lib_12.md)

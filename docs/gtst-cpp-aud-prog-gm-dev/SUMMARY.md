@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 游戏开发的音频编程入门指南](README.md)
 +   [前言](gtst-cpp-aud-prog-gm-dev_0.md)
 +   [第一章：音频概念](gtst-cpp-aud-prog-gm-dev_1.md)
 +   [第二章：音频播放](gtst-cpp-aud-prog-gm-dev_2.md)

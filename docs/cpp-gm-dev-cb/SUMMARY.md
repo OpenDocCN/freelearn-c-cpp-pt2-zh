@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 游戏开发秘籍](README.md)
 +   [前言](cpp-gm-dev-cb_00.md)
 +   [第一章：游戏开发基础](cpp-gm-dev-cb_01.md)
 +   [第二章：游戏中的面向对象方法和设计](cpp-gm-dev-cb_02.md)

@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 高级量化金融](README.md)
 +   [前言](adv-quant-fin-cpp_00.md)
 +   [第一章：量化金融是什么？](adv-quant-fin-cpp_01.md)
 +   [第二章：数学模型](adv-quant-fin-cpp_02.md)

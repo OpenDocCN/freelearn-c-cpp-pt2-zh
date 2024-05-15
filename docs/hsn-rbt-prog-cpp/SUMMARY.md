@@ -1,4 +1,4 @@
-+   [Excel 2019 金融建模实用指南](README.md)
++   [C++ 机器人编程实用指南](README.md)
 +   [前言](hsn-rbt-prog-cpp_00.md)
 +   [第一部分：在树莓派上使用 wiringPi 入门](hsn-rbt-prog-cpp_01.md)
 +   [第一章：Raspberry Pi 简介](hsn-rbt-prog-cpp_02.md)

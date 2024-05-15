@@ -1,6 +1,6 @@
-# Excel 2019 金融建模实用指南
+# C++ 游戏开发的程序化内容生成
 
-> 原文：[`zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09`](https://zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09)
+> 原文：[`zh.annas-archive.org/md5/78a00fe20d9b720cedc79b3376ba4721`](https://zh.annas-archive.org/md5/78a00fe20d9b720cedc79b3376ba4721)
 > 
 > 译者：[飞龙](https://github.com/wizardforcel)
 > 

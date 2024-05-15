@@ -1,6 +1,6 @@
-# Excel 2019 金融建模实用指南
+# C++ UE4 脚本编程秘籍
 
-> 原文：[`zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09`](https://zh.annas-archive.org/md5/3c97e70c885487f68835a4d0838eee09)
+> 原文：[`zh.annas-archive.org/md5/244B225FA5E3FFE01C9887B1851E5B64`](https://zh.annas-archive.org/md5/244B225FA5E3FFE01C9887B1851E5B64)
 > 
 > 译者：[飞龙](https://github.com/wizardforcel)
 > 
