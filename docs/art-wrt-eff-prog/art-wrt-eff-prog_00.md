@@ -94,20 +94,3 @@ Coroutine done on thread: 140003570587392
 
 像这样出现。
 
-# 联系我们
-
-我们一直欢迎读者的反馈。
-
-`customercare@packtpub.com` 并在邮件主题中提到书名。
-
-**勘误**：尽管我们已经非常注意确保内容的准确性，但错误还是会发生。如果你在这本书中发现了错误，我们将不胜感激地希望你能向我们报告。请访问[www.packtpub.com/support/errata](http://www.packtpub.com/support/errata) 并填写表格。
-
-`copyright@packt.com` 并附上材料的链接。
-
-**如果你有兴趣成为作者**：如果你在某个专业领域有专长，并且有兴趣撰写或为一本书做出贡献，请访问[authors.packtpub.com](http://authors.packtpub.com)。
-
-# 分享你的想法
-
-一旦你读过《高效程序编写艺术》，我们很想听听你的想法！请点击这里直接进入亚马逊的书评页面，分享你的反馈。
-
-你的评论对我们和技术社区很重要，将帮助我们确保我们提供的是优质内容。

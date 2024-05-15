@@ -96,37 +96,3 @@ $ g++ -g listing1.cpp -o listing1 -lboost_system -lboost_coroutine -lboost_date_
 ### 提示
 
 重要的注释、提示和技巧会以这种方式出现。
-
-# 读者反馈
-
-我们始终欢迎读者的反馈。请告诉我们您对本书的看法——您喜欢或不喜欢什么。读者的反馈对我们很重要，因为它帮助我们开发您真正能够充分利用的标题。
-
-要向我们发送一般反馈，只需发送电子邮件至`<feedback@packtpub.com>`，并在您的消息主题中提及书名。
-
-如果您对某个主题有专业知识，并且有兴趣撰写或为一本书做出贡献，请参阅我们的作者指南[www.packtpub.com/authors](http://www.packtpub.com/authors)。
-
-# 客户支持
-
-现在您是 Packt 图书的自豪所有者，我们有一些事情可以帮助您充分利用您的购买。
-
-## 下载示例代码
-
-您可以从[`www.packtpub.com`](http://www.packtpub.com)的帐户中下载您购买的所有 Packt Publishing 图书的示例代码文件。如果您在其他地方购买了本书，您可以访问[`www.packtpub.com/support`](http://www.packtpub.com/support)并注册，文件将直接通过电子邮件发送给您。
-
-## 勘误
-
-尽管我们已经尽一切努力确保内容的准确性，但错误是难免的。如果您在我们的书籍中发现错误——可能是文本或代码中的错误——我们将不胜感激，如果您能向我们报告。通过这样做，您可以帮助其他读者避免挫折，并帮助我们改进本书的后续版本。如果您发现任何勘误，请访问[`www.packtpub.com/submit-errata`](http://www.packtpub.com/submit-errata)，选择您的书籍，点击**勘误提交表格**链接，并输入您的勘误详情。一旦您的勘误被验证，您的提交将被接受，并且勘误将被上传到我们的网站或添加到该书籍的勘误列表中的勘误部分。
-
-要查看先前提交的勘误表，请访问[`www.packtpub.com/books/content/support`](https://www.packtpub.com/books/content/support)，并在搜索框中输入书名。所需信息将显示在**勘误表**部分下。
-
-## 盗版
-
-互联网上的盗版行为是跨所有媒体持续存在的问题。在 Packt，我们非常重视版权和许可的保护。如果您在互联网上发现我们作品的任何非法副本，请立即向我们提供位置地址或网站名称，以便我们采取补救措施。
-
-请通过`<copyright@packtpub.com>`与我们联系，并附上涉嫌盗版材料的链接。
-
-我们感谢您在保护我们的作者和为您带来有价值的内容方面的帮助。
-
-## 问题
-
-如果您对本书的任何方面有问题，可以通过`<questions@packtpub.com>`与我们联系，我们将尽力解决问题。
