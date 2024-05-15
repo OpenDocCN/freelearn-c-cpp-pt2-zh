@@ -1,4 +1,5 @@
 +   [编写高效程序的艺术](docs/art-wrt-eff-prog/README.md)
++   [CMake 秘籍](docs/cmk-cb/README.md)
 +   [Code::Blocks 和 C++ 应用开发](docs/cpp-appdev-cdblk/README.md)
 +   [C++ 游戏开发秘籍](docs/cpp-gm-dev-cb/README.md)
 +   [C++ 面向对象编程揭秘](docs/dmst-oop-cpp/README.md)
@@ -8,6 +9,7 @@
 +   [C++ 系统编程实用指南](docs/hsn-sys-prog-cpp/README.md)
 +   [Boost C++ 库学习手册](docs/lrn-boost-cpp-lib/README.md)
 +   [LLVM12 学习手册](docs/lrn-llvm12/README.md)
++   [面向 C++ 的现代 CMake 教程（预览）](docs/mdn-cmk-cpp/README.md)
 +   [精通 Windows8 C++ 应用开发](docs/ms-win8-cpp-appdev/README.md)
 +   [C++ 游戏开发的程序化内容生成](docs/prcd-cont-gen-cpp-gm-dev/README.md)
 +   [C++ 软件架构](docs/sw-arch-cpp/README.md)
