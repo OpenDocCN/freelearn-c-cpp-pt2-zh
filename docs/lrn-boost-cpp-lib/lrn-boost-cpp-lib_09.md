@@ -529,11 +529,192 @@ file_type  sizetime  name -> target
 
 这是在我的 Linux 系统上运行此函数的示例输出：
 
-![查询文件系统条目
+![查询文件系统条目](img/1217OT_09_04.jpg)
 
 你也可以在 Linux 的`/dev`目录上运行这个程序，看看设备文件是如何列出的。
 
-调用`read_symlink`函数（第 15 行）来获取符号链接指向的目标文件。调用`file_size`函数（第 21 行）获取文件的大小（以字节为单位），调用`last_write_time`函数（第 22、26 和 46 行）获取文件的最后修改时间。`last_write_time`函数返回文件最后修改的**Unix 时间**。我们通过调用`boost::posix_time::from_time_t`函数将这个数字时间戳转换为可打印的日期时间字符串来打印这个时间戳的有意义的表示（参见第七章，“高阶和编译时编程”）。为了构建这个程序，你还必须链接 Boost DateTime 库，如下所示：```cpp$ g++ listing8_7.cpp -o listing8_7 -std=c++11 -lboost_filesystem -lboost_date_time```文件系统中有几个这样的函数，用于查询文件系统中对象的不同类型的信息，例如查找文件的硬链接数。我们可以查询`file_status`对象（第 10 行）以获取文件权限。请注意，我们不需要在命名空间级别函数中加上命名空间；它们会根据参数的类型正确解析，使用基于参数类型的参数相关查找（Argument Dependent Lookup）。## 对文件执行操作除了查询文件系统条目的信息之外，我们还可以使用 Boost 文件系统库对文件执行操作，如创建目录和链接，复制文件和移动文件等。### 创建目录使用函数`boost::filesystem::create_directory`很容易创建目录。传递一个路径给它，如果该路径上不存在目录，则会在该路径上创建一个目录；如果目录已经存在，则不会执行任何操作。如果路径存在但不是一个目录，`create_directory`会抛出一个异常。还有一个非抛出版本，它接受一个`boost::system::error_code`引用，在错误时设置错误代码。这些函数如果创建了目录则返回`true`，如果没有则返回`false`：**清单 9.8：创建目录**```cpp 1 #include <boost/filesystem.hpp> 2 #include <iostream> 3 #include <cassert>	 4 namespace fs = boost::filesystem; 5 6 int main() { 7   fs::path p1 = "notpresent/dirtest"; 8   boost::system::error_code ec; 9   if (!is_directory(p1.parent_path()) || exists(p1)) {10     assert( !create_directory(p1, ec) );1112     if (is_directory(p1)) assert(!ec.value());13     else assert(ec.value());14   }1516   try {17     if (create_directories(p1)) {18       assert( !create_directory(p1) );19     }20   } catch (std::exception& e) {21     std::cout << "Exception caught: " << e.what() << '\n';22   }23 }```在这个例子中，相对于当前目录在路径`notpresent/dirtest`上调用`create_directory`失败（第 10 行），如果当前目录中没有名为`notpresent`的目录，或者`notpresent/dirtest`已经存在。这是因为`create_directory`期望传递的路径的父目录存在，并且不会创建已经存在的路径。如果我们没有传递错误代码参数，这次对`create_directory`的调用将会抛出一个需要处理的异常。如果`notpresent/dirtest`已经存在并且是一个目录，那么`create_directory`会失败，但不会设置错误代码（第 12 行）。函数`boost::filesystem::create_directories`创建所需的所有路径组件，类似于 Unix 系统上的`mkdir -p`。对它的调用（第 17 行）除非存在权限问题或路径已经存在，否则会成功。它创建目录，包括沿路径缺失的任何目录。对`create_directory`和`create_directories`的调用是幂等的；如果目标目录存在，不会返回错误或抛出异常，但函数会返回`false`，因为没有创建新目录。### 创建符号链接符号链接，有时被称为软链接，是文件系统中的条目，类似于其他文件的别名。它们可以引用文件以及目录，并经常用于为文件和目录提供替代的简化名称和路径。符号链接在 UNIX 系统上已经存在了相当长的时间，并且自 Windows 2000 以来在 Windows 上以某种形式可用。我们可以使用函数`boost::filesystem::create_symlink`来创建符号链接。对于创建指向目录的符号链接，建议使用函数`boost::filesystem::create_directory_symlink`以获得更好的可移植性。**清单 9.9：创建符号链接**```cpp 1 #include <boost/filesystem.hpp> 2 namespace fs = boost::filesystem; 3 4 void makeSymLink(const fs::path& target, const fs::path& link) { 5   boost::system::error_code ec; 6  7   if (is_directory(target)) { 8     create_directory_symlink(target, link); 9   } else {10     create_symlink(target, link);11   }12 }```这显示了一个名为`makeSymLink`的函数，它创建指向给定路径的符号链接。函数的第一个参数是链接必须别名的目标路径，第二个参数是链接本身的路径。这种参数顺序让人联想到 UNIX 的`ln`命令。如果目标是目录，此函数调用`create_directory_symlink`（第 8 行），而对于所有其他情况，它调用`create_symlink`（第 10 行）。请注意，目标路径在创建符号链接时不需要存在，在这种情况下将创建悬空的符号链接。调用这些函数的效果与在 POSIX 系统上运行`ln -s target link`命令相同。在 Windows 上，当`target`是目录时，通过运行`mklink /D link target`命令可以获得相同的效果，当`target`不是目录时，通过运行`mklink link target`命令可以获得相同的效果。如果`create_directory_symlink`或`create_symlink`抛出异常，函数`makeSymLink`将抛出异常。### 复制文件复制文件是 Boost 文件系统中的另一个常见任务。`boost::filesystem::copy_file`函数将常规文件从源复制到目标，并且如果目标处已存在该文件，则会失败。使用适当的覆盖，可以使其覆盖目标处的文件。`boost::filesystem::copy_symlink`接受源符号链接并在目标处创建第二个符号链接，它别名与源相同的文件。您不能将目录传递给任何一个函数作为目标。还有一个`boost::copy_directory`函数，似乎并不做其名称所示的事情。它创建目录并将源目录的属性复制到目标目录。因此，我们将推出我们自己的递归目录复制实用程序函数：第 9.10 节：递归复制目录```cpp 1 void copyDirectory(const fs::path& src, const fs::path& target) { 2   if (!is_directory(src) 3     || (exists(target) && !is_directory(target)) 4     || !is_directory(absolute(target).parent_path()) 5     || commonPrefix(src, target) == src) { 6     throw std::runtime_error("Preconditions not satisfied"); 7   } 8 9   boost::system::error_code ec;10   fs::path effectiveTarget = target;11   if (exists(target)) {12     effectiveTarget /= src.filename();13   }14   create_directory(effectiveTarget);1516   fs::directory_iterator iter(src), end;17   while (iter != end) {18     auto status = iter->symlink_status();19     auto currentTarget = effectiveTarget/20                               iter->path().filename();2122     if (status.type() == fs::regular_file) {23       copy_file(*iter, currentTarget,24                     fs::copy_option::overwrite_if_exists);25     } else if (status.type() == fs::symlink_file) {26       copy_symlink(*iter, currentTarget);27     } else if (status.type() == fs::directory_file) {28       copyDirectory(*iter, effectiveTarget);29     } // else do nothing30     ++iter;31   }32 }```第 9.10 节定义了`copyDirectory`函数，该函数递归地将源目录复制到目标目录。它执行基本验证，并在不满足必要的初始条件时抛出异常（第 6 行）。如果以下任何条件为真，则违反了必要的前提条件：1.  源路径不是目录（第 2 行）1.  目标路径存在，但不是目录（第 3 行）1.  目标路径的父目录不是目录（第 4 行）1.  目标路径是源路径的子目录（第 5 行）为了检测违反 4，我们重用了第 9.4 节中定义的`commonPrefix`函数。如果目标路径已经存在，则在其下创建与源目录同名的子目录以容纳复制的内容（第 11-12 行，14 行）。否则，将创建目标目录并将内容复制到其中。除此之外，我们使用`directory_iterator`而不是`recursive_directory_iterator`（第 17 行）来递归迭代源目录。我们使用`copy_file`来复制常规文件，传递`copy_option::overwrite_if_exists`选项以确保已存在的目标文件被覆盖（第 23-24 行）。我们使用`copy_symlink`来复制符号链接（第 26 行）。每次遇到子目录时，我们递归调用`copyDirectory`（第 28 行）。如果从`copyDirectory`调用的 Boost 文件系统函数抛出异常，它将终止复制。### 移动和删除文件您可以使用`boost::filesystem::rename`函数移动或重命名文件和目录，该函数以旧路径和新路径作为参数。两个参数的重载如果失败会抛出异常，而三个参数的重载则设置错误代码：```cppvoid rename(const path& old_path, const path& new_path);void rename(const path& old_path, const path& new_path,            error_code& ec);```如果`new_path`不存在，且其父目录存在，则会创建它；否则，重命名调用失败。如果`old_path`不是目录，则`new_path`如果存在，也不能是目录。如果`old_path`是目录，则`new_path`如果存在，必须是一个空目录，否则函数失败。当一个目录被移动到另一个空目录时，源目录的内容被复制到目标空目录内，然后源目录被删除。重命名符号链接会影响链接本身，而不是它们所指向的文件。您可以通过调用`boost::filesystem::remove`并传递文件系统条目的路径来删除文件和空目录。要递归删除一个非空目录，必须调用`boost::filesystem::remove_all`。```cppbool remove(const path& p);bool remove(const path& p, error_code& ec);uintmax_t remove_all(const path& p);uintmax_t remove_all(const path& p, error_code& ec);```如果路径指定的文件不存在，`remove`函数返回 false。这会删除符号链接而不影响它们所指向的文件。`remove_all`函数返回它删除的条目总数。在错误情况下，`remove`和`remove_all`的单参数重载会抛出异常，而双参数重载会设置传递给它的错误代码引用，而不会抛出异常。### 路径感知的 fstreams 此外，头文件`boost/filesystem/fstream.hpp`提供了与`boost::filesystem::path`对象一起工作的标准文件流类的版本。当您编写使用`boost::filesystem`并且需要读取和写入文件的代码时，这些非常方便。### 注意最近，基于 Boost 文件系统库的 C++技术规范已被 ISO 批准。这为其包含在未来的 C++标准库修订版中铺平了道路。# 使用 Boost IOStreams 进行可扩展 I/O 标准库 IOStreams 设施旨在为各种设备上的各种操作提供一个框架，但它并没有被证明是最容易扩展的框架。Boost IOStreams 库通过一个更简单的接口来补充这个框架，以便将 I/O 功能扩展到新设备，并提供一些非常有用的类来满足在读取和写入数据时的常见需求。## Boost IOStreams 的架构标准库 IOStreams 框架提供了两个基本抽象，**流**和**流缓冲区**。流为应用程序提供了一个统一的接口，用于在底层设备上读取或写入一系列字符。流缓冲区为实际设备提供了一个更低级别的抽象，这些设备被流所利用和进一步抽象。Boost IOStreams 框架提供了`boost::iostreams::stream`和`boost::iostreams::stream_buffer`模板，这些是流和流缓冲区抽象的通用实现。这两个模板根据一组进一步的概念实现其功能，这些概念描述如下：+   **源**是一个抽象，用于从中读取一系列字符的对象。+   **汇**是一个抽象，用于向其写入一系列字符。+   **设备**是源、汇，或两者兼有。+   **输入过滤器**修改从源读取的一系列字符，而**输出过滤器**修改写入到汇之前的一系列字符。+   **过滤器**是输入过滤器或输出过滤器。可以编写一个既可以用作输入过滤器又可以用作输出过滤器的过滤器；这被称为**双用过滤器**。要在设备上执行 I/O，我们将零个或多个过滤器序列与设备关联到`boost::iostreams::stream`的实例或`boost::iostreams::stream_buffer`的实例。一系列过滤器称为**链**，一系列过滤器以设备结尾称为**完整链**。以下图表是输入和输出操作的统一视图，说明了流对象和底层设备之间的 I/O 路径：![Boost IOStreams 的架构](img/1217OT_09_01.jpg)
+调用`read_symlink`函数（第 15 行）来获取符号链接指向的目标文件。调用`file_size`函数（第 21 行）获取文件的大小（以字节为单位），调用`last_write_time`函数（第 22、26 和 46 行）获取文件的最后修改时间。`last_write_time`函数返回文件最后修改的**Unix 时间**。
+
+我们通过调用`boost::posix_time::from_time_t`函数将这个数字时间戳转换为可打印的日期时间字符串来打印这个时间戳的有意义的表示（参见第七章，“高阶和编译时编程”）。为了构建这个程序，你还必须链接 Boost DateTime 库，如下所示：
+
+```cpp
+$ g++ listing8_7.cpp -o listing8_7 -std=c++11 -lboost_filesystem -lboost_date_time
+```
+
+文件系统中有几个这样的函数，用于查询文件系统中对象的不同类型的信息，例如查找文件的硬链接数。我们可以查询`file_status`对象（第 10 行）以获取文件权限。请注意，我们不需要在命名空间级别函数中加上命名空间；它们会根据参数的类型正确解析，使用基于参数类型的参数相关查找（Argument Dependent Lookup）。
+
+## 对文件执行操作
+
+除了查询文件系统条目的信息之外，我们还可以使用 Boost 文件系统库对文件执行操作，如创建目录和链接，复制文件和移动文件等。
+
+### 创建目录
+
+使用函数`boost::filesystem::create_directory`很容易创建目录。传递一个路径给它，如果该路径上不存在目录，则会在该路径上创建一个目录；如果目录已经存在，则不会执行任何操作。如果路径存在但不是一个目录，`create_directory`会抛出一个异常。还有一个非抛出版本，它接受一个`boost::system::error_code`引用，在错误时设置错误代码。这些函数如果创建了目录则返回`true`，如果没有则返回`false`：
+
+**清单 9.8：创建目录**
+
+```cpp 
+ 1 #include <boost/filesystem.hpp> 
+ 2 #include <iostream> 
+ 3 #include <cassert>	 
+ 4 namespace fs = boost::filesystem; 
+ 5 
+ 6 int main() { 
+ 7   fs::path p1 = "notpresent/dirtest"; 
+ 8   boost::system::error_code ec; 
+ 9   if (!is_directory(p1.parent_path()) || exists(p1)) {
+10     assert( !create_directory(p1, ec) );
+11
+12     if (is_directory(p1)) assert(!ec.value());
+13     else assert(ec.value());
+14   }
+15
+16   try {
+17     if (create_directories(p1)) {
+18       assert( !create_directory(p1) );
+19     }
+20   } catch (std::exception& e) {
+21     std::cout << "Exception caught: " << e.what() << '\n';
+22   }
+23 }
+```
+
+在这个例子中，相对于当前目录在路径`notpresent/dirtest`上调用`create_directory`失败（第 10 行），如果当前目录中没有名为`notpresent`的目录，或者`notpresent/dirtest`已经存在。这是因为`create_directory`期望传递的路径的父目录存在，并且不会创建已经存在的路径。如果我们没有传递错误代码参数，这次对`create_directory`的调用将会抛出一个需要处理的异常。如果`notpresent/dirtest`已经存在并且是一个目录，那么`create_directory`会失败，但不会设置错误代码（第 12 行）。
+
+函数`boost::filesystem::create_directories`创建所需的所有路径组件，类似于 Unix 系统上的`mkdir -p`。对它的调用（第 17 行）除非存在权限问题或路径已经存在，否则会成功。它创建目录，包括沿路径缺失的任何目录。对`create_directory`和`create_directories`的调用是幂等的；如果目标目录存在，不会返回错误或抛出异常，但函数会返回`false`，因为没有创建新目录。
+
+### 创建符号链接
+
+符号链接，有时被称为软链接，是文件系统中的条目，类似于其他文件的别名。它们可以引用文件以及目录，并经常用于为文件和目录提供替代的简化名称和路径。符号链接在UNIX系统上已经存在了相当长的时间，并且自Windows 2000以来在Windows上以某种形式可用。我们可以使用函数`boost::filesystem::create_symlink`来创建符号链接。对于创建指向目录的符号链接，建议使用函数`boost::filesystem::create_directory_symlink`以获得更好的可移植性。
+
+**清单9.9：创建符号链接**
+
+```cpp
+ 1 #include <boost/filesystem.hpp>
+ 2 namespace fs = boost::filesystem; 
+ 3 
+ 4 void makeSymLink(const fs::path& target, const fs::path& link) { 
+ 5   boost::system::error_code ec; 
+ 6  
+ 7   if (is_directory(target)) { 
+ 8     create_directory_symlink(target, link); 
+ 9   } else {
+10     create_symlink(target, link);
+11   }
+12 }
+```
+这显示了一个名为`makeSymLink`的函数，它创建指向给定路径的符号链接。函数的第一个参数是链接必须别名的目标路径，第二个参数是链接本身的路径。这种参数顺序让人联想到UNIX的`ln`命令。如果目标是目录，此函数调用`create_directory_symlink`（第8行），而对于所有其他情况，它调用`create_symlink`（第10行）。请注意，目标路径在创建符号链接时不需要存在，在这种情况下将创建悬空的符号链接。调用这些函数的效果与在POSIX系统上运行`ln -s target link`命令相同。在Windows上，当`target`是目录时，通过运行`mklink /D link target`命令可以获得相同的效果，当`target`不是目录时，通过运行`mklink link target`命令可以获得相同的效果。如果`create_directory_symlink`或`create_symlink`抛出异常，函数`makeSymLink`将抛出异常。
+
+### 复制文件
+
+复制文件是Boost文件系统中的另一个常见任务。`boost::filesystem::copy_file`函数将常规文件从源复制到目标，并且如果目标处已存在该文件，则会失败。使用适当的覆盖，可以使其覆盖目标处的文件。`boost::filesystem::copy_symlink`接受源符号链接并在目标处创建第二个符号链接，它别名与源相同的文件。您不能将目录传递给任何一个函数作为目标。还有一个`boost::copy_directory`函数，似乎并不做其名称所示的事情。它创建目录并将源目录的属性复制到目标目录。因此，我们将推出我们自己的递归目录复制实用程序函数：
+
+第9.10节：递归复制目录
+
+```cpp 
+ 1 void copyDirectory(const fs::path& src, const fs::path& target) { 
+ 2   if (!is_directory(src) 
+ 3     || (exists(target) && !is_directory(target)) 
+ 4     || !is_directory(absolute(target).parent_path()) 
+ 5     || commonPrefix(src, target) == src) { 
+ 6     throw std::runtime_error("Preconditions not satisfied"); 
+ 7   } 
+ 8 
+ 9   boost::system::error_code ec;
+10   fs::path effectiveTarget = target;
+11   if (exists(target)) {
+12     effectiveTarget /= src.filename();
+13   }
+14   create_directory(effectiveTarget);
+15
+16   fs::directory_iterator iter(src), end;
+17   while (iter != end) {
+18     auto status = iter->symlink_status();
+19     auto currentTarget = effectiveTarget/
+20                               iter->path().filename();
+21
+22     if (status.type() == fs::regular_file) {
+23       copy_file(*iter, currentTarget,
+24                     fs::copy_option::overwrite_if_exists);
+25     } else if (status.type() == fs::symlink_file) {
+26       copy_symlink(*iter, currentTarget);
+27     } else if (status.type() == fs::directory_file) {
+28       copyDirectory(*iter, effectiveTarget);
+29     } // else do nothing
+30     ++iter;
+31   }
+32 }
+```
+第9.10节定义了`copyDirectory`函数，该函数递归地将源目录复制到目标目录。它执行基本验证，并在不满足必要的初始条件时抛出异常（第6行）。如果以下任何条件为真，则违反了必要的前提条件：
+
+1.  源路径不是目录（第2行）
+
+1.  目标路径存在，但不是目录（第3行）
+
+1.  目标路径的父目录不是目录（第4行）
+
+1.  目标路径是源路径的子目录（第5行）
+
+为了检测违反4，我们重用了第9.4节中定义的`commonPrefix`函数。如果目标路径已经存在，则在其下创建与源目录同名的子目录以容纳复制的内容（第11-12行，14行）。否则，将创建目标目录并将内容复制到其中。
+
+除此之外，我们使用`directory_iterator`而不是`recursive_directory_iterator`（第17行）来递归迭代源目录。我们使用`copy_file`来复制常规文件，传递`copy_option::overwrite_if_exists`选项以确保已存在的目标文件被覆盖（第23-24行）。我们使用`copy_symlink`来复制符号链接（第26行）。每次遇到子目录时，我们递归调用`copyDirectory`（第28行）。如果从`copyDirectory`调用的Boost文件系统函数抛出异常，它将终止复制。
+
+### 移动和删除文件
+
+您可以使用`boost::filesystem::rename`函数移动或重命名文件和目录，该函数以旧路径和新路径作为参数。两个参数的重载如果失败会抛出异常，而三个参数的重载则设置错误代码：
+
+```cpp
+void rename(const path& old_path, const path& new_path);
+void rename(const path& old_path, const path& new_path,
+            error_code& ec);
+```
+
+如果`new_path`不存在，且其父目录存在，则会创建它；否则，重命名调用失败。如果`old_path`不是目录，则`new_path`如果存在，也不能是目录。如果`old_path`是目录，则`new_path`如果存在，必须是一个空目录，否则函数失败。当一个目录被移动到另一个空目录时，源目录的内容被复制到目标空目录内，然后源目录被删除。重命名符号链接会影响链接本身，而不是它们所指向的文件。
+
+您可以通过调用`boost::filesystem::remove`并传递文件系统条目的路径来删除文件和空目录。要递归删除一个非空目录，必须调用`boost::filesystem::remove_all`。
+
+```cpp
+bool remove(const path& p);
+bool remove(const path& p, error_code& ec);
+uintmax_t remove_all(const path& p);
+uintmax_t remove_all(const path& p, error_code& ec);
+```
+
+如果路径指定的文件不存在，`remove`函数返回false。这会删除符号链接而不影响它们所指向的文件。`remove_all`函数返回它删除的条目总数。在错误情况下，`remove`和`remove_all`的单参数重载会抛出异常，而双参数重载会设置传递给它的错误代码引用，而不会抛出异常。
+
+### 路径感知的fstreams
+
+此外，头文件`boost/filesystem/fstream.hpp`提供了与`boost::filesystem::path`对象一起工作的标准文件流类的版本。当您编写使用`boost::filesystem`并且需要读取和写入文件的代码时，这些非常方便。
+
+### 注意
+
+最近，基于Boost文件系统库的C++技术规范已被ISO批准。这为其包含在未来的C++标准库修订版中铺平了道路。
+
+# 使用Boost IOStreams进行可扩展I/O
+
+标准库IOStreams设施旨在为各种设备上的各种操作提供一个框架，但它并没有被证明是最容易扩展的框架。Boost IOStreams库通过一个更简单的接口来补充这个框架，以便将I/O功能扩展到新设备，并提供一些非常有用的类来满足在读取和写入数据时的常见需求。
+
+## Boost IOStreams的架构
+
+标准库IOStreams框架提供了两个基本抽象，**流**和**流缓冲区**。流为应用程序提供了一个统一的接口，用于在底层设备上读取或写入一系列字符。流缓冲区为实际设备提供了一个更低级别的抽象，这些设备被流所利用和进一步抽象。
+
+Boost IOStreams框架提供了`boost::iostreams::stream`和`boost::iostreams::stream_buffer`模板，这些是流和流缓冲区抽象的通用实现。这两个模板根据一组进一步的概念实现其功能，这些概念描述如下：
+
++   **源**是一个抽象，用于从中读取一系列字符的对象。
+
++   **汇**是一个抽象，用于向其写入一系列字符。
+
++   **设备**是源、汇，或两者兼有。
+
++   **输入过滤器**修改从源读取的一系列字符，而**输出过滤器**修改写入到汇之前的一系列字符。
+
++   **过滤器**是输入过滤器或输出过滤器。可以编写一个既可以用作输入过滤器又可以用作输出过滤器的过滤器；这被称为**双用过滤器**。
+
+要在设备上执行I/O，我们将零个或多个过滤器序列与设备关联到`boost::iostreams::stream`的实例或`boost::iostreams::stream_buffer`的实例。一系列过滤器称为**链**，一系列过滤器以设备结尾称为**完整链**。
+
+以下图表是输入和输出操作的统一视图，说明了流对象和底层设备之间的I/O路径：
+
+![Boost IOStreams的架构](img/1217OT_09_01.jpg)
 
 Boost IOStreams 架构
 
