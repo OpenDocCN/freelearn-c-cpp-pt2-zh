@@ -4,7 +4,7 @@
 +   [C++ 游戏开发秘籍](docs/cpp-gm-dev-cb/README.md)
 +   [C++ 面向对象编程揭秘](docs/dmst-oop-cpp/README.md)
 +   [C++ 游戏开发的音频编程入门指南](docs/gtst-cpp-aud-prog-gm-dev/README.md)
-+   [C++ 机器人编程实用指南](docs/hsn-emb-prog-cpp17/README.md)
++   [C++17 嵌入式编程实用指南](docs/hsn-emb-prog-cpp17/README.md)
 +   [C++ 机器人编程实用指南](docs/hsn-rbt-prog-cpp/README.md)
 +   [C++ 系统编程实用指南](docs/hsn-sys-prog-cpp/README.md)
 +   [Boost C++ 库学习手册](docs/lrn-boost-cpp-lib/README.md)
