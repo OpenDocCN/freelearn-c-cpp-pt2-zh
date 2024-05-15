@@ -1,4 +1,4 @@
-# 第五章。超越 STL 的有效数据结构
+# 第五章：超越 STL 的有效数据结构
 
 C++标准库提供了一套丰富的**通用容器**，可用于各种常见的编程任务。这些包括序列容器，如`std::vector`、`std::deque`、`std::list`、`std::forward_list`，以及有序和无序的关联容器，如`std::map`、`std::set`、`std::unordered_map`、`std::unordered_set`等等。
 

@@ -1,4 +1,4 @@
-# *第四章*：Qt Quick 和 QML
+# 第四章：Qt Quick 和 QML
 
 Qt 由两个不同的模块组成，用于开发**图形用户界面**（**GUI**）应用程序。第一种方法是使用 Qt Widgets 和 C++，我们在上一章中学习过。第二种方法是使用 Qt Quick Controls 和**Qt 建模语言**（**QML**），我们将在本章中介绍。
 

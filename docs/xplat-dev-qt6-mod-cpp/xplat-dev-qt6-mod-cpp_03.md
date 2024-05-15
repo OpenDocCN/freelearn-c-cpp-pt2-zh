@@ -1,4 +1,4 @@
-# *第二章*：Qt Creator 简介
+# 第二章：Qt Creator 简介
 
 **Qt Creator**是 Qt 自己的**集成开发环境**（**IDE**），用于跨平台应用程序开发。在本章中，您将学习 Qt Creator IDE 的基础知识，以及 IDE 的**用户界面**（**UI**）。我们还将看看如何在 Qt Creator 中创建和管理项目。Qt 的这个模块涵盖了使用 Qt Creator 开发简单 Qt 应用程序的内容，包括开发人员的快捷方式和实用技巧。
 
