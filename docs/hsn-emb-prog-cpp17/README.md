@@ -1,6 +1,6 @@
-# C++ 机器人编程实用指南
+# C++17 嵌入式编程实用指南
 
-> 原文：[`zh.annas-archive.org/md5/E72C92D0A964D187E23464F49CAD88BE`](https://zh.annas-archive.org/md5/E72C92D0A964D187E23464F49CAD88BE)
+> 原文：[`zh.annas-archive.org/md5/B28E444E77634E28D12AD6F4C3A426AD`](https://zh.annas-archive.org/md5/B28E444E77634E28D12AD6F4C3A426AD)
 > 
 > 译者：[飞龙](https://github.com/wizardforcel)
 > 
