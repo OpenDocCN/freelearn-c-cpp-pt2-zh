@@ -1,0 +1,1 @@
+["```cpp\ncmake_minimum_required(VERSION 3.20)\nproject(Hello)\nadd_executable(Hello hello.cpp)\n```", "```cpp\ncmake_minimum_required(VERSION 3.20)\nproject(app)\nmessage(\"Top level CMakeLists.txt\")\nadd_subdirectory(api)\n```", "```cpp\ncmake --build <dir> --parallel [<number-of-jobs>]\ncmake --build <dir> -j [<number-of-jobs>]\n```"]
