@@ -1,0 +1,51 @@
+- en: 'Section 3: Automating With CMake'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Completing the previous sections has turned you into a self-sufficient build
+    engineer capable of building all kinds of projects with CMake. The final step
+    in becoming a CMake professional is learning how to introduce and automate various
+    quality checks and prepare your projects for collaborative work and publication.
+    High-quality projects developed within large companies often share the same philosophy:
+    automate repetitive tasks that drain mental energy from important decisions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To achieve that, we''re leveraging the power of the CMake ecosystem to add
+    all kinds of tests done during the build: code-style checks, unit tests, and static
+    and dynamic analyses of our solutions. We''ll also simplify the documentation
+    process by using tooling to generate pretty web pages, and we''ll package and
+    install our project to make its consumption a breeze, both for other developers
+    and end users.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As a summary, we will put together everything we have learned into one coherent
+    unit: a professional project that will stand the test of time.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This section comprises the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B17205_08_Final_JC_ePub.xhtml#_idTextAnchor179), *Testing Frameworks*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program Analysis
+    Tools*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B17205_10_Final_JC_ePub.xhtml#_idTextAnchor210), *Generating
+    Documentation*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B17205_11_Final_JC_ePub.xhtml#_idTextAnchor217), *Installing
+    and Packaging*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 12*](B17205_12_Final_JC_ePub.xhtml#_idTextAnchor240), *Creating Your
+    Professional Project*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

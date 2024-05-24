@@ -1,0 +1,1575 @@
+- en: '*Chapter 12*: Creating Your Professional Project'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We gathered all the required knowledge to build professional projects; we learned
+    about structuring, building, dependency management, testing, analyzing, installing,
+    and packaging. It's time to put these acquired skills into practice by creating
+    a coherent, professional project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The important thing to understand is that even trivial programs will benefit
+    from automated quality checks and a streamlined end-to-end process that turns
+    raw code into a fully fledged solution. It's true that this is often a considerable
+    investment, as many steps need to be taken in order to prepare everything right
+    – even more so if we're trying to add these mechanisms to already existing code
+    bases (usually, they're already large and convoluted).
+  prefs: []
+  type: TYPE_NORMAL
+- en: That's the very reason to use CMake from the get-go and set all the piping upfront;
+    not only it will be easier to configure but, more importantly, it's also much
+    more efficient to do it early, as all the quality controls and build automation
+    have to be added to long-term projects at some point anyway.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is exactly what we'll do in this chapter – we'll write a new solution that
+    is as small and as simple as possible. It will perform just a single (almost)
+    practical function – adding two numbers together. Limiting the functionality of
+    the business code will allow us to focus on every other aspect of the project
+    that we learned about in the previous chapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To have a more involved problem to solve, this project will build both a library
+    and an executable. The library will provide the internal business logic and will
+    also be available for other projects to consume as a CMake package. The executable
+    will be meant for end users only and will implement a user interface that shows
+    the functionality of the underlying library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Planning our work
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Project layout
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Building and managing dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Testing and program analysis
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing and packaging
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Providing the documentation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You can find the code files present in this chapter at GitHub:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter12](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter12)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Planning our work
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The software we''ll be building in this chapter isn''t meant to be extremely
+    complex – we''ll create a simple calculator that adds two numbers together (*Figure
+    12.1*). It will be released as a console application with a text user interface
+    and a library to perform mathematical operations, which can potentially be used
+    in another project. While there isn''t much use for such a project in real life,
+    as C++ offers plenty of support for calculations in its standard library, its
+    banality will be perfect to explore how all techniques discussed in this book
+    work together in practice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.1 – The two states of a console calculator''s user interface'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.1 – The two states of a console calculator's user interface
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usually, projects either produce a user-facing executable or a library for developers.
+    Projects that do both are a bit rarer but not totally uncommon – some applications
+    offer standalone SDKs or libraries supporting the creation of plugins. Another
+    case may be a library that offers examples of its usage. The project we'll build
+    in this chapter somewhat fits into the last category.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will start planning by reviewing the list of chapters, recalling their content,
+    and selecting the techniques and tools described therein that we will use to build
+    our computing application:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 1*](B17205_01_Final_JC_ePub.xhtml#_idTextAnchor014), *First Steps
+    with CMake*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first chapter gave us basic information on CMake – how to install it and
+    use its command line to build prepared projects. Information on project files
+    provided here will be key: the responsibilities of different files, conventionally
+    used names, and some quirks. In this chapter, we also discussed preset files for
+    generators, but we''ll skip these in this project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 2*](B17205_02_Final_JC_ePub.xhtml#_idTextAnchor051), *The CMake Language*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here, we introduced tools necessary to write correct listfiles and scripts.
+    We shared fundamental information on code: comments, command invocations, and
+    arguments. We also thoroughly explained variables, lists, and control structures
+    and presented a few very useful commands. This knowledge will be applied throughout
+    the project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 3*](B17205_03_Final_JC_ePub.xhtml#_idTextAnchor078), *Setting Up
+    Your First CMake Project*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Topics covered in the third chapter will have a critical impact on the project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specifying a minimal CMake version decides which CMake policies will apply;
+    naming, versioning, and configuring a project's language affects the basic behavior
+    of the build.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Insights into project partitioning and structuring that shape the layout of
+    directories and files.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: System discovery variables to help us decide how to handle different environments,
+    specifically for this project – for example, do we need to run `ldconfig`?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Toolchain configuration allows the requirement of a particular version of C++
+    and a standard supported by the compiler.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This chapter also tells us that it's often a good idea to disable in-source
+    builds, so we'll do that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B17205_04_Final_JC_ePub.xhtml#_idTextAnchor106), *Working with
+    Targets*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here, we highlighted how every modern CMake project makes extensive use of
+    targets. Ours will too, for the following reasons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a few libraries and executables (both for test and production) will
+    keep the project organized and *DRY.*
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Target properties and transitive usage requirements (propagated properties)
+    keep configuration close to target definitions.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generator expressions are going to appear throughout the solution, but we'll
+    keep them as simple as possible.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In this project, we'll use custom commands to generate files for Valgrind and
+    coverage reports, and we'll use target hooks (`PRE_BUILD`) to clean the `.gcda`
+    files produced by coverage instrumentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126), *Compiling C++
+    Sources with CMake*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There''s no C++ project without compilation. The basics are quite simple, but
+    CMake allows us to tweak this process in so many ways: extend the sources of a
+    target, configure the optimizer, and provide debugging information. For this project,
+    the default compilation flags will do just fine, but we''ll go ahead and play
+    a bit with the preprocessor:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We'll store build metadata (the project version, build time, and the Git commit
+    SHA) in the compiled executable and show it to the user.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We'll enable the precompilation of headers. It's not really a necessity in such
+    a small project, but it will help us practice this concept.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Unity builds won't be necessary – the project won't be big enough to make adding
+    them worthwhile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B17205_06_Final_JC_ePub.xhtml#_idTextAnchor146), *Linking with
+    CMake*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The sixth chapter provides us with general information on linking (useful in
+    any project), most of which comes in handy by default. But since this project
+    also provides a library, we''ll explicitly refer to some building instructions
+    on the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Static libraries for testing and development
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Shared libraries for release
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This chapter outlines how to separate `main()` for testing, which we'll do as
+    well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B17205_07_Final_JC_ePub.xhtml#_idTextAnchor162), *Managing Dependencies
+    with CMake*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To make the project more interesting, we''ll bring an external dependency:
+    a text UI library. We described a few dependency management methods in this chapter.
+    Picking the right one isn''t too difficult: the `FetchContent` utility module
+    is usually recommended and most convenient (unless we are solving a specific corner
+    case described in the chapter).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B17205_08_Final_JC_ePub.xhtml#_idTextAnchor179), *Testing Frameworks*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proper automated tests are imperative to assure that quality of our solution
+    doesn't degrade over time. We'll add the support for CTest and properly structure
+    our project for testing (we'll apply the `main()` separation mentioned earlier).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Also, in this chapter, we discussed two testing frameworks: Catch2 and GTest
+    with gMock; for this project, we''ll use the latter. To get clear information
+    on our coverage, we''ll generate HTML reports with LCOV'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program Analysis
+    Tools*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To perform static analysis, we can choose from a variety of tools: Clang-Tidy,
+    Cpplint, Cppcheck, include-what-you-use, and link what you use. In this case,
+    we''ll go with Cppcheck , as Clang-Tidy doesn''t work very well with precompiled
+    headers built with GCC. The dynamic analysis will be done with Valgrind''s Memcheck
+    tool, and we''ll use the Memcheck-cover wrapper to generate HTML reports. Our
+    source will be also automatically formatted during the build with ClangFormat.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B17205_10_Final_JC_ePub.xhtml#_idTextAnchor210), *Generating
+    Documentation:*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since we'll be providing a library as part of this project, it's key to provide
+    at least some documentation to go with it. As we already know, CMake allows us
+    to automate the generation of it with Doxygen. We'll do that in a refreshed design
+    by adding the doxygen-awesome-css look to it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B17205_11_Final_JC_ePub.xhtml#_idTextAnchor217), *Installing
+    and Packaging*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we'll configure the installation and packaging of our solution. We'll
+    prepare files to form the package as described, along with target definitions.
+    We'll install that and the artifacts from build targets to appropriate directories
+    by including the `GNUInstallDirs` module. We will additionally configure a few
+    components to modularize the solution and prepare it for use with CPack.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Professional projects also come with a few text files: `README`, `LICENSE`,
+    `INSTALL`, and so on. We''ll touch on this briefly at the end.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make things simpler, we won't implement logic that checks whether all the
+    required utilities and dependencies are available. We'll rely on CMake here to
+    show its diagnostics and tell users what's missing. If projects that you publish
+    after reading this book get significant traction, you might want to consider adding
+    these mechanisms to improve the user experience.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having formed a clear plan, let's discuss how to actually structure the project,
+    both in terms of logical targets and directory structure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Project layout
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To build any project, we should start with a clear understanding of what logical
+    targets are going to be created in it. In this case, we''ll follow the structure
+    shown in *Figure 12.2*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.2 – A structure of logical targets'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.2 – A structure of logical targets
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let's explore the structure by following the build order. First, we'll compile
+    `calc_obj`, which is an **object library**. We did mention *object libraries*
+    a few times in the book, but we didn't actually introduce them as a concept. Let's
+    do this now.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Object libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Object libraries* are used to group multiple source files under a single logical
+    target and are compiled into the (`.o`) *object files* during a build. To create
+    an *object library*, we use the same method as with other libraries with the `OBJECT`
+    keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '*Object files* produced during the build can be added as compiled elements
+    to other targets with the `$<TARGET_OBJECTS:objlib>` generator expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Alternatively, you can add them as dependencies with the `target_link_libraries()`
+    command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our `Calc` library, *object libraries* will be useful to avoid repeating
+    the compilation of library sources for the static and shared versions of the library.
+    We'll just need to remember to explicitly compile the *object files* with `POSITION_INDEPENDENT_CODE`,
+    as this is a requirement for a shared library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With this out of the way, let''s get back to the targets of this project: `calc_obj`
+    will provide compiled *object files*, which then will be used for both the `calc_static`
+    and `calc_shared` libraries. What are the practical differences between them and
+    why provide two libraries at all?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shared libraries versus static libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We briefly introduced both types of libraries in [*Chapter 6*](B17205_06_Final_JC_ePub.xhtml#_idTextAnchor146),
+    *Linking with CMake*. We then mentioned that overall memory usage can be better
+    for multiple programs using the same shared library and that it's likely that
+    a user already has the most popular libraries or knows how to quickly install
+    them. More importantly, shared libraries are delivered in separate files that
+    must be installed in specific paths for the dynamic linker to find them, while
+    static libraries are merged as part of the executable file. In that form, they
+    are slightly faster to use, as no additional lookups are required to find the
+    location of code in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As library authors, we can decide whether we're providing a static or shared
+    version of the library, or we can simply ship both versions and leave this decision
+    to the programmer using our library. We're opting for the latter here (just to
+    see how it's done).
+  prefs: []
+  type: TYPE_NORMAL
+- en: A static library will be consumed by the `calc_test` target, which will contain
+    unit tests that guarantee that the provided business functionality of the library
+    works as expected. As mentioned, we're building both versions from the same set
+    of compiled *object files*. In this scenario, it's perfectly fine to test either
+    version, as there really should be no practical difference in their behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The console app provided with `calc_console_static` target will use the shared
+    library. This target will also link against an external dependency: the **Functional
+    Terminal (X) User Interface** (**FTXUI**) library by Arthur Sonzogni (there is
+    a link to the GitHub project in the *Further reading section*). It provides a
+    dependence-free, cross-platform framework for text user interfaces.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last two targets are `calc_console` and `calc_console_test`. The `calc_console`
+    target is just a bootstrap `main()` wrapper around `calc_console_static`. Its
+    only purpose is to extract the entry point from the business code. This allows
+    us to write the unit tests (which need to provide their own entry point) and run
+    them from `calc_console_test`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We now know what targets need to be built and how they relate to each other.
+    Let's figure out how to structure the project with files and directories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Project file structure
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The project consists of two primary targets, the `calc` library and the `calc_console`
+    executable, each of which will reside in directory trees under `src` and `test`
+    to separate production code from tests (shown in *Figure 12.3*). Additionally,
+    we''ll have our files in two other directories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *root directory* containing top-level configuration and key project documentation
+    files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `cmake` directory for all the utility modules and helper files used by
+    CMake to build and install the project:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '![Figure 12.3 – The directory structure of the project'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.3 – The directory structure of the project
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here''s the full list of files in each of the four main directories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B17205_Table_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Initially, the `cmake` directory is busier than the business code, but this
+    will quickly change as the project grows in functionality. The effort to start
+    a clean project is significant, but don't worry – it will pay off very soon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We''ll go through all files and see in detail what they do and what role they
+    play in the project. This will happen in four steps: building, testing, installing
+    and providing documentation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building and managing dependencies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'All build processes work the same way. We start from the top-level listfile
+    and navigate downward into the project source tree. *Figure 12.4* shows which
+    project files partake in building. Numbers in parentheses indicate the order of
+    the CMake script execution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.4 – Files used in the build stage'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.4_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.4 – Files used in the build stage
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our top-level listfile will configure the project and load nested elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We start by providing key project details and adding a path to the CMake utility
+    modules (the `cmake` directory in our project). We then disable in-source builds
+    (through a custom module) and include two key directories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`src`, containing the project source (to be named `bin` in the build tree)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test`, containing all the testing utilities'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Finally, we include another module that will set up the installation of the
+    project. This will be discussed in another section. Meanwhile, let''s take a look
+    at the `NoInSourceBuilds` module to understand how it works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/NoInSourceBuilds.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: No surprises here – we simply check whether the user provided a destination
+    directory as an argument to the `cmake` command to store generated files. It has
+    to be a different path than the project source tree. If that's not the case, we
+    inform the user how to provide it and how to clean the repository after the mistake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our top-level listfile then includes the `src` subdirectory, instructing CMake
+    to read the listfile in it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This file is very subtle – it simply steps into the nested directories, executing
+    the listfiles in them. Let's follow the listfile of the `calc` library – it's
+    a bit involved, so we'll discuss it in parts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building the Calc library
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The list file for `calc` contains bits of testing configuration, but we''ll
+    focus on the building for now; the remainder will be discussed in the *Testing
+    and program analysis* section:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We declare three targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`calc_obj`, an *object library* compiling a `calc.cpp` implementation file.
+    It also references the `calc.h` header file through the `PUBLIC_HEADER` property,
+    which can be found in the configured *include directory* (thanks to generator
+    expressions providing appropriate paths for a specific mode – build or install).
+    By using this library, we avoid repeated compilation of other targets, but we
+    also need to enable `POSITION_INDEPENDENT_CODE` so that generated *object files*
+    are usable by the shared library.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`calc_shared`, a shared library depending on `calc_obj`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`calc_static`, a static library depending on `calc_obj`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For completeness, we''ll add a listing of the `calc` library''s C++ code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc/include/calc/calc.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code is quite basic: it declares two global functions enclosed in a `Calc`
+    namespace (C++ namespaces are extremely useful in libraries, helping to avoid
+    name collisions).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The implementation file is also very straightforward:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc/calc.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: This wraps up the explanation of files in the `src/calc` directory. Next up
+    is the `src/calc_console` and building the executable of the console calculator
+    using this library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building the Calc Console executable
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The source directory of `calc_console` contains several files: a listfile,
+    two implementation files (business code and a bootstrap), and a header file. The
+    listfile looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The listfile seem very busy, but now, as experienced CMake users, we can easily
+    untangle what''s happening inside:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Include CMake module to fetch FTXUI dependency.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Declare the `calc_console_static` target, which contains the business code,
+    but not the `main()` function, to allow GTest to define its own entry point.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Add a header precompilation – we're just adding a standard `string` header to
+    prove a point, but for larger projects, we could add many more (including headers
+    belonging to the project).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Link the business code with the shared `calc_shared` library and the FTXUI library.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Add all the actions to be taken on this target: the generation of build information,
+    testing, program analysis, and documentation.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Add and link the `calc_console` bootstrap executable, which provides the entry
+    point.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Again, we'll defer discussing testing and documentation to appropriate sections
+    in this chapter. Let's take a look at dependency management and build info generation
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that we''re preferring the utility module over find-module to bring in
+    the FTXUI. This is because it isn''t very likely that this dependency is already
+    present in the system. Rather than hoping to find it, we''ll fetch and install
+    it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/GetFTXUI.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: We're using the recommended `FetchContent` method, described in detail in [*Chapter
+    7*](B17205_07_Final_JC_ePub.xhtml#_idTextAnchor162), *Managing Dependencies with
+    CMake*. The only unusual addition is the calls of the `option()` command. They
+    allow us to skip lengthy steps of the FTXUI build and disengage its installation
+    configuration from the installation of this project. The same will be necessary
+    for GTest dependency. The `option()` command is referenced in the *Further reading*
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The listfile for `calc_command` includes one more custom utility module that
+    is build-related: `BuildInfo`. We''ll use it to record three values that can be
+    surfaced in the executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: SHA of the current Git commit
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The timestamp of the build
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The project version specified in the top-level listfile
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You might remember from [*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126),
+    *Compiling C++ Sources with CMake*, that we can use CMake to capture some build-time
+    values and provide them to C++ code through template files – for example, with
+    a handy C++ struct:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/buildinfo.h.in
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To fill that structure during the configuration stage, we''ll use the following
+    code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/BuildInfo.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Including the module will set variables containing information we're after and
+    then we'll call `configure_file()` to generate `buildinfo.h`. All that's left
+    is to call the `BuildInfo` function and add the directory of the produced file
+    to *include directories* of the desired target. The file can be then shared with
+    multiple different consumers if needed. In such a case, you'll probably want to
+    add `include_guard(GLOBAL)` at the top of the listfile to avoid running the `git`
+    command for every target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before delving into the implementation of the console calculator, I''d like
+    to underline that you shouldn''t worry too much about the complexity of the `tui.cpp`
+    file. To fully understand it, you''ll require some knowledge of the FXTUI library
+    – we don''t want to get in too deep here. Instead, let''s focus on the highlighted
+    lines:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/tui.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: This piece of code provides a `getTui()` function, which returns a `ftxui::Component`,
+    an object that encapsulates an interactive UI element with labels, text fields,
+    separators, and a border. If you're interested in how it works in detail, you'll
+    find suitable references in the *Further reading* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'More importantly, look at the include directives: they refer to the headers
+    we provided earlier with the `calc_obj` target and the `BuildInfo` module. The
+    first line of the lambda function provided to the constructor of the `Renderer`
+    class will call the library''s `Calc::Sum` method and use the resulting value
+    to print a label with `sum` (by calling the `text()` function below).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, the labels are used to present the user with the `BuildInfo::` values
+    collected at build time in three consecutive calls to `text()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This method has its declaration in the related header file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/include/tui.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is then used by the bootstrap from the `calc_console` target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/bootstrap.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: This short piece of code utilizes `ftxui` to create an interactive console screen
+    that takes the `Component` object returned by `getTui()`, makes it visible to
+    the user, and collects keyboard events in a loop, creating an interface, as shown
+    in *Figure 12.1*. Again, understanding this in full isn't really crucial, as the
+    main purpose of `ftxui` is to provide us with an external dependency that we can
+    use to practice CMake techniques.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We've covered all the files in the `src` directory. Let's move on to the aforementioned
+    topic of testing and analyzing the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing and program analysis
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Program analysis and testing go hand in hand to assure the quality of our solutions.
+    For example, running Valgrind becomes more consistent when test code is used.
+    For this reason, we''ll configure those two things together. *Figure 12.5* illustrates
+    the execution flow and files needed to set them up (a few snippets will be added
+    to the `src` directory):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.5 – Files used to enable testing and program analysis'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.5_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.5 – Files used to enable testing and program analysis
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we already know, tests live in the `test` directory, and their listfile
+    gets executed from the top-level listfile with the `add_subdirectory()` command.
+    Let''s see what''s inside:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Testing utilities defined in the `Testing` module are included at this level
+    to allow both target groups (from the `calc` and the `calc_console` directories)
+    to use them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Testing.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: We enabled testing and included the `FetchContent` module to get GTest and GMock.
+    We're not really using GMock in this project, but these two frameworks are bundled
+    in a single repository, so we need to configure GMock as well. The highlighted
+    part of this configuration disengages the installation of both frameworks from
+    the installation of our project (by setting the appropriate `option()` to `OFF`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, we need to create a function that enables the thorough testing of business
+    targets. We''ll keep it in the same file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Testing.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here, we first include the necessary modules: `GoogleTest` is bundled with
+    CMake, but `Coverage` and `Memcheck` will be written by us. We then provide an
+    `AddTests` macro, which will prepare a target for testing, instrument coverage,
+    and memory checking. Let''s see how it works in detail.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preparing the coverage module
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Adding coverage to multiple targets is a little bit tricky, as it consists
+    of a few steps. We start by introducing two functions that enable coverage tracking
+    and clean stale tracking files between builds:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Coverage.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding functions will be used later, when we get to individual target
+    configurations (`calc_...` and `calc_console_...`). The `Coverage` module will
+    also provide a function that generates the custom coverage target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Coverage.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`AddCoverage()` is called in the `AddTests()` function in the `Testing` module.
+    It differs slightly from the one introduced in [*Chapter 8*](B17205_08_Final_JC_ePub.xhtml#_idTextAnchor179),
+    *Testing Frameworks*, as it takes the name of the target into account and adds
+    it to the output path to avoid any collisions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To generate reports for both test targets, we simply need to run two `cmake`
+    commands (after configuring the project with the `Debug` build type):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: It's now time to modify the Memcheck module that we created earlier (in [*Chapter
+    9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program Analysis Tools*)
+    to handle multiple targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preparing the Memcheck module
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Generation of the Valgrind memory management report is called by `AddTests()`.
+    We''ll start this module with the general setup:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Memcheck.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''re familiar with this code already; let''s look at the function that''ll
+    create appropriate targets for report generation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Memcheck.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: To handle multiple targets, the `REPORT_PATH` variable is set to store the path
+    to a target-specific report. This variable is then used in subsequent commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Generation of Memcheck reports can be achieved with following commands (this
+    works better in the `Debug` build type):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: These are all modules used by the `Testing` module. Let's see how it is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Applying testing scenarios
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A few things have to happen for the testing to work:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We need to create nested listfiles and define test targets for both directories.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Unit tests need to be written and prepared as executable targets.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: These targets need to have `AddTests()` called on them.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Software Under Test** (**SUT**) needs to be instrumented to enable coverage
+    collection.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Collected coverage should be cleaned between the builds to avoid segmentation
+    faults.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'As implied in `test/CMakeLists.txt`, we''ll create two nested listfiles that
+    configure our tests. Once more, we''ll provide one for the library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''ll also provide one for the executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc_console/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To keep things brief, we''ll provide as simple unit tests as possible. One
+    file will cover the library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc/calc_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And we''ll have a second file to test the business code. For this purpose,
+    we''ll use the FXTUI library. Again, there''s no expectation that you will understand
+    this source code in every detail. Test listings are provided in this chapter merely
+    for completeness:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc_console/tui_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: This test code simply renders the textual UI in a default state to a static
+    screen object, which then gets stored in a string. In order for the test to pass,
+    the output needs to contain a substring with the default sum.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now, we''ll need to complete the remaining steps: after we have created test
+    targets and prepared their source code, it''s time to register them in CPack with
+    the `AddTests()` function from the `Testing` module.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We do this for the library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We then do it for the executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/test/calc_console/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Subsequently, we instruct the SUT to enable coverage instrumentation with `EnableCoverage()`.
+    Note that in the case of the library, we had to add instrumentation to the *object
+    library* rather than the static one. This is because the `--coverage` flag has
+    to be added to the compilation step, which happens when `calc_obj` is being built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, we can't add cleaning of the coverage files here, as CMake requires
+    `add_custom_command` hooks to be called in the same directory as the target definition.
+    This brings us back to the `src/calc` and `src/calc_console` listfiles that we
+    didn't complete previously. We'll need to add `CleanCoverage(calc_static)` and
+    `CleanCoverage(calc_console_static)` respectively (we have to include the `Coverage`
+    module first). What else needs to be added to these files? Instructions to enable
+    static analysis!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding static analysis tools
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We postponed the continuation of business code listfiles until now so that
+    we can discuss added modules in the appropriate context. We can add a `CleanCoverage`
+    function call and a few other things to the library listfile:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can also add them to the executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/CMakeLists.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: These files are almost complete now (as the second comment suggests, we still
+    need to add the documentation code, which will happen in the *Automatic documentation
+    generation* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Two new modules appear in the listings: `Format` and `CppCheck`. Let''s dive
+    into the first one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Format.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `Format()` function is an exact copy of the formatting function described
+    in [*Chapter 9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program Analysis
+    Tools*; we're simply reusing it here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next up is a completely new `CppCheck` module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/CppCheck.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is simple and convenient. You may see some resemblance to the Clang-Tidy
+    module (from [*Chapter 9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program
+    Analysis Tools*); this is CMake''s strength – many concepts working the same way.
+    Note the arguments passed to `cppcheck`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--enable=warning` – This specifies that we''d like to get warning messages.
+    You can enable additional checks – refer to the Cppcheck manual for more details
+    (the link can be found in the *Further reading section*).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--error-exitcode=10` – This specifies that we''d like to get an error code
+    when `cppcheck` detects an issue. This can be any number from `1` to `255` (as
+    `0` indicates success), although some numbers can be reserved by the system.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Usage is very convenient – calling `AddCppCheck` will inform CMake that it needs
+    to run the checks automatically on the specified target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We have virtually created all files in the `src` and `test` subdirectories.
+    Now, our solution builds and can be fully tested. It's finally time to move to
+    installation and packaging.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing and packaging
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We''re circling back to the subject discussed in the previous chapter and starting
+    with a quick overview of the files needed to set up installation and packaging:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.6 – Files configuring installation and packaging'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.6_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.6 – Files configuring installation and packaging
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Only files are needed here – most of the work is already done in previous sections.
+    As you may remember, the top-level listfile includes a CMake module that''s going
+    to handle this process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''re interested in installing two items:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Calc library artifacts: the static library, the shared library, and header
+    files along with their target export file'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The Calc console executable
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The package definition config-file will only introduce library targets, as potential
+    consuming projects won't depend on the executable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After configuring the installation steps, we''ll move on to the CPack configuration.
+    The high-level overview of the `Install` module looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (overview)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Everything is planned, so it's time to write an installation module for the
+    library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installation of the library
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To install the library, it''s best to start by configuring logical targets
+    and specifying the destination for their artifacts. To avoid providing paths manually,
+    we''ll be using default values provided by the `GNUInstallDirs` module. For modularity,
+    we''ll group the artifacts into components. The default installation will install
+    all files, but you may choose to only install the `runtime` component and skip
+    the `development` artifacts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'During the installation, we''d like to register the shared library we copied
+    with `ldconfig`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Having those steps prepared, we can make the library visible to other CMake
+    projects by wrapping it in a reusable CMake package. We''ll need to generate and
+    install the target export file and the config-file that includes it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As we already know, for very simple packages, the config-file can be really
+    minimal:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/CalcConfig.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: That's it. The library will now be installed when you run `cmake` in `--install`
+    mode after building the solution. All that remains to be installed is the executable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installation of the executable
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The installation of binary executables is the simplest step of all. We just
+    need to use a single command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: And it's done! Let's move on to the last part of the configuration – packing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Packaging with CPack
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We can go wild and configure a vast multitude of supported package types; for
+    this project, however, a basic configuration will be enough:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Install.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Such a minimal setup works well for standard archives, such as ZIP files. We
+    can test the whole installation and packaging with a single command (the project
+    has to be built beforehand):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: This concludes the installation and packaging; the next order of business is
+    documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Providing the documentation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The final element of a professional project is, of course, the documentation.
+    It comes in two categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical documentation (interfaces, designs, classes, and files)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: General documentation (all other not-as-technical documents)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As we saw in [*Chapter 10*](B17205_10_Final_JC_ePub.xhtml#_idTextAnchor210),
+    *Generating Documentation*, a lot of technical documentation can be generated
+    automatically with CMake by using Doxygen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Automatic documentation generation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A thing to mention: some projects generate documentation during the build stage
+    and package it with the rest of the project. It''s a matter of preference. For
+    this project, we have decided not to do so. You might have a good reason to choose
+    otherwise (such as hosting the documentation online).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Figure 12.7* shows the overview of the execution flow that is used in this
+    process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 12.7 – Files used to generate documentation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_12.7_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 12.7 – Files used to generate documentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To generate documentation for our targets, we''ll create another CMake utility
+    module, `Doxygen`. We''ll start by using the Doxygen find-module and downloading
+    the `doxygen-awesome-css` project for themes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Doxygen.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we''ll need a function to create targets that generate documentation.
+    We''ll draw closely from code introduced in [*Chapter 10*](B17205_10_Final_JC_ePub.xhtml#_idTextAnchor210),
+    *Generating Documentation*, and modify it to support many targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/cmake/Doxygen.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, we need to use this function by calling it for the library target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And we call it for the console executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/src/calc_console/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Two new targets are added to the project: `doxygen-calc` and `doxygen-calc_console`,
+    and technical documentation can be generated on demand.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What other documents should we provide?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Not-as-technical documents of professional project
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Professional projects should always include at least two documents that are
+    stored in a top-level directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`README` – generally describes the project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LICENSE` – specifies the legal characteristics of the project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You might also consider adding these:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`INSTALL` – describes the steps required for installation'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CHANGELOG` – lists important changes that happened in different versions'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`AUTHORS` – contains credits and contact information if a project has multiple
+    contributors'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`BUGS` – informs about known bugs and instructs how to report new ones'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'CMake as such doesn''t play any role when it comes to these files – there''s
+    no automated behavior or scripts to use. However, these files are an essential
+    part of C++ projects and should be covered for completeness. For reference, we''ll
+    provide a minimal set of exemplary files, starting with a short `README` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/README.md
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is short and maybe a little silly. Note the `.md` extension – it stands
+    for *Markdown*, which is a text-based formatting language that is easily readable.
+    Websites such as GitHub and many text editors will render these files with rich
+    formatting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our `INSTALL` file will look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/INSTALL
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: This file turned out to be a bit longer, but it covers the most important requirements,
+    steps, and commands, and it will work just fine for our needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `LICENSE` file is a bit tricky, as it requires some expertise in copyright
+    law (and otherwise). Instead of writing all clauses by ourselves, we can do what
+    many other projects do and use a readily available software license. For this
+    project, we''ll go with the MIT License, which is extremely permissive. You might
+    want to choose something else, depending on the needs of a specific project –
+    check the *Further reading* section for some useful references:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/LICENSE
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Lastly, we have the `CHANGELOG`. As suggested earlier, it''s good to keep track
+    of changes in a file so that developers using your project can easily find out
+    which version supports the features they need. For example, it might be useful
+    to say that a multiplication feature was added to the library in version 0.8.2\.
+    Something as simple as the following is already helpful:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-12/01-full-project/CHANGELOG
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: Our professional project is now complete – we can build it, test it, generate
+    packages, upload all sources to a repository, and release artifacts. Of course,
+    it would be easier if this could happen automatically, perhaps with a CI/CD pipeline.
+    But that's a story for another book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This chapter wraps up our long journey through CMake. Now you fully understand
+    what problems CMake aims to solve and which steps are necessary to automate these
+    solutions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the first three chapters, we explored all the basics: what CMake is and
+    how users leverage it to bring raw source code to life, what the key components
+    of CMake are, and what purpose different project files have. We explained the
+    syntax of CMake: comments, command invocation, arguments, variables, and control
+    structures. We''ve discovered how modules and subprojects work, what the correct
+    project structure is, and how to work with various platforms and toolchains.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second part of the book taught us about building with CMake: how to use
+    targets, custom commands, build types, and generator expressions. We dove deep
+    into the technicalities of compilation, and the configuration of a preprocessor
+    and an optimizer. We discussed linking and introduced different library types.
+    Then, we investigated how CMake helps to manage the dependencies of a project
+    with the `FetchContent` and `ExternalProject` modules. We also researched Git
+    submodules as a possible alternative. Most importantly, we studied how to find
+    installed packages with `find_package()` and `FindPkgConfig`. If these weren''t
+    enough, we looked into writing our own find-modules.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The last part told us how to go about the automation of testing, analysis,
+    documentation, installing, and packaging. We looked into CTest and testing frameworks:
+    Catch2, GoogleTest, and GoogleMock. Coverage reporting was covered too. [*Chapter
+    9*](B17205_09_Final_JC_ePub.xhtml#_idTextAnchor195), *Program Analysis Tools*,
+    gave us an understanding of different analysis tools: a formatter and static checkers
+    (Clang-Tidy, Cppcheck, and so on), and explained how to add the Memcheck memory
+    analyzer from the Valgrind suite. Next, we briefly described how to generate documentation
+    with Doxygen and how to make it presentable. Lastly, we demonstrated how to install
+    projects on the system, create reusable CMake packages, and configure and use
+    CPack to generate binary packages.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last chapter drew on all this knowledge to showcase a completely professional
+    project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Congratulations on completing this book. We''ve covered everything necessary
+    to develop, test, and package high-quality C ++ software. The best way to make
+    progress from here is to put what you have learned into practice and create great
+    software for your users. Good luck!*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*R.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information, you can refer to the following links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Building both a static library and a shared library*:[https://stackoverflow.com/q/2152077](https://stackoverflow.com/q/2152077)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*A FXTUI library project*: [https://github.com/ArthurSonzogni/FTXUI](https://github.com/ArthurSonzogni/FTXUI)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*The documentation of the option() command*: [https://cmake.org/cmake/help/latest/command/option.html](https://cmake.org/cmake/help/latest/command/option.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Preparing for Release (of open source software) by Google*:[https://opensource.google/docs/releasing/preparing/](https://opensource.google/docs/releasing/preparing/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Why we can''t use Clang-Tidy for GCC-precompiled headers*: [https://gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104](https://gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Cppcheck manual*:[https://cppcheck.sourceforge.io/manual.pdf](https://cppcheck.sourceforge.io/manual.pdf)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*How to write a README*:[https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Creative Commons Licenses for GitHub Projects*: [https://github.com/santisoler/cc-licenses](https://github.com/santisoler/cc-licenses)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Commonly used project licenses recognized by GitHub*: [https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

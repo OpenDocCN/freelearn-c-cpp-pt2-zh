@@ -1,0 +1,2021 @@
+- en: '*Chapter 2*: The CMake Language'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Writing in the **CMake** **Language** is a bit tricky. When you read a CMake
+    listfile for the first time, you may be under the impression that the language
+    in it is so simple that it doesn't require any special training or preparation.
+    What follows is very often a practical attempt to introduce changes and experiment
+    with the code without a thorough understanding of how it works. We programmers
+    are usually very busy and are overly keen to tackle any build-related issues with
+    little investment. We tend to make gut-based changes hoping they just might do
+    the trick. This approach to solving technical problems is called *voodoo programming*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The CMake Language appears simple: after we have completed our small addition,
+    fix, or hack, or added a one-liner, we realize that something isn''t working.
+    The time spent on debugging is often longer than that spent on actually studying
+    the subject. Luckily, this won''t be our fate – because this chapter covers the
+    vast majority of the critical knowledge needed to use the CMake Language in practice.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this chapter, we'll not only learn about the building blocks of the CMake
+    Language – **comments**, **commands**, **variables**, and **control structures**
+    – but we'll also give the necessary background and try them out in a clean and
+    modern CMake example. CMake puts you in a bit of a unique position. On one hand,
+    you perform a role of a build engineer; you need to understand all the intricacies
+    of the compilers, the platforms, and everything else in-between. On the other
+    hand, you're a developer; you're writing code that generates a buildsystem. Writing
+    good code is hard and requires thinking on many levels at the same time – it should
+    work and be easy to read, but it should also be easy to analyze, extend, and maintain.
+    This is exactly what we're going to talk about here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, we'll introduce some of the most useful and common commands in CMake.
+    Commands that aren't used that often will be placed in the *Appendix* section
+    (this will include a complete reference guide for the string, list, and file manipulation
+    commands).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basics of the CMake Language syntax
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Working with variables
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using lists
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Understanding control structures in CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Useful commands
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter02](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter02).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basics of the CMake Language syntax
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Composing CMake code is very much like writing in any other imperative language:
+    lines are executed from top to bottom and from left to right, occasionally stepping
+    into an included file or a called function. Depending on the mode (see the *Mastering
+    the command line* section in [*Chapter 1*](B17205_01_Final_JC_ePub.xhtml#_idTextAnchor014),
+    *First Steps with CMake*), the execution begins from the root file of the source
+    tree (`CMakeLists.txt`) or a `.cmake` script file that was passed as an argument
+    to `cmake`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we discussed in the previous chapter, scripts support the majority of the
+    CMake Language (with the exclusion of any project-related functionality). As a
+    result, they''re a great way to start practicing the CMake syntax itself, and
+    that''s why we''ll be using them here. After becoming comfortable writing basic
+    listfiles, we''ll start preparing actual project files in the next chapter. If
+    you remember, scripts can be run with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake supports `\n` or `\r\n` line endings. **UTF-8** with optional **Byte Order
+    Markers** (**BOMs**) is supported in CMake versions above 3.0, and **UTF-16**
+    is supported in CMake versions above 3.2.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Everything in a CMake listfile is either a *command invocation* or a *comment*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Comments
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Just like in **C++**, there are two kinds of comments – *single-line* comments
+    and *bracket* (*multiline*) comments. But unlike in C++, bracket comments can
+    be nested. Let me show you the syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Multiline comments get their name from their symbol – they start with an opening
+    square bracket (`[`), any number of equal (`=`) signs, and another square bracket:
+    `[=[`. To close a bracket comment, use the same number of equal signs and reverse
+    the brackets like so: `]=]`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prepending opening bracket tokens with `#` is optional, and allows you to quickly
+    disable a multiline comment by adding another `#` to the first line of the bracket
+    comment like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: That's a nifty trick, but when and how should we use comments in our CMake file?
+    Since writing listfiles is essentially programming, it is a good idea to bring
+    our best coding practices to them as well. Code that follows such practices is
+    often called *clean* – a term used over the years by software development gurus
+    like Robert C. Martin, Martin Fowler, and many other authors. What's considered
+    helpful and harmful is often heavily disputed and, as you might guess, comments
+    have not been left out of these debates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Everything should be judged on a case-by-case basis, but generally agreed-upon
+    guidelines say that good comments provide at least one of the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Information**: They can untangle complexities such as regex patterns or formatting
+    strings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Intent**: They can explain the intent of the code when it is unobvious from
+    the implementation or interface.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Clarification**: They can explain concepts that can''t be easily refactored
+    or changed.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Warnings of consequences**: They can provide warnings, especially around
+    code that can break other things.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Amplification**: They can underline the importance of an idea that is hard
+    to express in code.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Legal clauses**: They can add this necessary evil, which is usually not the
+    domain of a programmer.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If you can, avoid adding comments and adopt better naming practices, or refactor
+    or correct your code. If you can, avoid adding comments of the following types:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Mandated**: These are added for completeness, but they are not really important.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Redundant**: These repeat what is already clearly written in the code.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Misleading**: These could be outdated or incorrect if they don''t follow
+    code changes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Journal**: These note what has been changed and when (use **VCS** for this
+    instead).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Dividers**: These mark sections.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing elegant code without comments is hard, but it improves the experience
+    of the reader. Since we spend more time reading code than writing it, we should
+    always try to *write readable code*, instead of just trying to write it quickly.
+    I recommend checking out the *Further reading* section at the end of this chapter
+    for some good references on *clean code*. If you're interested in comments in
+    particular, you'll find a link to one of my many YouTube videos touching on this
+    subject in depth.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Command invocations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Time for some action! Invoking commands is the bread and butter of CMake listfiles.
+    To execute a command, you must provide its name, followed by parentheses, in which
+    you may enclose a whitespace-separated list of **command arguments**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 2.1 – An example of a command'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_2.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 2.1 – An example of a command
+  prefs: []
+  type: TYPE_NORMAL
+- en: Command names aren't case-sensitive, but there is a convention in the CMake
+    community to use snake_case in command names (that is, lower-case words joined
+    with underscores). You can also define your own commands, which we'll cover in
+    the *Understanding control structures in CMake* section of this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What's especially striking in comparison to C++ is the fact that command invocations
+    in CMake are not expressions. You can't provide another command as an argument
+    to a called command, as *everything* between the parentheses is interpreted as
+    an argument for that command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Even more enraging is the fact that CMake commands don''t require semicolons
+    at the end of an invocation. This may be because each line of source can contain
+    up to one command invocation, followed by an optional single-line comment. Alternatively,
+    an entire line has to be part of a bracket comment. So, these are the only allowed
+    formats:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Putting a command after a bracket comment is not allowed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: After removing any comments, whitespace, and empty lines, we get a list of command
+    invocations. This creates an interesting perspective – CMake syntax is really
+    simple, but is that a good thing? How do we even work with variables? Or, how
+    do we direct the flow of the execution?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake provides commands for these actions and much more. To make things easier,
+    we''ll be introducing the relevant commands as we move through different examples,
+    and they can be grouped into three categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Scripting commands**: These are always available, and they change the state
+    of the command processor, access variables, and affect other commands and the
+    environment.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Project commands**: These are available in projects, and they manipulate
+    the project state and build targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**CTest commands**: These are available in CTest scripts. They manage testing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We'll cover the most useful scripting commands in this chapter (as they are
+    also useful in projects). Project and CTest commands will be discussed in the
+    following chapters as we introduce the concepts relating to build targets ([*Chapter
+    3*](B17205_03_Final_JC_ePub.xhtml#_idTextAnchor078), *Setting Up Your First CMake
+    Project*) and testing frameworks ([*Chapter 8*](B17205_08_Final_JC_ePub.xhtml#_idTextAnchor179),
+    *Testing Frameworks*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Virtually every command relies on other elements of the language in order to
+    function: variables, conditional statements, and first and foremost, command-line
+    arguments. Let''s see how we should use these.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Command arguments
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Many commands require whitespace-separated arguments to parametrize how they
+    behave. As you saw in *Figure 2.1*, there's something weird happening with the
+    quotes around the arguments. Some arguments have quotes and others don't – what's
+    up with that?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Under the hood, the only data type recognized by CMake is a *string*. This is
+    why every command expects zero or more strings for its arguments. But plain, static
+    strings aren't very useful, especially when we can't nest command invocations.
+    Here's where arguments come into play – CMake will evaluate every argument to
+    a static string and then pass them into the command. *Evaluating* means *string
+    interpolation*, or substituting parts of a string with another value. This can
+    mean replacing the *escape sequences*, expanding the *variable references* (also
+    called *variable interpolation*), and unpacking *lists*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Depending on the context, we might want to enable such evaluation as needed.
+    And for that reason, CMake offers three types of arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Bracket arguments**'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Quoted arguments**'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Unquoted arguments**'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Each argument type offers a different level of evaluation and has a few small
+    quirks to it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bracket arguments
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Bracket arguments aren't evaluated because they are used to pass multiline strings,
+    verbatim, as a single argument to commands. This means it will include whitespace
+    in the form of tabs and newlines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These arguments are structured exactly like comments – that is, they are opened
+    with `[=[` and closed with `]=]`, where the number of the equal signs in the opening
+    and closing tokens has to match (skipping the equal signs is fine too, but they
+    still have to match). The only difference from comments is that you can't nest
+    bracket arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here''s an example of the use of such an argument with the `message()` command,
+    which prints all passed arguments to the screen:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/01-arguments/bracket.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the above example, we can see different forms of bracket arguments. The
+    first one skips the equal sign. Note how putting closing tags on a separate line
+    is visible as an empty line in the output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The second form is useful when we're passing text that contains double brackets
+    (`]]`) (highlighted in the code snippet), as they won't be interpreted as marking
+    the end of the argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These kinds of bracket arguments have limited use – typically, to contain longer
+    blocks of text. In most cases, we'll need something more dynamic, such as quoted
+    arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quoted arguments
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Quoted arguments resemble a regular C++ string – these arguments group together
+    multiple characters, including whitespace, and they will expand *escape sequences*.
+    Like C++ strings, they are opened and closed with a double quote character (`"`),
+    so to include a quote character within the output string, you have to escape it
+    with a backslash (`\"`). Other well-known escape sequences are supported as well:
+    `\\` denotes a literal backslash, `\t` is a tab character, `\n` is a newline,
+    and `\r` is a carriage return.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is where the similarities with C++ strings end. Quoted arguments can span
+    multiple lines, and they will interpolate variable references. Think of them as
+    having a built-in `sprintf` function from `std::format` function from `${name}`.
+    We'll talk more about variable references in the *Working with variables* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s try these arguments in action:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/01-arguments/quoted.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Can you guess how many lines will be in the output of the preceding script?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: That's right – we have one escaped quote character, one escaped newline, and
+    a literal newline. All of them will be printed in the output. We also accessed
+    a built-in `CMAKE_VERSION` variable, which we can see correctly interpolated on
+    the last line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unquoted arguments
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The last type of argument is definitely a bit rare in the programming world.
+    We got used to the fact that strings have to be delimited in one way or another,
+    for example, by using single quotes, double quotes, or a backslash. CMake deviates
+    from this convention and introduces unquoted arguments. We might argue that dropping
+    delimiters makes the code easier to read, just like skipping semicolons. Is that
+    true? I'll let you form your own opinion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unquoted arguments evaluate both *escape sequences* and *variable references*.
+    However, be careful with semicolons (`;`), as in CMake, this is treated as a delimiter.
+    CMake will split the argument containing it into multiple arguments. If you need
+    to use it, escape it with a backslash (`\;`). This is how CMake manages lists.
+    I'll explain that in detail in the *Using lists* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You may find that these arguments are the most perplexing to work with, so
+    here''s an illustration to help clarify how these arguments are partitioned:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 2.2 – Escape sequences cause separate tokens to be interpreted as
+    a single argument'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_2.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 2.2 – Escape sequences cause separate tokens to be interpreted as a single
+    argument
+  prefs: []
+  type: TYPE_NORMAL
+- en: Question
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why does it matter if a value is passed as a single argument or many arguments?
+    Some CMake commands require a specific number of arguments and ignore any overhead.
+    If your arguments accidentally become separated, you'll get hard-to-debug errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unquoted arguments cannot contain unescaped quotes (`"`), hashes (`#`), and
+    backslashes (`\`). And if that's not enough rules to remember, parentheses (`()`)
+    are allowed only if they form correct, matching pairs. That is, you'll start with
+    an opening parenthesis and close it before closing the command argument list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s look at some examples of all of the above rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/01-arguments/unquoted.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'What will be the output of the above? Let''s have a look:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Even a simple command such as `message()` is very particular about separated
+    unquoted arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The space in `a single argument` was correctly printed when it was explicitly
+    escaped.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: However, `twoarguments` and `threeseparatearguments` were *glued* together,
+    since `message()` doesn't add any spaces on its own.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Now that we understand how to deal with the complexities and quirks of CMake
+    arguments, we are ready to tackle the next interesting subject – working with
+    all kinds of *variables* in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Working with variables
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '**Variables** in CMake are a surprisingly complex subject. Not only are there
+    three categories of variables – normal, cache, and environment – but they also
+    reside in different scopes, with specific rules on how one scope affects the other.
+    Very often, a poor understanding of all these rules becomes a source of bugs and
+    headaches. I recommend you study this section with care and make sure you understand
+    all of concepts before moving on.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s start with some key facts about variables in CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable names are case-sensitive and can include almost any character.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All variables are stored internally as strings, even if some commands can interpret
+    them as values of other data types (even lists!).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The basic variable manipulation commands are `set()` and `unset()`, but there
+    are other commands that can affect variables, such as `string()` and `list()`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To set a variable, we simply call `set()`, providing its name and the value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/02-variables/set.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the use of brackets and quoted arguments allows for spaces to
+    be included in the variable name. However, when referencing it later, we have
+    to escape the whitespace with a backslash (`\`). For that reason, it is recommended
+    to use only alphanumeric characters, dashes (`-`), and underscores (`_`) in variable
+    names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Also avoid reserved names (in upper, lower, or mixed case) that begin with
+    any of the following: `CMAKE_`, `_CMAKE_`, or underscore (`_`), followed by the
+    name of any CMake command.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `set()` command accepts a plain text variable name as its first argument,
+    but the `message()` command uses a variable reference wrapped in the `${}` syntax.
+    What would happen if we were to provide a variable wrapped in the `${}` syntax
+    to the `set()` command? To answer that, we'll need to understand variable references
+    better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To unset a variable, we can use `unset()` in the following way: `unset(MyString1)`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable references
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'I already mentioned references briefly in the *Command arguments* section,
+    as they''re evaluated for quoted and unquoted arguments. And we learned that to
+    create a reference to a defined variable, we need to use the `${}` syntax, like
+    so: `message(${MyString1})`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On evaluation, CMake will traverse the scope stack (I'll explain that in a second)
+    and replace `${MyString1}` with a value, or an empty string if no variable is
+    found (CMake won't generate any error messages). This process is called *variable
+    evaluation*, *expansion*, or *interpolation*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Such interpolation is performed in an inside-out fashion. This means two things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the following reference is encountered – `${MyOuter${MyInner}}` – CMake will
+    try to evaluate `MyInner` first, rather than searching for a variable named `MyOuter${MyInner}`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the `MyInner` variable is successfully expanded, CMake will repeat the expansion
+    process until no further expansion is possible.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let''s consider an example with the following variables:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`MyInner` with a `Hello` value'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`MyOuter` with a `${My` value'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If we call the `message("${MyOuter}Inner} World")` command, the output we'll
+    receive will be `Hello World`, and that is because `${MyOuter}` was replaced with
+    a literal value, `${My`, which, when combined with the top-level value, `Inner}`,
+    creates another variable reference – `${MyInner}`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake will perform this expansion to the full extent, and only then will it
+    pass the resulting values as arguments to the command. This is why when we call
+    `set(${MyInner} "Hi")`, we won't actually be changing the `MyInner` variable,
+    but instead, we'll change the `Hello` variable. CMake expands `${MyInner}` to
+    `Hello` and passes that string as the first argument to the `set()` command, along
+    with a new value, `Hi`. Very often, this is not what we want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Variable references are a bit peculiar in how they work when it comes to variable
+    categories, but in general, the following applies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `${}` syntax is used to reference *normal* or *cache* variables.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `$ENV{}` syntax is used to reference *environment* variables.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `$CACHE{}` syntax is used to reference *cache* variables.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: That's right, with `${}`, you might get a value from one category or the other.
+    I'll explain that in the *How to correctly use the variable scope in CMake* section,
+    but first, let's introduce some other categories of variables so that we understand
+    clearly what they are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember that you can pass arguments to scripts through the command line after
+    a `--` token. Values will be stored in the `CMAKE_ARGV<n>` variable and the count
+    of the passed arguments will be in the `CMAKE_ARGC` variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the environment variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: This is the least complicated kind of variable. CMake makes a copy of the variables
+    that were in the environment used to start the `cmake` process and makes them
+    available in a single, global scope. To reference these variables, use the `$ENV{<name>}`
+    syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake also allows you to set (`set()`) and unset (`unset()`) these variables,
+    but changes will only be made to a local copy in the running `cmake` process and
+    not the actual system environment; moreover, these changes won't be visible to
+    subsequent runs of builds or tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To modify or create a variable, use the `set(ENV{<variable>} <value>)` command,
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To clear an environment variable, use `unset(ENV{<variable>})`, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be aware that there are a few environment variables that affect different aspects
+    of CMake behavior. The `CXX` variable is one of them – it specifies what executable
+    will be used for compiling C++ files. We''ll cover other environmental variables,
+    as they will become relevant for this book. A full list is available in the documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you use `ENV` variables as arguments to your commands, the values will be
+    interpolated during the generation of the buildsystem. This means that they will
+    get baked into the build tree, and changing the environment for the build stage
+    won't have any effect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, take the following project file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/03-environment/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding example has two steps: it will print the `myenv` environment
+    variable during the configuration, and it will add a build stage through `add_custom_target()`,
+    which echoes the same variable as part of the build process. We can test what
+    happens with a bash script that uses one value for the configuration stage and
+    another for the build stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/03-environment/build.sh
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Running the preceding code clearly shows that the value set during the configuration
+    is persisted to the generated buildsystem:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the cache variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We first mentioned cache variables when discussing command-line options for
+    `cmake` in [*Chapter 1*](B17205_01_Final_JC_ePub.xhtml#_idTextAnchor014), *First
+    Steps with CMake*. Essentially, they're persistent variables stored in a `CMakeCache.txt`
+    file in your build tree. They contain information gathered during the project
+    configuration stage, both from the system (path to compilers, linkers, tools,
+    and others) and from the user through the `CMakeCache.txt` file) – they only exist
+    in *projects*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cache variables can be referenced with the `$CACHE{<name>}` syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To set a cache variable, use `set()` with the following syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`set(<variable> <value> CACHE <type> <docstring> [FORCE])`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can see, there are some new required arguments (in comparison to the
+    `set()` command for normal variables), and it also introduces first keywords:
+    `CACHE` and `FORCE`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Specifying `CACHE` as a `set()` argument means that we intend to change what
+    was provided during the configuration stage, and it imposes a requirement to provide
+    the variable `<type>` and `<docstring>` values. This is because these variables
+    are configurable by the user and the GUI needs to know how to display it. The
+    following types are accepted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`BOOL`: A Boolean on/off value. The GUI will show a checkbox.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`FILEPATH`: A path to a file on a disk. The GUI will open a file dialog.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PATH`: A path to a directory on a disk. The GUI will open a directory dialog.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`STRING`: A line of text. The GUI offers a text field to be filled. It can
+    be replaced by a drop-down control by calling `set_property(CACHE <variable> STRINGS
+    <values>)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INTERNAL`: A line of text. The GUI skips internal entries. The internal entries
+    may be used to store variables persistently across runs. Use of this type implicitly
+    adds the `FORCE` keyword.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `<doctring>` value is simply a label that will be displayed by the GUI next
+    to the field to provide more detail about this setting to the user. It is required
+    even for an `INTERNAL` type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Setting cache variables follows the same rules as environmental variables to
+    some extent – values are overwritten only for the current execution of CMake.
+    Take a look at this example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The above call has no permanent effect if the variable exists in the cache.
+    However, if the value doesn''t exist in cache or an optional `FORCE` argument
+    is specified, the value will be persisted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Setting the cache variables has some unobvious implications. That is, any normal
+    variable with the same name will be removed. We'll find out why in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a reminder, cache variables can be managed from the command line as well
+    (check the appropriate section in [*Chapter 1*](B17205_01_Final_JC_ePub.xhtml#_idTextAnchor014),
+    *First Steps with CMake*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: How to correctly use the variable scope in CMake
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '**Variable scope** is probably the hardest part of the whole concept of the
+    CMake Language. This is maybe because we''re so accustomed to how things are done
+    in more advanced languages that support namespaces and scope operators. CMake
+    doesn''t have those mechanisms, so it deals with this issue in its own, somewhat
+    unusual way.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just to clarify, variable scopes as a general concept are meant to separate
+    different layers of abstraction so that when a user-defined function is called,
+    variables set in that function are local to it. These *local* variables aren't
+    affecting the *global* scope, even if the names of the local variables are exactly
+    the same as the global ones. If explicitly needed, functions should have read/write
+    access to global variables as well. This separation of variables (or scopes) has
+    to work on many levels – when one function calls another, the same separation
+    rules apply.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake has two scopes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`function()` are executed'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMakeLists.txt` listfile in a nested directory is executed from the `add_subdirectory()`
+    command'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We'll cover the preceding commands later in this book, but first, we need to
+    know how the concept of variable scope is implemented. When a nested scope is
+    created, CMake simply fills it with copies of all the variables from the current
+    scope. Subsequent commands will affect these copies. But as soon as the execution
+    of the nested scope is completed, all copies are deleted and the original, parent
+    scope is restored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s consider the following scenario:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The parent scope sets the `VAR` variable to `ONE`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The nested scope starts and `VAR` is printed to console.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `VAR` variable is set to `TWO`, and `VAR` is printed to the console.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The nested scope ends, and `VAR` is printed to the console.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'The console''s output will look like this: `ONE`, `TWO`, `ONE`. This is because
+    the copied `VAR` variable is discarded after the nested scope ends.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How the concept of scope works in CMake has interesting implications that aren't
+    that common in other languages. If you unset (`unset()`) a variable created in
+    the parent scope while executing in a nested scope, it will disappear, but only
+    in the nested scope. When the nested scope is completed, the variable is restored
+    to its previous value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This brings us to the behavior of variable referencing and the `${}` syntax.
+    Whenever we try to access the normal variable, CMake will search for the variables
+    from the current scope, and if the variable with such a name is defined, it will
+    return its value. So far, so good. However, when CMake can't find a variable with
+    that name (for example, if it didn't exist or was unset (`unset()`)), it will
+    search through the cache variables and return a value from there if a match is
+    found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That's a possible gotcha if we have a nested scope calling `unset()`. Depending
+    on where we reference that variable – in the inner or the outer scope – we'll
+    be accessing the cache or the original value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But what can we do if we really need to change the variable in the calling
+    (parent) scope? CMake has a `PARENT_SCOPE` flag you can add at the end of the
+    `set()` and `unset()` commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: That workaround is a bit limited, as it doesn't allow accessing variables more
+    than one level up. Another thing worth noting is the fact that using `PARENT_SCOPE`
+    doesn't change variables in the current scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s see how variable scope works in practice and consider the following
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/04-scope/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We set the global variable, `V`, to `1`, and then we call the `Outer` function;
+    then set `V` to `2` and call the `Inner` function, and then set `V` to `3`. After
+    every step, we print the variable to the console:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: As we explained previously, as we go deeper into the functions, the variable
+    values are copied to the nested scope, but as we exit the scope, their original
+    value is restored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'What would the output be if we changed the `set()` command of the `Inner` function
+    to operate in the parent scope: `set(V 3 PARENT_SCOPE)`?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: We affected the scope of the `Outer` function, but not the scope of the `Inner`
+    function or the global scope!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMake documentation also mentions that CMake scripts bind variables in one
+    directory scope (which is a bit redundant, as the only command that effectively
+    creates a directory scope, `add_subdirectory()`, isn't allowed in scripts).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since all variables are stored as strings, CMake has to take a more creative
+    approach to more complex data structures such as *lists*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using lists
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To store a `;`) as a delimiter: `a;list;of;5;elements`. You can escape a semicolon
+    in an element with a backslash, like so: `a\;single\;element`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create a list, we can use the `set()` command: `set(myList a list of five
+    elements)`. Because of how lists are stored, the following commands will have
+    exactly the same effect:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`set(myList "a;list;of;five;elements")`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`set(myList a list "of;five;elements")`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'CMake automatically unpacks lists in unquoted arguments. By passing an unquoted
+    `myList` reference, we effectively send more arguments to the command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `message()` command will receive here six arguments: "`the list is:`",
+    "`a`", "`list`", "`of`", "`five`", "`elements`". This may have unintended consequences,
+    as the output will be printed without any additional spaces between the arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this is a very simple mechanism, and it should be used carefully.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake offers a `list()` command that provides a multitude of subcommands to
+    read, search, modify, and order lists. Here''s a short summary:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Most of the time, we don't really need to use lists in our projects. However,
+    if you find yourself in that rare case where this concept would be convenient,
+    you'll find a more in-depth reference of the `list()` command in the *Appendix*
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know how to work with lists and variables of all kinds, let's shift
+    our focus to controlling the execution flow and learn about control structures
+    available in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding control structures in CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The CMake Language wouldn''t be complete without **control structures**! Like
+    everything else, they are provided in the form of a command, and they come in
+    three categories: **conditional blocks**, **loops**, and **command definitions**.
+    Control structures are executed in scripts and during buildsystem generation for
+    projects.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditional blocks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The only conditional block supported in CMake is the humble `if()` command.
+    All conditional blocks have to be closed with an `endif()` command, and they may
+    have any number of `elseif()` commands and one optional `else()` command in this
+    order:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As in many other imperative languages, the `if()`-`endif()` block controls
+    which sets of commands will be executed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the `<condition>` expression specified in the `if()` command is met, the
+    first section will be executed.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Otherwise, CMake will execute commands in the section belonging to the first
+    `elseif()` command in this block that has met its condition.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If there are no such commands, CMake will check if the `else()` command is provided
+    and execute any commands in that section of the code.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If none of the above conditions are met, the execution continues after the `endif()`
+    command.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The provided `<condition>` expression is evaluated according to a very simple
+    syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The syntax for conditional commands
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The same syntax is valid for `if()`, `elseif()`, and `while()` commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logical operators
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'The `if()` conditions support the `NOT`, `AND`, and `OR` logical operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`NOT <condition>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<condition> AND <condition>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<condition> OR <condition>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Also, the nesting of conditions is possible with matching pairs of parentheses
+    (`()`). As in all decent languages, the CMake Language respects the order of evaluation
+    and starts from the innermost parenthesis:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`(<condition>) AND (<condition> OR (<condition>))`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The evaluation of a string and a variable
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'For legacy reasons (because the variable reference (`${}`) syntax wasn''t always
+    around), CMake will try to evaluate *unquoted arguments* as if they are *variable
+    references*. In other words, using a plain variable name (for example, `VAR`)
+    inside a condition is equal to writing `${VAR}`. Here''s an example for you to
+    consider, and a *gotcha*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `if()` condition works in a bit of a convoluted way here – first, it will
+    evaluate `${VAR2}` to `VAR1`, which is a recognized variable, and this in turn
+    is evaluated to the `FALSE` string. Strings are considered Boolean true only if
+    they equal any of the following constants (these comparisons are case insensitive):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ON`, `Y`, `YES`, or `TRUE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A non-zero number
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This brings us to the conclusion that the condition in the preceding example
+    will evaluate to false.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, here''s another catch – what would be the evaluation of a condition
+    with an unquoted argument with a name of a variable containing a value such as
+    `BAR`? Consider the following code example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'According to what we have said so far, it would be `false`, as the `BAR` string
+    doesn''t meet the criteria to evaluate to a Boolean `true` value. That''s unfortunately
+    not the case, because CMake makes an exception when it comes to unquoted variable
+    references. Unlike with quoted arguments, `FOO` won''t be evaluated to `BAR` to
+    produce an `if("BAR")` statement (which would be `false`). Instead, CMake will
+    only evaluate `if(FOO)` to `false` if it is any of the following constants (these
+    comparisons are case insensitive):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`OFF`, `NO`, `FALSE`, `N`, `IGNORE`, `NOTFOUND`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A string ending with `-NOTFOUND`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: An empty string
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Zero
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'So, simply asking for an undefined variable will be evaluated to `false`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, defining a variable beforehand changes the situation, and the condition
+    is evaluated to `true`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you think that the behavior of unquoted arguments is confusing, wrap variable
+    references in quoted arguments: `if ("${FOO}")`. This will result in argument
+    evaluation before the provided argument is passed into the `if()` command, and
+    the behavior will be consistent with the evaluation of strings.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In other words, CMake assumes that the user is asking if the variable is defined
+    (and is not explicitly `false`). Luckily, we can explicitly check that fact (and
+    not worry about the value inside):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Comparing values
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Comparison operations are supported with the following operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`EQUAL`, `LESS`, `LESS_EQUAL`, `GREATER`, and `GREATER_EQUAL`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'They can be used to compare numeric values, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The CMake documentation states that if one of the operands is not a number,
+    the value will be `false`. But practical experiments show that the comparison
+    of strings starting with a number works correctly: `if (20 EQUALS "20 GB")`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can compare software versions following the `major[.minor[.patch[.tweak]]]`
+    format by adding a `VERSION_` prefix to any of the operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Omitted components are treated as zero, and non-integer version components truncate
+    the compared string at that point.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For *lexicographic* string comparisons, we need to prepend an operator with
+    the `STR` prefix (note the lack of an underscore):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We often need more advanced mechanisms than simple equality comparisons. Fortunately,
+    CMake also supports `MATCHES` operator as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<VARIABLE|STRING> MATCHES <regex>`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any matched groups are captured in `CMAKE_MATCH_<n>` variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simple checks
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: We already mentioned one simple check, `DEFINED`, but there are others that
+    simply return `true` if a condition is met.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can check the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If a value is in a list: `<VARIABLE|STRING> IN_LIST <VARIABLE>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If a command is available for invocation: `COMMAND <command-name>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If a CMake policy exists: `POLICY <policy-id>` (this is covered in [*Chapter
+    3*](B17205_03_Final_JC_ePub.xhtml#_idTextAnchor078), *Setting Up Your First CMake
+    Project*)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If a CTest test was added with `add_test()`: `TEST <test-name>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If a build target is defined: `TARGET <target-name>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We'll explore build targets in [*Chapter 4*](B17205_04_Final_JC_ePub.xhtml#_idTextAnchor106),
+    *Working with Targets*, but for now, let's just say that targets are logical units
+    of a build process in a project created with a `add_executable()`, `add_library()`,
+    or `add_custom_target()` command that has already been invoked.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Examining the filesystem
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'CMake provides many ways of working with files. We rarely need to manipulate
+    them directly, and normally we''d rather use a high-level approach. For reference,
+    this book will provide a short list of the file-related commands in the *Appendix*
+    section. But most often, only the following operators will be needed (behavior
+    is well defined only for absolute paths):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`EXISTS <path-to-file-or-directory>`: Checks if a file or directory exists'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This resolves symbolic links (it returns `true` if the target of the symbolic
+    link exists).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<file1> IS_NEWER_THAN <file2>`: Checks which file is newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This returns `true` if `file1` is newer than (or equal to) `file2` or if one
+    of the two files doesn't exist.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`IS_DIRECTORY path-to-directory`: Checks if a path is a directory'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_SYMLINK file-name`: Checks if a path is a symbolic link'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_ABSOLUTE path`: Checks if a path is absolute'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Loops
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Loops in CMake are fairly straightforward – we can use either `while()` or
+    `foreach()` to repeatedly execute the same set of commands. Both of these commands
+    support loop control mechanisms:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `break()` loop stops the execution of the remaining block and breaks from
+    the enclosing loop.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `continue()` loop stops the execution of the current iteration and starts
+    at the top of the next one.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: While
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The loop block is opened with a `while()` command and closed with an `endwhile()`
+    command. Any enclosed commands will be executed as long as the `<condition>` expression
+    provided in `while()` is `true`. The syntax for phrasing the condition is the
+    same as for the `if()` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: You probably guessed that – with some additional variables – the `while` loop
+    can replace a `for` loop. Actually, it's way easier to use a `foreach()` loop
+    for that – let's take a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Foreach loops
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'A foreach block comes in a few variants that execute enclosed commands for
+    each value. Like other blocks, it has opening and closing commands: `foreach()`
+    and `endforeach()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The simplest form of `foreach()` is meant to provide a C++-style `for` loop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake will iterate from `0` to `<max>` (inclusive). If we need more control,
+    we can use the second variant, providing `<min>`, `<max>`, and, optionally, `<step>`.
+    All arguments must be nonnegative integers. Also, `<min>` has to be smaller than
+    `<max>`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, `foreach()` shows its true colors when it is working with lists:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake will take elements from all of the provided `<lists>` list variables,
+    followed by all of the explicitly stated `<items>` values, and store them in `<loop
+    variable>`, executing `<commands>` for every item, one by one. You can choose
+    to provide only lists, only values, or both:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/06-loops/foreach.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code will print the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or, we can use a short version (skipping the `IN` keyword) for the same result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Since version 3.17, `foreach()` has learned how to zip lists (`ZIP_LISTS`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Zipping lists means simply iterating through multiple lists and working on
+    respective items with the same index. Let''s look at an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/06-loops/foreach.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake will create a `num_<N>` variable for each list provided, which it will
+    fill with items from each list. You can pass multiple `<loop_var>` variable names
+    (one for every list) and each list will use a separate variable to store its items:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the count of items differs between lists, CMake won't define variables for
+    shorter ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, that's everything covered with regard to *loops*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Command definitions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are two ways to define your own command: you can use the `macro()` command
+    or the `function()` command. The easiest way to explain the differences between
+    these commands is by comparing them to C-style preprocessor macros and actual
+    C++ functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `macro()` command works more like a find-and-replace instruction than an actual
+    subroutine call such as `function()`. Contrary to functions, macros don't create
+    a separate entry on a call stack. This means that calling `return()` in a macro
+    will return to the calling statement one level higher than it would for a function
+    (possibly terminating the execution if we're already in the top scope).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `function()` command creates a separate scope for local variables, unlike
+    the `macro()` command, which works in the variable scope of a caller. This may
+    lead to confusing results. Let's talk about these details in the next section.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Both methods accept arguments that you can name and reference inside of a command
+    block. Additionally, CMake allows you to access arguments passed in command calls
+    with the following references:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`${ARGC}`: The count of arguments'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${ARGV}`: A list of all arguments'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${ARG0}`, `${ARG1}`, `${ARG2}`: The value of an argument at a specific index'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${ARGN}`: A list of anonymous arguments that were passed by a caller after
+    the last expected argument'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Accessing a numeric argument with an index outside of the `ARGC` bounds is undefined
+    behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you decide to define a command with named arguments, every call has to pass
+    all of them or it will be invalid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Macros
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Defining a macro is similar to any other block:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: After this declaration, we may execute our macro by calling its name (function
+    calls are case-insensitive).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following example highlights all of the problems relating to variable scopes
+    in macros:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/08-definitions/macro.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here''s the output from this script:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'What happened? Despite explicitly setting `myVar` to `new value`, it didn''t
+    affect the output for `message("argument: ${myVar}")`! This is because arguments
+    passed to macros aren''t treated as real variables but rather as constant find-and-replace
+    instructions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, the `myVar` variable in the global scope got changed from
+    `first value` to `new value`. This behavior is called a *side effect* and is considered
+    a bad practice, as it's hard to tell which variables might be affected by such
+    a macro without reading it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I recommend using functions whenever you can, as it will probably save you a
+    lot of headaches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To declare a command as a function, follow this syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: A function requires a name and optionally accepts a list of names of expected
+    arguments. If a function call passes more arguments than were declared, the excess
+    arguments will be interpreted as anonymous arguments and stored in the `ARGN`
+    variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned before, functions open their own scope. You can call `set()`, providing
+    one of the named arguments of the function, and any change will be local to the
+    function (unless `PARENT_SCOPE` is specified, as we discussed in the *How to correctly
+    use the variable scope in CMake* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions follow the rules of the call stack, enabling returning to the calling
+    scope with the `return()` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake sets the following variables for each function (these have been available
+    since version 3.17):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMAKE_CURRENT_FUNCTION`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_CURRENT_FUNCTION_LIST_DIR`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_CURRENT_FUNCTION_LIST_FILE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_CURRENT_FUNCTION_LIST_LINE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let''s take a look at these function variables in practice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/08-definitions/function.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This prints the following output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the general syntax and concept of the functions is very similar
+    to macros, but this time – it actually works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The procedural paradigm in CMake
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Let''s imagine for a second that we want to write some CMake code in the same
+    way we would write a program in C++. We''ll make a `CMakeLists.txt` listfile that
+    will call three defined commands that may call defined commands of their own:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 2.3 – A procedural call graph'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_2.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 2.3 – A procedural call graph
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Writing in this procedural style is a bit of a problem in CMake – you are required
+    to provide command definitions you''re planning to use ahead of time. The CMake
+    parser will not have it any other way. Your code would look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: What a nightmare! Everything is reversed! This code is very difficult to read
+    as the most minuscule details are at the top of the file. A correctly structured
+    piece of code lists the most general steps in the first subroutine, after which
+    it provides the slightly more detailed subroutines, and pushes the most detailed
+    steps to the very end of the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are solutions to this problem: moving command definitions to other files
+    and partitioning scopes across directories (scoped directories will be explained
+    in detail in [*Chapter 3*](B17205_03_Final_JC_ePub.xhtml#_idTextAnchor078), *Setting
+    Up Your First CMake Project*). But there is also a solution that is simple and
+    elegant: declaring an entry-point macro at the top of the file and calling it
+    at the very end of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this approach, our code is written with gradually narrowing scope, and
+    because we're not actually calling the `main()` macro until the very end, CMake
+    won't complain about the execution of undefined commands!
+  prefs: []
+  type: TYPE_NORMAL
+- en: One last question remains – why use a macro over a recommended function? In
+    this case, it's good to have unrestricted access to global variables, and since
+    we're not passing any arguments to `main()`, we don't need to worry about the
+    usual caveats.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You'll find a simple example of this concept in the `chapter-02/09-procedural/CMakeLists.txt`
+    listfile in the GitHub repository for this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A word on naming conventions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Naming is famously hard in software development, but nevertheless, it''s very
+    important to maintain a solution that is easy to read and understand. When it
+    comes to CMake scripts and projects, we should follow the rules of the *clean
+    code* approach, as we would with any software development solution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Follow a consistent naming style (`snake_case` is an accepted standard in the
+    CMake community).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use short but meaningful names (for example, avoid `func()`, `f()`, and suchlike).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Avoid puns and cleverness in your naming.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use pronounceable, searchable names that don't require mental mapping.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Now that we know how to properly invoke the commands with the correct syntax,
+    let's explore which commands will be the most beneficial to us to begin with.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Useful commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake offers many, many scripting commands that allow you to work with variables
+    and the environment. Some of them are covered extensively in the *Appendix* section,
+    for example, `list()`, `string()`, and `file()` (we'll leave these explanations
+    there and concentrate on projects in the main chapters). Others, such as `find_...()`,
+    fit better in chapters that talk about managing dependencies. In this section,
+    we'll briefly cover the most useful commands for scripts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The message() command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We already know and love our trusty `message()` command, which prints text
+    to standard output. However, there''s a lot more to it than meets the eye. By
+    providing a `MODE` argument, you can customize the style of the output, and in
+    the case of an error, you can stop the execution of the code: `message(<MODE>
+    "text")`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The recognized modes are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FATAL_ERROR`: This stops processing and generation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SEND_ERROR`: This continues processing, but skips generation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`WARNING`: This continues processing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`AUTHOR_WARNING`: A CMake warning. This continues processing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DEPRECATION`: This works accordingly if either of the `CMAKE_ERROR_DEPRECATED`
+    or `CMAKE_WARN_DEPRECATED` variables are enabled.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`NOTICE` or omitted mode (default): This prints a message to `stderr` to attract
+    the user''s attention.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`STATUS`: This continues processing and is recommended for main messages for
+    users.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`VERBOSE`: This continues processing and should be used for more detailed information
+    that usually isn''t very necessary.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DEBUG`: This continues processing and should contain any fine details that
+    might be helpful when there''s an issue with a project.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TRACE`: This continues processing and is recommended to print messages during
+    the project development. Usually, these sorts of messages would be removed before
+    publishing the project.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following example stops execution after the first message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/10-useful/message_error.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This means messages will be printed depending on the current log level (which
+    is `STATUS` by default). We discussed how to change this in the previous chapter
+    in the *Options for debugging and tracing* section. At that point, I promised
+    to talk about debugging with `CMAKE_MESSAGE_CONTEXT`, so let''s get to it. Since
+    then, we have acquired an understanding of three important pieces to this puzzle:
+    lists, scopes, and functions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When we enable a command-line flag, `cmake --log-context`, our messages will
+    be decorated with dot-separated context and stored in the `CMAKE_MESSAGE_CONTEXT`
+    list. Consider the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter02/10-useful/message_context.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output of the preceding script will look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The initial scope of the function is copied from the parent scope (which already
+    has one item in the list: `top`). The first command in `foo` adds a new item with
+    the `foo` function name to `CMAKE_MESSAGE_CONTEXT`. The message is printed, and
+    the function scope ends, discarding the local, copied variables, and the previous
+    scope (without `foo`) is restored.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This approach is useful with many nested functions in very complex projects.
+    Hopefully, you won't ever need it, but I thought it is a really good example of
+    how a function scope works in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another cool trick with `message()` is to add indentation to the `CMAKE_MESSAGE_INDENT`
+    list (in exactly the same way as with `CMAKE_MESSAGE_CONTEXT`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output from our scripts can then look a bit cleaner:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since CMake doesn't offer any real debugger with breakpoints or other tools,
+    the ability to produce clean log messages comes in very handy when things don't
+    go exactly as planned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The include() command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We can partition our CMake code into separate files to keep things ordered
+    and, well, *separate*. Then, we can reference them from our parent listfile by
+    calling `include()`, as shown in the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: If we provide a filename (a path with a `.cmake` extension), CMake will try
+    to open and execute it. Note that no nested, separate scope will be created, so
+    any changes to variables done in that file will affect the calling scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake will raise an error if a file doesn't exist unless we specify that it
+    is optional with the `OPTIONAL` keyword. If we need to know if `include()` was
+    successful, we can provide a `RESULT_VARIABLE` keyword with the name of the variable.
+    It will be filled with a full path to the included file on success or not found
+    (`NOTFOUND`) on failure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When running in script mode, any relative paths will be resolved from the current
+    working directory. To force searching in relation to the script itself, provide
+    an absolute path:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: If we don't provide a path but do provide the name of a module (without `.cmake`
+    or otherwise), CMake will try to find a module and include it. CMake will search
+    for a file with the name of `<module>.cmake` in `CMAKE_MODULE_PATH` and then in
+    the CMake module directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The include_guard() command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When we include files that have side effects, we might want to restrict them
+    so that they're only included once. This is where `include_guard([DIRECTORY|GLOBAL])`
+    comes in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Put `include_guard()` at the top of the included file. When CMake encounters
+    it for the first time, it will make a note of this fact in the current scope.
+    If the file gets included again (maybe because we don't control all of the files
+    in our project), it won't be processed any further.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If we want to protect against inclusion in unrelated function scopes that won't
+    share variables with each other, we should provide `DIRECTORY` or `GLOBAL` arguments.
+    As the names suggest, the `DIRECTORY` keyword will apply the protection within
+    the current directory and below, and the `GLOBAL` keyword applies the protection
+    to the whole build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The file() command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To give you an idea of what you can do with CMake scripts, let''s take a quick
+    glance at the most useful variants of the file manipulation command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: In short, the `file()` command will let you read, write, and transfer files,
+    and work with the filesystem, file locks, paths, and archives, all in a system-independent
+    manner. Please see the *Appendix* section for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The execute_process() command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Every now and then, you''ll need to resort to using tools available in the
+    system (after all, CMake is primarily a buildsystem generator). CMake offers a
+    command for this purpose: you can use `execute_process()` to run other processes
+    and collect their output. This command is a great fit for scripts, and it can
+    also be used in projects during the configuration stage. Here''s the general form
+    of the command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: CMake will use the API of the operating system to create a child process (so,
+    shell operators such as `&&`, `||`, and `>` won't work). However, you can still
+    chain commands and pass the output of one to another simply by providing the `COMMAND
+    <cmd> <arguments>` arguments more than once.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optionally, you may use a `TIMEOUT <seconds>` argument to terminate the process
+    if it hasn't finished the task within the required limit, and you can set the
+    `WORKING_DIRECTORY <directory>` as you need.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The exit codes of all tasks can be collected in a list by providing `RESULTS_VARIABLE
+    <variable>` arguments. If you''re only interested in the result of the last executed
+    command, use the singular form: `RESULT_VARIABLE <variable>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To collect the output, CMake provides two arguments: `OUTPUT_VARIABLE` and
+    `ERROR_VARIABLE` (which are used in a similar fashion). If you would like to merge
+    both `stdout` and `stderr`, use the same variable for both arguments.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember that when writing projects for other users, you should make sure that
+    the command you're planning to use is available on the platforms you claim to
+    support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This chapter opened the door to actual programming with CMake – you're now able
+    to write great, informative comments and invoke built-in commands, and you understand
+    how to correctly provide all kinds of arguments to them. This knowledge alone
+    will help you understand the unusual syntax of CMake listfiles that you may have
+    seen in other projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we covered variables in CMake – specifically, how to reference, set, and
+    unset normal, cache, and environment variables. We took a deep dive into how directory
+    and function scopes work, and we discussed the issues (and their workarounds)
+    relating to nested scopes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also covered lists and control structures. We discussed the syntax of conditions,
+    their logical operations, the evaluation of unquoted arguments, and strings and
+    variables. We learned how to compare values, do simple checks, and examine the
+    state of the files in the system. This allows us to write conditional blocks and
+    while loops. And while we were talking about loops, we also grasped the syntax
+    of foreach loops.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I'm sure that knowing how to define your own commands with macro and function
+    statements will help you write cleaner code in a more procedural style. We also
+    shared a few ideas about how to structure our code better and come up with more
+    readable names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we were formally introduced to the `message()` command and its multiple
+    log levels. We also studied how to partition and include listfiles, and we discovered
+    a few other useful commands. I feel confident that with this material, we are
+    ready to tackle the next chapter and write our first project in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Clean Code: A Handbook of Agile Software Craftsmanship* (Robert C. Martin):
+    [https://amzn.to/3cm69DD](https://amzn.to/3cm69DD)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Refactoring: Improving the Design of Existing Code* (Martin Fowler): [https://amzn.to/3cmWk8o](https://amzn.to/3cmWk8o)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Which comments in your code ARE GOOD?* (Rafał Świdzinski): [https://youtu.be/4t9bpo0THb8](https://youtu.be/4t9bpo0THb8)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*What''s the CMake syntax to set and use variables?* (StackOverflow): [https://stackoverflow.com/questions/31037882/whats-the-cmake-syntax-to-set-and-use-variables](https://stackoverflow.com/questions/31037882/whats-the-cmake-syntax-to-set-and-use-variables)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

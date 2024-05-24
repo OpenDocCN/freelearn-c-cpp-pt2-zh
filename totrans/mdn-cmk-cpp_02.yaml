@@ -1,0 +1,48 @@
+- en: 'Section 2: Building With CMake'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we have the most essential skills, it's time to start diving a little
+    deeper. The next part will allow you to solve most situations that come your way
+    when building a project in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We purposely focus on modern, elegant practices and avoid bringing too much
+    legacy into the picture. Specifically, we'll be dealing with logical build targets
+    rather than manipulating individual files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, we''ll explain in detail all the steps that the toolchain takes to build
+    a binary artifact from a target. That''s the part many books about C++ are missing:
+    how to configure and use preprocessors, compilers, and linkers properly, as well
+    as how to optimize their behavior.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, this section will cover all the different ways in which CMake offers
+    to manage dependencies, and will explain how to pick the best one for your specific
+    use case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This section comprises the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B17205_04_Final_JC_ePub.xhtml#_idTextAnchor106), *Working with
+    Targets*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126), *Compiling C++
+    Sources with CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B17205_06_Final_JC_ePub.xhtml#_idTextAnchor146), *Linking with
+    CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B17205_07_Final_JC_ePub.xhtml#_idTextAnchor162), *Managing Dependencies
+    with CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

@@ -1,0 +1,438 @@
+- en: '*Chapter 10*: Generating Documentation'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: High-quality code is not only well written, working, and tested—it is also thoroughly
+    documented. Documentation allows us to share information that could otherwise
+    get lost, draw a bigger picture, give context, reveal intent, and—finally—educate
+    both external users and maintainers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do you remember the last time you joined a new project and got lost for hours
+    in a maze of directories and files? This can be avoided. Truly excellent documentation
+    will lead a complete newcomer to the exact line of code they're looking for in
+    seconds. Sadly, the subject of missing documentation is often swept under the
+    rug. No wonder—it takes a lot of skill and many of us aren't very good at it.
+    On top of that, documentation and code can really part ways very quickly. Unless
+    a strict update and review process is put in place, it's easy to forget that documentation
+    needs work too.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some teams (in the interest of time or encouraged by managers) follow a practice
+    of writing "self-documenting code". By picking meaningful, readable identifiers
+    for filenames, functions, variables, and whatnot, they hope to avoid the chore
+    of documenting. While the habit of good naming is absolutely correct, it won''t
+    replace documentation. Even the best function signatures don''t guarantee that
+    all necessary information is conveyed—for example, `int removeDuplicates();` is
+    quite descriptive, but it doesn''t reveal what is returned! It may be the number
+    of duplicates found, the number of items left, or something else—it''s not certain.
+    Remember: there''s no such thing as a free lunch.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make things easier, professionals use automatic documentation generators
+    that can analyze the code and comments in source files to produce comprehensive
+    documentation in multiple different formats. Adding such generators to a CMake
+    project is very simple—let's see how!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding Doxygen to your project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generating documentation with a modern look
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You can find the code files present in this chapter on GitHub at the following
+    link:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter10](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter10)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding Doxygen to your project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'One of the most established and popular tools that can generate documentation
+    from C++ sources is Doxygen. And when I say "established", I mean it: the first
+    version was released by Dimitri van Heesch in October 1997\. Since then, it has
+    grown immensely, and it is actively supported by over 180 contributors to its
+    repository ([https://github.com/doxygen/doxygen](https://github.com/doxygen/doxygen)).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Doxygen can produce documentation in the following formats:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**HyperText Markup Language** (**HTML**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Rich Text Format** (**RTF**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Portable Document Format** (**PDF**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Lamport''s TeX** (**LaTeX**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**PostScript** (**PS**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Unix manual** (**man pages**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Microsoft Compiled HTML Help** (**CHM**)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you decorate your code with comments providing additional information in
+    the format specified by Doxygen, it will be parsed to enrich the output file.
+    What's more, the code structure will be analyzed to produce helpful charts and
+    diagrams. The latter is optional, as it requires an external Graphviz tool ([https://graphviz.org/](https://graphviz.org/)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The developer should first answer the following question: *Do users of the
+    project just get the documentation or will they generate it themselves (perhaps
+    when they build from source)?* The first option implies that documentation is
+    shipped with the binaries, available online, or (less elegantly) checked in with
+    the source code into the repository.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The answer matters, because if we want users to generate documentation during
+    the build, they will need the dependencies present in their system. This isn''t
+    too large a problem since Doxygen is available through most package managers (as
+    well as Graphviz), and all that''s needed is a simple command, such as this one
+    for Debian:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are also binaries available for Windows (check the project's website).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To summarize: generate documentation for users or handle adding the dependencies
+    if needed. This is covered in [*Chapter 7*](B17205_07_Final_JC_ePub.xhtml#_idTextAnchor162),
+    *Managing Dependencies with CMake*, so we won''t repeat the steps here. Note that
+    Doxygen is built with CMake, so you can easily compile it from source as well.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When Doxygen and Graphviz are installed in the system, we can add the generation
+    to our project. Unlike as suggested by online sources, this isn't as hard or involved
+    as we might think. We don't need to create external configuration files, provide
+    paths to the `doxygen` executable, or add custom targets. Since CMake 3.9, we
+    can use the `doxygen_add_docs()` function from `FindDoxygen` find-module, which
+    sets the documentation target up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The signature looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first argument specifies the target name, which we''ll need to build explicitly
+    with the `-t` argument to `cmake` (after generating a build tree), as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or, we can always have it be built by adding the `ALL` argument (usually not
+    necessary). Other options are pretty self-explanatory, except maybe `USE_STAMP_FILE`.
+    This allows CMake to skip regeneration of documentation if none of the source
+    files have changed (but requires `sourceFilesOrDirs` to only contain files).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We''ll follow the practice from previous chapters and create a utility module
+    with a helper function (so that it can be reused in other projects), as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-10/01-doxygen/cmake/Doxygen.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The function accepts two arguments—`input` and `output` directories—and will
+    create a custom `doxygen` target. Here''s what happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, we'll use CMake's built-in Doxygen find-module to figure out if Doxygen
+    is available in the system.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If it isn't available, we'll create a dummy `doxygen` target that will inform
+    the user and run a `false` command, which (on Unix-like systems) returns `1`,
+    causing the build to fail. We terminate the function at that time with `return()`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If Doxygen is available, we'll configure it to generate HTML output in the provided
+    `output` directory. Doxygen is extremely configurable (find out more in the official
+    documentation). To set any option, just follow the example by calling `set()`
+    and prepend its name with `DOXYGEN_`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Set up the actual `doxygen` target: all the `DOXYGEN_` variables will be forwarded
+    to Doxygen''s configuration file, and documentation will be generated from the
+    provided `input` directory in the source tree.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If your documentation is to be generated by users, *Step 2* should probably
+    involve installing the necessary dependencies instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use this function, we can add it to the main listfile of our project, as
+    follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-10/01-doxygen/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Not difficult at all. Building the `doxygen` target generates HTML documentation
+    that looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 10.1 – Class reference generated with Doxygen'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_10.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 10.1 – Class reference generated with Doxygen
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The additional description you can see in **Member Function Documentation**
+    is added by prepending the method with an appropriate comment in the header file,
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-10/01-doxygen/src/calc.h (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This format is known as Javadoc. It is important to open the comment block
+    with double asterisks: `/**`. More information can be found in the description
+    of Doxygen''s docblocks (see the link in the *Further reading* section).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As mentioned earlier, if Graphviz is installed, Doxygen will detect it and
+    generate dependency diagrams, as illustrated here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 10.2 – Inheritance and collaboration diagrams generated by Doxygen'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_10.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 10.2 – Inheritance and collaboration diagrams generated by Doxygen
+  prefs: []
+  type: TYPE_NORMAL
+- en: By generating documentation straight from the source, we create a mechanism
+    to quickly update it with any code changes happening throughout the development
+    cycle. Also, any missed updates in the comments have a chance of being spotted
+    during the code review.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Many developers will complain that the design offered by Doxygen is dated, which
+    makes them hesitant to present generated documentation to their customers. Don't
+    worry—there's an easy solution to this problem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating documentation with a modern look
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Having your project documented with a clean, fresh design is also important.
+    After all, if we put all this work into writing high-quality documentation for
+    our cutting-edge project, it is imperative that the user perceives it as such.
+    Doxygen has all the bells and whistles, but it isn't known for following the latest
+    visual trends. That doesn't mean we'll need a lot of effort to change this, however.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Luckily, a developer known as *jothepro* created a theme called `doxygen-awesome-css`
+    that offers a modern, customizable design. It even comes with a dark mode! You
+    can see this in the following screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 10.3 – HTML documentation in doxygen-awesome-css theme'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_10.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 10.3 – HTML documentation in doxygen-awesome-css theme
+  prefs: []
+  type: TYPE_NORMAL
+- en: The theme doesn't require any additional dependencies and can be easily fetched
+    from its GitHub page at [https://github.com/jothepro/doxygen-awesome-css](https://github.com/jothepro/doxygen-awesome-css).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: Online sources suggest using multiple applications executed in series to upgrade
+    the experience. One popular approach proposes transforming Doxygen's output with
+    Sphinx using Breathe and Exhale extensions. This process seems a little busy and
+    will pull in a lot of other dependencies (such as Python). I recommend keeping
+    tooling simple where possible. Chances are that not every developer on your project
+    will understand CMake very well, and such a complex process will give them a hard
+    time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We''ll go straight to the automated adoption of this theme. Let''s see how
+    we can extend our `Doxygen.cmake` file to use it by adding a new macro, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-10/02-doxygen-nice/cmake/Doxygen.cmake (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We already know all of these commands from previous chapters of the book, but
+    let''s reiterate what happens for perfect clarity, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`doxygen-awesome-css` is pulled from Git and made available to the project
+    with the `FetchContent` module.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Extra options for Doxygen are configured, as recommended in the theme's `README`
+    file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_HTML_EXTRA_STYLESHEET` configures the path to the theme''s `.css`
+    file. It will be copied to the output directory.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'As you can imagine, it''s best to call this macro in the `Doxygen` function
+    right before `doxygen_add_docs()`, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter-10/02-doxygen-nice/cmake/Doxygen.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: As a reminder, all variables in macros are set in the scope of the calling function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can now enjoy modern style in our generated HTML documentation and share
+    it proudly with the world.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this short chapter, we covered adding Doxygen, the documentation generation
+    tool, to a CMake project, and making it elegant. This process isn't too involved
+    and will greatly improve the flow of information in your solution. Time spent
+    on adding documentation will be a worthwhile investment, especially if you find
+    that you or your teammates have trouble in understanding complex relations in
+    the application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You may worry that it will be hard to add Doxygen to a bigger project that
+    didn''t use documentation generation from the start. The sheer amount of work
+    required to add comments to every function can be overwhelming for developers.
+    Don''t strive for immediate completeness: start small, by only filling in a description
+    of elements you touched in your latest commit. Even largely incomplete documentation
+    is better than no documentation at all.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Keep in mind that by generating documentation, you''ll enforce its proximity
+    to the actual code: it''s way easier to maintain written explanations in sync
+    with the logic if they''re both in the same file. Also, realize that as with most
+    programmers, you''re probably a very busy person and you will eventually forget
+    some of the small details of your project. Remember: the shortest pencil is longer
+    than the longest memory. Do yourself a favor—write things down and prosper.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we'll learn how to automate the packaging and installation
+    of our projects with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Official website of Doxygen: [https://www.doxygen.nl/](https://www.doxygen.nl/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: FindDoxygen find-module documentation:[https://cmake.org/cmake/help/latest/module/FindDoxygen.html](https://cmake.org/cmake/help/latest/module/FindDoxygen.html)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Doxygen's docblocks:[https://www.doxygen.nl/manual/docblocks.html#specialblock](https://www.doxygen.nl/manual/docblocks.html#specialblock)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other documentation generation utilities
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are dozens of other tools that are not covered in this book, as we''re
+    focusing on projects supported by CMake. Nevertheless, some of them may be more
+    appropriate for your use case. If you''re feeling adventurous, visit the websites
+    of two projects I found interesting that are listed here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adobe's Hyde ([https://github.com/adobe/hyde](https://github.com/adobe/hyde))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Aimed at the Clang compiler, Hyde produces Markdown files that can be consumed
+    by tools such as Jekyll ([https://jekyllrb.com/](https://jekyllrb.com/)), a static
+    page generator supported by GitHub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Standardese ([https://github.com/standardese/standardese](https://github.com/standardese/standardese))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This uses `libclang` to compile your code and provides output in HTML, Markdown,
+    LaTex, and man pages. It aims (quite boldly) to be the next Doxygen.
+  prefs: []
+  type: TYPE_NORMAL

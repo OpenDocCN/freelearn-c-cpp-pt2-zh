@@ -1,0 +1,975 @@
+- en: '*Chapter 9*: Program Analysis Tools'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Producing high-quality code is not an easy task, even for very experienced developers.
+    By adding tests to our solution, we reduce the risk of making obvious mistakes
+    in the business code. But that won't be enough to avoid more intricate problems.
+    Every piece of software consists of so many details that keeping track of them
+    all becomes a full-time job. There are dozens of conventions and multiple special
+    design practices agreed upon by teams maintaining the product.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some questions relate to consistent coding style: should we use 80 or 120 columns
+    in our code? Should we allow `std::bind` or commit to Lambda functions? Is it
+    okay to use C-style arrays? Should small functions be defined in a single line?
+    Should we insist on using `auto` always, or only when it increases readability?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Ideally, we also avoid any statements that are known to be incorrect in general:
+    infinite loops, usage of identifiers reserved by a standard library, unintended
+    loss of precision, redundant `if` statements, and anything else that isn''t considered
+    a "best practice" (see the *Further reading* section for references).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another thing to look at is the modernization of code: as C++ evolves, it offers
+    new features. It can be difficult to track all the places we can refactor to the
+    latest standard. Additionally, manual effort costs time and introduces the risk
+    of bugs, which can be considerable for a large code base.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, we should inspect how things work when they''re put into motion: executing
+    the program and examining its memory. Is the memory freed properly after use?
+    Do we access data that was initialized correctly? Or maybe the code tries to dereference
+    some dangling pointers?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Managing all these issues and questions by hand is inefficient and error-prone.
+    Thankfully, we can employ automatic utilities to check and enforce rules, fix
+    mistakes, and modernize code for us. It's time to discover tools for program analysis.
+    Our code will be inspected on every build to ensure that it adheres to industry
+    standards.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enforcing the formatting
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using static checkers
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Dynamic analysis with Valgrind
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter09](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter09).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders <`build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enforcing the formatting
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Professional developers generally follow rules. They say that senior developers
+    know when to break one (as they can justify the need to). On the other hand, it
+    is said that very senior developers don't break rules because it's a waste of
+    time having to keep explaining their reasons to others. I say, pick your battles
+    and focus on things that actually matter and have a tangible impact on the product.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When it comes to coding style and formatting, programmers are presented with
+    a myriad of choices: should we use tabs or spaces for indentation? If spaces,
+    how many? What is the limit of characters in a column? How about in a file? Such
+    choices don''t impact the behavior of the program in most cases, but they do generate
+    a lot of noise and start lengthy discussions that don''t bring much value to a
+    product.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some practices are commonly agreed upon, but most of the time, we're debating
+    personal preference and anecdotal evidence. After all, enforcing 80 characters
+    in a column over 120 is an arbitrary choice. It doesn't really matter what we're
+    going to choose as long as we're consistent. Inconsistency in style is bad, as
+    it affects an important aspect of the software – the readability of the code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The best way to avoid it is to use a formatting tool such as `clang-format`.
+    This can alert us that the code isn''t formatted properly and even fix things
+    that stand out if we let it. Here''s an example of a command that formats code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `-i` option tells ClangFormat to edit files in place. `--style` selects
+    which supported formatting style should be used: `LLVM`, `Google`, `Chromium`,
+    `Mozilla`, `WebKit`, or custom, provided from `file` (there are links to details
+    in the *Further reading* section).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Of course, we don''t want to execute this command manually every time we make
+    a change; CMake should take care of this as part of the building process. We already
+    know how to find `clang-format` in the system (we''ll need to install it manually
+    beforehand). What we haven''t discussed yet is the process of applying an external
+    tool to all of our source files. To do it, we''ll create a convenient function
+    that can be included from the `cmake` directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/cmake/Format.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `Format` function takes two arguments: `target` and `directory`. It will
+    format all source files from `directory`, right before `target` is built.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technically, not all files in `directory` must necessarily belong to `target`
+    (and target sources can potentially be in multiple directories). However, finding
+    all the source files and headers that belong to the target (and possible dependent
+    targets) is a very complex process, especially when we need to filter out headers
+    that belong to external libraries and shouldn't be formatted. It's just more manageable
+    to work on directories in this scenario. We can just call the function for each
+    directory of the formatted target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This function has the following steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find the `clang-format` binary installed in the system. The `REQUIRED` keyword
+    will stop the configuration with an error if the binary wasn't found.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Create a list of file extensions to format (to be used as a *globbing expression*).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Prepend each expression with a path to `directory`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Recursively search for sources and headers (using the previously created list),
+    skip directories, and put their paths into the `SOURCE_FILES` variable.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Hook the formatting command as the `PRE_BUILD` step of `target`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This command will work well for small-to-medium code bases. For high amounts
+    of files, we'd need to transform absolute file paths to relative paths and execute
+    formatting using `directory` as a working directory (the `list(TRANSFORM)` command
+    is useful here). This might be necessary because commands passed to the shell
+    have a limit on their length (usually about 13,000 characters) and too many long
+    paths simply won't fit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s see how we can use this function in practice. We''ll use the following
+    project structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'First, we''ll need to set up the project and add the `cmake` directory to the
+    module path so that we can include it later:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Having that set, let''s fill in the list file for the `src` directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is simple and to the point. We have created an executable target `main`,
+    included the `Format.cmake` module, and called the `Format()` function for the
+    `main` target in the current directory (`src`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now, we need some unformatted source files. The header is just a simple `unused`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/src/header.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''ll also add a source file with way too much whitespace:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/src/main.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''re almost set. All that''s left is the configuration file of the formatter
+    (which is enabled with the `--style=file` argument in the command line):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/.clang-format
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Clang Format will scan the parent directories for the `.clang-format` file,
+    which specifies the exact formatting rules. This allows us to specify every little
+    detail, or to customize one of the standards mentioned earlier. In my case, I''ve
+    chosen to start with Google''s coding style and throw in a few tweaks: limit columns
+    to 140 characters, remove tabs, and allow short loops, functions, and `if` statements.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s see how files have changed after building this project (formatting happens
+    automatically before compilation):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/src/header.h (formatted)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The header file was formatted, even though it isn''t used by the target; short
+    functions aren''t allowed on a single line. The formatter added new lines, just
+    as expected. The `main.cpp` file also looks pretty slick now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/01-formatting/src/main.cpp (formatted)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unnecessary whitespace was removed and indentations were standardized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding the automated formatter isn't too big of an effort and will save you
+    a bunch of time in code reviews. If you've ever had to amend a commit to correct
+    some whitespace, you know the feeling. Consistent formatting keeps your code neat
+    without any effort.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: Applying formatting to an existing code base will most likely introduce a big
+    one-off change to the majority of the files in the repository. This may cause
+    *a lot* of merge conflicts if you (or your teammates) have some ongoing work.
+    It's best to coordinate such efforts to happen after all pending changes are done.
+    If this isn't possible, consider gradual adoption, perhaps on a per-directory
+    basis. Your fellow developers will thank you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The formatter is a great and simple tool to bring the visual aspect of the code
+    together, but it isn't a fully fledged program analysis tool (it focuses mostly
+    on whitespace). To deal with more advanced scenarios, we need to reach for utilities
+    capable of understanding the program's source to perform a static analysis.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using static checkers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Static program analysis is the process of checking the source code without
+    actually running the compiled version. The rigorous application of static checkers
+    dramatically improves the quality of the code: it becomes more consistent and
+    less bug-prone. The chance of introducing known security vulnerabilities is reduced
+    too. The C++ community has created dozens of static checkers: Astrée, Clang-Tidy,
+    CLazy, CMetrics, Cppcheck, Cpplint, CQMetrics, ESBMC, FlawFinder, Flint, IKOS,
+    Joern, PC-Lint, Scan-Build, Vera++, and so on.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Many of them recognize CMake as the industry standard and will provide out-of-the-box
+    support (or an integration tutorial). Some build engineers don''t want to go to
+    the trouble of writing CMake code, and they add static checkers by including external
+    modules available online, such as those collected by Lars Bilke in his GitHub
+    repository: [https://github.com/bilke/cmake-modules](https://github.com/bilke/cmake-modules).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It''s no wonder, as the general misconception is that you''d need to jump through
+    many hoops to get your code checked. The reason for this complexity is in the
+    nature of static checkers: they often mimic the behavior of a real compiler to
+    understand what happens in the code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Cppcheck recommends the following steps in its manual:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find the static checker's executable.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Generate a *compile database* with the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Run the checker on the produced JSON file:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: All that should happen as part of the build so that it doesn't get forgotten.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Since CMake understands exactly how we want our targets built, can''t it support
+    some of these utilities? At least the most popular? Sure, it can! This gem of
+    a feature is hard to find among the online noise, despite being so simple to use.
+    CMake supports enabling checkers on a per-target basis for the following tools:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: include-what-you-use ([https://include-what-you-use.org](https://include-what-you-use.org))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Clang-Tidy ([https://clang.llvm.org/extra/clang-tidy](https://clang.llvm.org/extra/clang-tidy))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: link what you use (a built-in CMake checker)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: cpplint ([https://github.com/cpplint/cpplint](https://github.com/cpplint/cpplint))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cppchecker ([https://cppcheck.sourceforge.io](https://cppcheck.sourceforge.io))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'All we need to do is set an appropriate target property to a semicolon-separated
+    list containing the path to the checker''s executable, followed by any command-line
+    options that should be forwarded to the checker:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<LANG>_CLANG_TIDY`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<LANG>_CPPCHECK`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<LANG>_CPPLINT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<LANG>_INCLUDE_WHAT_YOU_USE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_WHAT_YOU_USE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'As usual, `<LANG>` should be replaced with the language used, so use `C` for
+    C sources and `CXX` for C++. If you don''t need to control the checker on a per-target
+    basis, you can specify a default value for all targets in the project by setting
+    an appropriate global variable prefixed with `CMAKE_`, such as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Any target defined after this statement will have its `CXX_CLANG_TIDY` property
+    set the same way. Just keep in mind that this adds the analysis to regular builds,
+    which will make them slightly longer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On the other hand, there''s some value in more granular control of how targets
+    should be tested by the checker. We can write a simple function to solve this
+    for us:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/02-clang-tidy/cmake/ClangTidy.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `AddClangTidy` function has two simple steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find the Clang-Tidy binary and store its path in `CLANG-TIDY_PATH`. The `REQUIRED`
+    keyword will stop the configuration with an error if the binary wasn't found.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Enable Clang-Tidy on `target`, provide the path to the binary and custom options
+    to enable all checks, and treat warnings as errors.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'To use this function, we just need to include the module and call it for the
+    chosen target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/02-clang-tidy/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is short and extremely powerful. As we build the solution, we can see
+    the output from Clang-Tidy:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that unless you add the `--warnings-as-errors=*` option to the command-line
+    arguments, the build will succeed. It is recommended to agree on a list of rules
+    that will be enforced and fail builds that break them; this way, we'll prevent
+    non-compliant code from tainting the repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`clang-tidy` also offers an interesting `--fix` option, which will automatically
+    correct your code where possible. This is definitely a great timesaver and can
+    be used whenever you''re increasing the number of checks. As with formatting,
+    be sure to avoid merge conflicts when introducing any changes generated by static
+    analysis tools to legacy code bases.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on your use case, the size of the repository, and team preferences,
+    you should probably choose a few checkers that are a good match. Adding too many
+    will become a nuisance. Here's a short introduction to checkers supported by CMake
+    out-of-the-box.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clang-Tidy
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here is a description of Clang-Tidy from the official website:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: clang-tidy is a clang-based C++ "linter" tool. Its purpose is to provide an
+    extensible framework for diagnosing and fixing typical programming errors, like
+    style violations, interface misuse, or bugs that can be deduced via static analysis.
+    clang-tidy is modular and provides a convenient interface for writing new checks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The versatility of this tool is really impressive, as it offers over 400 checks.
+    It works well paired with ClangFormat, as the fixes applied automatically (over
+    150 available) can follow the same format file. Offered checks include improvements
+    in performance, readability, modernization, cpp-core-guidelines, and bug-prone
+    namespaces.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cpplint
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here is a description of Cpplint from the official website:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cpplint is a command-line tool to check C/C++ files for style issues following
+    Google's C++ style guide. Cpplint is developed and maintained by Google Inc. at
+    google/styleguide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This linter is meant to get your code in line with the aforementioned Google
+    style. It is written in Python, which might be an unwanted dependency for some
+    projects. The fixes are offered in formats consumable by Emacs, Eclipse, VS7,
+    Junit, and as `sed` commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cppcheck
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here is a description of Cppcheck from the official website:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cppcheck is a static analysis tool for C/C++ code. It provides unique code analysis
+    to detect bugs and focuses on detecting undefined behaviour and dangerous coding
+    constructs. The goal is to have very few false positives. Cppcheck is designed
+    to be able to analyze your C/C++ code even if it has non-standard syntax (common
+    in embedded projects).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This tool is worth recommending for peace of mind when it comes to avoiding
+    unnecessary noise generated by false positives. It is quite well established (over
+    14 years in the making) and still very actively maintained. Also, you might find
+    it useful if your code doesn't compile with Clang.
+  prefs: []
+  type: TYPE_NORMAL
+- en: include-what-you-use
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here is a description of include-what-you-use from the official website:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The main goal of include-what-you-use is to remove superfluous #includes. It
+    does this both by figuring out what #includes are not actually needed for this
+    file (for both .cc and .h files), and replacing #includes with forward-declares
+    when possible.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Too many included headers might not seem like a really big problem if your code
+    base is slim. In larger projects, time saved by avoiding unnecessary compilation
+    of header files quickly adds up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Link what you use
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Here is a description of link-what-you-use on CMake''s blog:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a built in CMake feature that uses options of ld and ldd to print out
+    if executables link more libraries than they actually require.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This also speeds up the build time; only in this case we're focusing on the
+    unneeded binary artifacts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Static analysis is critical where software errors can affect people's safety,
+    especially in medical, nuclear, aviation, automotive, and machine industries.
+    Smart developers know that it doesn't hurt to follow similar practices in less
+    demanding environments, most of all when the costs of adoption are so low. Using
+    static analyzers during the build is not only much cheaper than finding and fixing
+    bugs manually; it's also easy to enable with CMake. I'd even go as far to say
+    that there's almost no excuse to skip these checks in quality-sensitive software
+    (that is, all software involving someone else other than the programmer).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, not all bugs can be caught before a program is executed. What
+    can we do to get an even better insight into our projects?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dynamic analysis with Valgrind
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Valgrind ([https://www.valgrind.org](https://www.valgrind.org)) is an instrumentation
+    framework that allows building dynamic analysis utilities – that is, analysis
+    performed during a program''s runtime. It offers an extensive tool suite that
+    allows all kinds of investigations and checks. Some of the tools are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Memcheck – detects memory-management problems
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Cachegrind – profiles CPU caches, and pinpoints cache misses and other cache
+    issues
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Callgrind – an extension of Cachegrind with extra information on call graphs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Massif – a heap profiler that shows which parts of the program use heap over
+    time
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Helgrind – a thread debugger, which helps with data race issues
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DRD – a lighter, limited version of Helgrind
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Every single tool from this list is extremely handy when the occasion is right.
+    Most package managers know Valgrind and can install it on your OS with ease (it's
+    possible that it's already installed if you're using Linux). In any case, the
+    official website offers the source code, so you can build it yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We'll limit our focus to the most useful application from the suite. When people
+    refer to Valgrind, they very often mean Valgrind's Memcheck. Let's figure out
+    how to use it with CMake – it will pave the way for the adoption of other tools,
+    should you need them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Memcheck
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Memcheck can be indispensable when debugging memory issues. This subject is
+    particularly tricky in C++, as programmers have tremendous control over how they
+    manage memory. All kinds of mistakes are possible: reading unallocated memory,
+    reading memory that was already freed, attempting to free memory more than once,
+    and writing to incorrect addresses. Developers obviously try to avoid these, but
+    since these bugs are so inconspicuous, they can sneak into even the simplest programs.
+    Sometimes, all it takes is a forgotten variable initialization and we''re in a
+    pinch.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Invoking Memcheck looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Memcheck is the default tool of Valgrind, but you can also select it explicitly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Running Memcheck is expensive; the manual (see the link in *Further reading*)
+    says that programs instrumented with it can be 10–15 times slower. To avoid waiting
+    for Valgrind every time we run tests, we''ll create a separate target that will
+    be called from the command line whenever we need to test our code. Ideally, the
+    developer will run it before merging their change to the default branch of the
+    repository. This can be done with an early Git hook or added as a step in the
+    CI pipeline. To build a custom target, we''ll use the following command after
+    the generation stage has been completed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Adding such a target isn''t very difficult:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/03-valgrind/cmake/Valgrind.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this example, we created a CMake module (so we can reuse the same file across
+    projects) wrapping function that will accept the target to be tested. Two things
+    happen here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake searches default system paths for the `valgrind` executable and stores
+    it in the `VALGRIND_PATH` variable. The `REQUIRED` keyword will stop the configuration
+    with an error if the binary wasn't found.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A custom target, `valgrind`, is created; it will execute the Memcheck tool on
+    the `target` binary. We also added an option to always check for memory leaks.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When it comes to Valgrind options, we can provide them as command-line arguments
+    and also in the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `~/.valgrindrc` file (in your home directory)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `$VALGRIND_OPTS` environment variable
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `./.valgrindrc` file (in the working directory)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: These are checked in that order. Also, note that the last file will only be
+    considered if it belongs to the current user, is a regular file, and isn't marked
+    as world-writable. This is a safety mechanism, as options given to Valgrind can
+    be potentially harmful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use the `AddValgrind` function, we should provide it with a unit_tests target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/03-valgrind/test/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Remember that generating build trees with the `Debug` config allows Valgrind
+    to tap into the debug information, which makes its output much clearer. Let''s
+    see how this works in practice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will build the `sut` and `unit_tests` targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Start the execution of Memcheck, which will provide us with general information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `==954==` prefix contains the process ID. This is added to distinguish Valgrind
+    commentary from the output of the tested process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, tests are run as usual with `gtest`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At the end, a summary is presented:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Uh-oh! We are still using at least 1 byte. Allocations made with `malloc()`
+    and `new` aren''t matched with appropriate `free()` and `delete` operations. It
+    seems we have a memory leak in our program. Valgrind provides more details to
+    find it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Lines starting with `by 0x<address>` indicate individual functions in a call
+    stack. I''ve truncated the output (it had some noise from GTest) to focus on the
+    interesting bit – the topmost function and source reference, `run()(run.cpp:6)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, the summary is found at the bottom:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Valgrind does a very good job of finding very intricate issues. On occasion,
+    it's capable of digging even deeper to find questionable situations that can't
+    be categorized automatically. Such discoveries will be accounted for in the `possibly
+    lost` row.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s see what the issue found by Memcheck was in this case:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/03-valgrind/src/run.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'That''s right: the highlighted code is faulty. We do, in fact, create an object
+    that isn''t deleted before the test ends. This is the exact reason why having
+    extensive test coverage is so important.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Valgrind is an extremely useful tool, but it can get a bit verbose when dealing
+    with more complex programs. There must be a way to collect that information in
+    a more manageable form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Memcheck-Cover
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Commercial IDEs such as CLion natively support parsing Valgrind''s output to
+    something that can be easily navigated through GUI without scrolling through the
+    console window to find the right message. If your editor doesn''t have this option,
+    you still can get a much clearer view of the errors by using a third-party report
+    generator. Memcheck-cover, written by David Garcin, offers a nicer experience
+    in the form of a generated HTML file, as shown in *Figure 9.1*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 9.1 – A report generated by memcheck-cover'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_9.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 9.1 – A report generated by memcheck-cover
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This neat little project is available on GitHub ([https://github.com/Farigh/memcheck-cover](https://github.com/Farigh/memcheck-cover));
+    it requires Valgrind and `gawk` (GNU AWK tool). To use it, we''ll prepare a setup
+    function in a separate CMake module. It will consist of two parts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fetching and configuring the tool
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding a custom target that executes Valgrind and generates a report
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The configuration looks as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/04-memcheck/cmake/Memcheck.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the first part, we follow the same practices as with a regular dependency:
+    include the `FetchContent` module, and specify the project''s repository and desired
+    Git tag with `FetchContent_Declare`. Next, we initiate the fetch process and configure
+    the path to the binary using the `memcheck-cover_SOURCE_DIR` variable set by `FetchContent_Populate`
+    (called implicitly by `FetchContent_MakeAvailable`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second part of the function is creating the target to generate reports.
+    We''ll call it `memcheck` (so that it doesn''t overlap with the previous `valgrind`
+    target if we want to keep both options for some reason):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/04-memcheck/cmake/Memcheck.cmake (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This happens in two commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, we'll run the `memcheck_runner.sh` wrapper script, which will execute
+    Valgrind's Memcheck and collect the output to the file provided with the `-o`
+    argument.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then, we'll parse the output and create the report with `generate_html_report.sh`.
+    This script requires input and output directories provided with the `-i` and `-o`
+    arguments.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Both steps should be executed in the `CMAKE_BINARY_DIR` working directory so
+    that the unit test binary can access files through relative paths if needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The last thing we need to add to our list files is, of course, a call to this
+    function. It has the same pattern as `AddValgrind`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter09/04-memcheck/test/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After generating a buildsystem with the `Debug` config, we can build the target
+    with the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: And then we can enjoy our formatted report. Well, to truly enjoy it we'll need
+    to add that missing `delete c;` in `run.cpp` so that it stops complaining (or,
+    better yet, use a smart pointer instead).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '"You''ll spend more time studying the code than creating it – therefore, you
+    should optimize for reading rather than writing."'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This sentence is repeated like a mantra in more than one book discussing clean
+    code practices. No wonder, as this is very true, as tested in practice by many
+    software developers – so much so that rules for even minuscule things such as
+    the numbers of spaces, newlines, and the ordering of `#import` statements have
+    been codified. This isn't done out of pettiness, but to save time. By following
+    the practices outlined in this chapter, we don't need to worry about formatting
+    code correctly by hand. It will automatically get formatted as a side effect of
+    building – a step that we have to do anyway to check whether the code is working
+    correctly. By introducing ClangFormat, we can also ensure that it looks proper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Of course, we want more than a simple whitespace correction; code has to conform
+    to dozens of other small regulations. This is done by the addition of Clang-Tidy
+    and configuring it to enforce the coding style of our choosing. We discussed this
+    static checker in detail, but we also mentioned other options: Cpplint, Cppcheck,
+    Include-what-you-use, and Link-what-you-use. Since static linkers are relatively
+    fast, we can add them to builds with little investment, and it will usually be
+    well worth the price.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Lastly, we looked at the Valgrind utilities, specifically Memcheck, which allows
+    debugging problems related to memory management: incorrect reads, writes, deallocations,
+    and so on. This is a very handy tool that can save hours of manual investigation
+    and prevent bugs from sneaking into production. As mentioned, it can be a bit
+    slow to execute, which is why we created a separate target to run it explicitly
+    before submitting the code. We also learned how to present the output of Valgrind
+    in a more approachable form with Memcheck-Cover, an HTML report generator. This
+    can be really useful in environments that don''t support running an IDE (such
+    as CI pipelines).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Of course, we aren''t limited to these tools; there''s plenty more: both free
+    and open source projects, as well as commercial products coming with extensive
+    support. This is merely an introduction to the subject. Be sure to explore what''s
+    right for you. In the next chapter, we''ll take a closer look at documentation
+    generation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information, you can refer to the following links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*C++ Core guidelines curated by Bjarne Stroustrup, author of C++:* [https://github.com/isocpp/CppCoreGuidelines](https://github.com/isocpp/CppCoreGuidelines)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*The ClangFormat reference:* [https://clang.llvm.org/docs/ClangFormat.html](https://clang.llvm.org/docs/ClangFormat.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Static analyzers for C++ – a curated list:* [https://github.com/analysis-tools-dev/static-analysis#cpp](https://github.com/analysis-tools-dev/static-analysis#cpp)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Built-in static checker support in CMake:* [https://blog.kitware.com/static-checks-with-cmake-cdash-iwyu-clang-tidy-lwyu-cpplint-and-cppcheck/](https://blog.kitware.com/static-checks-with-cmake-cdash-iwyu-clang-tidy-lwyu-cpplint-and-cppcheck/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*A target property enabling ClangTidy:* [https://cmake.org/cmake/help/latest/prop_tgt/LANG_CLANG_TIDY.html](https://cmake.org/cmake/help/latest/prop_tgt/LANG_CLANG_TIDY.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*The Valgrind manual:* [https://www.valgrind.org/docs/manual/manual-core.html](https://www.valgrind.org/docs/manual/manual-core.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

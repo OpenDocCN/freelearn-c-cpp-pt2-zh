@@ -1,0 +1,1949 @@
+- en: '*Chapter 8*: Testing Frameworks'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Tenured professionals know that testing has to be automated. Someone explained
+    that to them years ago or they learned the hard way. This practice isn''t as obvious
+    to inexperienced programmers: it seems unnecessary, additional work that doesn''t
+    bring much value. No wonder: when someone is just starting writing code, they''ll
+    avoid writing complex solutions and contributing to vast code bases. Most likely,
+    they''re the sole developer on their pet project. These early projects hardly
+    ever need more than a few months to complete, so there''s hardly any opportunity
+    to see how code rots over a longer period.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All these factors contribute toward the notion that writing tests is a waste
+    of time and effort. The programming apprentice may say to themselves that they
+    actually do test their code each time they execute the "build-and-run" routine.
+    After all, they have manually confirmed that their code works and does what's
+    expected. It's finally time to move on to the next task, right?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Automated testing guarantees that new changes don't accidentally break our program.
+    In this chapter, we'll learn why tests are important and how to use CTest (a tool
+    bundled with CMake) to coordinate test execution. CTest is capable of querying
+    available tests, filtering execution, shuffling, repeating, and time-limiting.
+    We'll explore how to use those features, control the output of CTest, and handle
+    test failures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, we''ll adapt our project''s structure to support testing and create our
+    own test runner. After discussing the basic principles, we''ll move on to adding
+    popular testing frameworks: Catch2 and GoogleTest with its mocking library. Lastly,
+    we''ll introduce detailed test coverage reporting with LCOV.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why are automated tests worth the trouble?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using CTest to standardize testing in CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Creating the most basic unit test for CTest
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Unit-testing frameworks
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Generating test coverage reports
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You can find the code files present in this chapter on GitHub at the following
+    link:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter08](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter08)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why are automated tests worth the trouble?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Imagine a factory line that has a machine putting holes in sheets of steel.
+    These holes have to be of specific size and shape so that they can house bolts
+    that will hold the finished product together. The designer of such a factory line
+    will set up the machine, test if the holes are correct, and move on. Sooner or
+    later, something will change: the factory will use different, thicker steel; a
+    worker will accidentally change the hole size; or, simply, more holes need to
+    be punched and the machine has to be upgraded. A smart designer will put quality-control
+    checks at certain points on the line to make sure that the product follows the
+    specification and retains its key qualities. Holes have to conform to particular
+    requirements but it doesn''t really matter how they are created: drilled, punched,
+    or laser-cut.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The same approach finds application in software development: it''s very hard
+    to predict which pieces of code will remain unchanged for years and which will
+    see multiple revisions. As the functionality of the software expands, we need
+    to make sure that we don''t accidentally break things. But we will. Even the best
+    programmers will make mistakes because they can''t foresee all the implications
+    of every change they make. As if that weren''t enough, developers often work on
+    code written by someone else and they don''t know any of the intricate assumptions
+    made earlier. They will read the code, build a rough mental model, add necessary
+    changes, and hope they got it right. Most times, that''s true—until it isn''t.
+    In such cases, an introduced bug can consume hours if not days to fix, not to
+    mention the damage it can do to the product and the customers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On occasion, you will stumble upon some code that is really hard to understand
+    and follow. You will not only question how the code came to be and what it does,
+    but you will also start a witch-hunt to figure out who's to blame for creating
+    such a mess. Don't be too surprised if it turns out that you're the author. It
+    has happened to me, and it will happen to you. Sometimes, code is created in a
+    hurry, without a full understanding of the problem. As developers, we're not only
+    under pressure from deadlines or budgets. Woken up in the middle of the night
+    to fix a critical failure, you'll be appalled at how certain errors can slip past
+    code review.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most of this can be avoided with automated tests. These are pieces of code that
+    check if another piece of code (used in production) is behaving correctly. As
+    the name suggests, automated tests should be executed without prompts every time
+    someone makes a change. It usually happens as part of the build process and is
+    often added as a step to control the code quality before merging it into the repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You may be tempted to avoid automated tests to save time. That would be a very
+    costly lesson. Steven Wright rightfully said: "*Experience is something you don''t
+    get until just after you need it.*" Trust me: unless you''re writing a one-off
+    script for personal purposes or prototyping a non-production experiment, don''t
+    skip writing tests. Initially, you might get annoyed by the fact that the code
+    you meticulously crafted is constantly failing tests. But if you really think
+    about it, that failed test just stopped you from adding a breaking change to production.
+    The effort invested now will pay off as time is saved on bug-fixing (and full
+    nights of sleep). Tests are not as hard to add and maintain as they may seem.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CTest to standardize testing in CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Ultimately, automated testing involves nothing other than running an executable
+    that sets your `test_my_app`, another will go with `unit_tests`, and a third will
+    use something obscure or not provide tests at all. Discovering which file needs
+    to be run, which framework is used, which arguments should be passed to the runner,
+    and how to collect results are problems that users would like to avoid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake solves this by introducing a separate `ctest` command-line tool. It''s
+    configured by the project''s author through listfiles and provides a unified way
+    of executing tests: the same, standardized interface for every project built with
+    CMake. If you follow this convention, you will enjoy other benefits down the line:
+    adding the project to a (CI/CD) pipeline will be easier, surfacing them in (IDEs)
+    such as Visual Studio or CLion—all of these things will be streamlined and more
+    convenient. More importantly, you''ll get a more powerful test-running utility
+    with very little investment.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'How to execute tests with CTest on an already configured project? We''ll need
+    to pick one of the following three modes of operation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Test
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Build-and-test
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Dashboard client
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The last mode allows you to send the results of the test to a separate tool
+    called CDash (also from Kitware). CDash collects and aggregates software-quality
+    test results in an easy-to-navigate dashboard, as illustrated in the following
+    screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 8.1 ‒ Screenshot of the CDash dashboard timeline view'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_8.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 8.1 ‒ Screenshot of the CDash dashboard timeline view
+  prefs: []
+  type: TYPE_NORMAL
+- en: CDash isn't in the scope of this book since it's an advanced solution used as
+    a shared server, accessible for all developers in a company.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you''re interested in learning more online, reference the official documentation
+    of CMake and visit the CDash website:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://cmake.org/cmake/help/latest/manual/ctest.1.html#dashboard-client](https://cmake.org/cmake/help/latest/manual/ctest.1.html#dashboard-client)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://www.cdash.org/](https://www.cdash.org/)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s get back to the first two modes. The command line for test mode looks
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this mode, CTest should be executed in the build tree, after building the
+    project with `cmake`. This is slightly cumbersome during the development cycle,
+    as you''d need to execute multiple commands and change the working directory back
+    and forth. To simplify the process, CTest added a second mode: `build-and-test`
+    mode.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build-and-test mode
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To use this mode, we need to execute `ctest` starting with `--build-and-test`,
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Essentially, this is a simple wrapper around the regular test mode that accepts
+    a few build configuration options and allows us to append the command for the
+    first mode— in other words, all options that can be passed to `ctest <options>`
+    will work when passed to `ctest --build-and-test`. The only requirement here is
+    to pass the full command after the `--test-command` argument. Contrary to what
+    you might think, build-and-test mode won''t actually run any tests unless provided
+    with `ctest` keyword after `--test-command`, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this command, we specify source and build paths, and select a build generator.
+    All three are required and follow the rules for the `cmake` command, described
+    in detail in [*Chapter 1*](B17205_01_Final_JC_ePub.xhtml#_idTextAnchor014), *First
+    Steps with CMake*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You may pass additional arguments to this mode. They come in three groups, controlling
+    the configuration, the build process, or the tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are the arguments for controlling the configuration stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--build-options`—Any extra options for the `cmake` configuration (not the
+    build tool) should be provided just before `--test-command`, which comes last.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-two-config`—Run the configuration stage for CMake twice.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-nocmake`—Skip the configuration stage.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-generator-platform`, `--build-generator-toolset`—Provide a generator-specific
+    platform and toolset.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-makeprogram`—Specify a `make` executable when using Make- or Ninja-based
+    generators.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here are the arguments for controlling the build stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--build-target`—Build the specified target (instead of the `all` target).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-noclean`—Build without building the `clean` target first.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--build-project`—Provide the name of the built project.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'This is the argument used to control the test stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--test-timeout`—Limit the execution of tests (provided in seconds).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All that's left is to configure the regular testing mode after the `--test-command
+    cmake` argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Test mode
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Assuming that we have built our project and we're executing `ctest` in the build
+    tree (or we're using the `build-and-test` wrapper), we can finally execute our
+    tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A simple `ctest` command without any arguments is usually enough to get satisfactory
+    results in most scenarios. If all tests pass, `ctest` will return a `0` exit code.
+    Use this in your CI/CD pipeline to prevent faulty commits from merging to your
+    repository's production branch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Writing good tests can be as challenging as writing the production code itself.
+    We set up our SUT to be in a specific state, run a single test, and then tear
+    down the SUT instance. This process is rather complex and can generate all sorts
+    of issues: cross-test pollution, temporal and concurrency disruptions, resource
+    contention, frozen execution due to deadlocks, and many others.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can employ strategies that help detect and solve some of these problems.
+    CTest allows you to affect test selection, their order, produced output, time
+    limits, repetition, and so on. The following sections will provide the necessary
+    context and a brief overview of the most useful options. As always, refer to the
+    CMake documentation for an exhaustive list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The first thing we might need to do is to understand which tests are actually
+    written for the project. CTest offers an `-N` option, which disables execution
+    and only prints a list, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: You might want to use `-N` with the filters described in the next section to
+    check which tests would be executed when a filter is applied.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need a JSON format that can be consumed by automated tooling, execute
+    `ctest` with `--show-only=json-v1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CTest also offers a mechanism to group tests with `LABELS` keyword. To list
+    all available labels (without actually executing any tests), use `--print-labels`.
+    This option is helpful when tests are defined manually with the `add_test(<name>
+    <test-command>)` command in your listfile, as you are then able to specify individual
+    labels through test properties, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: On the other hand, the frameworks we'll discuss later provide automatic test
+    discovery, which unfortunately doesn't support such a granular level of labeling
+    yet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filtering tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are plenty of reasons to run only a subset of all tests—the most common
+    one might be the need to debug a single failing test or a module you're working
+    on. There's no point in waiting for all other tests in that case. Other advanced
+    testing scenarios will even go as far as partitioning test cases and distributing
+    the load across a fleet of test runners.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These flags will filter tests according to the provided `<r>` **regular expression**
+    (**regex**), as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-R <r>`, `--tests-regex <r>`—Only run tests with names matching `<r>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-E <r>`, `--exclude-regex <r>`—Skip tests with names matching `<r>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-L <r>`, `--label-regex <r>`—Only run tests with labels matching `<r>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-LE <r>`, `--label-exclude <regex>`—Skip tests with labels matching `<r>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Advanced scenarios can be achieved with the `--tests-information` option (or
+    the shorter form, `-I`). Use this filter to provide a range in a comma-separated
+    format: `<start>, <end>, <step>`. Any of the fields can be empty, and after one
+    more comma, you can append individual `<test-id>` values to run them additionally.
+    Here are some examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-I 3,,` will skip tests 1 and 2 (execution starts from the third test)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-I ,2,` will only run the first and second test'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-I 2,,3` will run every third test, starting from the second test in the row'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-I ,0,,3,9,7` will only run the third, ninth, and seventh test'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Optionally, CTest will accept the filename containing the specification in the
+    same format. As you might imagine, users prefer filtering tests by name. This
+    option can be used to distribute tests across multiple machines for really large
+    suites.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, the `-I` option used with `-R` will narrow the execution (only tests
+    matching both requirements will run). Add the `-U` option if you need the union
+    of the two to execute instead (any of the requirements will suffice).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned before, you can use the `-N` option to check the outcome of filtering.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shuffling tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Writing unit tests can be tricky. One of the more surprising problems to encounter
+    is test coupling, which is a situation where one test affects another by incompletely
+    setting or clearing the state of SUT. In other words, the first test to execute
+    can "leak" its state and pollute the second test. Such coupling is bad news because
+    it introduces unknown, implicit relations between tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'What''s worse, this kind of error is known to hide really well in the complexities
+    of testing scenarios. We might detect it when it causes one of the tests to fail
+    when it shouldn''t, but the opposite is equally possible: an incorrect state causes
+    the test to pass when it shouldn''t. Such falsely passing tests give developers
+    an illusion of security, which is even worse than not having tests at all. The
+    assumption that the code is correctly tested may encourage bolder actions, leading
+    to unexpected outcomes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One way of discovering such problems is by running each test in isolation. Usually,
+    this is not the case when executing test runners straight from the testing framework
+    without CTest. To run a single test, you'll need to pass a framework-specific
+    argument to the test executable. This allows you to detect tests that are passing
+    in the suite but are failing when executed on their own.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTest, on the other hand, effectively removes all memory-based cross-contamination
+    of tests by implicitly executing every test case in a child CTest instance. You
+    may even go further and add the `--force-new-ctest-process` option to enforce
+    separate processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, this alone won't work if your tests are using external, contested
+    resources such as GPUs, databases, or files. An additional precaution we can take
+    is to simply randomize the order of test execution. Such disturbance is often
+    enough to eventually detect such spuriously passing tests. CTest supports this
+    strategy with the `--schedule-random` option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Handling failures
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Here''s a famous quote from John C. Maxwell: "*Fail early, fail often, but
+    always fail forward.*" This is exactly what we want to do when running unit tests
+    (and perhaps in other areas of life). Unless you''re running your tests with a
+    debugger attached, it''s not easy to learn where you made a mistake as CTest will
+    keep things brief and only list tests that failed, without actually printing any
+    of their output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Messages printed to `stdout` by the test case or the SUT might be invaluable
+    to determine what was wrong exactly. To see them, we can run `ctest` with `--output-on-failure`.
+    Alternatively, setting the `CTEST_OUTPUT_ON_FAILURE` environment variable will
+    have the same effect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on the size of the solution, it might make sense to stop execution
+    after any of the tests fail. This can be done by providing the `--stop-on-failure`
+    argument to `ctest`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTest stores the names of failed tests. In order to save time in lengthy test
+    suites, we can focus on these failed tests and skip running the passing tests
+    until the problem is solved. This feature is enabled with the `--rerun-failed`
+    option (any other filters will be ignored). Remember to run all tests after solving
+    all issues to make sure that no regression has been introduced in the meantime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When CTest doesn''t detect any tests, it may mean two things: either tests
+    aren''t there or there''s an issue with the project. By default, `ctest` will
+    print a warning message and return a `0` exit code, to avoid muddying the waters.
+    Most users will have enough context to understand which case they encountered
+    and what to do next. However, in some environments, `ctest` will be executed always,
+    as part of an automated pipeline. Then, we might need to explicitly say that a
+    lack of tests should be interpreted as an error (and return a nonzero exit code).
+    We can configure this behavior by providing the `--no-tests=error` argument. For
+    the opposite behavior (no warning), use the `--no-tests=ignore` option.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Repeating tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sooner or later in your career, you''ll encounter tests that work correctly
+    most of the time. I want to emphasize the word *most*. Once in a blue moon, these
+    tests will fail for environmental reasons: because of incorrectly mocked time,
+    issues with event loops, poor handling of asynchronous execution, parallelism,
+    hash collisions, and other really complicated scenarios that don''t occur on every
+    run. These unreliable tests are called "flaky tests".'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Such inconsistency seems a not-so-important problem. We might say that tests
+    aren''t a real production environment and this is the ultimate reason why they
+    sometimes fail. There is a grain of truth in this: tests aren''t meant to replicate
+    every little detail, because it''s not viable. Tests are a simulation, an approximation
+    of what might happen, and that''s usually good enough. Does it hurt to rerun tests
+    if they''ll pass on the next execution?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Actually, it does. There are three main concerns, as outlined here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you have gathered enough flaky tests in your code base, they will become
+    a serious obstacle to the smooth delivery of code changes. It''s especially frustrating
+    when you''re in a hurry: either getting ready to go home on a Friday afternoon
+    or delivering a critical fix to a severe issue impacting your customers.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You can''t be truly sure that your flaky tests are failing because of the inadequacy
+    of the testing environment. It may be the opposite: they fail because they replicated
+    a rare scenario that already occurs in production. It''s just not obvious enough
+    to raise an alert… yet.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It's not the test that's flaky—it's your code! The environment is wonky from
+    time to time—as programmers, we deal with that in a deterministic manner. If SUT
+    behaves this way, it's a sign of a serious error—for example, the code might be
+    reading from uninitialized memory.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There isn''t a perfect way to address all of the preceding cases—the multitude
+    of possible reasons is simply too great. However, we might increase our chance
+    of identifying flaky tests by running them repeatedly with the `–repeat <mode>:<#>`
+    option. Three modes are available, as outlined here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`until-fail`—Run test `<#>` times; all runs have to pass.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`until-pass`—Run test up to `<#>` times; it has to pass at least once. This
+    is useful when dealing with tests that are known to be flaky, but too difficult
+    and important to debug or disable.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`after-timeout`—Run test up to `<#>` times but retry only if the test is timing
+    out. Use it in busy test environments.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A general recommendation is to debug flaky tests as quickly as possible or get
+    rid of them if they can't be trusted to produce consistent results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controlling output
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Printing every piece of information to the screen every time would instantly
+    get incredibly busy. CTest reduces the noise and collects the outputs of tests
+    it executes to the log files, providing only the most useful information on regular
+    runs. When things go bad and tests fail, you can expect a summary and possibly
+    some logs if you enabled `--output-on-failure`, as mentioned earlier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I know from experience that "enough information" is enough until it isn't. Sometimes,
+    we may want to see the output of passed tests too, perhaps to check if they're
+    truly working (and not just silently stopping without an error). To get access
+    to more verbose output, add the `-V` option (or `--verbose` if you want to be
+    explicit in your automated pipelines). If that's not enough, you might want `-VV`
+    or `--extra-verbose`. For extremely in-depth debugging, use `--debug` (but be
+    prepared for walls of text with all the details).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you're looking for the opposite, CTest also offers "Zen mode" enabled with
+    `-Q`, or `--quiet`. No output will be printed then (you can stop worrying and
+    learn to love the calm). It seems that this option has no other use than to confuse
+    people, but be aware that the output will still be stored in test files (in `./Testing/Temporary`
+    by default). Automated pipelines can check if the exit code is a nonzero value
+    and collect the log files for further processing without littering the main output
+    with details that may confuse developers not familiar with the product.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To store the logs in a specific path, use the `-O <file>`, `--output-log <file>`
+    option. If you''re suffering from lengthy outputs, there are two limit options
+    to cap them to the given number of bytes per test: `--test-output-size-passed
+    <size>` and `--test-output-size-failed <size>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Miscellaneous
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are a few other useful options that can be useful for your everyday testing
+    needs, as outlined here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-C <cfg>, --build-config <cfg>` (multi-configuration generators only)—Use
+    this to specify which configuration to test. The `Debug` configuration usually
+    has debugging symbols, making things easier to understand, but `Release` should
+    be tested too, as heavy optimization options could potentially affect the behavior
+    of SUT.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-j <jobs>, --parallel <jobs>`—This sets the number of tests executed in parallel.
+    It''s very useful to speed up the execution of long tests during development.
+    Be mindful that in a busy environment (on a shared test runner), it might have
+    an adverse effect due to scheduling. This can be slightly mitigated with the next
+    option.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--test-load <level>`—Use this to schedule parallel tests in a fashion that
+    CPU load doesn''t exceed the `<level>` value (on a best-effort basis).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`--timeout <seconds>`—Use this to specify the default limit of time for a single
+    test.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Now that we understand how to execute `ctest` in many different scenarios, let's
+    learn how to add a simple test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating the most basic unit test for CTest
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Writing unit tests is technically possible without any kind of framework. All
+    we have to do is create an instance of the class we want to test, execute one
+    of its methods, and check if the new state or value returned meets our expectations.
+    Then, we report the result and delete the object under test. Let's try it out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We''ll use the following structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Starting from `main.cpp`, we can see it will use a `Calc` class, as illustrated
+    in the following code snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/src/main.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Nothing too fancy—`main.cpp` simply includes the `calc.h` header and calls
+    two methods of the `Calc` object. Let''s quickly glance at the interface of `Calc`,
+    our SUT, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/src/calc.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The interface is as simple as possible. We''re using `#pragma once` here—it
+    works exactly like commonly seen preprocessor include guards and is understood
+    by almost all modern compilers, despite not being part of the official standard.
+    Let''s see the class implementation, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/src/calc.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Uh-oh! We introduced a mistake! `Multiply` is ignoring the `b` argument and
+    returns `a` squared instead. That should be detected by correctly written unit
+    tests. So, let''s write some! Here we go:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/test/calc_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: We start our `calc_test.cpp` file by writing two test methods, one for each
+    tested method of SUT. If the value returned from the called method doesn't match
+    expectations, each function will call `std::exit(1)`. We could use `assert()`,
+    `abort()`, or `terminate()` here, but that would result in a less explicit `Subprocess
+    aborted` message in the output of `ctest`, instead of the more readable `Failed`
+    message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Time to create a test runner. Ours will be simple as possible because doing
+    it correctly would require a ridiculous amount of work. Just look at the `main()`
+    function we had to write in order to run just two tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/test/unit_tests.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here''s a breakdown of what happens here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We declare two external functions that will be linked from another translation
+    unit.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If no arguments were provided, execute both tests (the zeroth element in `argv[]`
+    is always the program name).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the first argument is an identifier of the test, execute it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If any of the tests fail, it internally calls `exit()` and returns with a `1`
+    exit code.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If no tests were executed or all passed, it implicitly returns with a `0` exit
+    code.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To run the first test, we''ll execute `./unit_tests 1`; to run the second,
+    we''ll execute `./unit_tests 2`. We simplified the code as much as we could, and
+    it still turned out to be pretty hard to read. Anyone who might need to maintain
+    this section isn''t going to have a great time after adding a few more tests,
+    not to mention that this functionality is pretty raw—debugging such a test suite
+    will be a lot of work. Nevertheless, let''s see how we can use it with CTest,
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We start with the usual heading and `enable_testing()`. This is to tell CTest
+    that we''d like to enable tests in this directory and its subdirectories. Next,
+    we''ll include two nested listfiles in each of the subdirectories: `src` and `test`.
+    The highlighted `bin` value states that we''d like the binary output of `src`
+    subdirectories to be placed in `<build_tree>/bin`. Otherwise, binary files would
+    end up in `<build_tree>/src`, which could be confusing. After all, build artifacts
+    are no longer source files.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The listfile for the `src` directory is very straightforward and contains a
+    simple `main` target definition, as illustrated here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We also need a listfile for the `test` directory, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/01-no-framework/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We have now defined a second `unit_tests` target that also uses the `src/calc.cpp`
+    implementation file and respective header. Finally, we explicitly add two tests:
+    `SumAddsTwoInts` and `MultiplyMultipliesTwoInts`. Each provides its ID as an argument
+    to the `add_test()` command. CTest will simply take anything provided after the
+    `COMMAND` keyword and execute it in a subshell, collecting the output and exit
+    code. Don''t get too attached to `add_test()`—in the *Unit-testing frameworks*
+    section, we''ll discover a much better way of dealing with test cases, so we''ll
+    skip describing it in detail here.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is how `ctest` works in practice when executed in the build tree:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: CTest executed both tests and reported that one of them is failing—the returned
+    value from `Calc::Multiply` didn't meet expectations. Very good. We now know that
+    our code has a bug, and someone should fix it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You may have noticed that in most examples so far, we didn''t necessarily employ
+    the project structure described in [*Chapter 3*](B17205_03_Final_JC_ePub.xhtml#_idTextAnchor078),
+    *Setting Up Your First CMake Project*. This was done to keep things brief. This
+    chapter discusses more advanced concepts, and therefore using a full structure
+    is warranted. In your projects (no matter how small), it''s best to follow this
+    structure from the start. As a wise man once said: "*You step onto the road, and
+    if you don''t keep your feet, there''s no knowing where you might be swept off
+    to.*"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It's no secret that you should avoid building a testing framework as part of
+    your own project. Even the most basic example is hard on the eyes, has a lot of
+    overhead, and doesn't add any value. However, before we can adopt a unit-testing
+    framework, we'll need to rethink the structure of the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Structuring our projects for testing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'C++ has some limited introspection capabilities, but cannot offer such powerful
+    retrospection features as Java can. This might be the very reason why writing
+    tests and unit-testing frameworks for C++ code is much harder than in other, richer
+    environments. One implication of such an economic approach is the fact that the
+    programmer has to be more involved in crafting testable code. We''ll not only
+    have to design our interfaces more carefully, but also answer questions about
+    the practicalities, such as this: *How do we avoid doubling the compilation, and
+    reuse artifacts between tests and production?*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compilation time might not be a significant problem for smaller projects, but
+    as time flies, the projects grow. The need for short compilation loops does not
+    go away. In the previous example, we appended all the `sut` sources to the unit-test
+    executable apart from the `main.cpp` file. If you were reading closely, you will
+    have noticed that we had some code in that file that didn't get tested (the contents
+    of `main()` itself). By compiling the code twice, there's a slight chance that
+    the produced artifacts won't be *exactly the same*. These things can potentially
+    diverge over time (due to the addition of compilation flags and preprocessor directives).
+    This may be especially dangerous when engineers contributing to the code base
+    are in a rush, inexperienced, or simply unfamiliar with the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are multiple ways of dealing with the problem, but the most elegant is
+    to build your entire solution as a library and link it with unit tests. You might
+    ask: "*How are we going to run it then?*" We''ll need a bootstrap executable that
+    will link with the library and run its code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Begin by renaming your current `main()` function to `run()`, `start_program()`,
+    or something similar. Then, create another implementation file (`bootstrap.cpp`)
+    with a new `main()` function, and this function only. This will be our adapter
+    (or wrapper, if you will): its sole role is to provide an entry point and call
+    the `run()` forwarding command-line arguments (if any). All that''s left is to
+    link everything together, and we''ve got ourselves a testable project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: By renaming `main()`, we can now link SUT with tests and test its primary function
+    too. Otherwise, we'd be in violation of the `main()` function. As promised in
+    the *Separating main() for testing* section of [*Chapter 6*](B17205_06_Final_JC_ePub.xhtml#_idTextAnchor146),
+    we'll explain this subject in detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The testing framework may provide its own implementation of the `main()` function
+    out of the box, so we don't need to write it. Usually, it will detect all tests
+    that we've linked and execute them according to the desired configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Artifacts produced by this approach can be grouped into the following targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `sut` library with production code
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bootstrap` with a `main()` wrapper calling `run()` from `sut`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`unit tests` with a `main()` wrapper that runs all the tests on `sut`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following diagram shows the symbol relations between targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 8.2 ‒ Sharing artifacts between test and production executables'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_8.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 8.2 ‒ Sharing artifacts between test and production executables
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We end up with six implementation files that will produce their respective
+    (`.o`) *object files*, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`calc.cpp`—The `Calc` class to be unit-tested. This is called a **unit under
+    test** (**UUT**) because UUT is a specialization of SUT.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`run.cpp`—Original entry point renamed `run()`, which can be now tested.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`bootstrap.cpp`—New `main()` entry point calling `run()`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`calc_test.cpp`—Tests the `Calc` class.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`run_test.cpp`—New tests for `run()` can go here.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`unit_tests.o`—Entry point for unit tests, extended to call tests for `run()`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The library that we''re about to build doesn''t actually need to be a factual
+    library: static or shared. By creating an object library, we can avoid unnecessary
+    archiving or linking. Technically speaking, it''s possible to shave a few moments
+    by relying on dynamic linking for SUT, but more often than not, we''re making
+    changes in both targets: `tests` and `sut`, canceling out any potential gains.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s see how our files have changed, starting with the file previously named
+    `main.cpp`, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/02-structured/src/run.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Not too many differences: renamed file and function. We also added a `return`
+    statement as the compiler won''t do this implicitly for functions that are not
+    `main()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The new `main()` function looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/02-structured/src/bootstrap.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As simple as possible—we''re declaring that the linker will provide the `run()`
+    function from another translation unit, and we''re calling it. Next to change
+    is the `src` listfile, which you can see here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/02-structured/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: First, we created a `sut` library and marked `.` as a `PUBLIC` *include directory*
+    so that it will be propagated to all targets that will link `sut` (that is, `bootstrap`
+    and `unit_tests`). Note that *include directories* are relative to the listfile,
+    therefore we can use a dot (`.`) to refer to the current `<source_tree>/src` directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Time to update our `unit_tests` target. Here, we''ll remove the direct reference
+    to the `../src/calc.cpp` file with a linking reference to `sut` for the `unit_tests`
+    target. We''ll also add a new test for the primary function in the `run_test.cpp`
+    file. We''ll skip discussing that for brevity, but if you''re interested, check
+    out the online examples. Meanwhile, here''s the whole `test` listfile:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/02-structured/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We should also register the new test, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Done! By following this practice, you can be sure that your tests are executed
+    on the very machine code that will be used in production.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: The target names we're using here, `sut` and `bootstrap`, are chosen to make
+    it very clear what they're about from the perspective of testing. In real-life
+    projects, you should pick names that match the context of the production code
+    (rather than tests). For example, for a FooApp, name your target `foo` instead
+    of `bootstrap`, and `lib_foo` instead of `sut`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know how to structure a testable project in appropriate targets,
+    let's shift our focus to the testing frameworks themselves. We don't want to add
+    every test case to our listfiles manually, do we?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unit-testing frameworks
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The previous section proves that it isn''t extremely complicated to write a
+    tiny unit-testing driver. It wasn''t pretty, but believe it or not, professional
+    developers actually *do like* to reinvent the wheel (theirs will be fancier, rounder,
+    and faster than the legacy one). Don''t fall into this trap: you''ll create so
+    much boilerplate that it could become a separate project. Introducing a popular
+    unit-test framework to your solution aligns it to a standard that transcends projects
+    and companies and will get you free updates and extensions for cheap. You can''t
+    lose.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How do we add a unit-testing framework to our project? Well, write tests in
+    implementation files according to the chosen framework's rules and link these
+    tests with a test runner provided by the framework. Test runners are your entry
+    points that will start the execution of selected tests. Unlike the basic `unit_tests.cpp`
+    file we saw earlier in the chapter, many of them will detect all the tests automatically.
+    Beautiful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two unit-testing frameworks I decided to introduce in this chapter.
+    I picked them for the following reasons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Catch2** is a relatively easy-to-learn and well-supported and -documented
+    project. It offers simple test cases, but also provides elegant macros for **behavior-driven
+    development** (**BDD**). It lacks some features but can be coupled with external
+    tools when needed. You can visit its home page here: [https://github.com/catchorg/Catch2](https://github.com/catchorg/Catch2).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**GTest** is also very convenient, but much more advanced. Its key features
+    are a rich set of assertions, user-defined assertions, death tests, fatal and
+    non-fatal failures, value- and type-parametrized tests, XML test report generation,
+    and mocking. The last one is delivered in the GMock module available from the
+    same repository: [https://github.com/google/googletest](https://github.com/google/googletest).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Which framework you should choose depends on your learning approach and the
+    size of the project. If you prefer a slow, gradual process and don't need all
+    the bells and whistles, go with Catch2\. Developers who prefer starting from the
+    deep end and need a lot of firepower will benefit from choosing GTest.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Catch2
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'This framework, maintained by Martin Hořeňovský, is great for beginners and
+    smaller projects. This is not to say that it can''t handle the bigger applications,
+    as long as you keep in mind that there will be areas where additional tooling
+    may be necessary. I would deviate too much from the topic of this book if I went
+    into it in detail, but I still want to give you an overview. To start, let''s
+    take a brief look at the implementation of a unit test we can write for our `Calc`
+    class, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/03-catch2/test/calc_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: That's it. These few lines are much more powerful than what we wrote in the
+    previous examples. `CHECK()` macros will not only verify if the expectation is
+    met—they will actually collect all failed assertions and present them in a single
+    output so that you can do a single fix and avoid constant recompilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now, to the best part: we don''t need to add these tests anywhere or even inform
+    CMake they exist; you can forget about `add_test()` because you won''t need it
+    again. Catch2 will automatically register your tests with CTest if you let it.
+    Adding the framework is very easy after configuring the project as described in
+    the previous section. We need to bring it into the project with `FetchContent()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two major versions to choose from: `v2` and `v3`. Version 2 is offered
+    as a single-header library (just `#include <catch2/catch.hpp>`) for C++11, and
+    will be eventually deprecated by Version 3\. This one has multiple headers, is
+    compiled as a static library, and requires C++14\. Of course, it''s recommended
+    to go with the newer release if you can use modern C++ (yes—C++11 is no longer
+    considered "modern"). When working with Catch2, you should pick a Git tag and
+    pin it in your listfile. In other words, it is not guaranteed that an upgrade
+    won''t break your code (it likely won''t, but don''t risk going with the `devel`
+    branch if you don''t need to). To fetch Catch2, we need to provide a URL to the
+    repository, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/03-catch2/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we need to define our `unit_tests` target and link it with `sut` and
+    with a framework-provided entry point and `Catch2::Catch2WithMain` library. Since
+    Catch2 provides its own `main()` function, we no longer use the `unit_tests.cpp`
+    file (this file can be removed). The code is illustrated in the following snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/03-catch2/test/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Lastly, we use a `catch_discover_tests()` command defined in the module provided
+    by Catch2 that will detect all test cases from `unit_tests` and register them
+    with CTest, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/03-catch2/test/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Done. We just added a unit-testing framework to our solution. Let''s now see
+    it in practice. The output from the test runner looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The direct execution of the runner (compiled `unit_test` executable) is slightly
+    faster, but normally, you'd like to use the `ctest --output-on-failure` command
+    instead of executing the test runner directly to get all the CTest benefits mentioned
+    earlier. Note also that Catch2 was able to conveniently expand the `sut.Multiply(3,
+    4)` expression to `9`, providing us with more context.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This concludes the setup of Catch2\. If you ever need to add more tests, just
+    create implementation files and insert their paths to the list of sources for
+    the `unit_tests` target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This framework has quite a few interesting tricks up its sleeve: event listeners,
+    data generators, and micro benchmarking, but it doesn''t provide a mocking functionality.
+    If you don''t know what mocks are, read on—we''ll cover that in a moment. Nevertheless,
+    if you find yourself in need of mocks, you can always add one of the mocking frameworks
+    next to Catch2, as listed here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: FakeIt ([https://github.com/eranpeer/FakeIt](https://github.com/eranpeer/FakeIt))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Hippomocks ([https://github.com/dascandy/hippomocks](https://github.com/dascandy/hippomocks))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Trompeloeil ([https://github.com/rollbear/trompeloeil](https://github.com/rollbear/trompeloeil))
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: That said, for a more streamlined, advanced experience, there is another framework
+    worth looking at.
+  prefs: []
+  type: TYPE_NORMAL
+- en: GTest
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are a few important advantages when it comes to using GTest: it''s been
+    around quite a long time and is highly recognized in the C++ community (thus,
+    multiple IDEs support it natively). The company behind the biggest search engine
+    on the planet is maintaining and using it extensively, so it''s quite unlikely
+    it will become stale or abandoned any time soon. It can test C++11 and up, so
+    if you''re stuck in a bit older environment, you''re in luck.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The GTest repository comprises two projects: GTest (the main testing framework)
+    and GMock (a library adding the mocking functionality). That means you can download
+    both with a single `FetchContent()` call.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using GTest
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To use GTest, our project needs to follow the directions from the *Structuring
+    our projects for testing* section. This is how we''d write a unit test in this
+    framework:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/04-gtest/test/calc_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since this example will be used also in GMock, I decided to put tests in a single
+    `CalcTestSuite` class. Test suites are group related tests, so they can reuse
+    the same fields, methods, setup (initialization), and teardown (cleanup) steps.
+    To create a test suite, we need to declare a new class inheriting from `::testing::Test`
+    and put reused elements (fields, methods) in its `protected` section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each test case in a test suite is declared with a `TEST_F()` preprocessor macro
+    that stringifies provided names for the test suite and test case (there's also
+    a simple `TEST()` macro that defines unaffiliated tests). Because we defined `Calc
+    sut_` in the class, each test case can access it as if the test were a method
+    of `CalcTestSuite`. In reality, each test case is run in its own class implicitly
+    inheriting from `CalcTestSuite` (that's why we need the `protected` keyword).
+    Note that reused fields are not meant to share any data between consecutive tests—their
+    function is to keep the code *DRY*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: GTest doesn't offer natural syntax for assertions like Catch2 does. Instead,
+    we need to use an explicit comparison, such as `EXPECT_EQ()`. By convention, we
+    put the expected value as the first argument and the actual value as the second
+    argument. There are many other assertions, helpers, and macros worth learning
+    about.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: For detailed information on GTest, see the official reference material ([https://google.github.io/googletest/](https://google.github.io/googletest/)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To add this dependency to our project, we need to decide which version to use.
+    Unlike Catch2, GTest is leaning toward a "live at head" philosophy (originating
+    from the Abseil project that GTest depends on). It states: "*If you build our
+    dependency from source and follow our API, you shouldn''t have any issues.*" (Refer
+    to the *Further reading* section for more details.)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you're comfortable following this rule (and building from source isn't an
+    issue), set your Git tag to the `master` branch. Otherwise, pick a release from
+    the GTest repository. We can also choose to search the host machine for the installed
+    copy first, as CMake offers a bundled `FindGTest` module to find the local installation.
+    Since v3.20, CMake will use the upstream `GTestConfig.cmake` config-file, if it
+    exists, instead of relying on the find-module, which might become outdated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In any case, adding a dependency on GTest looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/04-gtest/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: We're following the same method as with Catch2—execute `FetchContent()` and
+    build the framework from source. The only difference is the addition of the `set(gtest...)`
+    command, as recommended by GTest authors to prevent overriding the parent project's
+    compiler and linker settings on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, we can declare our test runner executable, link it with `gtest_main`,
+    and have our test cases automatically discovered thanks to the built-in CMake
+    `GoogleTest` module, as illustrated here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/04-gtest/test/CMakeLists.txt (continued)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This completes the setup of GTest. The output of the test runner is much more
+    verbose than from Catch2, but we can pass `--gtest_brief=1` to limit it to failures
+    only, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Luckily, even the noisy output will be suppressed when running from CTest (unless
+    we explicitly enable it on the `ctest --output-on-failure` command line).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have the framework in place, let's discuss mocking. After all, no
+    test can be truly "unit" when it's coupled with other elements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: GMock
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Writing true unit tests is about executing a piece of code in isolation from
+    other pieces of code. Such a unit is understood as a self-contained element, either
+    a class or a component. Of course, hardly any programs written in C++ have all
+    of their units in clear isolation from others. Most likely, your code will rely
+    heavily on some form of association relationship between classes. There''s only
+    one problem with that: objects of such a class will require objects of another
+    class, and those will require yet another. Before you know it, your entire solution
+    is participating in a "unit test". Even worse, your code might be coupled to an
+    external system and be dependent on its state—for example, specific records in
+    a database, network packets coming in, or specific files stored on the disk.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To decouple units for the purpose of testing, developers use **test doubles**
+    or a special version of classes that are used by a class under test. Some examples
+    include fakes, stubs, and mocks. Here are some rough definitions of these:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A **fake** is a limited implementation of some more complex class. An example
+    could be an in-memory map instead of an actual database client.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A **stub** provides specific, canned answers to method calls, limited to responses
+    used by tests. It can also record which methods were called and how many times
+    this occurred.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A **mock** is a bit more extended version of a stub. It will additionally verify
+    if methods were called during the test as expected.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Such a test double is created at the beginning of a test and provided as an
+    argument to the constructor of a tested class to be used instead of a real object.
+    This mechanism is called **dependency injection**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The problem with simple test doubles is the fact that they are *too simple*.
+    To simulate behaviors for different test scenarios, we would have to provide many
+    different doubles, one for every state in which the coupled object can be. This
+    isn''t very practical and would scatter testing code across too many files. This
+    is where GMock comes in: it allows developers to create a generic test double
+    for a specific class and define its behavior for every test in line. GMock calls
+    these doubles "mocks", but in reality, they''re a mixture of all the aforementioned
+    types, depending on the occasion.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Consider the following example: let''s add a functionality to our `Calc` class
+    that would add a random number to the provided argument. It will be represented
+    by an `AddRandomNumber()` method that returns this sum as an `int`. How would
+    we confirm the fact that the returned value is really an exact sum of something
+    random and the value provided to the class? As we know, relying on randomness
+    is key to many important processes, and if we''re using it incorrectly, we might
+    suffer all kinds of consequences. Checking all random numbers until we exhaust
+    all possibilities isn''t very practical.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To test it, we need to wrap a random number generator in a class that could
+    be mocked (or, in other words, replaced with a mock). Mocks will allow us to force
+    a specific response, which is to "fake" generation of a random number. `Calc`
+    will use that value in `AddRandomNumber()` and allow us to check if the returned
+    value from that method meets expectations. The clean separation of random number
+    generation to another unit is an added value (as we'll be able to exchange one
+    type of generator for another).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s start with the public interface for the abstract generator. This will
+    allow us to implement it in the actual generator and a mock, enabling us to use
+    them interchangeably. We''ll execute the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/rng.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Classes implementing this interface will provide us with a random number from
+    the `Get()` method. Note the `virtual` keyword—it has to be on all methods to
+    be mocked unless we''d like to get involved with more complex template-based mocking.
+    We also need to remember to add a virtual destructor. Next, we have to extend
+    our `Calc` class to accept and store the generator, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/calc.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We included the header and added a method to provide random additions. Additionally,
+    a field to store the pointer to the generator was created, along with a parameterized
+    constructor. This is how dependency injection works in practice. Now, we implement
+    these methods, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/calc.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the constructor, we''re assigning the provided pointer to a class field.
+    We''re then using this field in `AddRandomNumber()` to fetch the generated value.
+    The production code will use a real number generator; the tests will use mocks.
+    Remember that we need to dereference pointers to enable polymorphism. As a bonus,
+    we could possibly create different generator classes for different implementations.
+    I just need one: a Mersenne Twister pseudo-random generator with uniform distribution,
+    as illustrated in the following code snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/rng_mt19937.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code isn''t very efficient, but it will suffice for this simple example.
+    The purpose is to generate numbers from `1` to `6` and return them to the caller.
+    The header for this class is as simple as possible, as we can see here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/rng_mt19937.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And this is how we''re using it in the production code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/src/run.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We have created a generator and passed a pointer to it to the constructor of
+    `Calc`. Everything is ready, and we can start writing our mock. To keep things
+    organized, developers usually put mocks in a separate `test/mocks` directory.
+    To prevent ambiguity, the header name has a `_mock` suffix. Here is the code we
+    will execute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/test/mocks/rng_mock.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After adding the `gmock.h` header, we can declare our mock. As planned, it''s
+    a class implementing the `RandomNumberGenerator` interface. Instead of writing
+    methods ourselves, we need to use `MOCK_METHOD` macros provided by GMock. These
+    are informing the framework as to which methods from the interface should be mocked.
+    Use the following format (note the parentheses):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We''re ready to use the mock in our test suite (previous test cases are omited
+    for brevity), as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/test/calc_test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let''s break down the changes: we added the new header and created a new field
+    for `rng_mock_` in the test suite. Next, the mock''s address is passed to the
+    constructor of `sut_`. We can do that because fields are initialized in order
+    of declaration (`rng_mock_` precedes `sut_`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our test case, we call GMock's `EXPECT_CALL` macro on the `Get()` method
+    of `rng_mock_`. This tells the framework to fail the test if the `Get()` method
+    isn't called during execution. The `Times` chained call explicitly states how
+    many calls must happen for the test to pass. `WillOnce` determines what the mocking
+    framework does after the method is called (it returns `3`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: By virtue of using GMock, we're able to express mocked behavior alongside the
+    expected outcome. This greatly improves readability and eases the maintenance
+    of tests. Most importantly, though, it provides elasticity in each test case,
+    as we get to differentiate what happens with a single, expressive statement.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, we need to make sure that the `gmock` library is linked with a test
+    runner. To achieve that, we add it to the `target_link_libraries()` list, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/05-gmock/test/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, we can enjoy all the benefits of GTest frameworks. Both GTest and GMock
+    are very advanced tools with a vast multitude of concepts, utilities, and helpers
+    for different occasions. This example (despite being a bit lengthy) only touches
+    the surface of what's possible. I encourage you to incorporate them in your projects
+    as they will greatly increase the quality of your code. A good place to start
+    with GMock is the *Mocking for Dummies* page in the official documentation (you
+    can find a link to this in the *Further reading* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having tests in place, we should somehow measure what's tested and what isn't
+    and strive to improve the situation. It's best to use automated tools that will
+    collect and report this information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating test coverage reports
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Adding tests to such a small solution isn''t incredibly challenging. The real
+    difficulty comes with slightly more advanced and longer programs. Over the years,
+    I have found that as I approach over 1,000 lines of code, it slowly becomes hard
+    to track which lines and branches are executed during tests and which aren''t.
+    After crossing 3,000 lines, it is nearly impossible. Most professional applications
+    will have much more code than that. To deal with this problem, we can use a utility
+    to understand which code lines are "covered" by test cases. Such code coverage
+    tools hook up to the SUT and gather the information on the execution of each line
+    during tests to present it in a convenient report like the one shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 8.3 ‒ Code coverage report generated by LCOV'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_8.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 8.3 ‒ Code coverage report generated by LCOV
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These reports will show you which files are covered by tests and which aren''t.
+    More than that, you can also take a peek inside the details of each file and see
+    exactly which lines of code are executed and how many times this occurs. In the
+    following screenshot, the `Calc` constructor was run `4` times, one time for each
+    of the tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 8.4 ‒ Detailed view of a code coverage report'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_8.4_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 8.4 ‒ Detailed view of a code coverage report
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are multiple ways of generating similar reports and they differ across
+    platforms and compilers, but they generally follow the same procedure: prepare
+    the SUT to be measured, and get the baseline, measure, and report.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The simplest tool for the job is called `gcov`, a coverage utility from the
+    `gcov` to measure coverage. If you're using Clang, don't worry—Clang supports
+    producing metrics in this format. You can get LCOV from the official repository
+    maintained by the *Linux Test Project* ([https://github.com/linux-test-project/lcov](https://github.com/linux-test-project/lcov))
+    or simply use a package manager. As the name suggests, it is a Linux-targeted
+    utility. It's possible to run it on macOS, but the Windows platform is not supported.
+    End users often don't care about test coverage, so it's usually fine to install
+    LCOV manually in your own build environment instead of bolting it to the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To measure coverage, we''ll need to do the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compile in the `Debug` configuration with compiler flags enabling code coverage.
+    This will generate coverage note (`.gcno`) files.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Link the test executable with the `gcov` library.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Gather coverage metrics for the baseline, without any tests being run.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Run the tests. This will create coverage data (`.gcda`) files.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Collect the metrics to an aggregated information file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Generate a (`.html`) report.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We should start by explaining why the code has to be compiled in the `Debug`
+    configuration. The most important reason is the fact that usually, `Debug` configurations
+    have disabled any optimization with a `-O0` flag. CMake does this by default in
+    the `CMAKE_CXX_FLAGS_DEBUG` variable (despite not stating this anywhere in the
+    documentation). Unless you decided to override this variable, your debug build
+    should be unoptimized. This is desired to prevent any inlining and other kinds
+    of implicit code simplification. Otherwise, it would be really hard to trace which
+    machine instruction came from which line of source code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the first step, we need to instruct the compiler to add the necessary instrumentation
+    to our SUT. The exact flag to add is compiler-specific; however, two major compilers—GCC
+    and Clang—offer the same `--coverage` flag that enables coverage, producing data
+    in a GCC-compatible `gcov` format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is how we can add the coverage instrumentation to our exemplary SUT from
+    the previous section:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/06-coverage/src/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let''s break this down step by step, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensure that we're running in the `Debug` configuration with the `if(STREQUAL)`
+    command. Remember that you won't be able to get any coverage unless you run `cmake`
+    with the `-DCMAKE_BUILD_TYPE=Debug` option.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Add `--coverage` to the `PRIVATE` *compile options* for all *object files* that
+    are part of the `sut` library.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Add `--coverage` to the `PUBLIC` linker options: both GCC and Clang interpret
+    this as a request to link the `gcov` (or compatible) library with all targets
+    that depend on `sut` (due to propagated properties).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `add_custom_command()` command is introduced to clean any stale `.gcda`
+    files. Reasons to add this command are discussed in detail in the *Avoiding the
+    SEGFAULT gotcha* section.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is enough to produce code coverage. If you're using an IDE such as Clion,
+    you'll be able to run your unit tests with coverage and get the results in a built-in
+    report view. However, this won't work in any automated pipeline that might be
+    run in your CI/CD. To get reports, we'll need to generate them ourselves with
+    LCOV.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For this purpose, it''s best to define a new target called `coverage`. To keep
+    things clean, we''ll define a separate function, `AddCoverage`, in another file
+    to be used in the `test` listfile, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/06-coverage/cmake/Coverage.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the preceding snippet, we first detect the paths for `lcov` and `genhtml`
+    (two command-line tools from the LCOV package). The `REQUIRED` keyword instructs
+    CMake to throw an error when they''re not found. Next, we add a custom `coverage`
+    target with the following steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clear the counters from any previous runs.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Run the `target` executable (using generator expressions to get its path). `$<TARGET_FILE:target>`
+    is an exceptional generator expression, and it will implicitly add a dependency
+    on `target` in this case, causing it to be built before executing all commands.
+    We'll provide `target` as an argument to this function.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Collect metrics for the solution from the current directory (`-d .`) and output
+    to a file (`-o coverage.info`).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Remove (`-r`) unwanted coverage data on system headers (`'/usr/include/*'`)
+    and output to another file (`-o filtered.info`).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Generate an HTML report in the `coverage` directory, and add a `--legend` color.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Remove temporary `.info` files.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Specifying the `WORKING_DIRECTORY` keyword sets binary tree as working directory
+    for all commands.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'These are the general steps for both GCC and Clang, but it''s important to
+    know that the `gcov` tool''s version has to match the version of the compiler.
+    In other words, you can''t use GCC''s `gcov` tool for Clang-compiled code. To
+    point `lcov` to Clang''s `gcov` tool, we can use the `--gcov-tool` argument. The
+    only problem here is that it has to be a single executable. To deal with that,
+    we can provide a simple wrapper script (remember to mark it as an executable with
+    `chmod +x`), as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake/gcov-llvm-wrapper.sh
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'All of our calls to `${LCOV_PATH}` in the previous function should receive
+    the following additional flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Make sure that this function is available for inclusion in the `test` listfile.
+    We can do this by extending the *include search path* in the main listfile, as
+    follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/06-coverage/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This small line allows us to include all `.cmake` files from the `cmake` directory
+    in our project. We can now use `Coverage.cmake` in the `test` listfile, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter08/06-coverage/test/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To build this target, use the following commands (notice that first command
+    ends with a `DCMAKE_BUILD_TYPE=Debug` build type selection):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After executing all of the mentioned steps, you will see a short summary like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, open the `coverage/index.html` file in your browser and enjoy the reports!
+    There's only one small issue though…
+  prefs: []
+  type: TYPE_NORMAL
+- en: Avoiding the SEGFAULT gotcha
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We may get ourselves into trouble when we start editing sources in such a solution.
+    This is because the coverage information is split into two parts, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`gcno` files, or **GNU Coverage Notes**, generated during the compilation of
+    the SUT'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`gcda` files, or **GNU Coverage Data**, generated **and updated** during test
+    runs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The "update" functionality is a potential source of segmentation faults. After
+    we run our tests initially, we're left with a bunch of `gcda` files that don't
+    get removed at any point. If we make some changes to the source code and recompile
+    the *object files*, new `gcno` files will be created. However, there's no wipe
+    step—the old `gcda` files still follow the stale source. When we execute the `unit_tests`
+    binary (it happens in the `gtest_discover_tests` macro), the coverage information
+    files won't match, and we'll receive a `SEGFAULT` (segmentation fault) error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To avoid this problem, we should erase any stale `gcda` files. Since our `sut`
+    instance is a `STATIC` library, we can hook the `add_custom_command(TARGET)` command
+    to building events. The clean will be executed before the rebuild starts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find links to more information in the *Further reading* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'On the surface, it may seem that complexities associated with proper testing
+    are so great, they aren''t worth the effort. It''s striking how much code out
+    there is running without any tests at all, the primary argument being that testing
+    your software is a daunting endeavor. I''ll add: even more so if done manually.
+    Unfortunately, without rigorous automated testing, visibility of any issues in
+    the code is incomplete or non-existent. Untested code is often quicker to write
+    (not always), but it''s definitely much slower to read, refactor, and fix.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we outlined some key reasons for going forward with tests
+    from the get-go. One of the most compelling is mental health and a good night''s
+    sleep. Not one developer lies in their bed thinking: *I can''t wait to be woken
+    up in a few hours to put out some fires and fix bugs*. But seriously: catching
+    errors before deploying them to production can be a life-saver for you (and the
+    company).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When it comes to testing utilities, CMake really shows its true strength. CTest
+    can do wonders in detecting faulty tests: isolation, shuffling, repetition, timeouts.
+    All these techniques are extremely handy and available through a simple flag straight
+    from the command line. We also learned how we can use CTest to list tests, filter
+    them, and control the output of test cases, but most importantly, we now know
+    the true power of adopting a standard solution across the board. Any project built
+    with CMake can be tested exactly the same, without investigating any details about
+    its internals.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we structured our project to simplify the process of testing and reuse
+    the same *object files* between production code and test runners. It was interesting
+    to write our own test runner, but maybe let's focus on the actual problem our
+    program should solve and invest time in embracing a popular third-party testing
+    framework.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Speaking of which, we learned the very basics of Catch2 and GTest. We further
+    dove into details of the GMock library and understood how test doubles work to
+    make true unit tests possible. Lastly, we set up some reporting with LCOV. After
+    all, there's nothing better than hard data to prove that our solution is, in fact,
+    fully tested.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we'll discuss more useful tooling to improve the quality
+    of our source code and find issues we didn't even know existed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information you can refer to the following links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*CMake documentation on CTest*: [https://cmake.org/cmake/help/latest/manual/ctest.1.html](https://cmake.org/cmake/help/latest/manual/ctest.1.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Catch2 documentation*:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md](https://github.com/catchorg/Catch2/blob/devel/docs/tutorial.md)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*GMock tutorial*: [https://google.github.io/googletest/gmock_for_dummies.html](https://google.github.io/googletest/gmock_for_dummies.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Abseil:* [https://abseil.io/](https://abseil.io/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Live at head with Abseil:* [https://abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head](https://abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Why Abseil is becoming a dependency of GTest*: [https://github.com/google/googletest/issues/2883](https://github.com/google/googletest/issues/2883)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Coverage in GCC*:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html](https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Coverage in Clang*: [https://clang.llvm.org/docs/SourceBasedCodeCoverage.html](https://clang.llvm.org/docs/SourceBasedCodeCoverage.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*LCOV documentation for command-line tools*:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[http://ltp.sourceforge.net/coverage/lcov/lcov.1.php](http://ltp.sourceforge.net/coverage/lcov/lcov.1.php)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[http://ltp.sourceforge.net/coverage/lcov/genhtml.1.php](http://ltp.sourceforge.net/coverage/lcov/genhtml.1.php)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*GCOV update functionality*: [https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

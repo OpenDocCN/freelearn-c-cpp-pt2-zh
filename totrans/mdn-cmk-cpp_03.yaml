@@ -1,0 +1,1842 @@
+- en: '*Chapter 4*: Working with Targets'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The most basic target we can build in CMake is a single binary executable file
+    that encompasses an entire application. It can be made out of a single piece of
+    source code, such as the classic `helloworld.cpp`. Or it can be something complex
+    – built with hundreds or even tens of thousands of files. This is what many beginner
+    projects look like – create a binary with one source file, add another, and, before
+    you know it, everything is linked to a single binary without any structure whatsoever.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As software developers, we deliberately draw boundaries and designate components
+    to group one or more units of translation (`.cpp` files). We do it for multiple
+    reasons: to increase code readability, manage coupling and connascence, speed
+    up the build process, and finally, extract the reusable components.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every project that is big enough will push you to introduce some form of partitioning.
+    A target in CMake is an answer to exactly that problem – a high-level logical
+    unit that forms a single objective for CMake. A target may depend on other targets,
+    and they are produced in a declarative way. CMake will take care of determining
+    in what order targets have to be built and then execute the necessary steps one
+    by one. As a general rule, building a target will produce an artifact that will
+    be fed into other targets or delivered as a final product of the build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'I deliberately use the inexact word *artifact* because CMake doesn''t limit
+    you to producing executables or libraries. In reality, we can use generated buildsystems
+    to create many kinds of output: more source files, headers, *object files*, archives,
+    and configuration files – anything really. All we need is a command-line tool
+    (such as a compiler), optional input files, and an output path.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Targets are a very powerful concept and simplify building a project greatly.
+    It is key to understand how they work and how to configure them in the most elegant
+    and clean way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The concept of a target
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing custom commands
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Understanding generator expressions
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter04](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter04).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The concept of a target
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you have ever used GNU Make, you will have already seen the concept of a
+    target. Essentially, it's a recipe that a buildsystem uses to compile a list of
+    files into another file. It can be a `.cpp` implementation file compiled into
+    an `.o` *object file*, a group of `.o` files packaged into an `.a` static library,
+    and many other combinations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake, however, allows you to save time and skip the intermediate steps of
+    those recipes; it works on a higher level of abstraction. It understands how to
+    build an executable directly from source files. So, you don''t need to write an
+    explicit recipe to compile any *object files*. All that''s required is an `add_executable()`
+    command with the name of the executable target and a list of the files that are
+    to be its elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: We already used this command in previous chapters and we already know how executable
+    targets are used in practice – during the generation step, CMake will create a
+    buildsystem and fill it with recipes to compile each of the source files and link
+    them together into a single binary executable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In CMake, we can create a target using one of three commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add_executable()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_library()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_custom_target()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The first two are pretty self-explanatory; we briefly used them already in previous
+    chapters to build executables and libraries (and we'll discuss them in depth in
+    [*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126), *Compiling C++
+    Sources with CMake*). But what are those custom targets?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'They allow you to specify your own command line that will be executed *without
+    checking whether the produced output is up to date*, for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calculate the checksums of other binaries.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Run the code-sanitizer and collect the results.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Send a compilation report to the data processing pipeline.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here''s the full signature of the `add_custom_target()` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: We won't discuss every option here, as we want to quickly move on to other targets,
+    but let's just say that custom targets don't necessarily have to produce tangible
+    artifacts in the form of files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One good use case for custom targets might be the need to remove specific files
+    on every build – for example, to make sure that code-coverage reports don''t contain
+    stale data. All we need to do is define a custom target like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding command will search for all files with a `.gcda` extension and
+    remove them. There is one catch though; unlike executable and library targets,
+    custom targets won't be built until they are added to a dependency graph. Let's
+    find out what that is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dependency graph
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Mature applications are often built from many components, and I don''t mean
+    external dependencies here. Specifically, I''m talking about internal libraries.
+    Adding them to the project is useful from a structural perspective, as related
+    things are packaged together in a single logical entity. And they can be linked
+    with other targets – another library or an executable. This is especially convenient
+    when multiple targets are using the same library. Take a look at *Figure 4.1*,
+    which describes an exemplary dependency graph:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 4.1 – Order of building dependencies in the BankApp project'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_4.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 4.1 – Order of building dependencies in the BankApp project
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this project, we have two libraries, two executables, and a custom target.
+    Our use case here is to provide a banking application with a nice GUI for users
+    (**GuiApp**), and a command-line version to be used as part of an automated script
+    (**TerminalApp**). Both executables are depending on the same **Calculations**
+    library, but only one of them needs the **Drawing** library. To guarantee that
+    our app wasn''t modified when it was downloaded from the internet by an end user,
+    we''ll calculate a checksum, store it in a file, and distribute it through separate
+    secure channels. CMake is pretty flexible when it comes to writing list files
+    for such a solution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/01-targets/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: We connect our libraries with executables by using the `target_link_libraries()`
+    command. Without it, the compilation for executables would fail because of undefined
+    symbols. Have you noticed that we invoked this command before actually declaring
+    any of the libraries? When CMake configures the project, it collects the information
+    about targets and their properties – their names, dependencies, source files,
+    and other details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After parsing all the files, CMake will attempt to build a dependency graph.
+    And like with all valid dependency graphs, they're directional acyclic graphs.
+    This means that there is a clear direction of which target depends on which, and
+    such dependencies cannot form cycles.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When we execute `cmake` in build mode, the generated buildsystem will check
+    what top-level targets we have defined and recursively build their dependencies.
+    Let''s consider our example from *Figure 4.1*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Start from the top, and build both libraries in group 1.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When the **Calculations** and **Drawing** libraries are complete, build group
+    2 – **GuiApp** and **TerminalApp**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Build a checksum target; run specified command lines to generate checksums (`cksum`
+    is a Unix checksum tool).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'There''s a slight issue though – the preceding solution doesn''t guarantee
+    that a checksum target will be built after executables. CMake doesn''t know that
+    a checksum depends on the executable binaries being present, so it''s free to
+    start building it first. To resolve this problem, we can put the `add_dependencies()`
+    command at the end of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will ensure that CMake understands the relation between the Checksum target
+    and the executables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That's great, but what's the difference between `target_link_libraries()` and
+    `add_dependencies()`? The first is intended to be used with actual libraries and
+    allows you to control property propagation. The second is meant to be used only
+    with top-level targets to set their build order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As projects grow in complexity, the dependency tree gets harder to understand.
+    How can we simplify this process?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visualizing dependencies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Even small projects can be difficult to reason about and share with other developers.
+    The easiest way to do so is through a nice diagram. After all, a picture is worth
+    a thousand words. We can do the work and draw a diagram ourselves, just like I
+    did in *Figure 4.1*. But this is tedious and would require constant updates. Luckily,
+    CMake has a great module to generate dependency graphs in the `dot/graphviz` format.
+    And it supports both internal and external dependencies!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use it, we can simply execute this command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The module will produce a text file that we can import to the Graphviz visualization
+    software, which can render an image or produce a PDF or SVG file that can be stored
+    as part of the software documentation. Everybody loves great documentation, but
+    hardly anyone likes to create it – now, you don't need to!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you''re in a rush, you can even run Graphviz straight from your browser
+    at this address:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://dreampuf.github.io/GraphvizOnline/](https://dreampuf.github.io/GraphvizOnline/)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Important Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom targets are not visible by default and we need to create a special configuration
+    file, `CMakeGraphVizOptions.cmake`, that will allow us to customize the graph.
+    One handy customization command is `set(GRAPHVIZ_CUSTOM_TARGETS TRUE)`; add it
+    to the special configuration file to enable reporting custom targets in your graph.
+    You can find more options in the documentation for the module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All you need to do is copy and paste the contents of the `test.dot` file into
+    the window on the left and your project will be visualized. Quite convenient,
+    isn't it?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 4.2 – A visualization of the BankApp example in Graphviz'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_4.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 4.2 – A visualization of the BankApp example in Graphviz
+  prefs: []
+  type: TYPE_NORMAL
+- en: I have removed the automatically generated legend section from the preceding
+    figure for clarity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using this method, we can quickly see all the explicitly defined targets. Now
+    that we have this global perspective, let's do a deep dive and see how to configure
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Target properties
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Targets have properties that work in a similar way to fields of C++ objects.
+    We can modify some of these properties and others are read-only. CMake defines
+    a large list of "known properties" (see the *Further reading* section) that are
+    available depending on the type of the target (executable, library, or custom).
+    You can also add your own properties if you like. Use the following commands to
+    manipulate the properties of a target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: To print a target property on screen, we first need to store it in the `<var>`
+    variable and then `message()` it to the user; we have to read them one by one.
+    On the other hand, setting properties on a target allows us to specify multiple
+    properties at the same time, on multiple targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The concept of properties isn''t unique to targets; CMake supports setting
+    properties of other scopes as well: `GLOBAL`, `DIRECTORY`, `SOURCE`, `INSTALL`,
+    `TEST`, and `CACHE`. To manipulate all kinds of properties, there are general
+    `get_property()` and `set_property()` commands. You can use these low-level commands
+    to do exactly what the `set_target_properties()` command does, just with a bit
+    more work:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generally, it's better to use as many high-level commands as you can. CMake
+    offers more of these, even narrower in their scope, such as setting specific properties
+    on a target. For example, `add_dependencies(<target> <dep>)` is appending dependencies
+    to the `MANUALLY_ADDED_DEPENDENCIES` target property. In this case, we can query
+    it with `get_target_property()` exactly as with any other property. However, we
+    can't use `set_target_property()` to change it (it's read-only), as CMake insists
+    on using the `add_dependencies()` command to restrict operations to appending
+    only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We'll introduce more property setting commands when we discuss compiling and
+    linking in upcoming chapters. Meanwhile, let's focus on how the properties of
+    one target can transition to another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are transitive usage requirements?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let's just agree that naming is hard, and sometimes one ends up with a result
+    that's hard to understand. "Transitive usage requirements" is, unfortunately,
+    one of those cryptic titles that you will encounter in the online CMake documents.
+    Let's untangle this strange name and perhaps propose a term easier to understand.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I'll start by clarifying the middle bit of this puzzle. As we previously discussed,
+    one target may depend on another. CMake documentation sometimes refers to such
+    dependency as *usage*, as in one target *uses* another. This was straightforward,
+    so on to the next one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There will be cases when such a used target has specific *requirements* that
+    a using target has to meet: link some libraries, include a directory, or require
+    specific compile features. All of these are in fact requirements, so documentation
+    is correct in a sense. The issue is that they aren''t called requirements in any
+    other context in the documentation. When you specify the same requirements for
+    a single target, you set *properties* or *dependencies*. Therefore, the last part
+    of the name should perhaps be simply "properties."'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last part is –*transitive*. This one I believe is correct (maybe a bit too
+    smart). CMake appends some properties/requirements of used targets to properties
+    of targets using them. You can say that some properties can transition (or simply
+    propagate) across targets implicitly, so it's easier to express dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simplifying this whole concept, I see it as *propagated properties* between
+    *the source target* (targets that gets used) and *destination targets* (targets
+    that use other targets).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s look at a concrete example to understand why it''s there and how it
+    works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: This target command will populate the `COMPILE_DEFINITIONS` property of a `<source>`
+    target. *Compile definitions* are simply `-Dname=definition` flags passed to the
+    compiler that configure the C++ preprocessor definitions (we'll get to that in
+    [*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126), *Compiling C++
+    Sources with CMake*). The interesting part here is the second argument. We need
+    to specify one of three values, `INTERFACE`, `PUBLIC`, or `PRIVATE`, to control
+    which targets the property should be passed to. Now, don't confuse these with
+    C++ access specifiers – this is something else.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Propagation keywords work like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRIVATE` sets the property of the source target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INTERFACE` sets the property of the destination targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PUBLIC` sets the property of the source and destination targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When a property is not to be transitioned to any destination targets, set it
+    to `PRIVATE`. When such a transition is needed, go with `PUBLIC`. If you're in
+    a situation where the source target doesn't use the property in its implementation
+    (`.cpp` files) and only in headers, and these are passed to the consumer targets,
+    `INTERFACE` is the answer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How does this work under the hood? To manage those properties, CMake provides
+    a few commands such as the aforementioned `target_compile_definitions()`. When
+    you specify a `PRIVATE` or `PUBLIC` keyword, CMake will store provided values
+    in the property of the target matching the command – in this case, `COMPILE_DEFINITIONS`.
+    Additionally, if a keyword was `INTERFACE` or `PUBLIC`, it will store the value
+    in property with an `INTERFACE_` prefix – `INTERFACE_COMPILE_DEFINITIONS`. During
+    the configuration stage, CMake will read the interface properties of source targets
+    and append their contents to destination targets. There you have it – propagated
+    properties, or transitive usage requirements – as CMake calls them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In CMake 3.20, there are 12 such properties managed with appropriate commands
+    such as `target_link_options()` or directly with the `set_target_properties()`
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`AUTOUIC_OPTIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPILE_DEFINITIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPILE_FEATURES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPILE_OPTIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INCLUDE_DIRECTORIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_DEPENDS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_DIRECTORIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_LIBRARIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_OPTIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POSITION_INDEPENDENT_CODE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PRECOMPILE_HEADERS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SOURCES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We''ll discuss most of these options in the following pages, but remember that
+    all of these options are, of course, described in the CMake manual. Find them
+    on their own page under a URL in this format (replace `<PROPERTY>` with a property
+    that interests you):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`https://cmake.org/cmake/help/latest/prop_tgt/<PROPERTY>.html`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next question that comes to mind is how far this propagation goes. Are the
+    properties set just on the first destination target, or are they sent to the very
+    top of the dependency graph? Actually, you get to decide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create a dependency between targets, we use the `target_link_libraries()`
+    command. The full signature of this command requires a propagation keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, this signature also specifies a propagation keyword, but this
+    one controls where properties from the source target get stored in the destination
+    target. *Figure 4.3* shows what happens to a propagated property during the generation
+    stage (after the configuration stage is completed):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 4.3 – How properties are propagated to destination targets'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_4.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 4.3 – How properties are propagated to destination targets
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Propagation keywords work like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRIVATE` appends the source value to the *private* property of the destination.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INTERFACE` appends the source value to the *interface* property of the destination.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PUBLIC` appends to both properties of the destination.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As we discussed before, interface properties are only used to propagate the
+    properties further down the chain, and the destination target won't use them in
+    its build process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basic `target_link_libraries(<target> <item>...)` command that we used before
+    implicitly specifies the `PUBLIC` keyword.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you correctly set propagation keywords for your source targets, properties
+    will be automatically placed on destination targets for you – unless there's a
+    conflict…
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dealing with conflicting propagated properties
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When one target depends on multiple other targets, there may be a situation
+    where propagated properties are in outright conflict with each other. Say that
+    one used target specifies the `POSITION_INDEPENDENT_CODE` property as `true` and
+    the other as `false`. CMake understands this as a conflict and will print an error
+    similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is useful to receive such a message, as we explicitly know that we introduced
+    this conflict and we need to resolve it. CMake has its own properties that have
+    to "agree" between source and destination targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On rare occasions, this may become important – for example, if you're building
+    software using the same library in multiple targets that are then linked to a
+    single executable. If these source targets are using different versions of the
+    same library, you may run into problems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make sure that we're only using the same specific version, we can create
+    a custom interface property, `INTERFACE_LIB_VERSION`, and store the version there.
+    This is not enough to solve the problem, as CMake won't propagate custom properties
+    by default. We have to explicitly add a custom property to a list of "compatible"
+    properties.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each target has four such lists:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_BOOL`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_STRING`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_NUMBER_MAX`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_NUMBER_MIN`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Appending your property to one of them will trigger propagation and compatibility
+    checks. The `BOOL` list will check whether all properties propagated to the destination
+    target evaluate to the same Boolean value. Analogically, `STRING` will evaluate
+    to a string. `NUMBER_MAX` and `NUMBER_MIN` are a bit different – propagated values
+    don't have to match, but the destination target will just receive the highest
+    or the lowest value instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This example will help us to understand how to apply this in practice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/02-propagated/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: We create three targets here; for simplicity, all are using the same empty source
+    file. On both of the source targets, we specify our custom property with the `INTERFACE_`
+    prefix. And we set them to the same matching library version. Both of the source
+    targets are linked to the destination target. Finally, we specify a `STRING` compatibility
+    requirement as a property for `source1` (we don't add the `INTERFACE_` prefix
+    here).
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake will propagate this custom property to the destination target and check
+    whether the version of all the source targets is an exact match (the compatibility
+    property can be set on just one target).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we understand what targets are, let's take a look at other things that
+    look like targets, smell like targets, and sometimes act like targets but, as
+    it turns out, aren't the real deal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Meet the pseudo targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The concept of a target is so useful that it would be great if some of its behaviors
+    could be borrowed for other things too. This is, specifically, things that do
+    not represent outputs of the buildsystem but rather inputs – external dependencies,
+    aliases, and so on. These are the pseudo targets, or targets that don't make it
+    to the generated buildsystem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imported targets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you skimmed the table of contents, you know that we'll be talking about how
+    CMake manages external dependencies – other projects, libraries, and so on. `IMPORTED`
+    targets are essentially products of this process. CMake can define them as a result
+    of the `find_package()` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can adjust the target properties of such a target: *compile definitions*,
+    *compile* *options*, *include directories*, and so on – and they will even support
+    transitive usage requirements. However, you should treat them as immutable; don''t
+    change their sources or dependencies.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The scope of the definition of an `IMPORTED` target can be global or local to
+    the directory where it was defined (visible in subdirectories but not in parent
+    directories).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alias targets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Alias targets do exactly what you expect – they create another reference to
+    a target under a different name. You can create alias targets for executables
+    and libraries with the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Properties of alias targets are read-only, and you cannot install or export
+    aliases (they aren't visible in the generated buildsystem).
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what is the reason to have aliases at all? They come in handy in scenarios
+    where some part of a project (such as a subdirectory) requires a target with a
+    specific name, and the actual implementation may be available under different
+    names depending on circumstances. For example, you may wish to build a library
+    shipped with your solution or import it based on a user's choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This is an interesting construct – a library that doesn't compile anything but
+    instead serves as a utility target. Its whole concept is built around propagated
+    properties (transitive usage requirements).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries have two primary uses – to represent header-only libraries
+    and to bundle a bunch of propagated properties into a single logical unit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Header-only libraries are fairly easy to create with `add_library(INTERFACE)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the preceding snippet, we created an Eigen interface library with three headers.
+    Next, with generator expressions (explained in the last section of this chapter),
+    we set its *include directories* to be `${CMAKE_CURRENT_SOURCE_DIR}/src` when
+    a target is exported and `include/Eigen` when it's installed (which will also
+    be explained at the end of this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use such a library, we just have to link it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: No actual linking occurs here, but CMake will understand this command as a request
+    to propagate all the `INTERFACE` properties to the `executable` target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second use case leverages exactly the same mechanism but for a different
+    purpose – it creates a logical target that can be a placeholder for propagated
+    properties. We can then use this target as a dependency for other targets and
+    set properties in a clean, convenient way. Here''s an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `add_library(INTERFACE)` command creates a logical `warning_props` target
+    that is used to set *compile options* specified in the second command on the `executable`
+    target. I recommend using these `INTERFACE` targets, as they improve the readability
+    and reusability of your code. Think of it as refactoring a bunch of magic values
+    to a well-named variable. I also suggest using the `_props` suffix to easily differentiate
+    interface libraries from the regular ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Are pseudo targets exhausting the concept of the target? Of course not! That
+    would simply be too easy. We still need to understand how these targets translate
+    to produced buildsystems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Target is a bit of a loaded word. It means different things in the context of
+    a project and the context of generated buildsystems. When CMake generates a buildsystem,
+    it "compiles" list files from CMake language to the language of a chosen build
+    tool; perhaps it creates a Makefile for GNU Make. Such Makefiles have their own
+    targets – some of them are direct conversions of list file targets, and others
+    are created implicitly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One such buildsystem target is `ALL`, which CMake generates by default to contain
+    all top-level list file targets, such as executables and libraries (not necessarily
+    custom targets). `ALL` is built when we run `cmake --build <build tree>` without
+    choosing a concrete target. As you might remember from the first chapter, you
+    can choose one by adding the `--target <name>` parameter to the preceding command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some executables or libraries might not be needed in every build, but we''d
+    like to keep them as part of the project for those rare occasions when they come
+    in useful. To optimize our default build, we can exclude them from the `ALL` target
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom targets work the other way around – by default, they're excluded from
+    the `ALL` target unless you explicitly define them with an `ALL` keyword, as we
+    did in the BankApp example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another implicitly defined build target is `clean`, which simply removes produced
+    artifacts from the build tree. We use it to get rid of all old files and build
+    everything from scratch. It's important though to understand that it don't just
+    simply delete everything in the build directory. This means that for `clean` to
+    work correctly, you need to manually specify any files that your custom targets
+    might create as `BYPRODUCTS` (see the BankApp example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: There's also an interesting non-target mechanism to create custom artifacts
+    that can be used in all *actual targets* – custom commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing custom commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Using custom targets has one drawback – as soon as you add them to the `ALL`
+    target or start depending on them for other targets, they will be built every
+    single time (you may still enable them in an `if` block to limit that). Sometimes,
+    this is what you want, but there are cases when custom behavior is necessary to
+    produce files that shouldn''t be recreated without reason:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating a source code file that another target depends on
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Translating another language into C++
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Executing a custom action immediately before or after another target was built
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are two signatures for a custom command. The first one is an extended
+    version of `add_custom_target()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you might have guessed, a custom command doesn't create a logical target,
+    but just like custom targets, it has to be added to a dependency graph. There
+    are two ways of doing that – using its output artifact as a source for an executable
+    (or library), or explicitly adding it to a `DEPENDS` list for a custom target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a custom command as a generator
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Admittedly, not every project needs to generate C++ code from other files.
+    One such occasion might be a compilation of `.proto` files. If you''re not familiar
+    with this library, protobuf is a platform-neutral binary serializer for structured
+    data. To keep it cross-platform and fast at the same time, Google''s engineers
+    invented their own protobuf format that defines models in `.proto` files, such
+    as this one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Such a file can be then shared across multiple languages – C++, Ruby, Go, Python,
+    Java, and so on. Google provides compilers that read `.proto` files and output
+    structure and serialization code valid for the chosen language. Smart engineers
+    don't check those compiled files into a repository but will use the original protobuf
+    format and add it to the build chain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We don''t know yet how to detect whether (and where) a protobuf compiler is
+    available on the target host (we''ll learn that in [*Chapter 7*](B17205_07_Final_JC_ePub.xhtml#_idTextAnchor162),
+    *Managing Dependencies with CMake*). So, for now, let''s just assume that the
+    compiler''s `protoc` command is residing in a location known to the system. We
+    have prepared a `person.proto` file and we know that the protobuf compiler will
+    output `person.pb.h` and `person.pb.cc` files. Here''s how we would define a custom
+    command to compile them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, to allow serialization in our executable, we can just add output files
+    to the sources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Assuming we dealt correctly with the inclusion of header files and linking the
+    protobuf library, everything will compile and update automatically when we introduce
+    changes to the `.proto` file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A simplified (and much less practical) example would be to create the necessary
+    header by copying it from another location:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/03-command/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Our "compiler", in this case, is the `cp` command. It fulfills a dependency
+    of the `main` target by creating a `constants.h` file in the build tree root,
+    simply by copying it from the source tree.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a custom command as a target hook
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The second version of the `add_custom_command()` command introduces a mechanism
+    to execute commands before or after building a target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We specify what target we''d like to "enhance" with new behavior in the first
+    argument and under the following conditions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRE_BUILD` will run before any other rules for this target (Visual Studio
+    generators only; for others, it behaves like `PRE_LINK`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PRE_LINK` binds the command to be run just after all sources have been compiled
+    but before the linking (or archiving) the target. It doesn''t work for custom
+    targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POST_BUILD` will run after all other rules have been executed for this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Using this version of `add_custom_command()`, we can replicate the generation
+    of the checksum from the previous BankApp example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/04-command/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: After the build of the `main` executable completes, CMake will execute `cksum`
+    with provided arguments. But what is happening in the first argument? It's not
+    a variable, as it would be wrapped in curly braces (`${}`), not in angle brackets
+    (`$<>`). It's a generator expression evaluating a full path to the target's binary
+    file. This mechanism is useful in the context of many target properties.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding generator expressions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake builds the solution in three stages – configuration, generation, and running
+    the build tool. Generally, we have all the required data during the configuration
+    stage. But every once in a while, we encounter the chicken and the egg problem.
+    Take an example from the previous section – a target needs to know the path of
+    a binary artifact of another target. But that information is only available after
+    all the list files are parsed and the configuration stage is complete.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How do we deal with that kind of problem? We could create a placeholder for
+    that information and postpone its evaluation to the next stage – the generation
+    stage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is what generator expressions (sometimes called genexes) do. They are built
+    around target properties such as `LINK_LIBRARIES`, `INCLUDE_DIRECTORIES`, `COMPILE_DEFINITIONS`,
+    propagated properties, and many others, but not all. They follow rules similar
+    to conditional statements and variable evaluation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It's worth noting that expressions are generally evaluated in the context of
+    the target using the expression (unless explicitly stated otherwise).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Important Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Generator expressions will be evaluated at the generation stage (when the configuration
+    is complete and the buildsystem is created), which means that you can''t capture
+    their output into a variable and print it to the console very easily. To debug
+    them, you can use either of these methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '• Write it to a file (this specific version of the `file()` command supports
+    generator expressions): `file(GENERATE OUTPUT filename CONTENT "$<...>")`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '• Add a custom target and build it explicitly from the command line: `add_custom_target(gendbg
+    COMMAND ${CMAKE_COMMAND} -E echo "$<...>")`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: General syntax
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let''s take the simplest possible example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding command adds a `-D` definition flag to the compiler's arguments
+    (ignore `PUBLIC` for now) that sets the `BAR` preprocessor definition to the **path
+    of the binary artifact of the foo target**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How is the generator expression formed?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 4.4 – The syntax of a generator expression'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_4.4_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 4.4 – The syntax of a generator expression
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can see in *Figure 4.4*, the structure seems fairly simple and readable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open with a dollar and a bracket (`$<`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Add the `EXPRESSION` name.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If an expression requires arguments, add a colon (`:`) and provide the `arg1`,
+    `arg2`, and `arg3` values, separated with a comma (`,`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Close the expression with `>`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There are even expressions that do not require any arguments, such as `$<PLATFORM_ID>`.
+    However, generator expressions can quickly become very confusing and complicated
+    when using their more advanced features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nesting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Let''s start with the ability to pass a general expression as an argument to
+    another expression or, in other words, general expression nesting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: This isn't a very complex example, but it's easy to imagine what happens when
+    we increase nesting levels and work with commands using multiple arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As if that''s not enough, you can technically add a variable expansion to this
+    mix:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: A variable will be expanded at the configuration stage and a generation expression
+    at the generation stage. There are some rare uses for this feature, but I strongly
+    recommend avoiding it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditional expressions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Boolean logic is supported in generator expressions. It''s a great feature,
+    but for legacy reasons, its syntax is inconsistent and can be hard to read. It''s
+    available in two forms. The first form supports both happy and sad paths:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The syntax here is aligned with all other expressions and, like all expressions,
+    nesting is allowed. So, you can replace any of the arguments with another expression
+    and produce some very complex evaluations – you can even nest one condition in
+    another. This form requires exactly three arguments, so we can''t omit anything.
+    Our best option to skip a value in case of an unmet condition is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The second form is a shorthand for the preceding; it will only expand to a
+    string if the condition is met:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, it breaks the convention of providing the `EXPRESSION` name
+    as the first token. I assume that the intention here was to shorten the expression
+    and skip those precious three characters, but the outcome can be really hard to
+    rationalize. Here''s one example from the CMake documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: I wish the syntax was aligned with conditions for the regular `IF` command,
+    but sadly that's not the case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Types of evaluation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Generator expressions are evaluated to one of two types – Boolean or string.
+    Boolean is represented by `1` (true) and `0` (false). Everything else is just
+    a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It's important to remember that nested expressions passed as conditions in conditional
+    expressions are explicitly required to evaluate to Boolean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There's an explicit logical operator to convert strings to Boolean, but Boolean
+    types can be converted to strings implicitly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know the basic syntax, let's take a look at what we can do with
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluation to Boolean
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We started discussing conditional expressions in the previous section. I want
+    to get the whole concept covered right off the bat so that there's no need to
+    return to it later. There are three categories of expressions that get evaluated
+    to Boolean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logical operators
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'There are four logical operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<NOT:arg>` negates the Boolean argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<AND:arg1,arg2,arg3...>` returns `1` if all the arguments are `1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<OR:arg1,arg2,arg3...>` returns `1` if any of the arguments is `1`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<BOOL:string_arg>` converts arguments from a string to a Boolean type.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'String conversion will evaluate to `1` if none of these conditions are met:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The string is empty.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The string is a case-insensitive equivalent of `0`, `FALSE`, `OFF`, `N`, `NO`,
+    `IGNORE`, or `NOTFOUND`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The string ends in the `-NOTFOUND` suffix (case-sensitive).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: String comparison
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Comparisons will evaluate to `1` if their condition is met and `0` otherwise:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<STREQUAL:arg1,arg2>` is a case-sensitive string comparison.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<EQUAL:arg1,arg2>` converts a string to a number and compares equality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<IN_LIST:arg,list>` checks whether the `arg` element is in the `list` list
+    (case-sensitive).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<VERSION_EQUAL:v1,v2>`, `$<VERSION_LESS:v1,v2>`, `$<VERSION_GREATER:v1,v2>`,
+    `$<VERSION_LESS_EQUAL:v1,v2>`, and `$<VERSION_GREATER_EQUAL:v1,v2>` are component-wise
+    version comparisons.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Variable queries
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: There are plenty of variables that contain Boolean-typed values. They also will
+    evaluate to `1` if their condition is met and `0` otherwise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There is one simple query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_EXISTS:arg>` – does the `arg` target exist?'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are multiple queries scanning passed arguments for a specific value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<CONFIG:args>` is the current config (`Debug`, `Release`, and so on) in `args`
+    (case-insensitive).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PLATFORM_ID:args>` is the current platform ID in `args`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LANG_COMPILER_ID:args>` is CMake''s `LANG` compiler ID in `args`, where
+    `LANG` is one of `C`, `CXX`, `CUDA`, `OBJC`, `OBJCXX`, `Fortran`, or `ISPC`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LANG_COMPILER_VERSION:args>` is the CMake''s `LANG` compiler version in
+    `args`, where `LANG` is one of `C`, `CXX`, `CUDA`, `OBJC`, `OBJCXX`, `Fortran`,
+    or `ISPC`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_FEATURES:features>` will return `true` if `features` is supported
+    by the compiler for this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANG_AND_ID:lang,compiler_id1,compiler_id2...>` is the language
+    of this `lang` target and is the compiler used for this target present in the
+    `compiler_ids` list. This expression is useful to specify details of a configuration
+    for specific compilers:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: In the preceding example, if we compile the `CXX` compiler with `AppleClang`
+    or `Clang`, the `-DCXX_CLANG` definition will be set. For the `CXX` compiler from
+    Intel, the `-DCXX_INTEL` definition flag will be set. Lastly, for the `C` and
+    `Clang` compiler, we'll get a `-DC_CLANG` definition.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANGUAGE:args>` if a language is used for the compilation of this
+    target in `args`. This can be used to provide language-specific flags to the compiler:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: If we compile `CXX`, the compiler will use the `-fno-exceptions` flag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<LINK_LANG_AND_ID:lang,compiler_id1,compiler_id2...>` works similarly to
+    `COMPILE_LANG_AND_ID` but checks the language used for the link step instead.
+    Use this expression to specify link libraries, link options, link directories,
+    and link dependencies of a particular language and a linker combination in a target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LINK_LANGUAGE:args>` is the language used for the link step in `args`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Evaluation to a string
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are plenty of expressions that get evaluated to a string. We can output
+    them directly to the placeholder of the target or consume as an argument to another
+    expression. We already learned about one – conditional expression evaluates to
+    a string. What else is available?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable queries
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'These expressions will evaluate to a specific value at the generation stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<CONFIG>` – the configuration (`Debug` and `Release`) name.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PLATFORM_ID>` – the current system''s CMake platform ID (`Linux`, `Windows`,
+    or `Darwin`). We discussed platform in the previous chapter, in the *Scoping the
+    environment* section.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LANG_COMPILER_ID>` – CMake''s compiler ID of the `LANG` compiler used, where
+    `LANG` is one of `C`, `CXX`, `CUDA`, `OBJC`, `OBJCXX`, `Fortran`, or `ISPC`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LANG_COMPILER_VERSION>` – CMake''s compiler version of the `LANG` compiler
+    used, where `LANG` is one of `C`, `CXX`, `CUDA`, `OBJC`, `OBJCXX`, `Fortran`,
+    or `ISPC`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANGUAGE>` – the compiled language of source files when evaluating
+    *compile options*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LINK_LANGUAGE>` – the link language of a target when evaluating link options.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Target-dependent queries
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'With the following queries, you can evaluate properties of an executable or
+    library target. Note that since CMake 3.19, for most expressions querying a target
+    in the context of another target no longer creates an automated dependency between
+    these targets (as was happening before 3.19):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_NAME_IF_EXISTS:target>` – the target name of `target` if it exists;
+    it is an empty string otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE:target>` – the full path to the `target` binary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_NAME:target>` – the `target` filename.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_BASE_NAME:target>` – the base name of `target`, or `$<TARGET_FILE_NAME:target>`
+    without a prefix and suffix. For `libmylib.so`, the base name would be `mylib`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_PREFIX:target>` – the prefix of the `target` filename (`lib`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_SUFFIX:target>` – the suffix (or extension) of the `target`
+    filename (`.so`, `.exe`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_DIR:target>` – the directory of the `target` binary file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_LINKER_FILE:target>` – the file used when linking to the `target`
+    target. Usually, it is the library that `target` represents (`.a`, `.lib`, `.so`)
+    on platforms with `.lib` import library.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TARGET_LINKER_FILE` offers the same family of expressions as the regular `TARGET_FILE`
+    expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_LINKER_FILE_NAME:target>`, `$<TARGET_LINKER_FILE_BASE_NAME:target>`,
+    `$<TARGET_LINKER_FILE_PREFIX:target>`, `$<TARGET_LINKER_FILE_SUFFIX:target>`,
+    `$<TARGET_LINKER_FILE_DIR:target>`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_SONAME_FILE:target>` – the full path to a file with a soname (`.so.3`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_SONAME_FILE_NAME:target>` – the name of a file with a soname.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_SONAME_FILE_DIR:target>` – the directory of a file with a soname.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_PDB_FILE:target>` – the full path to the linker generated program
+    database file (`.pdb`) for `target`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'PDB files offer the same expressions as a regular `TARGET_FILE`: `$<TARGET_PDB_FILE_BASE_NAME:target>`,
+    `$<TARGET_PDB_FILE_NAME:target>`, `$<TARGET_PDB_FILE_DIR:target>.`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_BUNDLE_DIR:target>` – the full path to the bundle (Apple–specific
+    package) directory (`my.app`, `my.framework`, or `my.bundle`) for `target`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_BUNDLE_CONTENT_DIR:target>` – the full path to the bundle content
+    directory for `target`. On macOS, it''s `my.app/Contents`, `my.framework`, or
+    `my.bundle/Contents`. Other `my.app`, `my.framework`, or `my.bundle`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_PROPERTY:target,prop>` – the `prop` value for `target`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_PROPERTY:prop>` – the `prop` value for `target` for which the expression
+    is being evaluated.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<INSTALL_PREFIX>` – the install prefix when the target is exported with `install(EXPORT)`
+    or when evaluated in `INSTALL_NAME_DIR`; otherwise, it is empty.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Escaping
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'On a rare occasion, you may need to pass a character to a generator expression
+    that has a special meaning. To escape this behavior, use the following expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<ANGLE-R>` – a literal `>` symbol (which compares strings containing `>`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMMA>` – a literal `,` symbol (which compares strings containing `,`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<SEMICOLON>` – a literal `;` symbol (which prevents a list expansion on an
+    argument with `;`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: String transformations
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Working with strings in the generator stage is possible with the following
+    expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<JOIN:list,d>` – join a semicolon-separated `list` using a `d` delimiter.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<REMOVE_DUPLICATES:list>` – remove duplicates without sorting `list`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<FILTER:list,INCLUDE|EXCLUDE,regex>` – include/exclude items from a list
+    using a `regex` regular expression.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LOWER_CASE:string>`, `$<UPPER_CASE:string>` – convert the string to another
+    case.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<GENEX_EVAL:expr>` – evaluate the `expr` string as a nested expression in
+    the context of the current target. This is useful when an evaluation of a nested
+    expression returns another expression (they aren''t evaluated recursively).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_GENEX_EVAL:target,expr>` – evaluate `expr` similarly to the `GENEX_EVAL`
+    transformation but in the context of `target`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Output-related expressions
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: CMake documentation fails to provide a good explanation of what "output-related
+    expressions" are. That leaves us a little lost; how are they related to output?
+  prefs: []
+  type: TYPE_NORMAL
+- en: As per the v3.13 documentation (removed in newer revisions), *"These expressions
+    generate output, in some cases depending on an input."*
+  prefs: []
+  type: TYPE_NORMAL
+- en: It turns out that they are a little bit of everything really. Some are a legacy
+    version of the shorthand conditional expression. Others are just a string transformation
+    expression that hadn't yet made its way into the other section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following expressions will return their first arguments if a specific condition
+    is met and an empty string otherwise:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<LINK_ONLY:deps>` – sets implicitly with `target_link_libraries()` to store
+    `PRIVATE` `deps` link dependencies, which won''t be propagated as usage requirements'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<INSTALL_INTERFACE:content>` – returns `content` if used with `install(EXPORT)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<BUILD_INTERFACE:content>` – returns `content` if used with an `export()`
+    command or by another target in the same buildsystem'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The following output expressions will perform a string transformation on their
+    arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<MAKE_C_IDENTIFIER:input>` – converts to a C identifier following the same
+    behavior as `string(MAKE_C_IDENTIFIER)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<SHELL_PATH:input>` – converts an absolute path (or list of paths) to a shell
+    path style matching the target OS. Slashes are converted to backslashes in Windows
+    shells and drive letters are converted to POSIX paths in MSYS shells.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Finally, we have a stray variable query expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_OBJECTS:target>` – returns a list of *object files* from a `target`
+    object library'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Examples to try out
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Everything is easier to grasp when there''s a good practical example to support
+    the theory. Here are some of the uses for generator expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build configurations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In the first chapter, we discussed build type specifying which configuration
+    we are building – `Debug`, `Release`, and so on. There may be cases where you''d
+    like to act differently based on what kind of build you''re making. A simple and
+    easy way to do so is utilizing the `$<CONFIG>` generator expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding example checks whether the config equals `DEBUG`; if that's the
+    case, the nested expression is evaluated to `1`. The outer shorthand `if` expression
+    then becomes `true`, and our `-ginline-points` debug flag gets added to the options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: System-specific one-liners
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Generator expressions can also be used to compact verbose `if` commands into
+    neat one-liners. Let''s suppose we have the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It tells the compiler to add `-DLINUX=1` to the arguments if this is the target
+    system. While this isn''t terribly long, it could be easily replaced with an elegant
+    expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Such code works well, but there's a limit to how much you can pack into a generator
+    expression until it becomes too hard to read. In that case, it's better to stick
+    to the long conditional blocks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries with compiler-specific flags
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Interface libraries, as we discussed earlier in this chapter, can be used to
+    provide flags to match the compiler:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Even in such a simple example, we can already see what happens when we nest
+    too many generator expressions. Unfortunately, sometimes this is the only way
+    to achieve the desired effect. Here''s what happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We check whether `COMPILER_ID` is `GNU`; if that's the case, we evaluate `OR`
+    to `1`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If it's not, we check whether `COMPILER_ID` is `Clang`, and evaluate `OR` to
+    `1`. Otherwise, evaluate `OR` to `0`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `OR` is evaluated to `1`, add `-rtti` to the `enable_rtti` *compile options*.
+    Otherwise, do nothing.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Next, we can link our libraries and executables with the `enable_rtti` interface
+    library. CMake will add the `-rtti` flag if a compiler supports it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nested generator expressions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sometimes, it's not obvious what happens when we try to nest elements in a generator
+    expression. We can debug the expressions by generating a test output to a debug
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s try out a few things and see what happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/04-genex/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is how each line works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `PLATFORM_ID` output value is regular case `Linux`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The output from the nested value will get transformed correctly to uppercase
+    `LINUX`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We can transform plain strings.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We can transform the content of configuration-stage variables.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Variables will be interpolated first, and closing angle brackets (`>`) will
+    be interpreted as part of the genex, in that only part of the string will get
+    capitalized.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In other words, be aware that the content of variables may affect the behavior
+    of your genex expansions. If you need an angle bracket in a variable, use `$<ANGLE-R>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The difference between a conditional expression and the evaluation of BOOL operator
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Generator expressions can be a little confusing when it comes to evaluating
+    Boolean types to strings. It is important to understand how they differ from regular
+    conditional expressions, starting with an explicit `IF` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter04/04-genex/CMakeLists.txt (fragment)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This produces a file like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let''s examine the output for each line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a Boolean expansion, where `BOOL` is `0`; therefore, the `TRUE` string
+    isn't written.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is a typical mistake – the author intended to print `TRUE` or `FALSE` depending
+    on the `BOOL` value, but since it is a Boolean `false` expansion as well, two
+    arguments are treated as one and not printed.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is the same mistake for a reversed value – it is a Boolean `true` expansion
+    that has both arguments written in a single line.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is a proper conditional expression starting with `IF` – it prints `FALSE`
+    because the first argument is `0`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is the incorrect usage of a conditional expression – when we don't need
+    to write values for Boolean `false`, we should use the first form.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Generator expressions are known for their convoluted syntax. The differences
+    mentioned in this example can confuse even experienced builders. If in doubt,
+    copy such an expression to another file and break it apart with added indentation
+    and whitespace to understand it better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Understanding targets is critical to writing clean, modern CMake projects. In
+    this chapter, we not only discussed what constitutes a target and how targets
+    depend on each other but also how to present that information in a diagram using
+    the Graphviz module. With this general understanding, we were able to learn about
+    the key feature of targets – properties (all kinds of properties). We not only
+    went through a few commands to set regular properties on targets; we also solved
+    the mystery of transitive usage requirements or propagated properties. This was
+    a hard one to solve, as we not only needed to control which properties get propagated
+    but also how to reliably propagate them to selected, further targets. Furthermore,
+    we discovered how to guarantee that those propagated properties are compatible
+    when they arrive from multiple sources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We then briefly discussed pseudo targets – imported targets, alias targets,
+    and interface libraries. All of them will come in handy in our projects, especially
+    when we know how to connect them with propagated properties for our benefit. Then,
+    we talked about generated build targets and how they are the immediate effect
+    of our actions during the configuration stage. Afterward, we focused on custom
+    commands (how they can generate files that can be consumed by other targets, compiled,
+    translated, and so on) and their hook function – executing additional steps when
+    a target is built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last part of the chapter was dedicated to the concept of a generator expression,
+    or genex for short. We explained its syntax, nesting, and how its conditional
+    expressions work. Then, we went through two types of evaluation – to Boolean and
+    to string. Each had its own set of expressions, which we explored and commented
+    on in detail. In addition, we have presented a few usage examples and clarified
+    how they work in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With such a solid foundation, we are ready for the next topic – compiling C++
+    sources to executables and libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For more information, use the following sites:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Graphviz module documentation:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Graphviz software:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://graphviz.org](https://graphviz.org)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*CMake target properties:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Transitive usage requirements:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements
+  prefs: []
+  type: TYPE_NORMAL

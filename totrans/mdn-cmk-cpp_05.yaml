@@ -1,0 +1,990 @@
+- en: '*Chapter 6*: Linking with CMake'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You might think that after we have successfully compiled the source code into
+    a binary file, our job as build engineers is done. That's almost the case – binary
+    files contain all the code for a CPU to execute, but the code is scattered across
+    multiple files in a very complex way. Linking is a process that simplifies things
+    and makes machine code neat and quick to consume.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A quick glance at the list of commands will tell you that CMake doesn't provide
+    that many related to linking. Admittedly, `target_link_libraries()` is the only
+    one that actually configures this step. Why dedicate a whole chapter to a single
+    command then? Unfortunately, almost nothing is ever easy in computer science,
+    and linking is no exception.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To achieve the correct results, we need to follow the whole story – understand
+    how exactly a linker works and get the basics right. We'll talk about the internal
+    structure of *object files*, how the relocation and reference resolution works,
+    and what it is for. We'll discuss how the final executable differs from its components
+    and how the process image is built by the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, we'll introduce you to all kinds of libraries – static, shared, and shared
+    modules. They all are called libraries, but in reality, they are almost nothing
+    alike. Building a correctly linked executable heavily depends on a valid configuration
+    (and taking care of such minute details as **position-independent code** (**PIC**).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We'll learn about another nuisance of linking – the **One Definition Rule**
+    (**ODR**). We need to get the amount of definitions exactly right. Dealing with
+    duplicated symbols can sometimes be very tricky, especially when shared libraries
+    come into play. Then, we'll learn why linkers sometimes can't find external symbols,
+    even when the executable is linked with the appropriate library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we'll discover how we can save time and use a linker to prepare our
+    solution for testing with dedicated frameworks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we''re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting the basics of linking right
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Building different library types
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Solving problems with the One Definition Rule
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The order of linking and unresolved symbols
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Separating `main()` for testing
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter06](https://github.com/PacktPublishing/Modern-CMake-for-Cpp/tree/main/examples/chapter06).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build examples provided in this book always use recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace placeholders `<build tree>` and `<source tree>` with appropriate
+    paths. As a reminder: **build tree** is the path to target/output directory, **source
+    tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting the basics of linking right
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We discussed the life cycle of a C++ program in [*Chapter 5*](B17205_05_Final_JC_ePub.xhtml#_idTextAnchor126),
+    *Compiling C++ Sources with CMake*. It consists of five main stages – writing,
+    compiling, linking, loading, and execution. After correctly compiling all the
+    sources, we need to put them together into an executable. *Object files* produced
+    in a compilation can't be executed by a processor directly. But why?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To answer this, let''s take a look at how a compiler structures an *object
+    file* in the popular ELF format (used by Unix-like systems and many others):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 6.1 – The structure of an object file'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_6.1_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 6.1 – The structure of an object file
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The compiler will prepare an *object file* for every unit of translation (for
+    every `.cpp` file). These files will be used to build an in-memory image of our
+    program. *Object files* contain the following elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An ELF header identifying the target operating system, ELF file type, target
+    instruction set architecture, and information on the position and size of two
+    header tables found in ELF files – the program headers table (not present in *object
+    files*) and the section headers table.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Sections containing information grouped by type (described next).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A section headers table, containing information about the name, the type, flags,
+    the destination address in memory, the offset in the file, and other miscellaneous
+    information. It is used to understand what sections are in this file and where
+    they are, just like a table of contents.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'As the compiler processes your source code, it groups the collected information
+    into a few separate bins, which will be put in their own separate section. Some
+    of them are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`.text` section: Machine code, with all the instructions to be executed by
+    the processor'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.data` section: All values of the initialized global and static objects (variables)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.bss` section: All values of the uninitialized global and static objects (variables),
+    which will be initialized to zero on program start'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.rodata` section: All values of the constants (read-only data)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.strtab` section: A string table containing all constant strings such as *Hello
+    World* that we put in our basic `hello.cpp` example'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.shstrtab` section: A string table containing the names of all the sections'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These groups very closely resemble the final version of the executable, which
+    will be put in the RAM to run our application. However, we can't just load this
+    file to memory as it is. This is because every *object file* has its own set of
+    sections. If we were to just concatenate them together, we'd run into all sorts
+    of issues. We'd be wasting a lot of space and time, as we'd need many more pages
+    of RAM. Instructions and data would be much harder to copy to a CPU cache. An
+    entire system would have to be much more complex and would waste precious cycles
+    jumping around many (possibly tens of thousands) of `.text`, `.data`, and other
+    sections during runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what we'll do instead is take each section of the *object file* and put
+    it together with the same type of section from all other *object files*. This
+    process is called `Relocatable` for *object files*). Apart from just bringing
+    appropriate sections together, it has to update internal associations in the file
+    – that is, addresses of variables, functions, symbol table indexes, or string
+    table indexes. All of these values are local to the *object file*, and their numbering
+    starts from zero. When we bundle files together, we need to offset these values
+    so that they are pointing at the correct addresses in the combined file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Figure 6.2* shows relocation in action – the `.text` section is relocated,
+    `.data` is being built from all linked files, and `.rodata` and `.strtab` will
+    follow (for simplicity, the figure doesn''t contain headers):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 6.2 – The relocation of the .data section'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_6.2_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 6.2 – The relocation of the .data section
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Secondly, a linker needs to `extern` keyword), the compiler reads the declaration
+    and *trusts* that the definition is somewhere out there and will be provided at
+    a later time. A linker is responsible for collecting such *unresolved references*
+    to external symbols, finding and filling the addresses at which they reside after
+    merging into the executable. *Figure 6.3* shows a simple example of reference
+    resolution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 6.3 – A reference resolution'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_6.3_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 6.3 – A reference resolution
+  prefs: []
+  type: TYPE_NORMAL
+- en: This part of the linking can be a source of problems if a programmer is unaware
+    of how it works. We may end up with unresolved references that won't find their
+    external symbols, or the opposite – we provided too many definitions and the linker
+    doesn't know which one to pick.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The final *executable file* looks very similar to the *object file*; it contains
+    relocated sections with resolved references, a section headers table, and of course,
+    the ELF Header describing the whole file. The main difference is the presence
+    of the Program Header (as pictured in *Figure 6.4*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 6.4 – The structure of the executable file in ELF'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '](img/Figure_6.4_B17205.jpg)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Figure 6.4 – The structure of the executable file in ELF
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Program Header is placed right after the ELF Header. A system loader will
+    read this header to create a process image. The header contains some general information
+    and a description of the memory layout. Each entry in the layout represents one
+    fragment of memory called a **segment**. Entries specify which sections will be
+    read, in what order, to which addresses in the virtual memory, what their flags
+    are (read, write, or execute), and a few other useful details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Object files* may also be bundled in a library, which is an intermediate product
+    that can be used in a final executable or another library. In the next section,
+    we''ll discuss three types of libraries.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building different library types
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'After source code is compiled, we might want to avoid compiling it again for
+    the same platform or even share it with external projects wherever possible. Of
+    course, you could just simply provide all of your *object files* as they were
+    originally created, but that has a few downsides. It is harder to distribute multiple
+    files and add them individually to a buildsystem. It can be a hassle, especially
+    if they are numerous. Instead, we could simply bring all *object files* into a
+    single object and share that. CMake helps greatly with this process. We can create
+    these libraries with a simple `add_library()` command (which is consumed with
+    the `target_link_libraries()` command). By convention, all libraries have a common
+    prefix, `lib`, and use system-specific extensions that denote what kind of library
+    they are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A static library has a `.a` extension on Unix-like systems and `.lib` on Windows.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Shared libraries have a `.so` extension on Unix-like systems and `.dll` on Windows.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When building libraries (static, shared, or shared modules), you''ll often
+    encounter the name *linking* for this process. Even CMake calls it that in the
+    build output of the `chapter06/01-libraries` project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Contrary to how it may seem, a linker isn't used to create all of the preceding
+    libraries. There are exceptions to performing relocation and reference resolution.
+    Let's take a look at each library type to understand how each works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Static libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To build a static library, we can simply use the command we already saw in
+    previous chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code will produce a static library if the `BUILD_SHARED_LIBS`
+    variable isn''t set to `ON`. If we want to build a static library regardless,
+    we can provide an explicit keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: What are static libraries? They are essentially a collection of raw *object
+    files* stored in an archive. On Unix-like systems, such archives can be created
+    by the `ar` tool. Static libraries are the oldest and most basic mechanism to
+    provide a compiled version of code. Use them if you want to avoid separating your
+    dependencies from the executable, at the price of the executable increasing in
+    size and used memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The archive may contain some additional indexes to speed up the final linking
+    process. Each platform uses its own methods to generate those. Unix-like systems
+    use a tool called `ranlib` for this purpose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shared libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It''s not surprising to learn that we can build shared libraries with the `SHARED`
+    keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can also do it by setting the `BUILD_SHARED_LIBS` variable to `ON` and using
+    the short version:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The difference from static libraries is significant. Shared libraries are built
+    using a linker, and they will perform both stages of linking. This means that
+    we'll receive a file with proper section headers, sections, and a section header
+    table (*Figure 6.1*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shared libraries (also known as shared objects) can be shared between multiple
+    different applications. An operating system will load a single instance of such
+    a library into memory with the first program that uses it, and all subsequently
+    started programs will be provided with the same address (thanks to the complex
+    mechanisms of virtual memory). Only the `.data` and `.bss` segments will be created
+    separately for every process consuming the library (so that each process can modify
+    its own variables without affecting other consumers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thanks to this approach, the overall memory usage in the system is better. And
+    if we're using a very popular library, we might not need to ship it with our program.
+    Chances are that it's already available on the target machine. However, if that's
+    not the case, a user is expected to explicitly install it before running the application.
+    This opens up the possibility of some issues when an installed version of a library
+    is different from expected (this type of problem is called *dependency hell*;
+    more information can be found in the *Further reading* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shared modules
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To build shared modules, we need to use the `MODULE` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is a version of a shared library that is intended to be used as a plugin
+    loaded during runtime, rather than something that is linked with an executable
+    during compilation. A shared module isn't loaded automatically with the start
+    of the program (like regular shared libraries). This only happens when a program
+    explicitly requests it by making a system call such as `LoadLibrary` (Windows)
+    or `dlopen()/dlsym()` (Linux/macOS).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You shouldn't try to link your executable with a module, as this isn't guaranteed
+    to work on all platforms. If you need to do that, use regular shared libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Position-independent code
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: All sources for shared libraries and modules should be compiled with a *position-independent
+    code* flag enabled. CMake checks the `POSITION_INDEPENDENT_CODE` property of targets
+    and appropriately adds compiler-specific compilation flags such as `-fPIC` for
+    `gcc` or `clang`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PIC is a bit of a confusing term. Nowadays, programs are already *position-independent*
+    in a sense, in that they use virtual memory to abstract away actual physical addresses.
+    When calling a function, a CPU uses a `0` for every process) to a physical address
+    that was available at the time of allocation. These mappings don't have to point
+    to consecutive physical addresses or follow any other specific order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PIC is about mapping symbols (references to functions and global variables)
+    to their runtime addresses. During compilation of a library, it is not known which
+    processes might use it. It's not possible to predetermine where in the virtual
+    memory the library will be loaded or in what order. This, in turn, means that
+    the addresses of the symbols are unknown, as is their relative position to the
+    library's machine code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To deal with that, we need another level of indirection. PIC will add a new
+    section to our output – the `.text` section is known during linking; therefore,
+    all symbol references can be pointed (through an offset) to a placeholder GOT
+    at that time. The actual values pointing to symbols in memory will only be filled
+    when an instruction accessing a referenced symbol is first executed. At that time,
+    a loader will set up that particular entry in the GOT (this is where the term
+    *lazy loading* comes from).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Shared libraries and modules will have the `POSITION_INDEPENDENT_CODE` property
+    automatically set to `ON` by CMake. However, it is important to remember that
+    if your shared library is linked against another target, such as a static or object
+    library, you need to set this property on that target too. Here''s how:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Failing to do so will get you into trouble with CMake, as this property is by
+    default checked for conflicts in a manner described in the *Dealing with conflicting
+    propagated properties* section of [*Chapter 4*](B17205_04_Final_JC_ePub.xhtml#_idTextAnchor106),
+    *Working With Targets*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Speaking of symbols, there's another problem to discuss. The next section is
+    about name collisions leading to ambiguity and inconsistency in definitions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solving problems with the One Definition Rule
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Phil Karlton was right on point when he said the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"There are two hard things in computer science: cache invalidation and naming
+    things."'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Names are difficult for a few reasons – they have to be precise, simple, short,
+    and expressive at the same time. That makes them meaningful and allows programmers
+    to understand the concepts behind the raw implementation. C++ and many other languages
+    impose one more requirement – many names have to be unique.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is manifested in a few different ways. A programmer is required to follow
+    the ODR. This says that in the scope of a single translation unit (a single `.cpp`
+    file), you are required to *define* it exactly once, even if you *declare* the
+    same name (of a variable, function, class type, enumeration, concept, or template)
+    multiple times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This rule is extended to the scope of an entire program for all variables you
+    effectively use in your code and non-inlined functions. Consider the following
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/02-odr-fail/shared.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: chapter06/02-odr-fail/one.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: chapter06/02-odr-fail/two.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: chapter06/02-odr-fail/two.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, it''s very straightforward – we created a `shared.h` header
+    file used in two separate translation units:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`one.cpp`, which simply prints `i` to the screen'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`two.cpp`, which does nothing except include the header'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We then link the two into a single executable and receive the following error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can''t define these things twice. However, there''s a notable exception
+    – types, templates, and extern inline functions can repeat their definitions in
+    multiple translation units if they are exactly the same (that is, they have the
+    same sequence of tokens). We can prove that by replacing a simple definition,
+    `int i;`, with a definition of a class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/03-odr-success/shared.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, we use it like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/03-odr-success/one.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The other two files, `two.cpp` and `CMakeLists.txt`, remain the same, as in
+    the `02odrfail` example. Such a change will allow the linking to succeed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternatively, we can mark the variable as local to a translation unit (it
+    won''t be exported outside of the *object file*). To do so, we''ll use the `static`
+    keyword, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/04-odr-success/shared.h
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: All other files will remain the same, as in the original example, and linking
+    will still succeed. This, of course, means that the variable in the preceding
+    code is stored in separate memory for each translation unit, and changes to one
+    won't affect the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dynamically linked duplicated symbols
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The ODR rule works exactly the same for static libraries as it does for *object
+    files*, but things aren''t so clear when we build our code with `SHARED` libraries.
+    A linker will allow duplicated symbols here. In the following example, we''ll
+    create two shared libraries, `A` and `B`, with one `duplicated()` function and
+    two unique `a()` and `b()` functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/05-dynamic/a.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The second implementation file is almost an exact copy of the first:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/05-dynamic/b.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, let''s use each function to see what happens (we''ll declare them locally
+    with `extern` for simplicity):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/05-dynamic/main.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code will run unique functions from each library and then call
+    a function defined with the same signature in both dynamic libraries. What do
+    you think will happen? Would the linking order matter in this case? Let''s test
+    it for two cases:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`main_1` linked with the `a` library first'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`main_2` linked with the `b` library first'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Here''s the code for such a project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/05-dynamic/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After building and running both executables, we''ll see the following output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Aha! So, a linker does care about the order of the linked libraries. This may
+    create some confusion if we aren't careful. In practice, naming collisions aren't
+    as rare as they seem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are some exceptions to this behavior; if we define locally visible symbols,
+    they will take precedence over those available from dynamically linked libraries.
+    Adding the following function to `main.cpp` will change the last line of output
+    of both binaries to **duplicated MAIN**, as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Always take great care when exporting names from libraries, as you're bound
+    to encounter name collisions sooner or later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use namespaces – don't count on a linker
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The concept of namespaces was invented to avoid such weird problems and deal
+    with the ODR in a manageable way. It comes as no surprise that it is recommended
+    to wrap your library code in a namespace named after the library. This way, we
+    can escape all the problems of duplicated symbols.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our projects, we might experience situations where one shared library is
+    linking another and then another in a lengthy chain. These aren't that rare, especially
+    in more complex setups. It is important to remember that simply linking one library
+    to another doesn't imply any kind of namespace inheritance. Symbols in each link
+    of this chain remain unprotected, kept in the namespaces in which they were originally
+    compiled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The quirks of a linker are interesting and useful to know on a couple of occasions,
+    but let's talk about a not-so-uncommon problem – what to do when correctly defined
+    symbols go missing without an explanation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The order of linking and unresolved symbols
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A linker can often seem whimsical and start complaining about things for no
+    apparent reason. This is an especially difficult ordeal for programmers starting
+    out who don't know their way around this tool. It's no wonder, since they usually
+    try to avoid touching build configuration for as long as they possibly can. Eventually,
+    they're forced to change something (perhaps add a library they worked on) in the
+    executable, and all hell breaks loose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let''s consider a fairly simple dependency chain – the `main` executable depends
+    on the `outer` library, which depends on the `nested` library (containing the
+    necessary `int b` variable). Suddenly, an inconspicuous message appears on the
+    programmer''s screen:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This isn''t such a rare diagnostic – usually, it means that we forgot to add
+    a necessary library to the linker. But in this case, the library is actually added
+    correctly to the `target_link_libraries()` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/06-order/CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'What then!? Very few errors can be as infuriating to debug and understand.
+    What we''re seeing here is an incorrect order of linking. Let''s dive into the
+    source code to figure out the reason:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/06-order/main.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code seems easy enough – we''ll print an `a` external variable,
+    which can be found in the `outer` library. We''re declaring it ahead of time with
+    the `extern` keyword. Here is the source for that library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/06-order/outer.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is quite simple too – `outer` is depending on the `nested` library to
+    provide the `b` external variable, which gets assigned to the `a` exported variable.
+    Let''s see the source of `nested` to confirm that we''re not missing the definition:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/06-order/nested.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So indeed, we have provided the definition for `b`, and since it''s not marked
+    as local with the `static` keyword, it''s correctly exported from the `nested`
+    target. As we saw previously, this target is linked with the `main` executable
+    in `CMakeLists.txt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: So where does the `undefined reference to 'b'` error come from?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Resolving undefined symbols works like this – a linker processes the binaries
+    from left to right. As the linker iterates through the binaries, it will do the
+    following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Collect all undefined symbols exported from this binary and store them for later
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Try to resolve undefined symbols (collected from all binaries processed so far)
+    with symbols defined in this binary
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Repeat this process for the next binary
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If any symbols remain undefined after the whole operation is completed, the
+    linking fails.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is the case in our example (CMake puts the *object files* of the executable
+    target before the libraries):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We processed `main.o`, got an undefined reference to `a`, and collected it for
+    future resolution.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We processed `libnested.a`, no undefined references were found, so there was
+    nothing to resolve.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We processed `libouter.a`, got an undefined reference to `b`, and resolved a
+    reference to `a`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'We did correctly resolve the reference to the `a` variable, but not for `b`.
+    All we need to do is reverse the order of linking so that `nested` comes after
+    `outer`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another less elegant option is to repeat the library (which is useful for cyclic
+    references):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, we can try using linker-specific flags such as `--start-group` or `--end-group`.
+    Go to the documentation of your linker for details, as these specifics are outside
+    of the scope of this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know how to solve common problems, let's talk about how we could
+    use the linker to our advantage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Separating main() for testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As we established so far, a linker enforces the ODR and makes sure that all
+    external symbols provide their definitions in the process of linking. One interesting
+    problem that we might encounter is the correct testing of the build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ideally, we should test exactly the same source code that is being run in production.
+    An exhaustive testing pipeline should build the source code, run its tests on
+    produced binary, and only then package and distribute the executable (without
+    the tests themselves).
+  prefs: []
+  type: TYPE_NORMAL
+- en: But how do we actually make this happen? Executables have a very specific flow
+    of execution, which often requires reading command-line arguments. C++'s compiled
+    nature doesn't really support pluggable units that can be temporarily injected
+    into the binary for test purposes only. It seems like we'll need a very complex
+    approach to solve this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Luckily, we can use a linker to help us deal with this in an elegant manner.
+    Consider extracting all logic from your program''s `main()` to an external function,
+    `start_program()`, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/07-testing/main.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It''s reasonable to skip testing this new `main()` function now; it is only
+    forwarding arguments to a function defined elsewhere (in another file). We can
+    then create a library containing the original source from `main()` wrapped in
+    a new function – `start_program()`. In this example, I''m going to use a simple
+    program to check whether the command-line argument count is higher than `1`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/07-testing/program.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can now prepare a project that builds this application and links together
+    those two translation units:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/07-testing/CMakeLists.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `main` target is just providing the required `main()` function. It's the
+    `program` target that contains all the logic. We can now test it by creating another
+    executable with its own `main()` containing the test logic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In a real-world scenario, frameworks such as `main()` method that can be used
+    to replace your program''s entry point and run all the defined tests. We''ll dive
+    deep into the subject of actual testing in [*Chapter 8*](B17205_08_Final_JC_ePub.xhtml#_idTextAnchor179),
+    *Testing Frameworks*. For now, let''s focus on the general principle and write
+    our own tests in another `main()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: chapter06/07-testing/test.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code will call `start_program` twice, with and without arguments,
+    and check whether the returned exit codes are correct. This unit test leaves much
+    to be desired in terms of clean code and elegant testing practices, but at least
+    it''s a start. The important thing is that we have now defined `main()` twice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `main.cpp` for production use
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In `test.cpp` for test purposes
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We''ll add the second executable to the bottom of our `CMakeLists.txt` now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: This creates another target, which is linked against the exact same binary code
+    as the production, but it grants us the freedom to call all exported functions
+    however we like. Thanks to this, we can run all code paths automatically and check
+    whether they work as expected. Great!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Linking in CMake does seem simple and insignificant, but in reality, there's
+    much more to it than meets the eye. After all, linking executables isn't as simple
+    as putting puzzle pieces together. As we learned about the structure of *object
+    files* and libraries, we discovered that things need to move around a bit before
+    a program is runnable. These things are called sections and they have distinct
+    roles in the life cycle of the program – store different kinds of data, instructions,
+    symbol names, and so on. A linker needs to combine them together in the final
+    binary accordingly. This process is called relocation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also need to take care of symbols – resolve references across all the translation
+    units and make sure that nothing's missing. Then, a linker can create the program
+    header and add it to the final executable. It will contain instructions for the
+    system loader, describing how to turn consolidated sections into segments that
+    make up the runtime memory image of the process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also discussed three different kinds of libraries (static, shared, and shared
+    modules), and we explained how they differ and which scenarios fit some better
+    than others. We also touched on the subject of PIC – a powerful concept that allows
+    for the lazy binding of symbols.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ODR is a C++ concept, but as we already know, it's heavily enforced by linkers.
+    After introducing this subject, we briefly explored how to deal with the most
+    basic symbol duplication, in both static and dynamic libraries. This was followed
+    by some short advice to use namespaces wherever possible and not to rely on a
+    linker too much when it comes to preventing symbol collisions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For such a seemingly straightforward step (CMake offers only a few commands
+    dedicated to a linker), it sure has a lot of quirks! One tricky thing to get right
+    is the order of linking, especially when libraries have nested dependencies. We
+    now know how to handle some basic situations and what other methods we could research
+    to deal with more complex ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, we investigated how to take advantage of a linker to prepare our program
+    for testing – by separating the `main()` function into another translation unit.
+    This enabled us to introduce another executable, which ran tests against the exact
+    same machine code that will be run in production.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know how to link, we can retrieve external libraries and use them
+    in our CMake projects. In the next chapter, we'll study how to manage dependencies
+    in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The structure of ELF files:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://en.wikipedia.org/wiki/Executable_and_Linkable_Format](https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The CMake manual for* `add_library()`:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://cmake.org/cmake/help/latest/command/add_library.html](https://cmake.org/cmake/help/latest/command/add_library.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Dependency hell:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://en.wikipedia.org/wiki/Dependency_hell](https://en.wikipedia.org/wiki/Dependency_hell
+    )'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*The differences between modules and shared libraries:*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[https://stackoverflow.com/questions/4845984/difference-between-modules-and-shared-libraries](https://stackoverflow.com/questions/4845984/difference-between-modules-and-shared-libraries)'
+  prefs: []
+  type: TYPE_NORMAL
