@@ -921,6 +921,11 @@
   id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将告诉CTest，`concurrency_test` 测试需要两个CPU才能运行。当使用 `-j 8` 并行运行测试时，`concurrency_test`
+    将占用八个并行执行“插槽”中的两个。如果此时，`PROCESSORS` 属性被设置为 `8`，则意味着没有其他测试可以与 `concurrency_test`
+    并行运行。当为 `PROCESSORS` 设置一个大于系统上可用的并行插槽或CPU数量的值时，测试将在整个池可用时运行。有时候，一些测试不仅需要特定数量的处理器，还需要独占运行，而不与任何其他测试一起运行。为了实现这一点，可以为测试设置
+    `RUN_SERIAL` 属性为 `true`。这可能会严重影响整体测试性能，因此使用时需要谨慎。一个更细粒度的控制方式是使用 `RESOURCE_LOCK`
+    属性，它包含一个字符串列表。这些字符串没有特别的含义，除了 CTest 会阻止两个测试并行运行，如果它们列出了相同的字符串。通过这种方式，可以实现部分序列化，而不会中止整个测试执行。这也是指定测试是否需要某个特定唯一资源（如某个文件、数据库等）的好方法。考虑以下示例：
 - en: '[PRE26]'
   id: totrans-126
   prefs: []
@@ -933,16 +938,21 @@
   id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，`database_test_1`、`database_test_2` 和 `database_test_3` 测试被阻止并行运行。`some_other_test`
+    测试不受数据库测试的影响，但 `yet_another_test` 将不会与任何数据库测试和 `some_other_test` 一起运行。
 - en: Fixtures as resources
   id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为资源的夹具
 - en: While not technically required, if `RESOURCE_LOCK` is used together with `FIXTURE_SETUP`,
     `FIXTURE_CLEANUP`, and `FIXTURE_REQUIRED`, it is good practice to use the same
     identifiers for the same resources.
   id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然技术上不是必需的，但如果 `RESOURCE_LOCK` 与 `FIXTURE_SETUP`、`FIXTURE_CLEANUP` 和 `FIXTURE_REQUIRED`
+    一起使用，最好为相同的资源使用相同的标识符。
 - en: Managing the parallelism of tests with `RESOURCE_LOCK` is very handy when tests
     need exclusive access to some resource. In most cases, it is entirely sufficient
     to manage the parallelism. Since CMake 3.16, this can be controlled on an even
@@ -956,29 +966,35 @@
   id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `RESOURCE_LOCK` 管理测试的并行性在测试需要独占访问某些资源时非常方便。在大多数情况下，这完全足够管理并行性。从 CMake 3.16
+    开始，这可以通过 `RESOURCE_GROUPS` 属性在更细粒度的级别上进行控制。资源组不仅允许你指定*哪些*资源被使用，还允许你指定*使用多少*资源。常见的场景是定义特定贪婪操作可能需要的内存量，或者避免超过某个服务的连接限制。资源组通常在使用GPU进行通用计算的项目中出现，定义每个测试需要多少GPU插槽。
 - en: 'Resource groups are quite a step up in complexity compared to simple resource
     locks. To use them, CTest has to do the following things:'
   id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 与简单的资源锁相比，资源组在复杂性上迈出了很大一步。要使用它们，CTest必须执行以下操作：
 - en: '**Know which resources a test needs to run**: This is defined by setting the
     test properties in a project'
   id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**了解一个测试需要哪些资源才能运行**：这通过在项目中设置测试属性来定义'
 - en: '**Know which resources a system has available**: This is done from outside
     a project when running tests'
   id: totrans-133
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**了解系统中可用的资源**：这是在运行测试时在项目之外完成的'
 - en: '**Pass on information about which resources to use for a test**: This is done
     by using environment variables'
   id: totrans-134
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**传递关于测试使用哪些资源的信息**：这是通过使用环境变量来完成的。'
 - en: 'Like resource locks, resource groups are arbitrary strings used to identify
     resources. The definition of the actual resource tied to the label is left to
     the user. The resource groups are defined as `name:value` pairs, which are separated
@@ -987,6 +1003,8 @@
   id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于资源锁，资源组是用来标识资源的任意字符串。实际与标签绑定的资源定义由用户来指定。资源组定义为 `name:value` 对，如果有多个组，则通过逗号分隔。测试可以通过
+    `RESOURCE_GROUPS` 属性定义要使用的资源，如下所示：
 - en: '[PRE27]'
   id: totrans-136
   prefs: []
@@ -1000,6 +1018,7 @@
   id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 在前面的示例中，`SomeTest` 表示它使用了两个 CPU 和 500 MB 的内存。它总共使用了六个客户端-服务器对实例，每对包含多个服务器和客户端实例。第一对由一个服务器实例和一个客户端实例组成；第二对需要一个服务器，但有两个客户端实例。
 - en: The last line, `4, servers:1,clients:1`, is shorthand to tell CTest to use four
     instances of the same pair, consisting of one `servers` resource and one `clients`
     resource. This means this test will not run unless a total of six servers and
@@ -1007,6 +1026,8 @@
   id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一行，`4, servers:1,clients:1`，是用来告诉 CTest 使用四个相同的实例对，由一个 `servers` 资源和一个 `clients`
+    资源组成。这意味着这个测试不会运行，除非总共可以提供六个服务器和七个客户端，以及所需的 CPU 和内存。
 - en: The available system resources are specified in a JSON file that is passed to
     CTest, either by the `ctest --resource-spec-file` command-line parameter or by
     setting the `CTEST_RESOURCE_SPEC_FILE` variable when calling CMake. Setting the
@@ -1015,11 +1036,15 @@
   id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 可用的系统资源在一个 JSON 文件中指定，该文件传递给 CTest，方法是通过 `ctest --resource-spec-file` 命令行参数，或在调用
+    CMake 时设置 `CTEST_RESOURCE_SPEC_FILE` 变量。设置变量应该通过使用 `cmake -D` 来完成，而不是在 `CMakeLists.txt`
+    中进行，因为指定系统资源应该在项目外部完成。
 - en: 'A sample resource specification file for the preceding example could look like
     this:'
   id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面示例的一个资源规格文件可能如下所示：
 - en: '[PRE28]'
   id: totrans-141
   prefs: []
@@ -1032,6 +1057,7 @@
   id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 该文件指定了一个具有 4096 MB 内存、8 个 CPU、2x4 服务器实例和 2x8 客户端实例的系统，总共 8 个服务器和 16 个客户端。如果无法用可用的系统资源满足测试的资源请求，则测试无法运行，并抛出类似如下的错误：
 - en: '[PRE29]'
   id: totrans-143
   prefs: []
@@ -1045,6 +1071,8 @@
   id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前的示例可以在这个规格下运行，因为它需要总共六个服务器和七个客户端。CTest 无法确保指定的资源是否真正可用；这项任务由用户或 CI 系统负责。例如，一个资源文件可能指定有八个
+    CPU 可用，但硬件实际上只有四个核心。
 - en: 'The information about the assigned resource groups is passed to the test over
     environment variables. The `CTEST_RESOURCE_GROUP_COUNT` environment variable specifies
     the total number of resource groups assigned to a test. If it is not set, this
@@ -1057,6 +1085,9 @@
   id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于分配的资源组的信息通过环境变量传递给测试。`CTEST_RESOURCE_GROUP_COUNT` 环境变量指定分配给测试的资源组的总数。如果未设置该变量，则表示
+    CTest 是在没有环境文件的情况下调用的。测试应该检查这一点并相应地采取行动。如果一个测试在没有资源的情况下无法运行，它应该失败，或者通过返回在 `SKIP_RETURN_CODE`
+    或 `SKIP_REGULAR_EXPRESSION` 属性中定义的相应返回代码或字符串来表明它未运行。分配给测试的资源组通过一对环境变量传递：
 - en: '`CTEST_RESOURCE_GROUP_<ID>`, which will contain the type of resource group.
     In the example from earlier, this will be either `"mem_mb"`, `"cpus"`, `"clients"`,
     or `"servers"`.'
@@ -1064,18 +1095,22 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CTEST_RESOURCE_GROUP_<ID>`，它将包含资源组的类型。在之前的示例中，这将是 `"mem_mb"`、`"cpus"`、`"clients"`
+    或 `"servers"`。'
 - en: '`CTEST_RESOURCE_GROUP_<ID>_<TYPE>`, which will contain a pair of `id:slots`
     for the types.'
   id: totrans-147
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CTEST_RESOURCE_GROUP_<ID>_<TYPE>`，它将包含一个 `id:slots` 的类型对。'
 - en: It is up to the implementation of the test on how the resource groups are used
     and internally distributed. So far, we have seen how tests are executed with CTest,
     but defining and discovering the tests is equally important.
   id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 如何使用资源组以及如何在内部分配资源，取决于测试的实现。到目前为止，我们已经看到了如何使用 CTest 执行测试，但定义和发现测试同样重要。
 - en: Writing and running tests is obviously one of the major boosters of code quality.
     However, another interesting metric is often how much of your code is actually
     covered by tests. Surveying and reporting code coverage can give interesting hints,
@@ -1083,11 +1118,13 @@
   id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 编写和运行测试显然是提升代码质量的主要推动力之一。然而，另一个有趣的指标往往是你的代码实际被多少测试覆盖。调查和报告代码覆盖率可以提供有趣的线索，不仅可以了解软件的测试广度，还能发现代码中的空白区域。
 - en: Generating code coverage reports
   id: totrans-150
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 生成代码覆盖率报告
 - en: Being aware of how much of your code is covered by tests is a great benefit
     and often gives a very good impression of how well-tested a given software is.
     It can also give hints to developers about the execution paths and edge cases
@@ -1095,11 +1132,13 @@
   id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 了解你的代码被测试覆盖的程度是一个很大的好处，通常可以给人留下软件测试充分的良好印象。它还可以为开发者提供有关未被测试覆盖的执行路径和边缘情况的提示。
 - en: To get code coverage in C++
   id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 获取 C++ 代码覆盖率
 - en: There are a few tools that help you get code coverage in C++. Arguably, the
     most popular is *Gcov* from GNU. It’s been around for years and works well with
     GCC and Clang. Although it does not work with Microsoft’s Visual Studio, using
@@ -1109,44 +1148,54 @@
   id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一些工具可以帮助你获取 C++ 代码覆盖率。可以说，最流行的工具是来自 GNU 的*Gcov*。它已经存在多年，并且与 GCC 和 Clang 配合得很好。尽管它与微软的
+    Visual Studio 不兼容，但使用 Clang 来构建和运行软件为 Windows 提供了可行的替代方案。或者，`OpenCppCoverage`
+    工具可以在 Windows 上获取 MSVC 构建的覆盖率数据。
 - en: The coverage information generated by Gcov can be collected in summarized reports
     with the Gcovr or LCOV tools.
   id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: Gcov 生成的覆盖率信息可以通过 Gcovr 或 LCOV 工具汇总为报告。
 - en: Generating coverage reports using Clang or GCC
   id: totrans-155
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Clang 或 GCC 生成覆盖率报告
 - en: 'In this section, we will look at how to create code coverage reports with Gcovr.
     Generating these reports roughly works in the following way:'
   id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这一部分，我们将看看如何使用 Gcovr 创建代码覆盖率报告。生成这些报告的大致过程如下：
 - en: The program and libraries to be tested are compiled with special flags so that
     they expose the coverage information.
   id: totrans-157
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 被测试的程序和库需要使用特殊的标志进行编译，以便它们暴露出覆盖率信息。
 - en: The program is run, and the coverage information is stored in a file.
   id: totrans-158
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 程序运行后，覆盖率信息会存储在一个文件中。
 - en: The coverage analyzers, such as Gcovr or LCOV, analyze the coverage files and
     generate reports.
   id: totrans-159
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 覆盖率分析工具，如 Gcovr 或 LCOV，会分析覆盖率文件并生成报告。
 - en: Optionally, the reports are stored or further analyzed to display trends in
     coverage.
   id: totrans-160
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 可选地，报告可以存储或进一步分析，以显示覆盖率的趋势。
 - en: A common setting for code coverage is that you want to have information about
     how much of a project’s code is covered by the unit tests. In order to do this,
     the code has to be compiled with the necessary flags so that the information is
@@ -1154,11 +1203,13 @@
   id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码覆盖率的常见设置是，你想要了解项目代码中有多少部分被单元测试覆盖。为了做到这一点，代码必须使用必要的标志进行编译，以便信息能够被暴露出来。
 - en: 'The `<LANG>_COMPILER_FLAGS` cache variable should be passed to CMake over the
     command line. When using GCC or Clang, this might look like this:'
   id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '`<LANG>_COMPILER_FLAGS` 缓存变量应通过命令行传递给 CMake。使用 GCC 或 Clang 时，这可能看起来像这样：'
 - en: '[PRE30]'
   id: totrans-163
   prefs: []
@@ -1176,17 +1227,20 @@
   id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种方法是定义各自的预设，如在[*第9章*](B30947_09.xhtml#_idTextAnchor146)中所述，*创建可复现的构建* *环境*。在构建代码覆盖率时，通常一个好的做法是启用调试信息并使用`-Og`标志禁用任何优化。此外，指定`-fkeep-inline-functions`和`-fkeep-static-consts`编译器标志将防止在函数未被使用的情况下优化掉静态和内联函数。这将确保所有可能的执行分支都被编译到代码中；否则，覆盖率报告可能会产生误导，特别是对于内联函数。
 - en: Coverage reports work not just for single executables but also for libraries.
     However, the libraries must be compiled with coverage flags on.
   id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 覆盖率报告不仅适用于单个可执行文件，还适用于库。但是，库必须在启用覆盖率标志的情况下编译。
 - en: As the compiler flags for coverage are set globally, the options will be passed
     on to projects added with `FetchContent` or `ExternalProject`, which might increase
     compilation time considerably.
   id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于覆盖率的编译器标志是全局设置的，这些选项将传递给通过`FetchContent`或`ExternalProject`添加的项目，这可能会显著增加编译时间。
 - en: Compiling sources using GCC or Clang with the coverage flags enabled will create
     `.gcno` files in the build directories for each object file and executable. These
     files contain meta information for Gcov about which calls and execution paths
@@ -1195,16 +1249,19 @@
   id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用启用覆盖率标志的GCC或Clang编译源代码将会在每个目标文件和可执行文件的构建目录中创建`.gcno`文件。这些文件包含关于各自编译单元中可用的调用和执行路径的Gcov元信息。为了找出哪些路径被使用，必须运行程序。
 - en: Check out the versions of Gcov and GCC
   id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看Gcov和GCC的版本
 - en: A common cause for failure and frustration when trying to extract code coverage
     information is that the versions of GCC and Gcov do not match. Always check with
     `g++ --version` and `gcov --version` that they are the same.
   id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 提取代码覆盖率信息时常见的失败和挫折原因是GCC和Gcov的版本不匹配。请始终通过`g++ --version`和`gcov --version`检查它们是否相同。
 - en: In a scenario where we want to find out the code coverage of tests, running
     CTest will generate the coverage results. Alternatively, running the executables
     directly will produce the same results. Running executables with coverage enabled
@@ -1213,18 +1270,21 @@
   id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们想要了解测试代码覆盖率的场景中，运行CTest将生成覆盖率结果。或者，直接运行可执行文件也会产生相同的结果。启用覆盖率的可执行文件将会在构建目录中生成`.gcda`文件，其中包含关于各自目标文件中调用的信息。
 - en: Once these files are generated, running Gcovr on them will create information
     about the coverage. By default, Gcovr outputs the information to `stdout`, but
     it can also generate HTML pages, JSON files, or SonarQube reports.
   id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦这些文件生成，运行Gcovr将会生成有关覆盖率的信息。默认情况下，Gcovr将信息输出到`stdout`，但它也可以生成HTML页面、JSON文件或SonarQube报告。
 - en: 'One of the pitfalls is that Gcovr expects all source and object files to be
     in the same directory, which is not the case with CMake. So, we have to pass the
     respective directories to Gcov with the `-r` option, like this:'
   id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个常见的陷阱是，Gcovr期望所有源代码和目标文件都位于同一目录中，但这在CMake中并非如此。因此，我们必须通过`-r`选项将相应的目录传递给Gcov，如下所示：
 - en: '[PRE31]'
   id: totrans-173
   prefs: []
@@ -1234,14 +1294,17 @@
   id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样的调用可能会生成一个看起来像这样的HTML文件：
 - en: '![Figure 7.1 – Example output for a coverage run](img/B30947_07_01.jpg)'
   id: totrans-175
   prefs: []
   type: TYPE_IMG
+  zh: '![图7.1 – 覆盖率运行示例输出](img/B30947_07_01.jpg)'
 - en: Figure 7.1 – Example output for a coverage run
   id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 图7.1 – 覆盖率运行示例输出
 - en: 'Another alternative to Gcovr is LCOV, which works in a very similar way. In
     contrast to Gcovr, LCOV cannot directly produce HTML or XML output but will assemble
     any coverage information in an intermediate format, which can then be consumed
@@ -1250,6 +1313,7 @@
   id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: Gcovr的另一个替代方案是LCOV，它的工作方式非常相似。与Gcovr不同，LCOV不能直接生成HTML或XML输出，而是将任何覆盖率信息组装成一个中间格式，然后可以通过各种转换器进行处理。为了生成HTML输出，通常使用`genhtml`工具。使用LCOV生成报告的命令可能如下所示：
 - en: '[PRE32]'
   id: totrans-178
   prefs: []
@@ -1259,14 +1323,17 @@
   id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用LCOV生成的覆盖率报告可能如下所示：
 - en: '![Figure 7.2 – An example coverage report generated with LCOV](img/B30947_07_02.jpg)'
   id: totrans-180
   prefs: []
   type: TYPE_IMG
+  zh: '![图7.2 – 使用LCOV生成的示例覆盖率报告](img/B30947_07_02.jpg)'
 - en: Figure 7.2 – An example coverage report generated with LCOV
   id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 图7.2 – 使用LCOV生成的示例覆盖率报告
 - en: Note that these calls will only create coverage reports for the last run. If
     you want to assemble them into a time series to see whether code coverage increases
     or decreases, there are various CI tools available, such as Codecov and Cobertura,
@@ -1276,11 +1343,13 @@
   id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，这些调用只会为最后一次运行创建覆盖率报告。如果你想将它们汇总成一个时间序列，以查看代码覆盖率是增加还是减少，有许多CI工具可供使用，如Codecov和Cobertura，来完成这项工作。这些工具通常可以解析Gcovr或LCOV的输出，并将其汇总为精美的图形，展示覆盖率的趋势。有关Gcovr的详细文档可以在[https://gcovr.com/en/stable/](https://gcovr.com/en/stable/)找到。
 - en: Creating coverage reports for MSVC
   id: totrans-183
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为MSVC创建覆盖率报告
 - en: 'When building software using MSVC, the `OpenCppCoverage` tool is an alternative
     to Gcov. It works by analyzing the program databases (`.pdb`) produced by the
     MSVC compiler, rather than by compiling the source with different flags. The command
@@ -1288,6 +1357,7 @@
   id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用MSVC构建软件时，`OpenCppCoverage`工具是Gcov的替代方案。它通过分析MSVC编译器生成的程序数据库（`.pdb`），而不是通过使用不同的标志重新编译源代码来工作。生成单个可执行文件的HTML覆盖率报告的命令可能如下所示：
 - en: '[PRE33]'
   id: totrans-185
   prefs: []
@@ -1299,6 +1369,7 @@
   id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于这将仅生成单个可执行文件的覆盖率报告，`OpenCppCoverage`允许你读取先前回合的输入，并将其合并成如下报告：
 - en: '[PRE34]'
   id: totrans-187
   prefs: []
@@ -1309,6 +1380,7 @@
   id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将把前两次运行的输入合并成一个公共报告。为了处理覆盖率信息，`export_type`选项必须设置为`binary`。
 - en: 'A common use for coverage reports is to find out how much code is covered by
     the tests defined in a project. In this case, using CTest as the test driver is
     convenient. As CTest will run the actual tests as subprocesses, the `--cover_children`
@@ -1318,6 +1390,7 @@
   id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 覆盖率报告的一个常见用途是找出项目中由测试定义所覆盖的代码量。在这种情况下，使用CTest作为测试驱动程序是很方便的。由于CTest将实际测试作为子进程运行，因此必须将`--cover_children`选项传递给`OpenCppCoverage`。为了避免生成系统库的覆盖率报告，可能需要添加模块和源过滤器。命令可能如下所示：
 - en: '[PRE35]'
   id: totrans-190
   prefs: []
@@ -1329,23 +1402,28 @@
   id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法的一个小缺点是，覆盖率报告会包括CTest本身的覆盖率报告。生成的HTML报告可能如下所示：
 - en: '![Figure 7.3 – A coverage report generated with OpenCppCoverage](img/B30947_07_03.jpg)'
   id: totrans-192
   prefs: []
   type: TYPE_IMG
+  zh: '![图7.3 – 使用OpenCppCoverage生成的覆盖率报告](img/B30947_07_03.jpg)'
 - en: Figure 7.3 – A coverage report generated with OpenCppCoverage
   id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 图7.3 – 使用OpenCppCoverage生成的覆盖率报告
 - en: 'If you use Visual Studio, an alternative to the command line is to use a plugin.
     The plugin can be found on the Visual Studio marketplace: [https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin](https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin)'
   id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你使用Visual Studio，命令行的替代方案是使用插件。插件可以在Visual Studio市场中找到：[https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin](https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin)
 - en: 'For the full documentation, consult the GitHub page of `OpenCppCoverage`: [https://github.com/OpenCppCoverage/OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage)'
   id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看完整的文档，请参考 `OpenCppCoverage` 的 GitHub 页面：[https://github.com/OpenCppCoverage/OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage)
 - en: Knowing how much of your code is covered by the supplied tests is a piece of
     very valuable information regarding code quality. In fact, in a lot of regulated
     industries, such as healthcare, aviation, and the car industry, providing code
@@ -1357,11 +1435,14 @@
   id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 知道代码测试覆盖了多少内容是了解代码质量的非常有价值的信息。事实上，在许多受监管的行业中，比如医疗、航空和汽车行业，监管机构可能要求提供代码覆盖率报告。然而，仅仅知道代码执行了多少是不够的；底层代码的质量更为重要。一些编译器提供了有用的工具，通过所谓的
+    sanitizer 来检测代码中的常见错误。在下一节中，您将学习如何使用 CMake 来应用这些 sanitizer。
 - en: Sanitizing your code
   id: totrans-197
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 清理代码
 - en: Today’s compilers are often more than just programs to convert text to binary
     code. They are complex software suites that have built-in functionality to ensure
     code quality. The focus on how much compilers are aware of code quality issues
@@ -1371,6 +1452,8 @@
   id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 当今的编译器不仅仅是将文本转换为二进制代码的程序。它们是复杂的软件套件，内置了确保代码质量的功能。编译器对代码质量问题的关注程度急剧增加，尤其是随着 LLVM
+    和 Clang 的出现。这些质量工具通常被称为 **sanitizers**，并通过向编译器和链接器传递特定标志来启用。
 - en: Code sanitizers are a way to bring additional quality checks into code by using
     the compiler to decorate the binary code with annotations and hooks, detecting
     various runtime issues. When the code is executed, the annotations are checked
@@ -1382,10 +1465,14 @@
   id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码 sanitizer 是通过使用编译器为二进制代码添加注释和钩子，从而带来额外的质量检查，能够检测各种运行时问题。代码执行时，系统会检查这些注释，若发现任何违规行为，会进行报告。Sanitizer
+    相对较快，但显然会对程序的运行时行为产生影响。如果 sanitizer 检测到任何问题，程序会调用 `abort()` 终止，并返回非零值。这在测试中尤为有用，因为这意味着任何违反
+    sanitizer 的测试都会被标记为失败。
 - en: 'The following are the most common types of sanitizers:'
   id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是最常见的几种 sanitizer 类型：
 - en: The **address sanitizer** (**ASan**) detects memory access errors such as out-of-bounds
     and use-after-free bugs. On some platforms, the ASan can even be run with hardware
     assistance.
@@ -1393,12 +1480,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**地址 sanitizer**（**ASan**）用于检测内存访问错误，如越界访问和使用后释放错误。在某些平台上，ASan 甚至可以使用硬件辅助来运行。'
 - en: The **leak sanitizer** (**LSan**), which is part of the ASan, can be used to
     detect memory leaks.
   id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**泄漏 sanitizer**（**LSan**）是 ASan 的一部分，可用于检测内存泄漏。'
 - en: In GCC and Clang, there are a few specialized versions of the general ASan,
     such as the **kernel address sanitizer** (**KASAN**) to detect memory errors in
     the Linux kernel.
@@ -1406,17 +1495,21 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 GCC 和 Clang 中，存在一些 ASan 的专用版本，比如 **内核地址 sanitizer**（**KASAN**），用于检测 Linux
+    内核中的内存错误。
 - en: The **memory sanitizer** (**MSan**) detects uninitialized memory reads.
   id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**内存 sanitizer**（**MSan**）用于检测未初始化的内存读取。'
 - en: The **thread sanitizer** (**TSan**) will report data races. Because of the way
     the TSan works, it cannot be run together with the ASan and LSan.
   id: totrans-205
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**线程 sanitizer**（**TSan**）会报告数据竞争问题。由于 TSan 的工作方式，它不能与 ASan 和 LSan 一起运行。'
 - en: The **undefined behavior sanitizer** (**UBSan**) detects and reports cases where
     code results in undefined behavior. Using variables before initialization or ambiguity
     regarding operator precedence are common examples.
@@ -1424,6 +1517,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**未定义行为 sanitizer**（**UBSan**）用于检测并报告代码导致未定义行为的情况。使用未初始化的变量或操作符优先级的歧义是常见的例子。'
 - en: The Clang suite leads the field with the availability of sanitizers, with GCC
     coming a close second. Microsoft has been a bit slower in adopting the features,
     but from MSVC version 16.9, which comes with Visual Studio 19, the Microsoft compilers
@@ -1433,6 +1527,8 @@
   id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: Clang 套件在 sanitizers 的可用性方面处于领先地位，其次是 GCC。微软在采用这些特性上稍慢，但从 MSVC 版本 16.9（随 Visual
+    Studio 19 一起发布）开始，微软的编译器至少支持 ASan。有关各个 sanitizer 的详细功能以及如何详细配置它们，请参考各编译器的有用文档。
 - en: The sanitizers are enabled by passing various compiler flags that cause a compiler
     to add extra debugging information to the binaries. When the binaries are executed,
     the sanitizer code will perform its check and print out any errors to `stderr`.
@@ -1441,17 +1537,21 @@
   id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过传递各种编译器标志启用 sanitizers，这些标志会使编译器将额外的调试信息添加到二进制文件中。当执行二进制文件时，sanitizer 代码会执行检查，并将任何错误打印到`stderr`。由于代码需要执行才能让
+    sanitizers 找到潜在的 bug，因此，高代码覆盖率对于提高 sanitizers 的可靠性至关重要。
 - en: To enable the ASan in GCC or Clang, the `-fsanitize=<sanitizer>` compiler flag
     has to be passed. For MSVC, the corresponding option is `/fsanitize=<sanitizer>`.
   id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在 GCC 或 Clang 中启用 ASan，必须传递`-fsanitize=<sanitizer>`编译器标志。对于 MSVC，相应的选项是`/fsanitize=<sanitizer>`。
 - en: 'The compiler flags are passed into CMake with the `CMAKE_CXX_FLAGS` cache variable.
     So, calling CMake from the command line with a sanitizer enabled would look like
     this:'
   id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 编译器标志通过`CMAKE_CXX_FLAGS`缓存变量传递给CMake。因此，从命令行调用启用 sanitizers 的 CMake 命令应该如下所示：
 - en: '[PRE36]'
   id: totrans-211
   prefs: []
@@ -1472,10 +1572,16 @@
   id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用 CMake 预设时，也可以在其中定义包含编译器标志的缓存变量。预设在[*第 9 章*](B30947_09.xhtml#_idTextAnchor146)《创建可重现的构建环境》中有详细介绍。全局设置`sanitizer`选项也会影响在标志设置后使用`FetchContent`或`ExternalProject`的任何包含项目，因此在这里请小心操作。对于
+    ASan，使用在 GCC 和 Clang 中的`-fsanitizer=address`，在 MSVC 中使用`/fsanitizer=address`。MSan
+    通过`-fsanitize=memory`启用，LSan 通过`-fsanitize=leak`启用，TSan 通过`-fsanitize=thread`启用，UBSan
+    在撰写本文时仅在 GCC 和 Clang 中通过`-fsanitize=undefined`启用。为了获得 ASan、LSan 和 MSan 更简洁的输出，可以告诉编译器显式保留帧指针。通过在
+    GCC 和 Clang 中设置`-fno-omit-framepointer`来实现。MSVC 仅在 x86 构建中通过`/Oy-`选项支持此功能。
 - en: Note
   id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意
 - en: Setting the `CMAKE_CXX_FLAGS` variable to enable sanitizers in `CMakeLists.txt`
     itself is discouraged, as the sanitizers are neither built nor have any usage
     requirements to use any of the targets defined by a project. Additionally, setting
@@ -1484,6 +1590,7 @@
   id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 不推荐在`CMakeLists.txt`中设置`CMAKE_CXX_FLAGS`变量来启用 sanitizers，因为 sanitizers 既不构建也没有任何使用要求来使用项目定义的目标。此外，在`CMakeLists.txt`中设置`CMAKE_CXX_FLAGS`变量可能与用户从命令行传递的标志发生冲突。
 - en: Sanitizers are a very powerful tool to increase code quality. Together with
     unit tests and the coverage report, they provide three of the four major concepts
     to ensure code quality. The fourth option to automatically ensure code quality
@@ -1491,11 +1598,13 @@
   id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: Sanitizers 是提高代码质量的非常强大的工具。结合单元测试和覆盖率报告，它们提供了确保代码质量的四个主要概念中的三个。第四种自动确保代码质量的方式是使用静态代码分析器。
 - en: Static code analysis using CMake
   id: totrans-216
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 CMake 进行静态代码分析
 - en: Unit tests, sanitizers, and coverage reports all depend on code being actually
     run to detect possible errors. Static code analysis analyzes code without running
     it. The good thing about that is that all code that is compiled can be analyzed,
@@ -1505,6 +1614,7 @@
   id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 单元测试、清理器和覆盖率报告都依赖于实际运行代码来检测可能的错误。静态代码分析则是在不运行代码的情况下进行分析。其优点是所有编译的代码都可以进行分析，而不仅仅是测试覆盖的部分。当然，这也意味着可以发现不同类型的故障。静态代码分析的一个缺点是，它可能需要很长时间才能运行完所有测试。
 - en: 'CMake supports several tools for static code analysis that are enabled either
     by setting a property or a global variable. All of the tools, except *link what
     you use*, are external programs that need to be installed and found in the path
@@ -1513,16 +1623,20 @@
   id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 支持多种静态代码分析工具，这些工具通过设置属性或全局变量来启用。除*link what you use*外，所有工具都是外部程序，需要安装并在系统路径中找到。*Link
+    what you use* 使用系统的链接器，因此不需要进一步安装。CMake 支持的工具如下：
 - en: '`LANG>_CLANG_TIDY` property or the `CMAKE_<LANG>_CLANG_TIDY` variable.'
   id: totrans-219
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`LANG>_CLANG_TIDY` 属性或 `CMAKE_<LANG>_CLANG_TIDY` 变量。'
 - en: '`<LANG>_CPPCHECK` property or the `CMAKE_<LANG>_CPPCHECK` variable.'
   id: totrans-220
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`<LANG>_CPPCHECK` 属性或 `CMAKE_<LANG>_CPPCHECK` 变量。'
 - en: '`<LANG>_CPPLINT` property or the `CMAKE_<LANG>_CPPLINT` variable. Cpplint was
     originally developed at Google, and because of this, it has the Google C++ style
     hardcoded within.'
@@ -1530,18 +1644,22 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`<LANG>_CPPLINT` 属性或 `CMAKE_<LANG>_CPPLINT` 变量。Cpplint 最初由 Google 开发，因此它内置了
+    Google C++ 风格。'
 - en: '`<LANG>_INCLUDE_WHAT_YOU_USE` property or the `CMAKE_<LANG>_INCLUDE_WHAT_YOU_USE`
     variable.'
   id: totrans-222
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`<LANG>_INCLUDE_WHAT_YOU_USE` 属性或 `CMAKE_<LANG>_INCLUDE_WHAT_YOU_USE` 变量。'
 - en: '`LINK_WHAT_YOU_USE` property or the `CMAKE_LINK_WHAT_YOU_USE` variable. Note
     that this is not dependent on the language chosen.'
   id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`LINK_WHAT_YOU_USE` 属性或 `CMAKE_LINK_WHAT_YOU_USE` 变量。请注意，这与所选择的语言无关。'
 - en: For all tools, `<LANG>` is either `C` or `CXX`. The properties contain a semicolon-separated
     list containing the respective executable and command-line arguments. As of CMake
     3.21, automatic execution of the static code analyzers is only supported for the
@@ -1553,6 +1671,10 @@
   id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于所有工具，`<LANG>` 是 `C` 或 `CXX`。这些属性包含一个以分号分隔的列表，其中包含各自的可执行文件和命令行参数。从 CMake 3.21
+    开始，静态代码分析器的自动执行仅支持 Ninja 和 Makefile 生成器。Visual Studio 通过 IDE 设置处理静态代码分析器，而 CMake
+    无法控制这些设置。lwyu 是一个特殊的情况，因为它使用特定的标志来处理 `ldd` 或 `ld` 链接器，并且不是一个特殊工具。因此，`LINK_WHAT_YOU_USE`
+    属性仅是一个布尔值，而不是一个命令行。这也意味着 lwyu 仅在 ELF 平台上受支持。
 - en: 'Like the coverage reports and the sanitizers earlier in this chapter, the static
     code analysis tools are enabled by passing the command in the respective variable
     to CMake over the command line, or by using a preset. If the variable is set,
@@ -1561,6 +1683,8 @@
   id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 与本章前面的覆盖率报告和清理器类似，静态代码分析工具通过将命令传递到相应变量中来启用 CMake，可以通过命令行或使用预设来实现。如果设置了该变量，静态代码分析器将在编译源文件时自动执行。启用
+    `clang-tidy` 构建可能如下所示：
 - en: '[PRE37]'
   id: totrans-226
   prefs: []
@@ -1573,11 +1697,14 @@
   id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 命令和参数以分号分隔的列表形式格式化。在上述示例中，通过 `-checks=*` 启用所有 `clang-tidy` 检查，并添加了一个过滤器，仅将 `clang-tidy`
+    应用于当前项目的 `include` 文件，使用 `-header-filter=<sourceDir/*>`。
 - en: 'The same patterns work when using Cppcheck, Cpplint, and iwyu, as the following
     examples show:'
   id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Cppcheck、Cpplint 和 iwyu 时，相同的模式也适用，以下示例展示了这一点：
 - en: '[PRE38]'
   id: totrans-229
   prefs: []
@@ -1591,44 +1718,54 @@
   id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 静态代码分析器将在编译项目中的文件时运行。任何发现的输出将与通常的编译器警告或错误一起打印出来。默认情况下，分析器的所有非关键问题不会导致构建失败。对于零容忍警告的高质量软件，可以传递适当的标志给
+    Cppcheck 和 Clang-Tidy：
 - en: For Clang-Tidy, passing `--warnings-as-errors=*` will cause a compilation to
     fail on any issue found
   id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于 Clang-Tidy，传递 `--warnings-as-errors=*` 将导致在发现任何问题时编译失败
 - en: For Cppcheck, passing the `--error-exitcode=1` parameter will cause Cppcheck
     to exit with `1` instead of `0` if an issue is found, and the build will fail
   id: totrans-232
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 对于 Cppcheck，传递 `--error-exitcode=1` 参数将在发现问题时使 Cppcheck 以 `1` 而非 `0` 退出，导致构建失败
 - en: '**iwyu** and **cpplint**, unfortunately, lack similar flags.'
   id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: '**iwyu** 和 **cpplint** 不幸的是，缺少类似的标志。'
 - en: A very nice feature of Clang-Tidy is that it can automatically apply fixes to
     source files. This can be done by additionally passing the `--fix` and `--fix-error`
     flags to Clang-Tidy.
   id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: Clang-Tidy 的一个非常棒的功能是它可以自动对源文件应用修复。这可以通过向 Clang-Tidy 额外传递 `--fix` 和 `--fix-error`
+    标志来实现。
 - en: Attention when building incrementally
   id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建增量时的注意事项
 - en: All the static code analyzers work only if a file is actually compiled. To ensure
     that the static code analyzers catch all errors, they have to be run on a clean
     build.
   id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有静态代码分析器仅在文件实际编译时工作。为了确保静态代码分析器捕捉到所有错误，必须在干净的构建上运行它们。
 - en: With the exception of lwyu, all the static code analyzers look at the source
     files to find any issues; conversely, **lwyu** will look at the binary files to
     find unused dependencies.
   id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 除 lwyu 外，所有静态代码分析器都会查看源文件以发现任何问题；相反，**lwyu** 会查看二进制文件以查找未使用的依赖项。
 - en: 'The lwyu analyzer is intended to help speed up builds and reduce the complexity
     of the dependencies tree. The command for lwyu is defined in `CMAKE_LINK_WHAT_YOU_USE_CHECK`.
     This variable is just a Boolean option, not a command for an external like the
@@ -1639,6 +1776,9 @@
   id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: lwyu 分析器旨在帮助加速构建并减少依赖树的复杂性。lwyu 的命令在 `CMAKE_LINK_WHAT_YOU_USE_CHECK` 中定义。这个变量只是一个布尔选项，而不是像其他工具那样的外部命令。如果设置，它会将相应的标志传递给链接器，以输出任何未使用的直接依赖项。从
+    CMake 版本 3.21 开始，这被定义为 `ldd –u -r` 命令。使用 `ldd` 意味着此分析器仅适用于 ELF 平台。可以通过传递一个简单的选项来启用
+    lwyu，像这样：
 - en: '[PRE39]'
   id: totrans-239
   prefs: []
@@ -1648,6 +1788,7 @@
   id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: lwyu 的输出可能如下所示：
 - en: '[PRE40]'
   id: totrans-241
   prefs: []
@@ -1658,6 +1799,7 @@
   id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个例子显示了 `libssl.so` 已经链接但没有被使用，甚至是那些通过任何依赖项间接链接的。
 - en: The combination of the various static code analyzers and iwyu and lwyu helps
     to keep codebases small and free from common code smells. So far in this chapter,
     we have looked at how tests are defined, sanitizers, and static code analysis,
@@ -1669,11 +1811,14 @@
   id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 各种静态代码分析器与 iwyu 和 lwyu 的组合有助于保持代码库简洁并避免常见的代码异味。到目前为止，本章我们已经讨论了如何定义测试、使用清理工具和静态代码分析，它们主要用于检查代码是否正确工作。我们看到的一个问题是，如果必须为所有单独的目标启用这些组合，`CMakeLists.txt`
+    可能会变得杂乱无章，尤其是对于大型项目。一个干净的替代方案是提供一个自定义构建类型，全球启用编译时代码分析。
 - en: Creating custom build types for quality tools
   id: totrans-244
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 为质量工具创建自定义构建类型
 - en: So far, we have discussed build types such as `Debug`, `Release`, `RelWithDebInfo`,
     and `MinSizeRel`, which are provided by CMake by default. These build types can
     be extended with custom build types that pass global flags to all targets. For
@@ -1684,10 +1829,12 @@
   id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们讨论了CMake默认提供的构建类型，例如`Debug`、`Release`、`RelWithDebInfo`和`MinSizeRel`。这些构建类型可以通过自定义构建类型进行扩展，从而将全局标志传递给所有目标。对于依赖特定编译器标志的代码质量工具，提供自定义构建类型可以显著简化`CMakeLists.txt`，特别是对于大型项目。创建自定义构建类型通常比直接修改全局的`CMAKE_<LANG>_FLAGS`更为推荐。
 - en: Do not override CMAKE_<LANG>_FLAGS
   id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要覆盖`CMAKE_<LANG>_FLAGS`
 - en: Setting the global compiler option is over the generic `CMAKE_<LANG>_FLAGS`
     in your `CMakeLists.txt`. These flags are intended to be set outside a project,
     either by passing them over the command line or by supplying them with a toolchain
@@ -1696,6 +1843,7 @@
   id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置全局编译器选项时，应使用通用的`CMAKE_<LANG>_FLAGS`，并将其写入`CMakeLists.txt`文件中。这些标志应该在项目外部设置，可以通过命令行传递或通过工具链文件提供。如果在项目内部修改这些标志，容易与外部传递的设置发生冲突。
 - en: For multi-configuration generators such as MSVC or Ninja Multi-Config, the available
     build types are stored in the `CMAKE_CONFIGURATION_TYPES` cache variable. For
     single configuration generators such as Make or Ninja, the current build type
@@ -1704,11 +1852,13 @@
   id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于像MSVC或Ninja Multi-Config这样的多配置生成器，可用的构建类型会存储在`CMAKE_CONFIGURATION_TYPES`缓存变量中。对于像Make或Ninja这样的单配置生成器，当前的构建类型会存储在`CMAKE_BUILD_TYPE`变量中。自定义构建类型应在顶级项目中定义。
 - en: 'A custom build type called `Coverage` could be added to `CMakeLists.txt`, like
     this:'
   id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以在`CMakeLists.txt`中添加一个名为`Coverage`的自定义构建类型，示例如下：
 - en: '[PRE41]'
   id: totrans-250
   prefs: []
@@ -1718,6 +1868,7 @@
   id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们来分析一下前面示例中的操作：
 - en: First, it is determined whether the current `Generator` is a multi or single-configuration
     generator. This is stored in the `GENERATOR_IS_MULTI_CONFIG` global property.
     Since the property cannot be used directly in an `if` statement, the property
@@ -1726,6 +1877,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 首先，需要确定当前的`Generator`是多配置生成器还是单配置生成器。这一信息会存储在`GENERATOR_IS_MULTI_CONFIG`全局属性中。由于该属性不能直接用于`if`语句，因此需要检索该属性并将其存储在`IS_MULTI_CONFIG`变量中。
 - en: If the current generator is indeed a multi-configuration generator, the custom
     build configuration called `Coverage` is added to `CMAKE_CONFIGURATION_TYPES`
     and made available to the generator, but only if it does not yet exist.
@@ -1733,6 +1885,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果当前的生成器确实是一个多配置生成器，那么名为`Coverage`的自定义构建配置将被添加到`CMAKE_CONFIGURATION_TYPES`中，并在生成器中可用，但前提是它尚不存在。
 - en: If the generator is a single configuration generator, a hint that the `Coverage`
     build exists is added by setting the `STRINGS` property of the `CMAKE_BUILD_TYPE`
     cache variable. This will create a drop-down menu with the valid options in the
@@ -1742,6 +1895,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果生成器是单配置生成器，则通过设置`CMAKE_BUILD_TYPE`缓存变量的`STRINGS`属性来添加`Coverage`构建类型的提示。这将在CMake
+    GUI中创建一个下拉菜单，显示有效选项。为了方便起见，支持的构建类型存储在`KNOWN_BUILD_TYPES`变量中。
 - en: As the current build type is usually supplied from the outside for single configuration
     generators, it is prudent to check for unknown build types and abort the configuration
     if an unknown build type is specified. Printing a message as `FATAL_ERROR` will
@@ -1750,22 +1905,26 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 由于当前构建类型通常是由外部为单配置生成器提供的，因此最好检查未知的构建类型，并在指定了未知的构建类型时中止配置。将消息打印为`FATAL_ERROR`将导致CMake停止构建。
 - en: 'With this, the `Coverage` build type is added to CMake, but the build type
     is not yet configured to add a custom compiler and linker flags to the build.
     To define the flags, two sets of cache variables are used:'
   id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过这种方式，`Coverage`构建类型被添加到CMake中，但此时构建类型尚未配置为向构建中添加自定义编译器和链接器标志。要定义这些标志，使用了两组缓存变量：
 - en: '`CMAKE_<LANG>_FLAGS_<CONFIGURATION>`'
   id: totrans-257
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CMAKE_<LANG>_FLAGS_<CONFIGURATION>`'
 - en: '`CMAKE_<TARGET_TYPE>_LINKER_FLAGS_<CONFIGURATION>`'
   id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CMAKE_<TARGET_TYPE>_LINKER_FLAGS_<CONFIGURATION>`'
 - en: '`<CONFIGURATION>` is the name of the custom build type, `<LANG>` is the programming
     language, and `<TARGET_TYPE>` for the linker flags are either executable or the
     various types of libraries. It can be useful to base the configuration for a custom
@@ -1775,6 +1934,8 @@
   id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: '`<CONFIGURATION>` 是自定义构建类型的名称，`<LANG>` 是编程语言，`<TARGET_TYPE>` 的链接器标志可以是可执行文件或各种类型的库。基于现有构建类型来创建自定义构建配置非常有用，这样可以重用任何配置选项。以下示例设置了一个基于
+    `Debug` 构建类型标志的 `Coverage` 构建类型，适用于 Clang 或 GCC 兼容的编译器：'
 - en: '[PRE42]'
   id: totrans-260
   prefs: []
@@ -1786,6 +1947,7 @@
   id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 标志也可以包含生成器表达式，以便在设置标志时考虑不同的编译器。将标志标记为 `advanced` 将有助于防止用户意外更改这些变量：
 - en: '[PRE43]'
   id: totrans-262
   prefs: []
@@ -1802,6 +1964,8 @@
   id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时候，库的文件名应当反映它们是通过特殊构建类型创建的。为自定义构建类型设置 `CMAKE_<CONFIGURATION>_POSTFIX` 可以实现这一点。这在调试构建中已经是常见做法，这样文件在打包时可以与发布构建区分开来。与此相关的是
+    `DEBUG_CONFIGURATIONS` 全局属性，它包含被认为是非优化的配置，用于调试。如果自定义构建被认为是非发布构建，应该考虑如以下方式将其添加到该属性中：
 - en: '[PRE44]'
   id: totrans-264
   prefs: []
@@ -1816,17 +1980,21 @@
   id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: '`DEBUG_CONFIGURATION` 属性应该在顶层项目中设置，在任何 `target_link_libraries` 调用之前。`DEBUG_CONFIGURATIONS`
+    属性目前仅由 `target_link_libraries` 使用，出于历史原因，库可能会以 `debug` 前缀标记或优化，表明它们只应在相应的构建配置下链接。如今，这种做法很少使用，因为生成器表达式提供了更细粒度的控制。'
 - en: That concludes this chapter. We have covered the most common aspects of testing
     and quality tools and hope that we have contributde to your journey toward excellent
     software quality.
   id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章到此结束。我们已经涵盖了测试和质量工具的最常见方面，并希望我们能为你在追求卓越软件质量的道路上做出贡献。
 - en: Summary
   id: totrans-267
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: Maintaining high-quality software is a huge and complex task, and today, there
     is such a multitude of tools and techniques to test software that it can be hard
     to up. With the techniques and tools described in this chapter, we hope to have
@@ -1839,6 +2007,8 @@
   id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 维护高质量的软件是一个庞大而复杂的任务，今天，有如此多的工具和技术可供测试软件，以至于可能难以掌握。通过本章描述的技术和工具，我们希望简要概述了现代 C++
+    开发中最常见的任务和工具。CTest 和 CMake 可以帮助协调各种测试类型，从而最大化工具的效能。在本章中，你已经看到如何定义和运行测试，如何并行执行测试，以及如何管理测试资源。我们还探讨了如何定义测试夹具，以及如何定义更高级的方法来根据测试输出确定测试是否成功或失败。
 - en: We illustrated how to set up code coverage reports using Gcov and how to define
     custom build types to pass the necessary compiler flags. We looked at how various
     tools for static code analysis can be included in CMake projects and how the sanitizers
@@ -1846,93 +2016,112 @@
   id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们展示了如何使用 Gcov 设置代码覆盖率报告，以及如何定义自定义构建类型来传递必要的编译器标志。我们还介绍了如何将各种静态代码分析工具包含到 CMake
+    项目中，以及如何使用各种编译器的 sanitizer。
 - en: In the next chapter, we will see how to use external programs from within CMake
     and how to perform platform-independent tasks.
   id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，我们将学习如何在CMake中使用外部程序，以及如何执行平台无关的任务。
 - en: Questions
   id: totrans-271
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: How are tests defined in CMake?
   id: totrans-272
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在CMake中，测试是如何定义的？
 - en: How can CTest be told to execute a specific test?
   id: totrans-273
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何告诉CTest执行特定的测试？
 - en: How can an unstable test be repeated until it either succeeds or fails?
   id: totrans-274
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何将一个不稳定的测试重复执行，直到它成功或失败？
 - en: How are tests run in parallel and random order?
   id: totrans-275
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何以并行和随机顺序运行测试？
 - en: How can you prevent multiple tests from using a unique test resource at the
     same time?
   id: totrans-276
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何防止多个测试同时使用唯一的测试资源？
 - en: How are static code analyzers enabled for targets?
   id: totrans-277
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何为目标启用静态代码分析工具？
 - en: How are custom build types defined?
   id: totrans-278
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何定义自定义构建类型？
 - en: Answers
   id: totrans-279
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 答案
 - en: Tests are defined by using the `add_test` function.
   id: totrans-280
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 测试是通过使用`add_test`函数定义的。
 - en: Either by using a regex on the test’s name with `ctest -R` or by using the test
     number, using `ctest -I`.
   id: totrans-281
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过使用`ctest -R`对测试名称应用正则表达式，或者通过使用测试编号，使用`ctest -I`。
 - en: By calling `ctest --repeat:until-pass:n` or `ctest --repeat:until-fail:n`.
   id: totrans-282
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过调用`ctest --repeat:until-pass:n`或`ctest --repeat:until-fail:n`。
 - en: By running `ctest -j <``num_of_jobs> --schedule-random`.
   id: totrans-283
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过运行`ctest -j <num_of_jobs> --schedule-random`。
 - en: By setting the `RESOURCE_LOCK` or `RESOURCE_GROUP` property for the respective
     tests.
   id: totrans-284
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过为相应的测试设置`RESOURCE_LOCK`或`RESOURCE_GROUP`属性。
 - en: Static code analyzers are enabled by passing the command line, including any
     arguments, to the respective target properties.
   id: totrans-285
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 静态代码分析工具是通过将命令行（包括任何参数）传递给相应的目标属性来启用的。
 - en: By either adding them to the `CMAKE_CONFIGURATION_TYPES` property for multi-configuration-type
     generators or by adding them to the `CMAKE_BUILD_TYPE` property.
   id: totrans-286
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过将其添加到多配置类型生成器的`CMAKE_CONFIGURATION_TYPES`属性中，或通过将其添加到`CMAKE_BUILD_TYPE`属性中。
