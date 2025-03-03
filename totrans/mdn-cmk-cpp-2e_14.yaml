@@ -570,44 +570,52 @@
   id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 该命令要求每个输出产物块以`<TYPE>`开始（这是唯一必需的元素）。CMake识别几种类型：
 - en: '`ARCHIVE`: Static libraries (`.a`) and DLL import libraries for Windows-based
     systems (`.lib`).'
   id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ARCHIVE`：静态库（`.a`）和Windows系统的DLL导入库（`.lib`）。'
 - en: '`LIBRARY`: Shared libraries (`.so`), but not DLLs.'
   id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`LIBRARY`：共享库（`.so`），但不包括DLL。'
 - en: '`RUNTIME`: Executables and DLLs.'
   id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`RUNTIME`：可执行文件和DLL。'
 - en: '`OBJECTS`: *Object files* from `OBJECT` libraries.'
   id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`OBJECTS`：来自`OBJECT`库的*目标文件*。'
 - en: '`FRAMEWORK`: Static and shared libraries that have the `FRAMEWORK` property
     set (this excludes them from `ARCHIVE` and `LIBRARY`). This is macOS-specific.'
   id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FRAMEWORK`：具有`FRAMEWORK`属性设置的静态库和共享库（这将使它们排除在`ARCHIVE`和`LIBRARY`之外）。这是特定于macOS的。'
 - en: '`BUNDLE`: Executables marked with `MACOSX_BUNDLE` (also not part of `RUNTIME`).'
   id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`BUNDLE`：标记为`MACOSX_BUNDLE`的可执行文件（也不属于`RUNTIME`）。'
 - en: '`FILE_SET <set>`: Files in the `<set>` file set specified for the target. Either
     C++ header files or C++ module headers (since CMake 3.23).'
   id: totrans-92
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FILE_SET <set>`：目标指定的`<set>`文件集中的文件。可以是C++头文件或C++模块头文件（自CMake 3.23起）。'
 - en: '`PUBLIC_HEADER`, `PRIVATE_HEADER`, `RESOURCE`: Files specified in the target
     properties with the same name (on Apple platforms, they should be set on the `FRAMEWORK`
     or `BUNDLE` targets).'
@@ -615,6 +623,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`PUBLIC_HEADER`，`PRIVATE_HEADER`，`RESOURCE`：在目标属性中指定的文件，名称相同（在Apple平台上，它们应该设置在`FRAMEWORK`或`BUNDLE`目标中）。'
 - en: 'The CMake documentation claims that if you only configure one artifact type
     (for example, `LIBRARY`), only this type will be installed. For CMake version
     3.26.0, this is not true: all the artifacts will be installed as if they were
@@ -623,6 +632,8 @@
   id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake文档声称，如果你只配置了一种产物类型（例如`LIBRARY`），则仅安装这种类型。对于CMake 3.26.0版本而言，这不准确：所有产物都会像使用默认选项一样安装。可以通过为所有不需要的产物类型指定`<TYPE>
+    EXCLUDE_FROM_ALL`来解决此问题。
 - en: A single `install(TARGETS)` command can have multiple artifact configuration
     blocks. However, be aware that you may only specify one of each type per call.
     That is, if you’d like to configure different destinations of `ARCHIVE` artifacts
@@ -631,12 +642,15 @@
   id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个`install(TARGETS)`命令可以包含多个产物配置块。然而，需要注意的是，每次调用时只能指定一种类型。也就是说，如果你想为`Debug`和`Release`配置设置不同的`ARCHIVE`产物目标路径，那么必须分别执行两次`install(TARGETS
+    ... ARCHIVE)`调用。
 - en: 'You may also omit the type name and specify options for all the artifacts.
     Installation would then be then performed for every file that’s produced by these
     targets, regardless of their type:'
   id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以省略类型名称并为所有产物指定选项。安装时将会对这些目标产生的每个文件执行安装，无论其类型如何：
 - en: '[PRE13]'
   id: totrans-97
   prefs: []
@@ -648,17 +662,20 @@
   id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，你不需要显式地提供`DESTINATION`，因为有内建的默认值，但在处理不同平台时，有一些注意事项需要记住。
 - en: Utilizing the default destination for different platforms
   id: totrans-99
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 利用不同平台的默认安装路径
 - en: 'When CMake installs your project’s files, it copies them into a specific directory
     in the system. Different file types belong in different directories. This directory
     is determined by the following formula:'
   id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 当CMake安装你的项目文件时，它会将文件复制到系统中的特定目录。不同的文件类型应该放在不同的目录中。该目录由以下公式确定：
 - en: '[PRE14]'
   id: totrans-101
   prefs: []
@@ -670,28 +687,35 @@
   id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前一节所述，你可以显式地提供安装的`DESTINATION`组件，或者让CMake根据产物类型使用内建的默认值：
 - en: '| **Artifact type** | **Built-in default** | **Install directory variable**
     |'
   id: totrans-103
   prefs: []
   type: TYPE_TB
+  zh: '| **产物类型** | **内建默认值** | **安装目录变量** |'
 - en: '| `RUNTIME` | `bin` | `CMAKE_INSTALL_BINDIR` |'
   id: totrans-104
   prefs: []
   type: TYPE_TB
+  zh: '| `RUNTIME` | `bin` | `CMAKE_INSTALL_BINDIR` |'
 - en: '| `LIBRARY``ARCHIVE` | `lib` | `CMAKE_INSTALL_LIBDIR` |'
   id: totrans-105
   prefs: []
   type: TYPE_TB
+  zh: '| `LIBRARY``ARCHIVE` | `lib` | `CMAKE_INSTALL_LIBDIR` |'
 - en: '| `PUBLIC_HEADER``PRIVATE_HEADER``FILE_SET` (`type` `HEADERS`) | `include`
     | `CMAKE_INSTALL_INCLUDEDIR` |'
   id: totrans-106
   prefs: []
   type: TYPE_TB
+  zh: '| `PUBLIC_HEADER``PRIVATE_HEADER``FILE_SET`（`type` `HEADERS`） | `include` |
+    `CMAKE_INSTALL_INCLUDEDIR` |'
 - en: 'Table 14.1: Default destinations per artifact type'
   id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 表14.1：每种产物类型的默认目标路径
 - en: While default paths are useful, they aren’t always appropriate. For example,
     CMake defaults the `DESTINATION` for libraries to `lib`. The full path for libraries
     is then computed as `/usr/local/lib` for Unix-like systems and something like
