@@ -2375,6 +2375,7 @@
   id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: 选择的工具包将用于配置 CMake 项目，这意味着工具包中定义的工具将用于编译该项目。选择工具包将自动触发 CMake 配置。
 - en: By default, kits are scanned by the extension automatically. As a result, discovered
     toolchains are listed as options in the kit selection menu. If your toolchain
     is not displayed here, this means CMake Tools failed to discover it. In such a
@@ -2384,6 +2385,8 @@
   id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，扩展会自动扫描工具包。因此，发现的工具链会作为选项列在工具包选择菜单中。如果您的工具链没有显示在这里，这意味着 CMake Tools 未能发现它。在这种情况下，首先尝试重新扫描工具包。如果仍然没有显示，您可以手动将其添加到用户本地的
+    `cmake-tools-kits.json (1)` 文件中来定义额外的工具包。
 - en: 'Adding a new kit is not usually necessary since the extension does a good job
     of discovering the toolchains. In the odd case of failure, there is a kit template
     here, which you can customize and append to the user-local `cmake-tools-kits.json`
@@ -2392,6 +2395,8 @@
   id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: '通常不需要添加新的工具包，因为扩展可以很好地自动发现工具链。如果遇到异常情况失败，这里有一个工具包模板，您可以自定义并将其附加到用户本地的 `cmake-tools-kits.json`
+    文件中，以定义一个新的工具包。要打开用户本地的工具包文件，请从命令面板中选择 **CMake: 编辑用户本地 CMake 工具包** 菜单项：'
 - en: '[PRE20]'
   id: totrans-368
   prefs: []
@@ -2401,60 +2406,74 @@
   id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意
 - en: In older versions of the CMake Tools extension, the `cmake-tools-kits.json`
     file may be named `cmake-kits.json` instead.
   id: totrans-370
   prefs: []
   type: TYPE_NORMAL
+  zh: 在较旧版本的 CMake Tools 扩展中，`cmake-tools-kits.json` 文件可能被命名为 `cmake-kits.json`。
 - en: Keep in mind that if your kit name collides with an auto-generated name from
     CMake Tools, CMake Tools will override your entry on a scan. Thus, always give
     unique names to your kit definitions.
   id: totrans-371
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，如果您的工具包名称与 CMake Tools 自动生成的名称冲突，CMake Tools 在扫描时会覆盖您的条目。因此，请始终为您的工具包定义提供唯一的名称。
 - en: For further information about kits, refer to [https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md](https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md).
   id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关工具包的更多信息，请参阅 [https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md](https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md)。
 - en: Qt Creator
   id: totrans-373
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Qt Creator
 - en: Qt Creator is another IDE that supports CMake projects. CMake support is decent,
     and the support comes out of the box without the need for any extra plugins. In
     this section, we are going to take a quick glance at Qt Creator’s CMake support.
   id: totrans-374
   prefs: []
   type: TYPE_NORMAL
+  zh: Qt Creator 是另一个支持 CMake 项目的 IDE。CMake 支持相当不错，并且默认提供，无需额外的插件。在本节中，我们将快速了解 Qt
+    Creator 对 CMake 的支持。
 - en: As always, ensure that you have the IDE installed and configured properly in
     your environment first.
   id: totrans-375
   prefs: []
   type: TYPE_NORMAL
+  zh: 和往常一样，确保您的 IDE 已正确安装并在环境中配置好。
 - en: Qt Creator version 5.0.1 is used in the examples.
   id: totrans-376
   prefs: []
   type: TYPE_NORMAL
+  zh: 本示例使用的是 Qt Creator 版本 5.0.1。
 - en: Adding your CMake installation
   id: totrans-377
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 添加您的 CMake 安装
 - en: In order to use CMake with Qt Creator, the path to CMake must be defined in
     Qt Creator. To view and define CMake paths, navigate to **Edit** | **Preferences**
     | **CMake**.
   id: totrans-378
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在 Qt Creator 中使用 CMake，必须在 Qt Creator 中定义 CMake 的路径。要查看和定义 CMake 路径，请导航至 **编辑**
+    | **首选项** | **CMake**。
 - en: '![Figure 2.49 – Qt Creator CMake path settings](img/B30947_02_49.jpg)'
   id: totrans-379
   prefs: []
   type: TYPE_IMG
+  zh: '![图 2.49 – Qt Creator CMake 路径设置](img/B30947_02_49.jpg)'
 - en: Figure 2.49 – Qt Creator CMake path settings
   id: totrans-380
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 2.49 – Qt Creator CMake 路径设置
 - en: Depending on how CMake was installed, Qt Creator might be able to detect the
     correct version automatically. If this is not the case, it can be configured manually.
     To select which CMake executable to run in Qt Creator, select the desired entry
@@ -2462,29 +2481,36 @@
   id: totrans-381
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据 CMake 的安装方式，Qt Creator 可能能够自动检测到正确的版本。如果没有，您可以手动配置它。要选择在 Qt Creator 中运行的
+    CMake 可执行文件，请选择所需的条目并点击 **设置为默认** 按钮。
 - en: 'To add a new CMake executable, click **Add**. This will append a new entry
     into the **Manual** section and bring up a window to fill in the details for the
     new entry:'
   id: totrans-382
   prefs: []
   type: TYPE_NORMAL
+  zh: 要添加新的 CMake 可执行文件，点击 **添加**。这将把一个新的条目添加到 **手动** 部分，并弹出一个窗口，您可以在其中填写新条目的详细信息：
 - en: '![Figure 2.50 – Adding a new CMake executable](img/B30947_02_50.jpg)'
   id: totrans-383
   prefs: []
   type: TYPE_IMG
+  zh: '![图 2.50 – 添加新的 CMake 可执行文件](img/B30947_02_50.jpg)'
 - en: Figure 2.50 – Adding a new CMake executable
   id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 2.50 – 添加新的 CMake 可执行文件
 - en: 'The fields on this window are described in detail here:'
   id: totrans-385
   prefs: []
   type: TYPE_NORMAL
+  zh: 该窗口中的字段在这里有详细描述：
 - en: '**Name**: A unique name to distinguish a new CMake executable entry.'
   id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '**名称**：用于区分新 CMake 可执行文件条目的唯一名称。'
 - en: '`cmake`/`cmake.exe`).'
   id: totrans-387
   prefs:
@@ -2645,6 +2671,8 @@
   id: totrans-411
   prefs: []
   type: TYPE_NORMAL
+  zh: 在大多数情况下（例如，打开项目并保存对 `CMakeLists.txt` 的更改），Qt Creator 会自动运行 CMake 配置，而无需手动执行。若要手动运行
+    CMake 配置，请点击 **Build** | **Run CMake** 菜单项。
 - en: After configuration, press the hammer icon in the leftmost corner to build the
     project. Alternatively, the *Ctrl* + *B* keyboard shortcut can be used. This will
     build the whole CMake project. To build a specific CMake target only, use the
@@ -2652,37 +2680,46 @@
   id: totrans-412
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置完成后，点击最左侧的锤子图标以构建项目。或者，可以使用 *Ctrl* + *B* 快捷键。这将构建整个 CMake 项目。若要仅构建特定的 CMake
+    目标，请使用位于 `cm` 旁边的定位器，然后按下空格键。
 - en: '![Figure 2.55 – Qt Creator locator suggestions](img/B30947_02_55.jpg)'
   id: totrans-413
   prefs: []
   type: TYPE_IMG
+  zh: '![图 2.55 – Qt Creator 定位器建议](img/B30947_02_55.jpg)'
 - en: Figure 2.55 – Qt Creator locator suggestions
   id: totrans-414
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 2.55 – Qt Creator 定位器建议
 - en: The locator will display CMake targets available to build. Select the desired
     target either by highlighting it and pressing *Enter* or clicking on it directly
     using the mouse.
   id: totrans-415
   prefs: []
   type: TYPE_NORMAL
+  zh: 定位器将显示可构建的 CMake 目标。可以通过高亮选择目标并按 *Enter* 键，或直接用鼠标点击目标来选择。
 - en: '![Figure 2.56 – Available CMake targets to build displayed on the locator](img/B30947_02_56.jpg)'
   id: totrans-416
   prefs: []
   type: TYPE_IMG
+  zh: '![图 2.56 – 定位器中显示的可用 CMake 构建目标](img/B30947_02_56.jpg)'
 - en: Figure 2.56 – Available CMake targets to build displayed on the locator
   id: totrans-417
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 2.56 – 定位器中显示的可用 CMake 构建目标
 - en: The selected CMake target (and, naturally, its dependencies) will be built.
   id: totrans-418
   prefs: []
   type: TYPE_NORMAL
+  zh: 选择的 CMake 目标（以及其依赖项）将被构建。
 - en: Running and debugging
   id: totrans-419
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 运行和调试
 - en: To run or debug a CMake target, press the kit selector button (the computer
     icon on the left navigation bar) and select the CMake target. Then, click either
     the run button (the *play icon* under the kit selector) to run or the debug button
@@ -2690,28 +2727,35 @@
   id: totrans-420
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行或调试一个 CMake 目标，请按 Kit 选择器按钮（左侧导航栏中的计算机图标），并选择 CMake 目标。然后，点击运行按钮（Kit 选择器下方的
+    *播放图标*）来运行，或者点击调试按钮（带有错误的 *播放图标*）来调试。
 - en: 'The following figure shows the kit selector menu content:'
   id: totrans-421
   prefs: []
   type: TYPE_NORMAL
+  zh: 下图显示了 Kit 选择器菜单的内容：
 - en: '![Figure 2.57 – Kit selector displaying CMake targets](img/B30947_02_57.jpg)'
   id: totrans-422
   prefs: []
   type: TYPE_IMG
+  zh: '![图 2.57 – 显示 CMake 目标的 Kit 选择器](img/B30947_02_57.jpg)'
 - en: Figure 2.57 – Kit selector displaying CMake targets
   id: totrans-423
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 2.57 – 显示 CMake 目标的 Kit 选择器
 - en: Here, we conclude the basics of using CMake with Qt Creator. For more advanced
     topics, you can consult the resources given in the *Further* *reading* section.
   id: totrans-424
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们结束了使用 CMake 和 Qt Creator 的基础内容。有关更高级的主题，您可以参考 *进一步阅读* 部分提供的资源。
 - en: Summary
   id: totrans-425
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: In this chapter, we covered the fundamental methods of interacting with CMake,
     which are the CLI and the GUI. We also covered various IDE and editor integrations
     that are essential for a daily workflow. Using any kind of tool requires knowledge
@@ -2720,192 +2764,227 @@
   id: totrans-426
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们介绍了与 CMake 交互的基本方法，包括 CLI 和 GUI。我们还讨论了各种 IDE 和编辑器的集成，它们对于日常工作流程至关重要。使用任何工具都需要了解如何与其交互。学习交互方式使我们能够更好地利用工具本身，也能帮助我们更轻松地达成目标。
 - en: In the next chapter, we will be talking about the building blocks of a CMake
     project, which will enable you to create a well-structured, production-ready CMake
     project from scratch.
   id: totrans-427
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，我们将讨论 CMake 项目的构建块，这将使你能够从零开始创建一个结构良好、适合生产的 CMake 项目。
 - en: Questions
   id: totrans-428
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: 'To reinforce what you have learned in this chapter, try to answer the following
     questions. If you are having a hard time answering them, go back to the relevant
     section and re-visit the topic:'
   id: totrans-429
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了巩固你在本章学到的内容，试着回答以下问题。如果你在回答时遇到困难，请返回相关章节并重新阅读该主题：
 - en: 'Describe how a CMake project can be configured from the CLI into the build
     folder in the project’s root directory with each of the following:'
   id: totrans-430
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 描述如何通过命令行接口（CLI）将 CMake 项目配置到项目根目录下的构建文件夹，涉及以下各项：
 - en: A different C++ compiler, located at `/usr/bin/clang++`
   id: totrans-431
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 另一个 C++ 编译器，位于 `/usr/bin/clang++`
 - en: A Ninja generator
   id: totrans-432
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Ninja 生成器
 - en: A `-Wall` compiler flag for the `Debug` build type
   id: totrans-433
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`-Wall` 编译器标志，用于 `Debug` 构建类型'
 - en: 'Describe how the project previously configured in *Q1* can be built using CMake
     using the command line with each of the following:'
   id: totrans-434
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 描述如何使用命令行和 CMake 构建之前在 *Q1* 中配置的项目，涉及以下各项：
 - en: Eight parallel jobs
   id: totrans-435
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 八个并行任务
 - en: The `--trace` option in the Unix Makefiles generator
   id: totrans-436
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Unix Makefiles 生成器中的 `--trace` 选项
 - en: Describe how the project previously built in *Q1* can be installed using CMake
     using the `directory/opt/project` command line?
   id: totrans-437
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 描述如何使用 `directory/opt/project` 命令行通过 CMake 安装之前在 *Q1* 中构建的项目？
 - en: Assuming the `CMake-Best-Practices` project is already configured and built,
     which command must be invoked to only install the `ch2.libraries` component?
   id: totrans-438
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 假设 `CMake-Best-Practices` 项目已经配置并构建完成，必须执行哪个命令来仅安装 `ch2.libraries` 组件？
 - en: What is an advanced variable in CMake?
   id: totrans-439
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: CMake 中的高级变量是什么？
 - en: Answers
   id: totrans-440
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 答案
 - en: 'Here are the answers:'
   id: totrans-441
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 下面是答案：
 - en: '`cmake –S . -B ./build -DCMAKE_CXX_COMPILER:STRING= "/``usr/bin/clang++ "`'
   id: totrans-442
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake –S . -B ./build -DCMAKE_CXX_COMPILER:STRING= "/``usr/bin/clang++ "`'
 - en: '`cmake –S . -B ./build -``G "Ninja"`'
   id: totrans-443
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake –S . -B ./build -``G "Ninja"`'
 - en: '`cmake –S . -B ./build -``DCMAKE_BUILD_FLAGS_DEBUG:STRING= "-Wall"`'
   id: totrans-444
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake –S . -B ./build -``DCMAKE_BUILD_FLAGS_DEBUG:STRING= "-Wall"`'
 - en: 'The project previously configured in Q1 can be built using CMake via the command
     line as follows:'
   id: totrans-445
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在 Q1 中之前配置的项目可以通过以下命令使用 CMake 在命令行中构建：
 - en: '`cmake --build ./build --``parallel 8`'
   id: totrans-446
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake --build ./build --``parallel 8`'
 - en: '`cmake --build ./build --` `VERBOSE=1`'
   id: totrans-447
   prefs:
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake --build ./build --` `VERBOSE=1`'
 - en: '`cmake --install ./``build --prefix=/opt/project`'
   id: totrans-448
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake --install ./``build --prefix=/opt/project`'
 - en: '`cmake --install ./build --``component ch2.libraries`'
   id: totrans-449
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`cmake --install ./build --``component ch2.libraries`'
 - en: It is a CMake cache variable that is marked as *advanced* to make it hidden
     in GUIs via the `mark_as_advanced()` function.
   id: totrans-450
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 它是一个 CMake 缓存变量，标记为 *高级*，通过 `mark_as_advanced()` 函数使其在图形界面中隐藏。
 - en: Further reading
   id: totrans-451
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'There are a lot of guides and documents regarding the topics we have discussed
     in this chapter. You can find a non-exhaustive list of recommended material to
     read here:'
   id: totrans-452
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章讨论的主题有很多相关的指南和文档。你可以在这里找到一份不完全的推荐阅读材料清单：
 - en: 'CMake CLI documentation: [https://cmake.org/cmake/help/latest/manual/cmake.1.html](https://cmake.org/cmake/help/latest/manual/cmake.1.html).'
   id: totrans-453
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CMake CLI 文档：[https://cmake.org/cmake/help/latest/manual/cmake.1.html](https://cmake.org/cmake/help/latest/manual/cmake.1.html)。
 - en: 'CMake projects in Visual Studio: [https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160).'
   id: totrans-454
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Visual Studio 中的 CMake 项目：[https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160)。
 - en: 'CMake support in Visual Studio: [https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/](https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/).'
   id: totrans-455
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Visual Studio 中的 CMake 支持：[https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/](https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/)。
 - en: 'CMake Tools extension for VSCode: [https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/](https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/).'
   id: totrans-456
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: VSCode 的 CMake Tools 扩展：[https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/](https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/)。
 - en: 'VSCode CMake Tools documentation: [https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation](https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation)'
   id: totrans-457
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: VSCode CMake Tools 文档：[https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation](https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation)
 - en: 'Debugging in VSCode: [https://code.visualstudio.com/docs/editor/debugging](https://code.visualstudio.com/docs/editor/debugging).'
   id: totrans-458
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 VSCode 中调试：[https://code.visualstudio.com/docs/editor/debugging](https://code.visualstudio.com/docs/editor/debugging)。
 - en: 'Qt Creator locator guide: [https://doc.qt.io/qtcreator/creator-editor-locator.html](https://doc.qt.io/qtcreator/creator-editor-locator.html).'
   id: totrans-459
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Qt Creator 定位器指南：[https://doc.qt.io/qtcreator/creator-editor-locator.html](https://doc.qt.io/qtcreator/creator-editor-locator.html)。
 - en: 'Qt Creator UI: [https://doc.qt.io/qtcreator/creator-quick-tour.html](https://doc.qt.io/qtcreator/creator-quick-tour.html).'
   id: totrans-460
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Qt Creator 用户界面：[https://doc.qt.io/qtcreator/creator-quick-tour.html](https://doc.qt.io/qtcreator/creator-quick-tour.html)。
