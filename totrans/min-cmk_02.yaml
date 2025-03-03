@@ -227,28 +227,34 @@
   id: totrans-36
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.4: Windows 11 应用搜索结果](img/B21152_01_4.jpg)'
 - en: 'Figure 1.4: Windows 11 application search results'
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.4: Windows 11 应用搜索结果'
 - en: Open the Terminal app. Then, from the top bar, click the dropdown and select
     **Developer Command Prompt for** **VS 2022**.
   id: totrans-38
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 打开 Terminal 应用。然后，从顶部栏点击下拉菜单，选择 **VS 2022 的开发者命令提示符**。
 - en: '![Figure 1.5: Microsoft Terminal new tab selector](img/B21152_01_5.jpg)'
   id: totrans-39
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.5: Microsoft Terminal 新标签页选择器](img/B21152_01_5.jpg)'
 - en: 'Figure 1.5: Microsoft Terminal new tab selector'
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.5: Microsoft Terminal 新标签页选择器'
 - en: Customizing Command Prompt
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义命令提示符
 - en: 'It is possible to modify the default `VsDevCmd.bat` when it’s launched with
     the host and target architectures specified. To do this, go to `profiles` section,
     find the `Command Prompt` entry under `list` and change the `commandLine` property
@@ -262,6 +268,13 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: '在指定主机和目标架构的情况下，修改默认的 `VsDevCmd.bat` 是可能的。为此，进入 `profiles` 部分，找到 `Command Prompt`
+    项，在 `list` 下修改 `commandLine` 属性，包含 `VsDevCmd.bat` 的路径和所需的架构（例如，`"commandline":
+    "%SystemRoot%\\System32\\cmd.exe /k \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\"
+    -arch=x64 -host_arch=x64"`）。也可以在 Windows Terminal 打开 Git Bash 时调用 `VsDevCmd.bat`（如果你还没有安装
+    Git，请参阅 *安装 Git* 部分）。为此，找到 `"commandLine": "\"C:\\Program Files\\Microsoft Visual
+    Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" -arch=x64 -host_arch=x64
+    && \"%PROGRAMFILES%/Git/bin/bash.exe\" -i -l"`。'
 - en: 'To verify that the Microsoft compiler is working as expected, run `cl.exe`.
     You should then see the following printed (the architecture will vary depending
     on the machine you’re using):'
@@ -269,18 +282,22 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为了验证 Microsoft 编译器是否按预期工作，运行 `cl.exe`。你应该能看到以下输出（架构会根据你使用的机器而有所不同）：
 - en: '![Figure 1.6: Running cl.exe from Developer Command Prompt](img/B21152_01_6.jpg)'
   id: totrans-44
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.6: 从开发者命令提示符运行 cl.exe](img/B21152_01_6.jpg)'
 - en: 'Figure 1.6: Running cl.exe from Developer Command Prompt'
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.6: 从开发者命令提示符运行 cl.exe'
 - en: CMake and Visual Studio
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 和 Visual Studio
 - en: Visual Studio comes bundled with its own version of CMake, which you can rely
     on and skip the following two steps. It is located in `C:\Program Files\Microsoft
     Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`.
@@ -289,6 +306,9 @@
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: Visual Studio 自带了自己的 CMake 版本，你可以依赖这个版本并跳过接下来的两步。它位于 `C:\Program Files\Microsoft
+    Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`。运行
+    `cmake --version` 会显示 `cmake version <version>-msvc1`，这表示该版本与普通的 CMake 版本不同。
 - en: If you do not currently have CMake installed on your system (or have a fairly
     old version of CMake installed), head to [https://cmake.org/download/](https://cmake.org/download/)
     to get the latest release (at the time of writing, this is `3.28.1`).
@@ -296,33 +316,41 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如果你的系统上尚未安装 CMake（或者安装的是相当旧的版本），请访问 [https://cmake.org/download/](https://cmake.org/download/)
+    获取最新版本（截至本文写作时，版本是 `3.28.1`）。
 - en: The simplest option is to grab the Windows x64 installer (cmake-3.28.1-windows-x86_64.msi)
     and follow the standard installation instructions.
   id: totrans-49
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 最简单的选项是下载 Windows x64 安装程序 (cmake-3.28.1-windows-x86_64.msi)，然后按照标准安装说明进行操作。
 - en: '![Figure 1.7: CMake Windows installer](img/B21152_01_7.jpg)'
   id: totrans-50
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.7: CMake Windows 安装程序](img/B21152_01_7.jpg)'
 - en: 'Figure 1.7: CMake Windows installer'
   id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.7: CMake Windows 安装程序'
 - en: Ensure that you select **Add CMake to the system PATH for the** **current user**.
   id: totrans-52
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 确保你选择了 **将 CMake 添加到系统 PATH 环境变量中的当前用户**。
 - en: '![Figure 1.8: CMake installer PATH options](img/B21152_01_8.jpg)'
   id: totrans-53
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.8: CMake 安装程序 PATH 选项](img/B21152_01_8.jpg)'
 - en: 'Figure 1.8: CMake installer PATH options'
   id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.8: CMake 安装程序 PATH 选项'
 - en: 'Follow the remaining installation instructions and wait for CMake to install.
     Once this is completed, close and open Terminal and return to `cmake` and `cmake
     --version` and you should see the following:'
@@ -330,87 +358,106 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 按照剩余的安装说明进行操作，等待 CMake 安装完成。一旦完成，关闭并重新打开 Terminal，然后返回到 `cmake` 和 `cmake --version`，你应该能看到以下内容：
 - en: '![Figure 1.9: Running cmake.exe from Developer Command Prompt](img/B21152_01_9.jpg)'
   id: totrans-56
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.9: 从开发者命令提示符运行 cmake.exe](img/B21152_01_9.jpg)'
 - en: 'Figure 1.9: Running cmake.exe from Developer Command Prompt'
   id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '图 1.9: 从开发者命令提示符运行 cmake.exe'
 - en: And with that, we’re ready to start building with CMake.
   id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这些，我们就可以开始使用 CMake 构建了。
 - en: Installing CMake on macOS
   id: totrans-59
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 macOS 上安装 CMake
 - en: In this section, we’ll cover how to install everything you’ll need to start
     building the application on macOS.
   id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本节中，我们将介绍如何安装所有你需要的工具，以便在 macOS 上开始构建应用程序。
 - en: 'To begin, you will need a C/C++ compiler. If you don’t already have a compiler
     installed, the safest bet is to go with Xcode, which can be downloaded from the
     App Store:'
   id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，你需要一个 C/C++ 编译器。如果你还没有安装编译器，最安全的选择是安装 Xcode，它可以从 App Store 下载：
 - en: Go to **Spotlight Search** by clicking the magnifying glass on the macOS menu
     bar.
   id: totrans-62
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 通过点击 macOS 菜单栏上的放大镜图标，进入**Spotlight 搜索**。
 - en: '![Figure 1.10: Spotlight Search option on macOS menu bar](img/B21152_01_10.jpg)'
   id: totrans-63
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.10：macOS 菜单栏上的 Spotlight 搜索选项](img/B21152_01_10.jpg)'
 - en: 'Figure 1.10: Spotlight Search option on macOS menu bar'
   id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.10：macOS 菜单栏上的 Spotlight 搜索选项
 - en: Search for **App Store**.
   id: totrans-65
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 搜索 **App Store**。
 - en: '![Figure 1.11: Searching for App Store from Spotlight Search](img/B21152_01_11.jpg)'
   id: totrans-66
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.11：从 Spotlight 搜索中查找 App Store](img/B21152_01_11.jpg)'
 - en: 'Figure 1.11: Searching for App Store from Spotlight Search'
   id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.11：从 Spotlight 搜索中查找 App Store
 - en: From **App Store**, search for **Xcode**.
   id: totrans-68
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从 **App Store** 中搜索 **Xcode**。
 - en: '![Figure 1.12: Xcode search results from the App Store](img/B21152_01_12.jpg)'
   id: totrans-69
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.12：来自 App Store 的 Xcode 搜索结果](img/B21152_01_12.jpg)'
 - en: 'Figure 1.12: Xcode search results from the App Store'
   id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.12：来自 App Store 的 Xcode 搜索结果
 - en: Click the **Get** and then **Install** buttons.
   id: totrans-71
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击 **获取** 然后点击 **安装** 按钮。
 - en: '![Figure 1.13: Xcode application install](img/B21152_01_13.jpg)'
   id: totrans-72
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.13：Xcode 应用程序安装](img/B21152_01_13.jpg)'
 - en: 'Figure 1.13: Xcode application install'
   id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.13：Xcode 应用程序安装
 - en: 'It is also possible to install **Command Line Tools** for **Xcode** from [https://developer.apple.com](https://developer.apple.com),
     specifically [https://developer.apple.com/download/all/](https://developer.apple.com/download/all/),
     which also includes the core tools we’ll need to work with CMake. To access the
@@ -419,11 +466,15 @@
   id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 也可以从 [https://developer.apple.com](https://developer.apple.com) 安装**Xcode**的**命令行工具**，特别是从
+    [https://developer.apple.com/download/all/](https://developer.apple.com/download/all/)，该链接也包含了我们与
+    CMake 一起使用所需的核心工具。要访问 Apple Developer 网站，需要一个 Apple Developer 账户（你可以在这里了解更多：[https://developer.apple.com/account](https://developer.apple.com/account)）。
 - en: 'Once either `Terminal` again) and enter the following:'
   id: totrans-75
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一旦打开 `Terminal`，再次输入以下命令：
 - en: '[PRE0]'
   id: totrans-76
   prefs: []
@@ -433,6 +484,7 @@
   id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 你应该看到类似以下的消息：
 - en: '[PRE1]'
   id: totrans-78
   prefs: []
@@ -443,6 +495,7 @@
   id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 这确认了我们有一个有效的编译器，并且现在可以安装 CMake 来与其一起使用。
 - en: If you do not currently have CMake installed on your system (or have a fairly
     old version of CMake installed), head to [https://cmake.org/download/](https://cmake.org/download/)
     to get the latest release (at the time of writing this is 3.28.1).
@@ -450,31 +503,38 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如果你当前没有在系统上安装 CMake（或者安装的是一个相当旧的版本），请访问 [https://cmake.org/download/](https://cmake.org/download/)
+    获取最新版本（截至本文撰写时为 3.28.1）。
 - en: The simplest option is to grab the macOS 10.13 or later disk image (`.dmg`)
     (cmake-3.28.1-macos-universal.dmg) and follow the standard installation instructions.
   id: totrans-81
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 最简单的选项是获取适用于 macOS 10.13 或更高版本的磁盘镜像（`.dmg` 文件）（cmake-3.28.1-macos-universal.dmg），并按照标准安装说明进行操作。
 - en: '![Figure 1.14: CMake macOS installation](img/B21152_01_14.jpg)'
   id: totrans-82
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.14：CMake macOS 安装](img/B21152_01_14.jpg)'
 - en: 'Figure 1.14: CMake macOS installation'
   id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.14：CMake macOS 安装
 - en: Drag **CMake** to your **Applications** folder.
   id: totrans-84
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将 **CMake** 拖动到 **应用程序** 文件夹中。
 - en: The CMake GUI will now be available on your system but CMake won’t yet be available
     from Terminal.
   id: totrans-85
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 现在，CMake GUI 已经可以在系统中使用，但尚未能从 Terminal 使用 CMake。
 - en: To be able to run CMake commands from Terminal, open **CMake** from the **Applications**
     folder, ignore the UI that appears for now, and go to the CMake macOS menu bar
     and click **Tools**| **How to install For Command** **Line Use**.
@@ -482,34 +542,42 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为了能够从 Terminal 运行 CMake 命令，打开 **CMake**（在 **应用程序** 文件夹中），暂时忽略弹出的 UI，接着进入 CMake
+    macOS 菜单栏并点击 **工具**| **如何安装用于命令行使用**。
 - en: '![Figure 1.15: CMake command-line install options from macOS menu bar](img/B21152_01_15.jpg)'
   id: totrans-87
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.15：macOS 菜单栏上的 CMake 命令行安装选项](img/B21152_01_15.jpg)'
 - en: 'Figure 1.15: CMake command-line install options from macOS menu bar'
   id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.15：macOS 菜单栏上的 CMake 命令行安装选项
 - en: After clicking this, a popup will appear with several options. The least invasive
     is likely the first option, though the second is also a fine choice.
   id: totrans-89
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 点击此项后，会弹出一个包含多个选项的窗口。最不干扰的选项可能是第一个，第二个选项也是不错的选择。
 - en: '![Figure 1.16: CMake command-line install options panel](img/B21152_01_16.jpg)'
   id: totrans-90
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.16：CMake命令行安装选项面板](img/B21152_01_16.jpg)'
 - en: 'Figure 1.16: CMake command-line install options panel'
   id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.16：CMake命令行安装选项面板
 - en: 'To have the path option persist, we need to update our `.zshrc` file. Copy
     the following line:'
   id: totrans-92
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为了使路径选项持久化，我们需要更新我们的`.zshrc`文件。复制以下行：
 - en: '[PRE2]'
   id: totrans-93
   prefs: []
@@ -522,91 +590,111 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从终端确保你在主目录（`cd ~`）中，然后打开你的`.zshrc`文件（你可以使用你喜欢的文本编辑器，或者在终端中输入`nano .zshrc`）。
 - en: '![Figure 1.17: Opening .zshrc with nano from Terminal](img/B21152_01_17.jpg)'
   id: totrans-95
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.17：从终端用nano打开.zshrc](img/B21152_01_17.jpg)'
 - en: 'Figure 1.17: Opening .zshrc with nano from Terminal'
   id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.17：从终端用nano打开.zshrc
 - en: Paste the earlier command and save the file.
   id: totrans-97
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 粘贴之前的命令并保存文件。
 - en: '![Figure 1.18: Modifying .zshrc from nano inside Terminal](img/B21152_01_18.jpg)'
   id: totrans-98
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.18：在终端内用nano修改.zshrc](img/B21152_01_18.jpg)'
 - en: 'Figure 1.18: Modifying .zshrc from nano inside Terminal'
   id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.18：在终端内用nano修改.zshrc
 - en: To reload the Zsh config file and update the `PATH` variable, run `source .zshrc`.
   id: totrans-100
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为了重新加载Zsh配置文件并更新`PATH`变量，运行`source .zshrc`。
 - en: '![Figure 1.19: Refresh the Terminal environment by executing .zshrc again](img/B21152_01_19.jpg)'
   id: totrans-101
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.19：通过再次执行.zshrc来刷新终端环境](img/B21152_01_19.jpg)'
 - en: 'Figure 1.19: Refresh the Terminal environment by executing .zshrc again'
   id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.19：通过再次执行.zshrc来刷新终端环境
 - en: Finally, run `cmake` from Terminal to verify that it can be found.
   id: totrans-103
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 最后，从终端运行`cmake`来验证是否能够找到它。
 - en: '![Figure 1.20: Running cmake from Terminal](img/B21152_01_20.jpg)'
   id: totrans-104
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.20：从终端运行cmake](img/B21152_01_20.jpg)'
 - en: 'Figure 1.20: Running cmake from Terminal'
   id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.20：从终端运行cmake
 - en: You can also use `where cmake` and `cmake --version` to verify that you have
     the correct version installed.
   id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以使用`where cmake`和`cmake --version`来验证是否安装了正确版本。
 - en: With that, we’re ready to start building with CMake.
   id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这些，我们就可以开始使用CMake进行构建了。
 - en: Installing CMake on Linux (Ubuntu)
   id: totrans-108
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在Linux（Ubuntu）上安装CMake
 - en: In this section, we’ll cover how to get everything you’ll need to start building
     the application on Linux (Ubuntu).
   id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这一节中，我们将介绍如何获取你在Linux（Ubuntu）上构建应用所需的一切。
 - en: 'To begin with, you will need a C/C++ compiler. If you don’t already have a
     compiler installed, an excellent choice is to go with GCC. This can be installed
     by using the standard Ubuntu package manager, `apt`:'
   id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，你需要一个C/C++编译器。如果你还没有安装编译器，一个很好的选择是使用GCC。可以通过标准的Ubuntu包管理器`apt`来安装：
 - en: Open **Terminal** by using **Show Applications** from the desktop.
   id: totrans-111
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用桌面上的**显示应用程序**打开**终端**。
 - en: '![Figure 1.21: Ubuntu Show Applications menu option](img/B21152_01_21.jpg)'
   id: totrans-112
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.21：Ubuntu显示应用菜单选项](img/B21152_01_21.jpg)'
 - en: 'Figure 1.21: Ubuntu Show Applications menu option'
   id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.21：Ubuntu显示应用菜单选项
 - en: Run `sudo apt update` and then `sudo apt install build-essential` (it is possible
     that your version of Ubuntu already comes with this installed, but it’s good to
     check).
@@ -614,20 +702,24 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 运行`sudo apt update`，然后运行`sudo apt install build-essential`（你的Ubuntu版本可能已经安装了这个，但最好检查一下）。
 - en: '![Figure 1.22: Installing build-essential from Terminal](img/B21152_01_22.jpg)'
   id: totrans-115
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.22：从终端安装build-essential](img/B21152_01_22.jpg)'
 - en: 'Figure 1.22: Installing build-essential from Terminal'
   id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.22：从终端安装build-essential
 - en: 'Run `gcc --version` to verify that the compiler can be found and is working
     as expected. You should see output resembling the following:'
   id: totrans-117
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 运行`gcc --version`来验证编译器是否能够找到并正常工作。你应该看到类似以下的输出：
 - en: '[PRE3]'
   id: totrans-118
   prefs: []
@@ -637,10 +729,12 @@
   id: totrans-119
   prefs: []
   type: TYPE_IMG
+  zh: '![图 1.23：从终端运行gcc --version](img/B21152_01_23.jpg)'
 - en: 'Figure 1.23: Running gcc --version from Terminal'
   id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 1.23：从终端运行gcc --version
 - en: Next, we need to install CMake. This can be done via a package manager (e.g.,
     `apt`), but we’ll do so directly here to specify the precise version. Go to [https://cmake.org/download/](https://cmake.org/download/)
     and scroll down to find the binary distributions section. Grab Linux x86_64 (Intel)
@@ -650,12 +744,15 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 接下来，我们需要安装CMake。这可以通过包管理器（例如`apt`）完成，但我们在这里直接进行安装，以指定精确的版本。访问[https://cmake.org/download/](https://cmake.org/download/)，并向下滚动找到二进制发行版部分。根据你的架构，选择Linux
+    x86_64（Intel）（`cmake-3.28.1-linux-x86_64.tar.gz`）或Linux aarch64（ARM）（`cmake-3.28.1-linux-aarch64.tar.gz`）。
 - en: 'Run this command from the folder you downloaded CMake to extract and install
     CMake to your `/``opt` folder:'
   id: totrans-122
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从你下载CMake的文件夹运行此命令，提取并安装CMake到你的`/opt`文件夹：
 - en: '[PRE4]'
   id: totrans-123
   prefs: []
