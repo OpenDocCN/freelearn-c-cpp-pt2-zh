@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '1'
 - en: Getting Started
   id: totrans-1
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 入门
 - en: The objective of *Minimal CMake* is to walk you through the development process
     of taking an application from its humble beginnings (starting with a simple console
     application) to a complete windowed application you can demo to friends and use
@@ -15,12 +17,14 @@
   id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Minimal CMake* 的目标是引导你完成应用程序的开发过程，从一个简单的控制台应用程序开始，直到一个完整的窗口化应用程序，你可以向朋友演示，并将其作为未来项目的模板。'
 - en: We’ll see how CMake can help throughout the entire process. Perhaps the greatest
     benefit CMake provides is how easy it is to integrate existing open source software
     to improve the functionality of your app.
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将看到 CMake 如何帮助整个过程。或许 CMake 提供的最大好处是，它能够轻松地将现有的开源软件集成进来，以增强你应用的功能。
 - en: Before we can start using CMake to create our application, we need to ensure
     that we have our development environment set up and ready to go. The setup will
     vary depending on which platform you’ve decided to use (Windows, macOS, or Linux).
@@ -29,65 +33,79 @@
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始使用 CMake 创建应用之前，我们需要确保我们的开发环境已设置并准备好。根据你选择的平台（Windows、macOS 或 Linux），设置过程会有所不同。我们将在这里讨论每个平台。这将为我们介绍
+    CMake 并开始构建应用程序的核心提供一个良好的起点。
 - en: 'In this chapter, we’re going to cover the following topics:'
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们将讨论以下主题：
 - en: Installing CMake on Windows
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 Windows 上安装 CMake
 - en: Installing CMake on macOS
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 macOS 上安装 CMake
 - en: Installing CMake on Linux (Ubuntu)
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在 Linux（Ubuntu）上安装 CMake
 - en: Installing Git
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 安装 Git
 - en: Visual Studio Code setup (optional)
   id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Visual Studio Code 设置（可选）
 - en: Technical requirements
   id: totrans-11
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 技术要求
 - en: 'To get the most out of this book, we recommend that you run the examples locally.
     To do this you will need the following:'
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了充分利用本书，我们建议你在本地运行示例。为此，你需要以下内容：
 - en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
     (**OS**)
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一台运行最新 **操作系统** (**OS**) 的 Windows、Mac 或 Linux 计算机
 - en: A working C/C++ compiler (a system default is recommended for each platform
     if you don’t already have this)
   id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个工作中的 C/C++ 编译器（如果你还没有安装，建议使用每个平台的系统默认编译器）
 - en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
 - en: CMake version
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 版本
 - en: All examples in this book have been tested with CMake 3.28.1\. Earlier versions
     are not guaranteed to work. Later versions should be safe to upgrade to, though
     it’s possible that there may be differences. If in doubt, use CMake 3.28.1 when
@@ -95,22 +113,28 @@
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 本书中的所有示例都已经在 CMake 3.28.1 版本下进行过测试。早期版本无法保证兼容。升级到较新的版本应该是安全的，但可能会存在差异。如果有疑问，建议在运行本书中的示例时使用
+    CMake 3.28.1。
 - en: Installing CMake on Windows
   id: totrans-18
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 Windows 上安装 CMake
 - en: In this section, we’ll cover how to install everything you’ll need to start
     building applications with CMake on Windows.
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本节中，我们将介绍如何安装你在 Windows 上开始使用 CMake 构建应用所需的所有内容。
 - en: To begin with, you will need a C/C++ compiler. If you don’t already have a compiler
     installed, a good choice to go with is Visual Studio (Visual Studio 2022 Community
     Edition can be downloaded from [https://visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/)).
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，你将需要一个 C/C++ 编译器。如果你还没有安装编译器，推荐使用 Visual Studio（可以从 [https://visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/)
+    下载 Visual Studio 2022 Community Edition）。
 - en: Visual Studio is an integrated development environment that comes with Microsoft’s
     C++ compiler for Windows (`cl.exe`). We won’t be covering Visual Studio directly,
     though you are more than welcome to use it if you prefer (see [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228)*,
