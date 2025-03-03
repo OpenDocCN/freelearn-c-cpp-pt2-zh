@@ -702,10 +702,12 @@
   id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于`ExternalProject`只在构建时提供内容，因此这种方法仅适用于已经存在于本地文件夹中的子项目。因为它们包括一个在配置时必须存在的导入目标目录，而在使用`target_link_libraries`时，这些目录必须在配置时就已经存在，因此导出的路径应该指向源目录，而不是外部项目的安装位置。
 - en: These practices are for temporary workarounds
   id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些做法是临时的权宜之计。
 - en: The practices using `ExternalProject` and `FetchContent` described here are
     meant for temporary workarounds, to be able to include legacy projects in the
     CMake build while migrating. These are not good practices to use in a production
@@ -717,22 +719,26 @@
   id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里描述的使用`ExternalProject`和`FetchContent`的做法，旨在为迁移过程中能够将遗留项目包含到CMake构建中提供临时的解决方案。这些做法并不适合在生产环境中使用。此模式允许使用原始构建系统，并提供一个导入的目标，用于链接已经迁移的项目。是否通过创建这样的中间项目结构来实现早期用CMake构建整个项目的努力是值得的，需要根据每个案例单独考虑。
 - en: If migrating from Microsoft Visual Studio instead of using `ExternalProject`,
     the `include_external_msproject()` function might be used to directly include
     the project files.
   id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果从Microsoft Visual Studio迁移而不是使用`ExternalProject`，则可以使用`include_external_msproject()`函数直接包含项目文件。
 - en: With this, you should have all the concepts to migrate to CMake from another
     build system.
   id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过这些内容，你应该掌握了从其他构建系统迁移到CMake所需的所有概念。
 - en: Summary
   id: totrans-86
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: In this chapter, you learned about some concepts and strategies for migrating
     projects of various sizes to CMake. The effort and actual work to be done when
     migrating projects to CMake will very much depend on the individual setup of a
@@ -747,59 +753,70 @@
   id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，你学习了关于将各种规模的项目迁移到CMake的一些概念和策略。迁移项目到CMake所需的努力和实际工作将很大程度上依赖于项目的具体设置。然而，采用这里描述的方法后，选择合适的策略应该会更容易。改变构建过程和开发者工作流程通常是破坏性的，因此你必须仔细考虑这种努力是否值得。尽管如此，将项目迁移到CMake将开启所有用于构建高质量软件的功能和做法的可能性，正如本书所述。此外，拥有一个清晰且维护良好的构建系统将使开发者能够专注于他们的主要任务，即编写代码和发布软件。
 - en: This brings us to the final chapter of this book, which is about getting access
     to the CMake community, finding further reading material, and contributing to
     CMake itself.
   id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将带我们进入本书的最后一章，内容是如何访问CMake社区、寻找进一步的阅读材料并为CMake本身做贡献。
 - en: Questions
   id: totrans-89
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: What are the two main strategies for migrating large projects?
   id: totrans-90
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 迁移大型项目的两种主要策略是什么？
 - en: When choosing a bottom-up approach for migrating projects, which subprojects
     or targets are migrated first?
   id: totrans-91
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在选择自下而上的方法迁移项目时，应该首先迁移哪些子项目或目标？
 - en: When choosing a top-down approach, which projects should be migrated first?
   id: totrans-92
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在选择自上而下的方法时，应该首先迁移哪些项目？
 - en: What are the advantages and disadvantages of a top-down approach?
   id: totrans-93
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 自上而下的方法有哪些优缺点？
 - en: What are the benefits and drawbacks of using a bottom-up approach for migrating?
   id: totrans-94
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用自下而上的方法进行迁移有哪些优缺点？
 - en: Answers
   id: totrans-95
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 答案
 - en: Large projects can be migrated from the top down or the bottom up.
   id: totrans-96
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 大型项目可以选择自上而下或自下而上的方式进行迁移。
 - en: When working with a bottom-up approach, projects or targets with the most incoming
     dependencies should be migrated first.
   id: totrans-97
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在使用自下而上的方法时，应该首先迁移具有最多传入依赖项的项目或目标。
 - en: When choosing a top-down approach, projects with the fewest incoming dependencies
     should be migrated first.
   id: totrans-98
