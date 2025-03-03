@@ -1,8 +1,10 @@
 - en: '5'
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: Integrating Third-Party Libraries and Dependency Management
+  id: totrans-1
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -11,6 +13,7 @@
     that are not part of a CMake project. The first part of the chapter will be about
     how to find those things in general, while the latter part will focus on how to
     manage dependencies to build your CMake project.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
 - en: One of the biggest advantages of using CMake is that it has built-in dependency
@@ -19,6 +22,7 @@
     locally downloaded dependencies. Additionally, you will learn how third-party
     libraries can be downloaded and used as binaries and, alternatively, how they
     can be built from source directly out of a CMake project.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
 - en: 'We will look at how to write instructions for CMake to reliably find almost
@@ -29,45 +33,56 @@
     them in place from scratch, setting up CMake to handle dependencies in a structured
     and consistent way will reduce the time spent fixing broken builds in the future.
     Here’s the list of main topics that we’ll cover in this chapter:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
 - en: Finding files, programs, and paths with CMake
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Using third-party libraries in your CMake project
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Using package managers with CMake
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Getting the dependencies as source code
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Dependency providers – a new way of getting dependencies
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Technical requirements
+  id: totrans-10
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'As with the previous chapters, all the examples are tested with CMake 3.24
     and run on any of the following compilers:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
 - en: GCC 9 or newer
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Clang 12 or newer
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: MSVC 19 or newer
+  id: totrans-14
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -75,22 +90,27 @@
     Some examples pull dependencies from various online locations, so an internet
     connection is also required. All of the examples and source code are available
     from the GitHub repository for this book, which can be found at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
 - en: 'The examples for the external package managers require Conan (version 1.40
     or newer) and vcpkg installed on your system to run. You can get the software
     here:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: '**Conan**: [https://conan.io/](https://conan.io/)'
+  id: totrans-17
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Vcpkg**: [https://github.com/microsoft/vcpkg](https://github.com/microsoft/vcpkg)'
+  id: totrans-18
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Finding files, programs, and paths with CMake
+  id: totrans-19
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -102,33 +122,41 @@
     search order of where to find the files or programs we are looking for. Then,
     we might want to add more locations where the file might be, and finally, we must
     account for the differences between different operating systems.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: On an abstraction level higher than the individual files, CMake can find whole
     packages that define targets, include paths, and package-specific variables. Refer
     to the *Using third-party libraries in your CMake project* section for more detail.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: 'There are five `find_...` commands that share very similar options and behaviors:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: '`find_file`: This locates a single file'
+  id: totrans-23
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`find_path`: This finds a directory containing a specific file'
+  id: totrans-24
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`find_library`: This finds library files'
+  id: totrans-25
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`find_program`: This finds executable programs'
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`find_package`: This finds complete sets of packages'
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -138,9 +166,11 @@
     file content available for easy use in the CMake project. In this chapter, first,
     we will look at the simpler `find` functions before we cover how to find complex
     packages.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: Finding files and paths
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -149,15 +179,19 @@
     them is that `find_path` stores the directory in which a file is found in the
     result, while `find_file` stores the full path including the filename. The signature
     of the `find_file` command is shown as follows:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The preceding command either searches for a single file, if the name has been
     passed directly, or for a list of likely names if the `NAMES` option has been
     used. The resulting path is stored in the variable passed as `<VAR>`. If the file
     cannot be found, the variable will contain `<VARIABLENAME>-NOTFOUND`.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: Passing a list of names is useful if the files being searched for have variations
@@ -165,61 +199,88 @@
     or may not include version numbers and so on. When passing a list of names, the
     names should be ordered in a preferred way, as the search stops once the first
     file has been found.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: Searching for files containing version numbers
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
 - en: It is recommended that you search for filenames without version numbers before
     searching for those that contain some form of version numbering. This is so that
     locally built files are preferred to the ones installed by the operating system.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
 - en: The `HINTS` and `PATHS` options contain additional locations to the default
     locations where the file is searched for. `PATH_SUFFIXES` could contain several
     subdirectories that are searched below each of the other locations.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '`HINTS` 和 `PATHS` 选项包含附加的位置，文件将在这些位置下进行搜索。`PATH_SUFFIXES` 可以包含几个子目录，这些子目录将在其他位置下进行搜索。'
 - en: 'The `find_…` commands search for things in defined places and within a defined
     order. The `NO_..._PATH` arguments of the commands can be used to skip the respective
     location. The following table shows the order of the search locations and the
     options for skipping a location:'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '`find_…` 命令在定义的地方并按定义的顺序搜索内容。命令的 `NO_..._PATH` 参数可用于跳过相应的路径。下表显示了搜索位置的顺序以及跳过位置的选项：'
 - en: '| **Location** | **The skip option in** **the command** |'
+  id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| **位置** | **命令中的跳过选项** |'
 - en: '| Package root variables | `NO_PACKAGE_ROOT_PATH` |'
+  id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| 包根变量 | `NO_PACKAGE_ROOT_PATH` |'
 - en: '| CMake-specific cache variables | `NO_CMAKE_PATH` |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| CMake 特定的缓存变量 | `NO_CMAKE_PATH` |'
 - en: '| CMake-specific environment variables | `NO_CMAKE_ENVIRONMENT_PATH` |'
+  id: totrans-41
   prefs: []
   type: TYPE_TB
+  zh: '| CMake 特定的环境变量 | `NO_CMAKE_ENVIRONMENT_PATH` |'
 - en: '| Paths from the `HINTS` option |  |'
+  id: totrans-42
   prefs: []
   type: TYPE_TB
+  zh: '| 来自 `HINTS` 选项的路径 |  |'
 - en: '| System-specific environment variables | `NO_SYSTEM_ENVIRONMENT_PATH` |'
+  id: totrans-43
   prefs: []
   type: TYPE_TB
+  zh: '| 系统特定的环境变量 | `NO_SYSTEM_ENVIRONMENT_PATH` |'
 - en: '| System-specific cache variables | `NO_CMAKE_SYSTEM_PATH` |'
+  id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| 系统特定的缓存变量 | `NO_CMAKE_SYSTEM_PATH` |'
 - en: '| Paths from the `PATHS` option |  |'
+  id: totrans-45
   prefs: []
   type: TYPE_TB
+  zh: '| 来自 `PATHS` 选项的路径 |  |'
 - en: 'Let’s look at the search order more closely along with what the different locations
     mean:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更仔细地看一下搜索顺序以及不同位置的含义：
 - en: '`find_file` is used as part of the `find_package` command. Please refer to
     the *Using third-party libraries in your CMake project* section for an in-depth
     discussion.'
+  id: totrans-47
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`find_file` 是 `find_package` 命令的一部分。有关详细讨论，请参考 *在 CMake 项目中使用第三方库* 部分。'
 - en: '`CMAKE_PREFIX_PATH`, `CMAKE_INLCUDE_PATH`, and `CMAKE_FRAMEWORK_PATH` cache
     variables for macOS. Generally, setting the `CMAKE_PREFIX_PATH` cache variable
     is preferred over the other two types, as this is used for all of the `find_`
@@ -230,40 +291,59 @@
     has been set. Generally, Cmake sets the variables automatically, and they should
     not be changed by the developers. Architecture-specific paths take precedence
     over generic paths.'
+  id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CMAKE_PREFIX_PATH`、`CMAKE_INCLUDE_PATH` 和 `CMAKE_FRAMEWORK_PATH` 是 macOS 的缓存变量。通常，设置
+    `CMAKE_PREFIX_PATH` 缓存变量比其他两种类型更为优选，因为它用于所有的 `find_` 命令。前缀路径是进行搜索的基准点，常见的文件结构如
+    `bin`、`lib`、`include` 等都位于该路径下。`CMAKE_PREFIX_PATH` 是路径列表，对于每个条目，`find_file` 将在
+    `<prefix>/include` 或 `<prefix>/include/${CMAKE_LIBRARY_ARCHITECTURE}` 下搜索（如果相应的变量已被设置）。通常，CMake
+    会自动设置这些变量，开发人员不应更改它们。特定架构的路径优先于通用路径。'
 - en: The `CMAKE_INCLUDE_PATH` and `CMAKE_FRAMEWORK_PATH` cache variables should only
     be used if the standard directory structure is not applicable. They do not add
     additional `include` suffixes to the paths.
+  id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果标准目录结构不适用，则应仅使用 `CMAKE_INCLUDE_PATH` 和 `CMAKE_FRAMEWORK_PATH` 缓存变量。它们不会在路径中添加额外的
+    `include` 后缀。
 - en: Searching these paths can be skipped by passing the `NO_CMAKE_PATH` option to
     the command or, globally, by setting the `CMAKE_FIND_USE_PATH` variable to `false`.
+  id: totrans-50
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过将 `NO_CMAKE_PATH` 选项传递给命令，或者通过全局设置 `CMAKE_FIND_USE_PATH` 变量为 `false`，可以跳过这些路径的搜索。
 - en: '`CMAKE_PREFIX_PATH`, `CMAKE_INCLUDE_PATH`, and `CMAKE_FRAMEWORK_PATH` system
     environment variables. The variables work in the same way as the cache variables,
     but they are usually set from outside the call to CMake.'
+  id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CMAKE_PREFIX_PATH`、`CMAKE_INCLUDE_PATH` 和 `CMAKE_FRAMEWORK_PATH` 是系统环境变量。这些变量的工作方式与缓存变量相同，但通常是从
+    CMake 调用外部设置的。'
 - en: Note that, on Unix platforms, the lists are separated by colons (`:`) instead
     of semicolons (`;`)to conform to the platform-specific environment variables.
+  id: totrans-52
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 请注意，在 Unix 平台上，列表是通过冒号 (`:`) 分隔的，而不是分号 (`;`)，以符合平台特定的环境变量。
 - en: Paths from the `HINTS` option are the additional search locations that are manually
     specified. They could be constructed from other values such as property values,
     or they could depend on a previously found file or path.
+  id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 来自 `HINTS` 选项的路径是手动指定的附加搜索位置。它们可以从其他值（如属性值）构造，或者可能依赖于先前找到的文件或路径。
 - en: '`INCLUDE` and `PATH` environment variables could each contain a list of directories
     to be searched. Again, on Unix platforms, the list is separated by colons (`:`)
     instead of semicolons (`;`).'
+  id: totrans-54
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -275,47 +355,55 @@
     end in `bin` or `sbin`, is searched. Passing either the `NO_SYSTEM_ENVIRONMENT_PATH`
     variable or setting the `CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` variable to `false`
     will skip the locations in the environment variables.
+  id: totrans-55
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Assuming that the `PATH` option contains `C:\myfolder\bin;C:\yourfolder`, and
     `CMAKE_LIBRARY_ARCHITECTURE` is set to `x86_64`, the search order will be as follows:'
+  id: totrans-56
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`C:\myfolder\include\x86_64`'
+  id: totrans-57
   prefs:
   - PREF_IND
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`C:\myfolder\include\`'
+  id: totrans-58
   prefs:
   - PREF_IND
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`C:\myfolder\bin`'
+  id: totrans-59
   prefs:
   - PREF_IND
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`C:\yourfolder\include\x86_64`'
+  id: totrans-60
   prefs:
   - PREF_IND
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`C:\yourfolder\include\`'
+  id: totrans-61
   prefs:
   - PREF_IND
   - PREF_IND
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`C:\yourfolder\`'
+  id: totrans-62
   prefs:
   - PREF_IND
   - PREF_IND
@@ -327,12 +415,14 @@
     toolchain. One exception here is if a toolchain file is provided, such as when
     using sysroot or cross-compiling, as explained in [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182),
     *Cross-Platform Compiling and* *Custom Toolchains*.'
+  id: totrans-63
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: In addition to the `NO_CMAKE_SYSTEM_PATH` option, the `CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
     variable can be set to `false` to skip searching in locations provided by the
     system-specific cache variables.
+  id: totrans-64
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -340,20 +430,24 @@
     are additional search locations that are manually provided. Although not technically
     prevented, it is the convention that the `PATHS` variables should be fixed paths
     and not depend on other values.
+  id: totrans-65
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If only the locations provided by `HINTS` or `PATHS` are to be searched, adding
     the `NO_DEFAULT_PATH` option skips all the other locations.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
 - en: Occasionally, you might want to ignore particular paths for searching. In such
     cases, a list of paths might be specified in `CMAKE_IGNORE_PATH` or `CMAKE_SYSTEM_IGNORE_PATH`.
     Both of these variables were designed with cross-compiling scenarios in mind and
     are rarely used in other circumstances.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
 - en: Searching for files when cross-compiling
+  id: totrans-68
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -363,6 +457,7 @@
     first, you will want to look inside the toolchain’s directory for files. By setting
     the `CMAKE_FIND_ROOT` variable, the origin for all searches can be changed to
     a new location.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
 - en: Additionally, the `CMAKE_SYSROOT`, `CMAKE_SYSROOT_COMPILE`, and `CMAKE_SYSROOT_LINK`
@@ -372,6 +467,7 @@
     be changed. Any path that starts with a tilde (`~`), and is passed to the `find_`
     commands, will not be changed to avoid skipping directories that are under the
     user’s home directory.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
 - en: By default, first, CMake searches in the locations provided by any of the variables
@@ -380,74 +476,94 @@
     variable to either `BOTH`, `NEVER`, or `ONLY`. Alternatively, you can set the
     `CMAKE_FIND_ROOT_PATH_BOTH` option, the `ONLY_CMAKE_FIND_ROOT_PATH` option, or
     the `NO_CMAKE_FIND_ROOT_PATH` option to `find_file`.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
 - en: 'The following table shows the search order when setting either of the options
     or the variables in the different search modes:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
 - en: '| **Mode** | **Option** | **Search order** |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
 - en: '| --- | --- | --- |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
 - en: '| `BOTH` | `CMAKE_FIND_ROOT_PATH_BOTH` |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
 - en: '`CMAKE_FIND_ROOT_PATH`'
+  id: totrans-76
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT_COMPILE`'
+  id: totrans-77
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT_LINK`'
+  id: totrans-78
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT`'
+  id: totrans-79
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: All regular search locations
+  id: totrans-80
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '|'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
 - en: '| `NEVER` | `NO_CMAKE_FIND_ROOT_PATH` |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
 - en: All regular search locations
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '|'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
 - en: '| `ONLY` | `ONLY_CMAKE_FIND_ROOT_PATH` | `CMAKE_FIND_ROOT_PATH`'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT_COMPILE`'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT_LINK`'
+  id: totrans-87
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_SYSROOT`'
+  id: totrans-88
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Any regular paths, one of the other locations, or under `CMAKE_STAGING_PREFIX`
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '|'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
 - en: The `CMAKE_STAGING_PREFIX` variable is used to provide installation paths for
@@ -455,9 +571,11 @@
     it. Setting up cross-compilation toolchains will be covered in detail in [*Chapter
     12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform Compiling and Custom Toolchains*,
     where we talk about cross-compiling.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
 - en: Finding programs
+  id: totrans-92
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -466,35 +584,43 @@
     has the `NAMES_PER_DIR` option, which tells the command to search one directory
     at a time and search for all provided filenames in each directory instead of searching
     through each directory for each file.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
 - en: On Windows, the `.exe` and `.com` file extensions are automatically added to
     the filenames provided, but not `.bat` or `.cmd`.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
 - en: 'The cache variables used by `find_program` are slightly different from the
     ones used by `find_file`:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
 - en: '`find_program` automatically adds `bin` and `sbin` to the search locations
     provided by `CMAKE_PREFIX_PATH`'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Values in `CMAKE_LIBRARY_ARCHITECTURE` are ignored and have no effect
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_PROGRAM_PATH` is used instead of `CMAKE_INCLUDE_PATH`'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_APPBUNDLE_PATH` is used instead of `CMAKE_FRAMEWORK_PATH`'
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` is used to change the mode for searching
     programs'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -502,12 +628,16 @@
     variable if CMake is unable to find the program. This is often handy to determine
     whether a custom build step that depends on a certain external program should
     be enabled or not.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 与其他`find`命令一样，`find_program`会在CMake无法找到程序时设置`<varname>-NOTFOUND`变量。这通常对于判断是否启用某个依赖特定外部程序的自定义构建步骤非常有用。
 - en: Finding libraries
+  id: totrans-102
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 查找库
 - en: Finding libraries is a special case of finding files, so the `find_library`
     command supports the same set of options as `find_file`. Also, similar to the
     `find_program` command, it has the additional `NAMES_PER_DIR` option that checks
@@ -516,31 +646,41 @@
     applies platform-specific naming conventions to the filenames. On Unix platforms,
     the names will be prefixed with `lib`, while on Windows, the `.dll` or `.lib`
     extensions will be added.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 查找库是查找文件的一种特殊情况，因此`find_library`命令支持与`find_file`相同的选项集。此外，与`find_program`命令类似，它还有额外的`NAMES_PER_DIR`选项，该选项会首先检查所有文件名，然后再进入下一个目录。查找常规文件和查找库之间的区别在于，`find_library`会自动根据平台特定的命名约定来处理文件名。在Unix平台上，文件名前会加上`lib`，而在Windows上，会添加`.dll`或`.lib`扩展名。
 - en: 'Again, the cache variables are slightly different from the ones used in `find_file`
     and `find_program`:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，缓存变量与`find_file`和`find_program`中使用的变量略有不同：
 - en: '`find_library` adds `lib` to the search locations by `CMAKE_PREFIX_PATH`, and
     it uses `CMAKE_LIBRARY_PATH` instead of `CMAKE_INCLUDE_PATH` to find libraries.
     The `CMAKE_FRAMEWORK_PATH` variable is used similarly to `find_file`. The `CMAKE_LIBRARY_ARCHITECTURE`
     variable works the same as in `find_file`.'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`find_library`通过`CMAKE_PREFIX_PATH`将`lib`添加到搜索路径中，并使用`CMAKE_LIBRARY_PATH`代替`CMAKE_INCLUDE_PATH`来查找库。`CMAKE_FRAMEWORK_PATH`变量的使用方式类似于`find_file`。`CMAKE_LIBRARY_ARCHITECTURE`变量与`find_file`中的用法相同。'
 - en: This is done by appending the respective folders to the search paths. `find_library`
     searches the locations in the `PATH` environment variable in the same way as `find_file`,
     but it appends `lib` to each prefix. Also, it uses the `LIB` environment variable
     if this has been set instead of the `INCLUDE` variable.
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 通过将相应的文件夹附加到搜索路径来实现此操作。`find_library`以与`find_file`相同的方式搜索`PATH`环境变量中的位置，但会在每个前缀中附加`lib`。另外，如果已设置`LIB`环境变量，它将使用该变量，而不是使用`INCLUDE`变量。
 - en: '`CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` is used to change the mode for searching
     libraries.'
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`CMAKE_FIND_ROOT_PATH_MODE_LIBRARY`用于更改搜索库的模式。'
 - en: CMake is generally aware of conventions regarding 32-bit and 64-bit search locations
     such as platforms using the `lib32` and `lib64` folders for different libraries
     of the same name. The behavior is controlled by the `FIND_LIBRARY_USE_LIB[32|64|X32]_PATHS`
@@ -550,12 +690,16 @@
     is very rare, and tampering with the search order inside a `CMakeLists.txt` file
     quickly makes projects hard to maintain and heavily impacts the portability between
     systems.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake通常会识别32位和64位搜索位置的命名约定，例如某些平台使用`lib32`和`lib64`文件夹来存放同名的不同库。此行为由`FIND_LIBRARY_USE_LIB[32|64|X32]_PATHS`变量控制，该变量决定了应先搜索什么。项目还可以使用`CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX`变量定义自己的后缀，从而覆盖其他变量的行为。然而，通常情况下不需要这样做，修改`CMakeLists.txt`文件中的搜索顺序会迅速使项目变得难以维护，并且对不同系统之间的可移植性产生重大影响。
 - en: Finding static or shared libraries
+  id: totrans-109
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 查找静态库或共享库
 - en: 'In most cases, simply passing the base name of a library to CMake works well
     enough, but sometimes, the behavior has to be overridden. One reason for this
     is that on some platforms, the static version of a library should be preferred
@@ -563,11 +707,15 @@
     `find_library` call into two calls instead of trying to achieve this in a single
     call. It is more robust if the static library is in a different directory from
     the dynamic one:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 在大多数情况下，直接将库的基本名称传递给CMake就足够了，但有时需要覆盖默认行为。这样做的原因之一是，在某些平台上，应该优先使用库的静态版本而不是共享版本，或者反之。最好的方法是将`find_library`调用拆分为两个调用，而不是试图在一个调用中实现此目标。如果静态库和动态库位于不同的目录中，这样的做法更为稳健：
 - en: '[PRE1]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: On Windows, this approach cannot be used, as static libraries and import libraries
     for DLLs do have the same `.lib` suffix, so they are not distinguishable by name.
     The `find_file`, `find_path`, `find_program`, and `find_library` commands are
@@ -577,9 +725,11 @@
     files, followed by all the library files, and then add them manually to each target
     and, in the end, account for all platform-specific behaviors. Let’s dive into
     the process of how to find dependencies next.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
 - en: Using third-party libraries in your CMake project
+  id: totrans-113
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -595,24 +745,29 @@
     either by CMake itself or by the project using the package. Both types can be
     found by using `find_package`, and the result is a set of imported targets and/or
     a set of variables containing information that is relevant to the build system.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
 - en: The `findPkgConfig` module, which uses the `pkg-config` tool provided by [freedesktop.org](https://www.freedesktop.org/wiki/)
     to find the relevant meta-information for a dependency, also provides indirect
     support for packages.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
 - en: Typically, `find` modules are used for locating dependencies, for instance,
     when the upstream does not provide the necessary information for package configuration.
     They are not to be confused with CMake utility modules, which are used with `include()`.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
 - en: Use packages provided from upstream over find modules
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
 - en: Whenever possible, use a package provided by the upstream source instead of
     creating a `find` module. If the upstream project lacks the necessary information,
     try to fix it at the source rather than writing a new `find` module.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
 - en: 'Note that the `find_package` command has two signatures: a basic or short signature
@@ -620,14 +775,18 @@
     is sufficient for finding the packages we’re looking for, and it should be preferred
     because it is easier to maintain. The short form supports both the module and
     config packages, but the long form only supports configuration mode.'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
 - en: 'The signature of the short mode is as follows:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Let’s suppose we want to write a program that converts a string into a SHA-256
     hash by using the appropriate functionality of the OpenSSL library. To compile
     and link this example, we have to inform CMake that this project needs the OpenSSL
@@ -635,94 +794,137 @@
     necessary libraries have been installed at a default location on your system;
     for example, by using a regular package manager such as apt, RPM, or similar for
     Linux, Chocolatey for Windows, or brew for macOS.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们想编写一个程序，通过使用 OpenSSL 库的适当功能将字符串转换为 SHA-256 哈希。为了编译和链接这个例子，我们必须告诉 CMake 项目需要
+    OpenSSL 库，然后将其附加到目标上。暂时假设所需的库已经通过默认位置安装在您的系统上；例如，通过使用 Linux 的常规包管理器如 apt、RPM 或类似的工具，Windows
+    的 Chocolatey，或 macOS 的 brew。
 - en: 'A sample `CMakeLists.txt` file might look like this:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个样例 `CMakeLists.txt` 文件可能如下所示：
 - en: '[PRE3]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'The preceding example does the following things:'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 前述示例执行以下操作：
 - en: On the first line in the example, there is a `find_package(OpenSSL REQUIRED
     COMPONENTS SSL)` call. This tells CMake that we’re looking for a set of libraries
     and header files for OpenSSL. Specifically, we’re looking for the *SSL* component
     and ignoring any other components provided by the OpenSSL package. The `REQUIRED`
     keyword tells CMake that finding this package is required to build this project.
     If the package is not found, CMake will fail with an error.
+  id: totrans-126
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在示例的第一行中，有一个 `find_package(OpenSSL REQUIRED COMPONENTS SSL)` 调用。这告诉 CMake 我们正在寻找
+    OpenSSL 的一组库和头文件。具体来说，我们正在寻找 *SSL* 组件，并忽略 OpenSSL 包提供的任何其他组件。`REQUIRED` 关键字告诉
+    CMake 找到此包对于构建此项目是必需的。如果找不到该包，CMake 将失败并显示错误。
 - en: Once the package has been found, we tell CMake to link the library to the target
     using `target_link_libary`. Specifically, we tell CMake to link the `OpenSSL::SSL`
     target provided by the package OpenSSL.
+  id: totrans-127
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 一旦找到了包，我们告诉 CMake 使用 `target_link_libary` 将库链接到目标。具体地，我们告诉 CMake 链接由 OpenSSL
+    包提供的 `OpenSSL::SSL` 目标。
 - en: 'If a dependency has to be of a certain version, it can be specified either
     as a single version of the `major[.minor[.patch[.tweak]]]` format or as a version
     range with the `versionMin..[<]versionMax` format. For version ranges, both `versionMin`
     and `versionMax` should have the same format, and by specifying `<`, the upper
     version will be excluded. In this case, the `find_package` call will look something
     like this:'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果一个依赖项必须是特定版本，则可以指定为 `major[.minor[.patch[.tweak]]]` 格式的单个版本，或者作为 `versionMin..[<]versionMax`
+    格式的版本范围。对于版本范围，`versionMin` 和 `versionMax` 应具有相同的格式，通过指定 `<`，将排除上限版本。在这种情况下，`find_package`
+    调用将看起来像这样：
 - en: '[PRE4]'
+  id: totrans-129
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: This will tell CMake to look for any version 3.0.x of OpenSSL. In this case,
     the number of the patch level will be ignored to match the version number. If
     the version should match exactly, the `EXACT` keyword can be specified, however,
     this is rarely used.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将告诉 CMake 查找任何版本为 3.0.x 的 OpenSSL。在这种情况下，补丁级别的数字将被忽略以匹配版本号。如果版本需要精确匹配，可以指定
+    `EXACT` 关键字，但这很少使用。
 - en: 'Unfortunately, as of May 2024, CMake cannot query the modules for the available
     components. So, we have to rely on the documentation of the modules or library
     providers to find out which components are available. The available modules can
     be queried with the following commands:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 不幸的是，截至 2024 年 5 月，CMake 无法查询模块以获取可用的组件。因此，我们必须依赖于模块或库提供者的文档来查找可用的组件。可以使用以下命令查询可用的模块：
 - en: '[PRE5]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: A list of modules shipped with CMake can be found at [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html).
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以在 [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html)
+    找到一系列与 CMake 一起提供的模块。
 - en: Finding individual libraries and files
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 查找单独的库和文件
 - en: It is possible to look for individual libraries and files, but the preferred
     way is to use packages. Finding individual files and making them available to
     CMake will be covered in the *Writing your own find* *module* section.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以查找单独的库和文件，但首选方式是使用包。在 *编写您自己的查找模块* 部分将介绍如何查找单独的文件并使其可用于 CMake。
 - en: When run in module mode, the `find_package` command searches for files called
     `Find<PackageName>.cmake`; this occurs, first, in the paths specified by `CMAKE_MODULE_PATH`
     and then among the `find` modules provided by the CMake installation. If you wish
     to learn how to create CMake packages, head over to [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071),
     *Packaging, Deploying, and Installing a* *CMake Project*.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
 - en: 'When run in config mode, `find_package` searches for files called after any
     of the following patterns:'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
 - en: '`<``lowercasePackageName>-config.cmake`'
+  id: totrans-138
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<``PackageName>Config.cmake`'
+  id: totrans-139
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<lowercasePackageName>-config-version.cmake` (if the version details were
     specified)'
+  id: totrans-140
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<PackageName>ConfigVersion.cmake` (if the version details were specified)'
+  id: totrans-141
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -730,39 +932,51 @@
     if needed, some of the locations can be skipped by passing the respective option
     to CMake. `find_package` contains a few more options than the other `find_` commands.
     The following table shows the search order from a high level:'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
 - en: '| **Location** | **Skip option in** **the command** |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
 - en: '| Package root variables | `NO_PACKAGE_ROOT_PATH` |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
 - en: '| CMake-specific cache variables | `NO_CMAKE_PATH` |'
+  id: totrans-145
   prefs: []
   type: TYPE_TB
 - en: '| CMake-specific environment variables | `NO_CMAKE_ENVIRONMENT_PATH` |'
+  id: totrans-146
   prefs: []
   type: TYPE_TB
 - en: '| Paths specified in the `HINTS` option |  |'
+  id: totrans-147
   prefs: []
   type: TYPE_TB
 - en: '| System-specific environment variables | `NO_SYSTEM_ENVIRONMENT_PATH` |'
+  id: totrans-148
   prefs: []
   type: TYPE_TB
 - en: '| User package registry | `NO_CMAKE_PACKAGE_REGISTRY` |'
+  id: totrans-149
   prefs: []
   type: TYPE_TB
 - en: '| System-specific cache variables | `NO_CMAKE_SYSTEM_PATH` |'
+  id: totrans-150
   prefs: []
   type: TYPE_TB
 - en: '| System package registry | `NO_CMAKE_SYSTEM_PACKAGE_REGISTRY` |'
+  id: totrans-151
   prefs: []
   type: TYPE_TB
 - en: '| Paths specified in the `PATHS` option |  |'
+  id: totrans-152
   prefs: []
   type: TYPE_TB
 - en: 'Let’s look at the search order and search locations more closely:'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
 - en: '`find_package` call is stored in a variable called `<PackageName>_ROOT`. They
@@ -770,30 +984,36 @@
     variables work in the same way as `CMAKE_PREFIX_PATH`, not just for the call to
     `find_package` but for all other `find_` calls that might happen inside the `find`
     module belonging to the package.'
+  id: totrans-154
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_PREFIX_PATH`. For macOS, the `CMAKE_FRAMEWORK_PATH` variable is also
     considered a search location.'
+  id: totrans-155
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: By setting the `CMAKE_FIND_USE_CMAKE_PATH` variable to `false`, the locations
     from the CMake-specific cache variables will be skipped.
+  id: totrans-156
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_PREFIX_PATH` and `CMAKE_FRAMEWORK_PATH` as cache variables, CMake will
     also consider them if they are set as environment variables.'
+  id: totrans-157
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Setting the `CMAKE_FIND_USE_ENVIRONMENT_PATH` variable to `false` will disable
     this behavior.
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`HINTS` from `find_package` is an optional path passed to `find_package`.'
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -801,6 +1021,7 @@
     trailing `bin` and `sbin` directories are removed. The default locations for each
     system, such as `/usr`, `/lib`, and similar locations, are usually searched at
     this point.'
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -810,19 +1031,23 @@
     account, while the system package registry is valid system-wide. On Windows, the
     location for the user package registry is stored in the Windows registry under
     the following:'
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<packageName>\`'
+  id: totrans-162
   prefs:
   - PREF_IND
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'On the Unix platform, it is stored in the user’s home directory as follows:'
+  id: totrans-163
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`~/.``cmake/packages/<PackageName>`'
+  id: totrans-164
   prefs:
   - PREF_IND
   - PREF_UL
@@ -830,10 +1055,12 @@
 - en: '`find_package`, the platform-specific `CMAKE_SYSTEM_PREFIX_PATH`, `CMAKE_SYSTEM_FRAMEWORK_PATH`,
     and `CMAKE_SYSTEM_APPBUNDLE_PATH` cache variables work similarly to the other
     find calls. They are set by CMake itself and should not be changed by the project.'
+  id: totrans-165
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<packageName>\`'
+  id: totrans-166
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -841,33 +1068,43 @@
     is an optional path that is passed to `find_package`. Usually, the `HINTS` options
     are computed from other values or depend on variables, whereas the `PATHS` options
     are fixed paths.
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Specifically, when looking for packages in config mode, CMake will look for
     the following file structure under the various prefixes:'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-169
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'On macOS platforms, the following folders are also searched:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: You can find out more about packages in the official CMake documentation at
     [https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html).
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
 - en: In terms of modules, so far, we’ve only covered how to find existing modules.
     But what happens if we want to look for dependencies that are neither integrated
     into CMake, nor in the standard places, or they do not provide configuration instructions
     for CMake? Well, let’s find out about that in the next section.
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
 - en: Writing your own find module
+  id: totrans-174
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -880,6 +1117,7 @@
     that uses a different version of a library to build from the one that is installed
     by the systems package manager or if the package is not available in that package
     manager.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
 - en: If you’re developing multiple projects side by side, you might want to handle
@@ -888,6 +1126,7 @@
     depend too much on what is installed on the system. For this reason, using package
     managers such as Conan or vcpkg as described in the *Using package managers with
     CMake* section is preferred over writing your own `find` modules.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
 - en: Creating fully reproducible builds is described in [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182),
@@ -896,12 +1135,14 @@
     work. If no module and no configuration file exist for a dependency, often, writing
     your so-called `find` module is the quickest solution. The goal is to provide
     enough information so that, later, we can use any package by using `find_package`.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
 - en: '`find` modules are instructions for CMake on how to find the necessary header
     and binary files for a library and which create imported targets for CMake to
     use. As described earlier in this chapter, when invoking `find_package` in module
     mode, CMake searches for files called `Find<PackageName>.cmake` in `CMAKE_MODULE_PATH`.'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
 - en: 'Let’s assume that we’re building a project where the dependencies have already
@@ -909,48 +1150,63 @@
     we use them. For this example, let’s assume we use a library called `obscure`;
     in this case, the `find` module would be called `FindObscure.cmake`. So, the project
     structure might look like this:'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-180
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'The first thing we have to do is to add the `cmake` folder to the `CMAKE_MODULE_PATH`,
     which is a list. So, first, we add the following line to the `CMakeLists.txt`
     file:'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-182
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'This tells CMake that it should look for `find` modules in the `cmake` folder.
     Typically, a `find` module does things in the following order:'
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
 - en: It looks for files belonging to the package.
+  id: totrans-184
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: It sets up variables containing the `include` and `library` directories for
     the packages.
+  id: totrans-185
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: It sets up targets for the imported package.
+  id: totrans-186
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: It sets properties for the targets.
+  id: totrans-187
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: 'A simple `FindModules.cmake` for a library called `obscure` might look like
     this:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'When looking at the example, we can observe that the following things happen:'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
 - en: First, the actual `library` file belonging to the dependency is searched for
@@ -962,6 +1218,7 @@
     file named `obscure`, a file named `libobscure.so` or `obscure.dll` will be found.
     More details about the search order, hints, and paths will be covered later in
     this section.
+  id: totrans-191
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -969,6 +1226,7 @@
     by finding a known path pattern of the library, usually one of the public header
     files. The result is stored in the `OBSCURE_INCLUDE_DIR` variable. Again, the
     common practice is to name this variable `<PACKAGENAME>_INCLUDE_DIR`.
+  id: totrans-192
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -979,25 +1237,34 @@
     and the version-related arguments of `find_package`. `find_package_handle_standard_args`
     has a short signature and a long signature. In the example, the short signature
     is used:'
+  id: totrans-193
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-194
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '[PRE12]'
+  id: totrans-195
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '[PRE13]'
+  id: totrans-196
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '[PRE14]'
+  id: totrans-197
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: For most cases, the short form of `find_package_handle_standard_args` is sufficient.
     In the short form, the `find_package_handle_standard_args` function takes the
     package name as the first argument and a list of variables that are required for
@@ -1009,6 +1276,7 @@
     checks whether the `OBSCURE_LIBRARY` and `OBSCURE_INCLUDE_DIR` variables that
     have been passed are valid. If that is the case, the `<PACKAGENAME>_FOUND` variable
     is set.
+  id: totrans-198
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -1018,27 +1286,34 @@
     for the same dependency). Creating the target is done with `add_library`. Since
     we cannot be sure whether it is a static or dynamic library, the type is `UNKNOWN`
     and the `IMPORTED` flag is set.
+  id: totrans-199
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Finally, the properties for the library are set. The minimum setting that we
     recommend is the `IMPORTED_LOCATION` property and the location of the `include`
     files in `INTERFACE_INCLUDE_DIR`.
+  id: totrans-200
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: 'If everything works as expected, the library can then be used like this:'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-202
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: So, now we understand how other libraries are added to your projects if they
     are already available for use. But how do we get the libraries into our system
     in the first place? Let’s find that out in the next section.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
 - en: Using package managers with CMake
+  id: totrans-204
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -1050,6 +1325,7 @@
     the dependencies side by side. Often, a developer downloads the dependencies locally
     for each project so that each project can work independently. A very good way
     to handle dependencies is by using package managers such as Conan or vcpkg.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
 - en: Using a dedicated package manager has many advantages when it comes to dependency
@@ -1058,20 +1334,24 @@
     whole books on their own, so we will only cover the bare necessities to start
     working with them here. In this book, we will focus on using packages that are
     already available in your CMake project, rather than on creating your own packages.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
 - en: Since version 3.24, CMake has supported a concept called `find_package` or `FetchContent_MakeAvailable`
     to call external programs or scripts to locate or install the dependency. Dependency
     providers must be set before the first call to the project function with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES`,
     which typically should happen over the command line or by using a CMake preset.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
 - en: Although the concept is relatively new to CMake at the time of writing, it looks
     very promising. Conan 2.0 has experimental support for dependency providers, while
     vcpkg does not yet have it.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
 - en: Using Conan to get dependencies
+  id: totrans-209
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1084,69 +1364,87 @@
     it introduces several improvements and changes over Conan 1.x, including better
     integration with CMake, improved package creation and management, and enhanced
     user experience.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
 - en: One of the most powerful features of Conan is that it can create and manage
     binary packages for multiple platforms, configurations, and versions. When creating
     packages, they are described with a `conanfile.py` file that lists all dependencies,
     sources, and build instructions.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
 - en: The packages are built and uploaded to the remote server with the Conan client.
     This has an additional benefit that if no binary package that fits your local
     configuration can be found, the package can be built locally from its sources.
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
 - en: 'A basic workflow of using Conan with CMake works like this:'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
 - en: Create a `conanfile.txt` in your project that contains the list of dependencies
     and settings.
+  id: totrans-214
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Install the dependencies using Conan and use the generators provided by Conan
     to create the files that CMake can use to find and link the dependencies.
+  id: totrans-215
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Run CMake and integrate the information generated by Conan to build the project.
+  id: totrans-216
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: There are two important core concepts of Conan. The first one is `conanfile`.
     Profiles are usually located in the user’s home directory, there can be several
     different profiles but most often one uses the default profile.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
 - en: 'To create a new profile, you can use the `conan profile` `new` command:'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'This will create a new profile from the standard compiler detected on your
     system. If the `--name` argument is omitted, the default profile will be created.
     The resulting profile file might look like this:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: For different compiler settings, the profiles can be customized as needed.
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
 - en: The other core concept of Conan is `CMakeDeps` and `CMakeToolchain`.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
 - en: '`CMakeDeps` generates information to be used with `find_package` and offers
     more flexibility, and `CMakeToolchain` is somewhat more convenient to use but
     has some limitations regarding configuration.'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
 - en: The `CMakeToolchain` generator works well for small, standalone projects. For
     bigger projects, or if cross-compilation toolchains are involved, we recommend
     using the`CMakeDeps` generator.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
 - en: There are two main ways to use Conan with CMake. One is to call Conan on its
@@ -1161,60 +1459,78 @@
     specify all the Conan profiles for all the different build configurations up front,
     but that we can use the normal CMake definitions to create them on the fly. Let’s
     first look at how to use Conan as a dependency provider.
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
 - en: Using Conan as a dependency provider
+  id: totrans-227
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'To use Conan as a dependency provider, we need two things:'
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
 - en: '`conanfile.txt` to list the dependencies'
+  id: totrans-229
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The dependency provider definition for Conan
+  id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'First, `conanfile.txt` is placed next to the `CMakeLists.txt`, resulting in
     a project structure something like this:'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Inside `conanfile.txt`, we list the dependencies we want to use and tell Conan
     to use the `CMakeDeps` generator to generate package information for the dependencies:'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE19]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: First, the `[requires]` section describes which packages are to be imported;
     in this case, the `fmt` version *10.2.1* package is imported.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
 - en: The `[generators]` section describes which generators may be used. For using
     Conan as a dependency provider, the `CMakeDeps` generator is used.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
 - en: 'To use the dependency in CMake, we can use the `find_package` command as illustrated
     earlier, so a `CMakeLists.txt` might look like this:'
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE20]'
+  id: totrans-238
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Note that using Conan packages is no different than using “normal” CMake packages
     and no Conan-specific code needs to be added to `CMakeLists.txt`, which helps
     keep it portable between different systems
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
 - en: 'With that, we are almost ready. The next thing is to tell CMake to use Conan
     as a dependency provider. For this, the definition files for the CMake dependency
     provider for Conan can be obtained from here: [https://github.com/conan-io/cmake-conan](https://github.com/conan-io/cmake-conan)'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
 - en: Inside this repository, there is a `conan_provider.cmake` file, which can either
@@ -1222,6 +1538,7 @@
     is preferable to you. In the GitHub repository containing the examples, the file
     is included as a submodule. You can get it by cloning the repository and then
     calling `git submodule update --``init --recursive`.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
 - en: 'With this file, we have everything we need to start building. By passing this
@@ -1229,34 +1546,42 @@
     automatically installed and any call to `find_package()` is routed through Conan
     first to see whether the dependency is listed in `conanfile.txt`. The resulting
     call to CMake might look like this:'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE21]'
+  id: totrans-243
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: By default, the Conan dependency provider will autodetect any profile information
     and pass it to Conan. If no default profile exists, it will create one. If the
     binary package is not available in the Conan repository for the chosen build configuration
     or compiler, Conan will try to build the package locally, which might take some
     time, depending on the package size.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
 - en: Although using Conan as a dependency provider is the recommended way, some people
     might like to have more control over Conan and use Conan on its own with CMake.
     Let’s look at how this might work.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
 - en: Using Conan with CMake
+  id: totrans-246
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: To use Conan with CMake effectively, we can leverage the `CMakeDeps` and `CMakeToolchain`
     generators. These generators help bridge the gap between Conan’s dependency management
     and CMake’s build system configuration.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
 - en: If Conan is used on its own, a Conan profile has to be created for each build
     configuration that is usable for CMake.
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
 - en: 'First, let’s install the dependencies and have Conan create the necessary files
@@ -1264,11 +1589,14 @@
     Conan cache in the users’ home directory, but we can tell Conan where to install
     the package definition for CMake. This can be any directory, but in practice,
     it is often convenient to have this generated into the build directory of CMake:'
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE22]'
+  id: totrans-250
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: This will install all the dependencies listed in the `conanfile.txt` and create
     a bunch of files in the build folder. We also pass the `build=missing` flag. If
     the binary package is not available in the Conan repository, Conan will try to
@@ -1278,27 +1606,35 @@
     It is generally a good idea to specify the build types explicitly by using `-DCMAKE_BUILD_TYPE=Debug`,
     but with Conan, this becomes mandatory to avoid headaches because the dependencies
     are not found.
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
 - en: 'If we’re only using the `CMakeDeps` generator from Conan, this will create
     the necessary files to be used with `find_package()` in the build folder. The
     preferred way is setting this by passing the build folder to `CMAKE_PREFIX_PATH`
     either over the command line or a prefix like this:'
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE23]'
+  id: totrans-253
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Alternatively, it can also be appended inside `CMakeLists.txt` like this:'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE24]'
+  id: totrans-255
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: With that, the CMake project can be built, and the dependency can be used. In
     most cases, the `CMakeDeps` generator is what you want to use, as it provides
     a good compromise of using the benefits of CMake when it comes to cross-compiling
     while having the convenience of package handling from Conan.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
 - en: If you want to hand over the build configuration entirely to Conan, the `CMakeToolchain`
@@ -1306,23 +1642,30 @@
     information, but also generate a CMake toolchain definition and presets for using
     them. CMake toolchains are covered in detail in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146),
     *Creating Reproducible* *Build Environments*.
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
 - en: 'Again, installing the Conan packages happens with the following command:'
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE25]'
+  id: totrans-259
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'Using the `CMakeToolchain` generator will create a toolchain file in the build
     folder that contains all the information to resolve the dependencies. Additionally,
     `CMakeUserPresets.json` will be created containing a preset to use the resulting
     toolchain. After running Conan, the preset can be used with the following command:'
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE26]'
+  id: totrans-261
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: This will configure the CMake project with the toolchain generated from Conan.
     While this appears very convenient to use, it has the downside that all the configurations
     of the build environment have to be done over Conan profiles or flags on the `conan
@@ -1331,14 +1674,17 @@
     they get overwritten by the presets generated from Conan. Because of this, using
     the `CMakeToolchain` generator is only recommended for small standalone projects
     that have relatively simple requirements regarding the build environment.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
 - en: While Conan is a very powerful package manager that offers a very good integration
     with CMake, it is not the only one. Another frequently used package manager is
     vcpkg from Microsoft. Let’s have a closer look at it.
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
 - en: Using vcpkg for dependency management
+  id: totrans-264
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1348,51 +1694,66 @@
     CMake was added later. Packages can either be installed manually, by calling vcpkg
     in the so-called **classic mode**, or directly out of CMake in the so-called **manifest
     mode**. The command to install packages with vcpkg in the classic mode is as follows:'
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE27]'
+  id: totrans-266
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'When run in manifest mode, the dependencies of a project are defined in a `vcpkg.json`
     file in the root of the project. The manifest mode has a big advantage in that
     it integrates better with CMake, so whenever possible, use manifest mode. A vcpkg
     manifest might look like this:'
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE28]'
+  id: totrans-268
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'For CMake to find the packages, a vcpkg toolchain file must be passed to CMake,
     so the call to CMake will be as follows:'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE29]'
+  id: totrans-270
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: If they are run in manifest mode, the packages specified in the `vcpkg.json`
     file will be automatically downloaded and installed locally. If they are run in
     classic mode, the packages have to be manually installed before running CMake.
     When passing the vcpkg toolchain file, the installed packages can be used, as
     usual, by using `find_package` and `target_link_libraries`.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
 - en: Microsoft recommends that you install vcpkg as a submodule in the repository
     at the same level as the CMake root project, but it can be installed almost everywhere.
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
 - en: 'Setting the toolchain file might cause problems when cross-compiling, as `CMAKE_TOOLCHAIN_FILE`
     might point to a different file already. In this case, a second toolchain file
     can be passed with the `VCPKG_CHAINLOAD_TOOLCHAIN_FILE` variable. Then, the call
     to CMake would look something like this:'
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE30]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Conan and vcpkg are just two package managers for C++ and CMake that are popular.
     Of course, there are many more, but it would require a separate book to describe
     them all. Especially when projects get more complex, we highly advise that you
     use package managers.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
 - en: Which package manager you choose will depend on the context a project is being
@@ -1405,6 +1766,7 @@
     and more. This will be covered in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146),
     *Creating Reproducible Build* *Environments*. For the moment, let’s assume we’re
     running CMake with your standard system installation.
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
 - en: Using package managers for dependency management is the recommended thing to
@@ -1412,9 +1774,11 @@
     managers are not an option. This might be because of mysterious company policies
     or some other reason. In these cases, CMake also supports downloading dependencies
     as the source and integrating them into the project as external targets.
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
 - en: Getting the dependencies as source code
+  id: totrans-278
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -1423,6 +1787,7 @@
     subfolder inside your project and then add this folder with `add_subdirectory`.
     While this works and is fast, it quickly becomes tedious and hard to maintain.
     So, this should be automated as soon as possible.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
 - en: The practice of downloading and integrating a copy of third-party software directly
@@ -1430,9 +1795,11 @@
     makes building software easy, it creates issues with packaging libraries. Vendoring
     is avoided by either using a package manager or by installing third-party software
     into a location on your system.
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
 - en: Downloading dependencies as the source using pure CMake
+  id: totrans-281
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1441,9 +1808,11 @@
     While `ExternalProject` offers more flexibility, `FetchContent` is often more
     convenient to use, especially if the downloaded project is also built using CMake.
     Both of them download projects as source files and can be used to build them.
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
 - en: Using FetchContent
+  id: totrans-283
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -1454,11 +1823,13 @@
     external projects during configuration time, while `ExternalProject` does everything
     during the build step. The drawback to this is that the source and its configuration
     are not available during configuration time.
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
 - en: Before `FetchContent`, you would have used Git submodules to manually download
     the dependencies and then add them using `add_subdirectory`. This works in some
     cases, but it can be rather inconvenient and cumbersome to maintain.
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
 - en: '`FetchContent` provides a list of functions to pull in source dependencies,
@@ -1467,53 +1838,67 @@
     and makes them available for the build. In the following example, the `bertrand`
     library for design by contract is pulled from Git using GitHub and made available
     for use:'
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE31]'
+  id: totrans-287
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: When fetching dependencies as sources, the sequence of `FetchContent_Declare`
     followed by `FetchContent_MakeAvailable` should be used whenever possible because
     it makes code bases very maintainable due to their simplicity. `FetchContent`
     can download sources from HTTP/S, Git, SVN, Mercurial, and CVS, and the same best
     practices, such as specifying MD5 hashes for the downloaded content or using Git
     hashes, apply.
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
 - en: '`FetchContent_MakeAvailable` is the recommended way to make external CMake-based
     projects available, but if you want to have more control over your external projects,
     it is also possible to populate the projects manually. The following example does
     the same as the previous example but in a more verbose way:'
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE32]'
+  id: totrans-290
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: '`FetchContent_Populate` has additional options to be specified to control the
     build more closely. The signature is as follows:'
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE33]'
+  id: totrans-292
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: 'Let’s look at the `FetchContent_Populate` options:'
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
 - en: '`QUIET`: This can be specified to suppress the output of the population if
     it succeeds. If the command fails, the output will be shown even if the option
     is specified to allow for debugging.'
+  id: totrans-294
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`SUBBUILD_DIR`: This specifies where the external project will be located.
     The default is `${CMAKE_CURRENT_BINARY_DIR}/<name>-subbuild`. Generally, this
     option should be left as it is.'
+  id: totrans-295
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`SOURCE_DIR` and `BINARY_DIR` change where the source and build directories
     of the external project are located. The default settings are `${CMAKE_CURRENT_BINARY_DIR}/<lcName>-src`
     for `SOURCE_DIR` and `${CMAKE_CURRENT_BINARY_DIR}/<lcName>-build` for `BINARY_DIR`'
+  id: totrans-296
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1523,16 +1908,19 @@
     you from editing the commands for the different steps, so attempts to tamper with
     `CONFIGURE_COMMAND`, `BUILD_COMMAND`, `INSTALL_COMMAND`, and `TEST_COMMAND` will
     cause `FetchContent_Populate` to fail with an error.
+  id: totrans-297
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Note
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
 - en: If you find yourself in a situation where you need to pass options to the underlying
     `ExternalProject_Add`, consider using `ExternalProject` directly instead of first
     going through `FetchContent`. More details on how to use `ExternalProject` can
     be found in the next section.
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
 - en: Information about the source and build directories, along with whether a project
@@ -1540,6 +1928,7 @@
     `<name>_BINARY_DIR`, and `<name>_POPULATED` variables or by calling `FetchContent_GetProperties`.
     Note that `<name>` will always be available in all caps and all lowercase. This
     is so that CMake can identify the packages despite different capitalizations.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
 - en: Another big advantage of `FetchContent` is that it can handle cases where external
@@ -1548,6 +1937,7 @@
     the details are cached, and any further definitions will be silently ignored.
     The benefit of this is that a parent project can overrule the dependencies of
     the child projects.
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
 - en: 'Let’s assume we have a top project called `MyProject` that fetches two external
@@ -1556,13 +1946,16 @@
     we do not want to download and use two versions of `AwesomeLib` but only one to
     avoid conflicts. The following diagram shows what the dependency graph might look
     like:'
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
 - en: '![Figure 5.1 – Both Project_A and Project_B depend on different versions of
     AwesomeLib](img/B30947_05_01.jpg)'
+  id: totrans-303
   prefs: []
   type: TYPE_IMG
 - en: Figure 5.1 – Both Project_A and Project_B depend on different versions of AwesomeLib
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
 - en: 'To resolve this, we can specify which version of `AwesomeLib` to pull by placing
@@ -1572,23 +1965,29 @@
     contain the code to populate `AwesomeLib`, the top-level project does not need
     to use `FetchContent_MakeAvailable` or `FetchContent_Populate`. The resulting
     top-level `CMakeLists.txt` file might appear as follows:'
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE34]'
+  id: totrans-306
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: 'This will force `AwesomeLib` to be pinned to version 1.2 for all projects.
     Of course, this only works if the interface between the versions required by `Project_A`
     and `Project_B` are compatible, resulting in a dependency graph, as illustrated
     in the following diagram:'
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
 - en: '![Figure 5.2 – The corrected dependency graph after MyProject declares the
     version of AwesomeLib](img/B30947_05_02.jpg)'
+  id: totrans-308
   prefs: []
   type: TYPE_IMG
 - en: Figure 5.2 – The corrected dependency graph after MyProject declares the version
     of AwesomeLib
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
 - en: Adding dependencies as sources has some advantages, but it comes with major
@@ -1596,6 +1995,7 @@
     10*](B30947_10.xhtml#_idTextAnchor158),*Handling Distributed Repositories and
     Dependencies in a Super-Build*, we will tackle superbuilds with distributed repositories
     and provide more information about how to handle source dependencies.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
 - en: At the beginning of the chapter, we looked at `find_package`, which can be used
@@ -1605,9 +2005,11 @@
     and vcpkg will be better suited. Internally, `FetchContent` is using the older
     and more complicated `ExternalProject` module. While `ExternalProject` offers
     more control, it is also harder to use. Let’s have a look at how to use it next.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
 - en: Using ExternalProject
+  id: totrans-312
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -1618,23 +2020,27 @@
     in handy to avoid clashes in the naming of targets or components. The external
     project creates a primary target and several child targets that contain the following
     isolated build steps:'
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
 - en: '`ExternalProject` can download content in several ways such as through pure
     HTTPS downloads or by accessing versioning systems such as Git, Subversion, Mercurial,
     and CVS. If the contents are archived, the download step will also unpack them.'
+  id: totrans-314
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '**Updating and patching**: The downloaded source code can either be patched
     or updated to the newest version if the content is pulled from **source code**
     **management** (**SCM**).'
+  id: totrans-315
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '**Configure**: If the downloaded source uses CMake, the configure step is executed
     on it. For non-CMake projects, a custom command that does the configuration can
     be provided.'
+  id: totrans-316
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -1643,16 +2049,19 @@
     is not desired. If a custom build command is supplied, it is up to the user to
     ensure that the necessary compiler flags are passed on so that the results are
     ABI compatible.'
+  id: totrans-317
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '**Install**: The isolated build can be installed locally, usually somewhere
     in the build tree of the main project.'
+  id: totrans-318
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '**Test**: If the external content comes with a set of tests, the main project
     might choose to run them. By default, the tests are not run.'
+  id: totrans-319
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -1662,15 +2071,19 @@
     the overhead is primarily for the first run. The possibility of adding more steps
     to the external build does exist, but for most projects, the default steps are
     sufficient. The steps can be customized or omitted, as we will discover later.
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
 - en: 'In the following example, the `bertrand` library for using the design by contract
     is downloaded over HTTPS and locally installed in the current `build` directory:'
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE35]'
+  id: totrans-322
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: Note that the `ExternalProject` module is not available by default and has to
     be included in the first line with `include(ExternalProject)`. As the external
     library is installed in the local build directory, the `INSTALL_DIR` option is
@@ -1680,48 +2093,60 @@
     option. `ExternalProject` knows placeholders for the various directories such
     as `<SOURCE_DIR>`, `<BINARY_DIR>`, and `<DOWNLOAD_DIR>`. For a complete list,
     please consult the module documentation at [https://cmake.org/cmake/help/latest/module/ExternalProject.html](https://cmake.org/cmake/help/latest/module/ExternalProject.html).
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
 - en: Verify your downloads
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
 - en: It is highly recommended that you add the download hash to any URL, as this
     sends you a notification if the contents of an artifact change.
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
 - en: 'For this to work, any target that depends on `bertrand` has to be built after
     the external dependency. As `bertrand` is a header-only library, we want to add
     the `include` path to a target. Using the external project for another target
     in CMake could look similar to the following:'
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE36]'
+  id: totrans-327
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: In the first line, the installation directory is retrieved with `ExternalProject_Get_Property`
     and stored in the `INSTALL_DIR` variable. Unfortunately, the variable name is
     always the same as the property, so it is recommended that you store it immediately
     after retrieval in a variable with a unique name that expresses its use better.
+  id: totrans-328
   prefs: []
   type: TYPE_NORMAL
 - en: Next, the target we want to build is created and made dependent on the target
     created by `ExternalProject_Add`. This is necessary to enforce the correct build
     order.
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
 - en: Finally, the path to the local installation is added to the target with `target_include_directories`.
     Additionally, we could import the CMake targets provided by the external library,
     but the purpose of this is to illustrate how this could work if the external project
     is not built by CMake.
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
 - en: 'Downloading from SCM systems happens with the respective options. For Git,
     this usually looks like the following:'
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE37]'
+  id: totrans-332
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Note that `GIT_TAG` can be any valid revision number for Git, including tag
     names and long and short hashes. If `GIT_TAG` is omitted, the latest version of
     the default branch—usually called main or master—is downloaded. We highly recommend
@@ -1729,20 +2154,25 @@
     a commit hash, as tags can be moved around, although they rarely are in practice.
     Downloading from SVN is similar to downloading from Git. For additional details,
     please consult the official documentation for `ExternalProject`.
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
 - en: Using non-CMake projects and cross-compiling
+  id: totrans-334
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
 - en: 'A common use case for `ExternalProject` is to build dependencies that are not
     handled by CMake but by Autotools or Automake instead. In that case, you would
     need to specify the configuration and build commands as follows:'
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE38]'
+  id: totrans-336
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'Note that the first `find_program` command is used to find a version of `make`
     and store it in the `MAKE_EXECUTABLE` variable. A common issue with external projects
     is that you have to closely control where the dependencies are installed. Most
@@ -1751,11 +2181,14 @@
     options to the configuration or a build step is often necessary. Another way to
     handle this is to avoid the installation process entirely by replacing `INSTALL_COMMAND`
     with an empty string as follows:'
+  id: totrans-337
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE39]'
+  id: totrans-338
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: One problem with using non-CMake projects such as this is that they do not define
     the necessary targets for using the dependency directly. So, to use an externally
     built library in another target, you often have to add the full library name to
@@ -1764,6 +2197,7 @@
     platforms. The `find_library` or `find_file` calls are of little use because they
     happen at configuration time, while `ExternalProject` only creates the necessary
     files at build time.
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
 - en: 'Another common use case is to use `ExternalProject` to build the contents of
@@ -1776,12 +2210,16 @@
     to the sources of the external projects, so CMake might not rebuild them. For
     this reason, the `BUILD_ALWAYS` option should be passed, which has the downside
     of often making the build time considerably longer:'
+  id: totrans-340
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE40]'
+  id: totrans-341
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Managing the steps in ExternalProject
+  id: totrans-342
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
@@ -1790,11 +2228,14 @@
     to create regular targets for each step either by passing the `STEP_TARGETS` option
     or by calling `ExternalProject_Add_StepsTargets`. The following calls expose both
     the configure step and the build step of an external project as targets:'
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE41]'
+  id: totrans-344
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: 'The targets are named after `<mainName>-step`. In the preceding example, two
     additional targets, `MyProject-configure` and `MyProject-build`, will be created.
     Creating step targets has two main uses: you can create custom steps that are
@@ -1805,31 +2246,39 @@
     on each other, so the configuration step of one has to depend on the other. In
     the next example, the configuration step of `ProjectB` will depend on the completion
     of `ProjectA`:'
+  id: totrans-345
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE42]'
+  id: totrans-346
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: 'Finally, we can also create custom steps to be interjected into an external
     project. The process of adding steps is done with the `ExternalProject_Add_Step`
     command. Custom steps cannot be named the same as any of the predefined steps
     (such as `mkdir`, `download`, `update`, `patch`, `configure`, `build`, `install`,
     or `test`). The following example will create a step that adds the license information
     of an external project to a specific `tar` file after building:'
+  id: totrans-347
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE43]'
+  id: totrans-348
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: All in all, `ExternalProject` is a very powerful tool; however, it can become
     very complex to manage. Often, it is that flexibility that also makes `ExternalProject`
     hard to use. While it can help isolate builds, it often forces the project maintainer
     to manually expose any information from the inner workings of the external project
     to CMake, which, ironically, is what CMake is supposed to help with in the first
     place.
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
 - en: Summary
+  id: totrans-350
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -1839,11 +2288,13 @@
     by providing your own `find` module. We looked at source-code-based dependencies
     with `ExternalProject` and `FetchContent` and how even non-CMake projects can
     be built using CMake.
+  id: totrans-351
   prefs: []
   type: TYPE_NORMAL
 - en: Additionally, if you want to become even more sophisticated with your dependency
     management, we introduced Conan and vcpkg as two package handlers that integrate
     very well with CMake.
+  id: totrans-352
   prefs: []
   type: TYPE_NORMAL
 - en: Dependency management is a tough topic to cover and can be tedious at times.
@@ -1856,68 +2307,84 @@
     the best one can be tough. Nevertheless, we recommend using `find_package` whenever
     possible. The more popular CMake becomes, the better the chances are that other
     projects can be seamlessly integrated.
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
 - en: In the next chapter, you will learn how to automatically generate and package
     documentation for your code.
+  id: totrans-354
   prefs: []
   type: TYPE_NORMAL
 - en: Questions
+  id: totrans-355
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: Which `find_` programs exist in CMake?
+  id: totrans-356
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Which properties should be set for targets imported by a `find` module?
+  id: totrans-357
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: When finding things, which option takes precedence, `HINTS` or `PATHS`?
+  id: totrans-358
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: What is the order of preference of techniques to use for dependency management?
+  id: totrans-359
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: At what stage does `ExternalProject` download the external content?
+  id: totrans-360
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: At what stage does `FetchContent` download the external content?
+  id: totrans-361
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Answers
+  id: totrans-362
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: The answer is `find_file`, `find_path`, `find_library`, `find_program`, and
     `find_package`.
+  id: totrans-363
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: The `IMPORTED_LOCATION` and `INTERFACE_INCLUDE_DIRECTORIES` properties.
+  id: totrans-364
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`HINTS` takes precedence over `PATHS`.'
+  id: totrans-365
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Package managers as dependency providers are the most recommended way to handle
     dependencies, then using standalone package managers, then `FetchContent`, and
     then, only if all else fails, `ExternalProject` should be used.
+  id: totrans-366
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`ExternalProject` downloads external content at build time.'
+  id: totrans-367
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`FetchContent` downloads external content at configuration time.'
+  id: totrans-368
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
