@@ -3,199 +3,249 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 索引
 - en: As this ebook edition doesn't have fixed pagination, the page numbers below
     are hyperlinked for reference only, based on the printed edition of this book.
   id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于本电子书版本没有固定分页，下面的页码仅供参考，基于本书的印刷版进行超链接标注。
 - en: A
   id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: A
 - en: application
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用程序
 - en: installing [159](B21152_08.xhtml#_idIndexMarker348)-[162](B21152_08.xhtml#_idIndexMarker353)
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装 [159](B21152_08.xhtml#_idIndexMarker348)-[162](B21152_08.xhtml#_idIndexMarker353)
 - en: application binary interface (ABI) [64](B21152_04.xhtml#_idIndexMarker144)
   id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用程序二进制接口 (ABI) [64](B21152_04.xhtml#_idIndexMarker144)
 - en: application programming interface (API) [122](B21152_07.xhtml#_idIndexMarker267)
   id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用程序编程接口 (API) [122](B21152_07.xhtml#_idIndexMarker267)
 - en: as-c-math [50](B21152_03.xhtml#_idIndexMarker115)
   id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: as-c-math [50](B21152_03.xhtml#_idIndexMarker115)
 - en: B
   id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: B
 - en: bgfx
   id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: bgfx
 - en: example, running [116](B21152_06.xhtml#_idIndexMarker255), [117](B21152_06.xhtml#_idIndexMarker257)
   id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 示例，运行 [116](B21152_06.xhtml#_idIndexMarker255), [117](B21152_06.xhtml#_idIndexMarker257)
 - en: reference link [113](B21152_06.xhtml#_idIndexMarker248)
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 参考链接 [113](B21152_06.xhtml#_idIndexMarker248)
 - en: book repository, Windows
   id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 书籍仓库，Windows
 - en: using, from CMake [22](B21152_02.xhtml#_idIndexMarker033)
   id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用，从 CMake [22](B21152_02.xhtml#_idIndexMarker033)
 - en: build presets [89](B21152_05.xhtml#_idIndexMarker186)
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建预设 [89](B21152_05.xhtml#_idIndexMarker186)
 - en: Bundle [190](B21152_10.xhtml#_idIndexMarker411)
   id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 包 [190](B21152_10.xhtml#_idIndexMarker411)
 - en: C
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: C
 - en: C++ Slack Workspace
   id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: C++ Slack 工作区
 - en: reference link [232](B21152_11.xhtml#_idIndexMarker504)
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 参考链接 [232](B21152_11.xhtml#_idIndexMarker504)
 - en: C/C++ build recommendations [228](B21152_11.xhtml#_idIndexMarker489), [229](B21152_11.xhtml#_idIndexMarker493)
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: C/C++ 构建推荐 [228](B21152_11.xhtml#_idIndexMarker489), [229](B21152_11.xhtml#_idIndexMarker493)
 - en: unity builds [229](B21152_11.xhtml#_idIndexMarker495), [230](B21152_11.xhtml#_idIndexMarker497)
   id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 单元构建 [229](B21152_11.xhtml#_idIndexMarker495), [230](B21152_11.xhtml#_idIndexMarker497)
 - en: CDash, using with CTest [184](B21152_09.xhtml#_idIndexMarker400)
   id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: CDash，配合 CTest 使用 [184](B21152_09.xhtml#_idIndexMarker400)
 - en: CDash project, creating [185](B21152_09.xhtml#_idIndexMarker402)
   id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: CDash 项目，创建 [185](B21152_09.xhtml#_idIndexMarker402)
 - en: code coverage, adding [186](B21152_09.xhtml#_idIndexMarker406), [187](B21152_09.xhtml#_idIndexMarker408)
   id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 代码覆盖率，添加 [186](B21152_09.xhtml#_idIndexMarker406), [187](B21152_09.xhtml#_idIndexMarker408)
 - en: test results, uploading [185](B21152_09.xhtml#_idIndexMarker404), [186](B21152_09.xhtml#_idIndexMarker405)
   id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试结果，上传 [185](B21152_09.xhtml#_idIndexMarker404), [186](B21152_09.xhtml#_idIndexMarker405)
 - en: CLion
   id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: CLion
 - en: CMake, using with [227](B21152_11.xhtml#_idIndexMarker488)
   id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake，配合使用 [227](B21152_11.xhtml#_idIndexMarker488)
 - en: CMake
   id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake
 - en: configs [33](B21152_02.xhtml#_idIndexMarker062)
   id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置 [33](B21152_02.xhtml#_idIndexMarker062)
 - en: download link [8](B21152_01.xhtml#_idIndexMarker011)
   id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 下载链接 [8](B21152_01.xhtml#_idIndexMarker011)
 - en: dynamic array, adding [36](B21152_02.xhtml#_idIndexMarker072)
   id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 动态数组，添加 [36](B21152_02.xhtml#_idIndexMarker072)
 - en: file, adding [36](B21152_02.xhtml#_idIndexMarker071)
   id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 文件，添加 [36](B21152_02.xhtml#_idIndexMarker071)
 - en: GLOB, using [37](B21152_02.xhtml#_idIndexMarker076)
   id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: GLOB，使用 [37](B21152_02.xhtml#_idIndexMarker076)
 - en: interface files, referencing in target_sources [38](B21152_02.xhtml#_idIndexMarker077)
   id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口文件，在 target_sources 中引用 [38](B21152_02.xhtml#_idIndexMarker077)
 - en: invoking [23](B21152_02.xhtml#_idIndexMarker034), [24](B21152_02.xhtml#_idIndexMarker038)
   id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用 [23](B21152_02.xhtml#_idIndexMarker034), [24](B21152_02.xhtml#_idIndexMarker038)
 - en: linker errors [36](B21152_02.xhtml#_idIndexMarker074), [37](B21152_02.xhtml#_idIndexMarker075)
   id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 链接器错误 [36](B21152_02.xhtml#_idIndexMarker074), [37](B21152_02.xhtml#_idIndexMarker075)
 - en: project [34](B21152_02.xhtml#_idIndexMarker068), [35](B21152_02.xhtml#_idIndexMarker069)
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 项目 [34](B21152_02.xhtml#_idIndexMarker068), [35](B21152_02.xhtml#_idIndexMarker069)
 - en: scripts, automating with [151](B21152_08.xhtml#_idIndexMarker327)-[156](B21152_08.xhtml#_idIndexMarker340)
   id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本，使用 [151](B21152_08.xhtml#_idIndexMarker327)-[156](B21152_08.xhtml#_idIndexMarker340)
+    自动化
 - en: script structure [230](B21152_11.xhtml#_idIndexMarker498), [231](B21152_11.xhtml#_idIndexMarker500)
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本结构 [230](B21152_11.xhtml#_idIndexMarker498), [231](B21152_11.xhtml#_idIndexMarker500)
 - en: usage, reviewing [80](B21152_05.xhtml#_idIndexMarker167)
   id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用，回顾 [80](B21152_05.xhtml#_idIndexMarker167)
 - en: used, for building [24](B21152_02.xhtml#_idIndexMarker039), [25](B21152_02.xhtml#_idIndexMarker041)
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用，用于构建 [24](B21152_02.xhtml#_idIndexMarker039), [25](B21152_02.xhtml#_idIndexMarker041)
 - en: using, from command line [22](B21152_02.xhtml#_idIndexMarker029)
   id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用，从命令行 [22](B21152_02.xhtml#_idIndexMarker029)
 - en: CMake configs [33](B21152_02.xhtml#_idIndexMarker063)
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 配置 [33](B21152_02.xhtml#_idIndexMarker063)
 - en: multi-config generators [34](B21152_02.xhtml#_idIndexMarker066)
   id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 多配置生成器 [34](B21152_02.xhtml#_idIndexMarker066)
 - en: single-config generators [33](B21152_02.xhtml#_idIndexMarker064)
   id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 单配置生成器 [33](B21152_02.xhtml#_idIndexMarker064)
 - en: CMake generators [31](B21152_02.xhtml#_idIndexMarker059)
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 生成器 [31](B21152_02.xhtml#_idIndexMarker059)
 - en: specifying [32](B21152_02.xhtml#_idIndexMarker060)
   id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 指定 [32](B21152_02.xhtml#_idIndexMarker060)
 - en: CMake GUI [92](B21152_05.xhtml#_idIndexMarker196)-[94](B21152_05.xhtml#_idIndexMarker201)
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake GUI [92](B21152_05.xhtml#_idIndexMarker196)-[94](B21152_05.xhtml#_idIndexMarker201)
 - en: CMake library code
   id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 库代码
 - en: using [42](B21152_03.xhtml#_idIndexMarker086), [43](B21152_03.xhtml#_idIndexMarker090)
   id: totrans-49
   prefs: []
@@ -1120,210 +1170,262 @@
   id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: URL [115](B21152_06.xhtml#_idIndexMarker254)
 - en: operating system (OS) [40](B21152_03.xhtml#_idIndexMarker079), [120](B21152_07.xhtml#_idIndexMarker259)
   id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 操作系统 (OS) [40](B21152_03.xhtml#_idIndexMarker079), [120](B21152_07.xhtml#_idIndexMarker259)
 - en: out-of-source build [24](B21152_02.xhtml#_idIndexMarker036)
   id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 源外构建 [24](B21152_02.xhtml#_idIndexMarker036)
 - en: P
   id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: P
 - en: private nested dependencies [128](B21152_07.xhtml#_idIndexMarker281), [129](B21152_07.xhtml#_idIndexMarker282)
   id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 私有嵌套依赖 [128](B21152_07.xhtml#_idIndexMarker281), [129](B21152_07.xhtml#_idIndexMarker282)
 - en: public nested dependencies [129](B21152_07.xhtml#_idIndexMarker285)-[133](B21152_07.xhtml#_idIndexMarker294)
   id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 公共嵌套依赖 [129](B21152_07.xhtml#_idIndexMarker285)-[133](B21152_07.xhtml#_idIndexMarker294)
 - en: R
   id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: R
 - en: repetitive commands
   id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 重复命令
 - en: avoiding, with scripts [80](B21152_05.xhtml#_idIndexMarker169)-[82](B21152_05.xhtml#_idIndexMarker173)
   id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 避免使用脚本 [80](B21152_05.xhtml#_idIndexMarker169)-[82](B21152_05.xhtml#_idIndexMarker173)
 - en: resources, relative to executable
   id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 资源，相对于可执行文件
 - en: loading [190](B21152_10.xhtml#_idIndexMarker413)-[193](B21152_10.xhtml#_idIndexMarker417)
   id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 加载 [190](B21152_10.xhtml#_idIndexMarker413)-[193](B21152_10.xhtml#_idIndexMarker417)
 - en: retained mode [173](B21152_09.xhtml#_idIndexMarker372)
   id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 保留模式 [173](B21152_09.xhtml#_idIndexMarker372)
 - en: RPATH handling
   id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: RPATH 处理
 - en: reference link [71](B21152_04.xhtml#_idIndexMarker160)
   id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 参考链接 [71](B21152_04.xhtml#_idIndexMarker160)
 - en: rules [122](B21152_07.xhtml#_idIndexMarker268)
   id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 规则 [122](B21152_07.xhtml#_idIndexMarker268)
 - en: S
   id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: S
 - en: scripts
   id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本
 - en: automating, with CMake [151](B21152_08.xhtml#_idIndexMarker328)-[156](B21152_08.xhtml#_idIndexMarker339)
   id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 自动化，使用 CMake [151](B21152_08.xhtml#_idIndexMarker328)-[156](B21152_08.xhtml#_idIndexMarker339)
 - en: using, to avoid repetitive commands [80](B21152_05.xhtml#_idIndexMarker168)-[82](B21152_05.xhtml#_idIndexMarker172)
   id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用，避免重复命令 [80](B21152_05.xhtml#_idIndexMarker168)-[82](B21152_05.xhtml#_idIndexMarker172)
 - en: semantic versioning (SemVer) [136](B21152_07.xhtml#_idIndexMarker303)
   id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 语义化版本控制 (SemVer) [136](B21152_07.xhtml#_idIndexMarker303)
 - en: shaders [114](B21152_06.xhtml#_idIndexMarker249)
   id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 着色器 [114](B21152_06.xhtml#_idIndexMarker249)
 - en: Shared Object Name (soname) [161](B21152_08.xhtml#_idIndexMarker351)
   id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 共享对象名称 (soname) [161](B21152_08.xhtml#_idIndexMarker351)
 - en: Simple Directmedia Layer (SDL) [99](B21152_06.xhtml#_idIndexMarker206)
   id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 简单直接媒体层 (SDL) [99](B21152_06.xhtml#_idIndexMarker206)
 - en: single-config [25](B21152_02.xhtml#_idIndexMarker042)
   id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 单配置 [25](B21152_02.xhtml#_idIndexMarker042)
 - en: Software Development Kit (SDK) [135](B21152_07.xhtml#_idIndexMarker301)
   id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 软件开发工具包 (SDK) [135](B21152_07.xhtml#_idIndexMarker301)
 - en: streamline installation
   id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 简化安装
 - en: ExternalProject_Add, using to [109](B21152_06.xhtml#_idIndexMarker236)-[111](B21152_06.xhtml#_idIndexMarker240)
   id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 ExternalProject_Add [109](B21152_06.xhtml#_idIndexMarker236)-[111](B21152_06.xhtml#_idIndexMarker240)
 - en: super build [145](B21152_08.xhtml#_idIndexMarker316)
   id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 超级构建 [145](B21152_08.xhtml#_idIndexMarker316)
 - en: configuring [145](B21152_08.xhtml#_idIndexMarker315)
   id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置 [145](B21152_08.xhtml#_idIndexMarker315)
 - en: integrating [145](B21152_08.xhtml#_idIndexMarker317)-[151](B21152_08.xhtml#_idIndexMarker325)
   id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 集成 [145](B21152_08.xhtml#_idIndexMarker317)-[151](B21152_08.xhtml#_idIndexMarker325)
 - en: SVN_REPOSITORY [44](B21152_03.xhtml#_idIndexMarker095)
   id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: SVN_REPOSITORY [44](B21152_03.xhtml#_idIndexMarker095)
 - en: T
   id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: T
 - en: target [29](B21152_02.xhtml#_idIndexMarker053)
   id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 目标 [29](B21152_02.xhtml#_idIndexMarker053)
 - en: test options
   id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试选项
 - en: building [50](B21152_03.xhtml#_idIndexMarker113)-[53](B21152_03.xhtml#_idIndexMarker120)
   id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 构建 [50](B21152_03.xhtml#_idIndexMarker113)-[53](B21152_03.xhtml#_idIndexMarker120)
 - en: timer_lib [50](B21152_03.xhtml#_idIndexMarker114)
   id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: timer_lib [50](B21152_03.xhtml#_idIndexMarker114)
 - en: toolchain files [231](B21152_11.xhtml#_idIndexMarker501)
   id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 工具链文件 [231](B21152_11.xhtml#_idIndexMarker501)
 - en: transitive dependencies [127](B21152_07.xhtml#_idIndexMarker278)
   id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 传递依赖 [127](B21152_07.xhtml#_idIndexMarker278)
 - en: U
   id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: U
 - en: unit tests [168](B21152_09.xhtml#_idIndexMarker356)
   id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 单元测试 [168](B21152_09.xhtml#_idIndexMarker356)
 - en: adding, to library [169](B21152_09.xhtml#_idIndexMarker360)
   id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加到库 [169](B21152_09.xhtml#_idIndexMarker360)
 - en: running [172](B21152_09.xhtml#_idIndexMarker367), [173](B21152_09.xhtml#_idIndexMarker368)
   id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行 [172](B21152_09.xhtml#_idIndexMarker367), [173](B21152_09.xhtml#_idIndexMarker368)
 - en: Unity [170](B21152_09.xhtml#_idIndexMarker364)
   id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: Unity [170](B21152_09.xhtml#_idIndexMarker364)
 - en: unity builds [229](B21152_11.xhtml#_idIndexMarker494)
   id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: Unity 构建 [229](B21152_11.xhtml#_idIndexMarker494)
 - en: V
   id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: V
 - en: Visual Studio
   id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: Visual Studio
 - en: CMake, using with [223](B21152_11.xhtml#_idIndexMarker479)-[226](B21152_11.xhtml#_idIndexMarker484)
   id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 CMake 配合 [223](B21152_11.xhtml#_idIndexMarker479)-[226](B21152_11.xhtml#_idIndexMarker484)
 - en: Visual Studio Code
   id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: Visual Studio Code
 - en: and CMake presets [217](B21152_11.xhtml#_idIndexMarker464), [218](B21152_11.xhtml#_idIndexMarker467)
   id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: 和 CMake 预设 [217](B21152_11.xhtml#_idIndexMarker464), [218](B21152_11.xhtml#_idIndexMarker467)
 - en: auto-formatting [221](B21152_11.xhtml#_idIndexMarker473), [222](B21152_11.xhtml#_idIndexMarker475)
   id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 自动格式化 [221](B21152_11.xhtml#_idIndexMarker473), [222](B21152_11.xhtml#_idIndexMarker475)
 - en: CMake Tools [212](B21152_11.xhtml#_idIndexMarker447)
   id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 工具 [212](B21152_11.xhtml#_idIndexMarker447)
 - en: compile_commands.json, generating [220](B21152_11.xhtml#_idIndexMarker471)
   id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成 compile_commands.json [220](B21152_11.xhtml#_idIndexMarker471)
 - en: Diff Folders [222](B21152_11.xhtml#_idIndexMarker476), [223](B21152_11.xhtml#_idIndexMarker478)
   id: totrans-284
   prefs: []
