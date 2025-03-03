@@ -3,11 +3,13 @@
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '4'
 - en: Creating Libraries for FetchContent
   id: totrans-1
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 为 FetchContent 创建库
 - en: In [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with
     External Dependencies*, we covered a lot of ground understanding how to use `FetchContent`
     as an application developer. This is super useful, and if you’re not interested
@@ -18,6 +20,8 @@
   id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用 FetchContent 处理外部依赖》中，我们详细了解了如何作为应用程序开发者使用
+    `FetchContent`。这是非常有用的，如果你不打算创建自己的库，那么这些知识会对你大有帮助。然而，如果你对创建库以在多个项目间共享（或者更好的是，与更广泛的开源社区共享）充满兴趣，那么本章将适合你。
 - en: In this chapter, we’re going to cover the CMake commands to create a library,
     and then make it easily accessible through `FetchContent`. The skills you’ll learn
     here are useful for your libraries but can also be applied to other projects not
@@ -26,66 +30,80 @@
   id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们将介绍用于创建库的 CMake 命令，并通过 `FetchContent` 使其易于访问。你将在这里学到的技能不仅对你的库有帮助，还可以应用到其他不使用
+    CMake 的项目中。根据库的大小和复杂性，通常只需几个命令就能为库添加 `FetchContent` 支持。
 - en: 'In this chapter, we’re going to cover the following main topics:'
   id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们将讨论以下主要主题：
 - en: Making a library compatible with FetchContent
   id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使库兼容 FetchContent
 - en: Moving Game of Life to a library
   id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将生命游戏移到库中
 - en: Making Game of Life a shared library
   id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将生命游戏做成共享库
 - en: Final cross-platform additions
   id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 最终的跨平台补充
 - en: Interface libraries
   id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 接口库
 - en: Technical requirements
   id: totrans-10
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 技术要求
 - en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
     1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
   id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了跟上进度，请确保你已经满足[*第一章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。包括以下内容：
 - en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
     (**OS**)
   id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一台运行最新 **操作系统**（**OS**）的 Windows、Mac 或 Linux 机器
 - en: A working C/C++ compiler (a system default is recommended for each platform
     if you don’t already have this)
   id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个可工作的 C/C++ 编译器（如果你还没有的话，建议使用系统默认的编译器，适用于每个平台）
 - en: The code examples in this chapter can be found at https://github.com/PacktPublishing/Minimal-CMake.
   id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章中的代码示例可以在 https://github.com/PacktPublishing/Minimal-CMake 找到。
 - en: Making a library compatible with FetchContent
   id: totrans-15
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使库兼容 FetchContent
 - en: 'Returning to our ongoing project, let’s begin by identifying an area of code
     that is ripe for reuse: `array`. Let’s pull this functionality out to a separate
     library so that we can consume it from our main application and potentially reuse
@@ -94,11 +112,13 @@
   id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 回到我们正在进行的项目，让我们从识别一块可以重用的代码开始：`array`。我们将把这个功能提取到一个独立的库中，以便从主应用程序中使用，并且将来可能在其他项目中重用（或与其他开发者共享，供他们尝试）。
 - en: Project structure
   id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 项目结构
 - en: Before we look at the `CMakeLists.txt` file, let’s make some minor changes to
     the project structure to ensure our library is following common conventions. These
     changes aren’t strictly needed (the libraries we included earlier in [*Chapter
@@ -108,12 +128,16 @@
   id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们查看 `CMakeLists.txt` 文件之前，先对项目结构做一些小的调整，以确保我们的库遵循常见的惯例。这些调整并非严格必要（我们在[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用
+    FetchContent 处理外部依赖》中包含的库（`timer_lib` 和 `as-c-math`）并未遵循这些指南），但了解这些惯例是有用的，并且它们将帮助我们在项目不断发展时保持整洁和有序。
 - en: 'Starting with the `array/` folder we saw throughout [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032)*,*
     *Hello, CMake!*, and [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent
     with External Dependencies*, the structure looked like this:'
   id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 从我们在[*第二章*](B21152_02.xhtml#_idTextAnchor032)《你好，CMake！》和[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用
+    FetchContent 处理外部依赖》中看到的 `array/` 文件夹开始，结构如下：
 - en: '[PRE0]'
   id: totrans-20
   prefs: []
@@ -1296,6 +1320,9 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 将 `C_STANDARD_REQUIRED` 设置为 `ON` 确保我们能够获取到在 `target_compile_features` 中使用 `c_std_17`
+    指定的最小 C 语言版本。也可以通过 `set_target_properties` 和 `C_STANDARD 17` 来设置语言版本，尽管可以说，`target_compile_features`
+    更加清晰，这也是为什么本书中更倾向于使用它的原因。
 - en: Setting `C_EXTENSIONS` to `OFF` ensures we don’t inadvertently use language
     features added by different compiler vendors that do not appear in the C standard
     (or C++ standard if we used `CXX_EXTENSIONS`). Again, this is to help enforce
@@ -1310,6 +1337,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 将 `C_EXTENSIONS` 设置为 `OFF` 确保我们不会不小心使用不同编译器厂商添加的、不符合 C 标准（或如果我们使用了 `CXX_EXTENSIONS`
+    则是 C++ 标准）的语言特性。同样，这是为了帮助强制执行跨平台代码，使其不依赖于仅在某个编译器或平台上可用的特性。如果你打算只为一个平台或编译器进行构建，这一点不那么重要，但养成这个习惯是个好做法。特别是如果有一天你决定将代码移植到另一个平台，避免依赖特定编译器的特性将让这个过程变得更加容易。
 - en: 'The final expression looks like this:'
   id: totrans-197
   prefs:
@@ -1317,6 +1346,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 最终的表达式如下所示：
 - en: '[PRE41]'
   id: totrans-198
   prefs: []
@@ -1332,6 +1362,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 为了更保险起见，如果我们不是以共享库的方式构建 `mc-gol`，我们还会添加 `MC_GOL_STATIC_DEFINE`（尽管在这种情况下，这并不是严格必要的，但这是一个很好的、低成本的防御性措施，可以避免将来可能出现的链接时问题，这取决于
+    `mc_gol_export.h` 的状态）。
 - en: To see everything in one place, you can go to [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)
     and review `ch4/part-5/lib/gol/CMakeLists.txt`.
   id: totrans-200
@@ -1340,6 +1372,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 若想查看所有内容，可以访问 [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)
+    并查看 `ch4/part-5/lib/gol/CMakeLists.txt`。
 - en: That wraps up all changes to our *Game of Life* library! There’s just one more
     important topic we’ve yet to cover before we move on to the next chapter.
   id: totrans-201
@@ -1348,6 +1382,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 这就完成了我们对 *生命游戏* 库的所有修改！在进入下一章之前，我们还有一个重要的主题尚未讨论。
 - en: Interface libraries
   id: totrans-202
   prefs:
@@ -1355,6 +1390,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 接口库
 - en: In addition to static and shared libraries, there is another well-known library
     type often referred to as `.h` files). It is not compiled or linked ahead of time,
     the `.h` files are simply included and then compiled with the source of the main
@@ -1365,6 +1401,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 除了静态库和共享库外，还有另一种常见的库类型，通常被称为 `.h` 文件）。它不会在编译或链接时预先处理，`.h` 文件只是被包含进去，然后与主应用程序的源代码一起编译。
 - en: Header-only libraries are popular because of their ease of integration (you
     can include the `.h` file in your project and things will usually just work).
     The downside is that you pay a cost by compiling that library whenever you change
@@ -1377,6 +1414,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 仅头文件库因为其易于集成而非常受欢迎（你只需将 `.h` 文件包含到项目中，通常一切就能正常工作）。缺点是，每当你更改代码时，你必须重新编译该库，这会带来额外的开销，这种开销根据库的复杂度可能会很大。仅头文件库在
+    C++ 中尤其常见，尤其是模板库，因为它们的实现必须出现在头文件中。
 - en: 'Fortunately, CMake offers a straightforward way to create header-only libraries
     that can be used like any other library. A complete header-only `CMakeLists.txt`
     file is shown here:'
@@ -1386,6 +1425,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 幸运的是，CMake 提供了一种直接的方法来创建仅头文件库，这些库可以像其他库一样使用。这里展示了一个完整的仅头文件 `CMakeLists.txt`
+    文件：
 - en: '[PRE42]'
   id: totrans-206
   prefs: []
@@ -1401,6 +1442,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 该文件应该与我们之前看到的 `CMakeLists.txt` 文件非常相似。主要的不同点是添加了 `INTERFACE` 关键字，取代了 `add_library`
+    命令中的 `STATIC` 或 `SHARED`，以及特定的 `target_...` 命令中的 `PUBLIC` 或 `PRIVATE`。
 - en: The `INTERFACE` keyword informs CMake that there are no source files to build
     for this target and that no artifact (library file) will be produced. All it does
     is provide requirements for using it (in our case, we’re specifying where to find
@@ -1414,6 +1457,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: '`INTERFACE`关键字告知 CMake 这个目标没有源文件需要构建，也不会生成任何工件（库文件）。它所做的只是提供使用它的要求（在我们的例子中，我们指定了包含文件的位置，并要求使用
+    `c_std_17` 或更高版本）。`INTERFACE` 关键字还允许我们通过 `target_sources` 命令为依赖的目标指定一组源文件进行编译（我们将在[*第9章*](B21152_09.xhtml#_idTextAnchor195)中看到此用途，*为项目编写测试*）。'
 - en: The preceding code is a contrived example where we’ve extracted a single useful
     utility function not specific to *Game of Life* that we may want to use (and add
     to) in the future. The function is `try_wrap`, which is essentially a more robust
@@ -1424,6 +1469,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 上面的代码是一个人为的示例，我们提取了一个不特定于*生命游戏*的单一有用工具函数，未来可能会使用（并且可能会添加）。这个函数是 `try_wrap`，它本质上是一个更强大的取模函数，能在处理负数时更好地进行环绕运算。
 - en: 'Now, we can use this library in `mc-gol` like so:'
   id: totrans-210
   prefs:
@@ -1431,6 +1477,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 现在，我们可以像下面这样在`mc-gol`中使用这个库：
 - en: '[PRE43]'
   id: totrans-211
   prefs: []
@@ -1446,6 +1493,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 我们技术上并没有链接到这个库，但我们必须将目标添加为 `target_link_libraries` 的依赖项，以便为我们的目标应用程序填充包含搜索路径。然后，我们只需要在
+    `gol.c` 中添加 `#include <minimal-cmake/utils.h>` 以访问该函数。
 - en: As this is still a C header-only library, we need to annotate our function implementation
     with `static` to avoid linker errors. This will cause copies of our function to
     be generated in each translation unit (`.c` file) they are used, which isn’t ideal,
@@ -1459,6 +1508,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 由于这仍然是一个 C 语言的仅头文件库，我们需要用 `static` 来注解我们的函数实现，以避免链接错误。这将导致在每个翻译单元（`.c` 文件）中生成函数的副本，这并不理想，但在这个简单的例子中是可行的。C++
+    对仅头文件库的支持要好得多。在这种情况下，应该首选 `inline` 关键字（`inline` 在 C 语言中也受支持，但它在 C 中的含义与 C++ 中有所不同，使用起来也稍微复杂一些）。
 - en: Using header-only libraries this way provides all the advantages discussed in
     [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External
     Dependencies*, which include keeping your code and dependencies separate, as well
@@ -1469,6 +1520,8 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 以这种方式使用仅包含头文件的库提供了在[*第3章*](B21152_03.xhtml#_idTextAnchor065)中讨论的所有优势，*使用 FetchContent
+    处理外部依赖项*，包括将代码和依赖项分开，并使设置包含路径变得更加简单。
 - en: You can find a full example in `ch4/part6/lib/utils/CMakeLists.txt` and `ch4/part6/app/CMakeLists.txt`.
   id: totrans-215
   prefs:
@@ -1476,6 +1529,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 你可以在 `ch4/part6/lib/utils/CMakeLists.txt` 和 `ch4/part6/app/CMakeLists.txt` 中找到完整的示例。
 - en: Summary
   id: totrans-216
   prefs:
@@ -1483,6 +1537,7 @@
   - PREF_IND
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 摘要
 - en: If you’ve made it this far, give yourself a well-deserved pat on the back –
     you’ve come a long way! In this chapter, we discussed how to make a library compatible
     with `FetchContent`. This involved reviewing the project’s physical structure,
