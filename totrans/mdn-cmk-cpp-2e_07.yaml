@@ -1,0 +1,1698 @@
+- en: '7'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Compiling C++ Sources with CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Simple compilation scenarios are usually handled by a default configuration
+    of a toolchain or just provided out of the box by an **integrated development
+    environment** (**IDE**). However, in a professional setting, business needs often
+    call for something more advanced. It could be a requirement for higher performance,
+    smaller binaries, more portability, automated testing, or extensive debugging
+    capabilities – you name it. Managing all of these in a coherent, future-proof
+    way quickly becomes a complex, tangled mess (especially when there are multiple
+    platforms to support).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The process of compilation is often not explained well enough in books on C++
+    (in-depth subjects such as virtual base classes seem to be more interesting).
+    In this chapter, we’ll fix that by going through different aspects of compilation:
+    we’ll discover how compilation works, what its internal stages are, and how they
+    affect the binary output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After that, we will focus on the prerequisites – we’ll discuss what commands
+    we can use to fine-tune the compilation process, how to require specific features
+    from a compiler, and how to correctly instruct the compiler on which input files
+    to process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, we’ll focus on the first stage of compilation – the preprocessor. We’ll
+    be providing paths for included headers, and we’ll study how to plug in variables
+    from CMake and the build environment with preprocessor definitions. We’ll cover
+    the most interesting use cases and learn how to expose CMake variables so they
+    can be accessed from C++ code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Right after that, we’ll talk about the optimizer and how different flags can
+    affect performance. We’ll also discuss the costs of optimization, specifically
+    how it affects the debuggability of produced binaries, and what to do if that
+    isn’t desired.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, we’ll explain how to manage the compilation process in terms of reducing
+    the compilation time by using precompiled headers and unity builds. We’ll learn
+    how to debug the build process and find any mistakes we might’ve made.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basics of compilation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring the preprocessor
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring the optimizer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Managing the process of compilation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch07](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch07).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this book, always use the recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace the `<build tree>` and `<source tree>` placeholders with
+    appropriate paths. As a reminder: **build tree** is the path to the target/output
+    directory and **source tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basics of compilation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Compilation can be roughly described as a process of translating instructions
+    written in a high-level programming language into low-level machine code. This
+    allows us to create our applications using abstract concepts such as classes and
+    objects and sparing us the tedious intricacies of processor-specific assembly
+    languages. We don’t need to work directly with CPU registers, think about short
+    or long jumps, or manage stack frames. Compiled languages are more expressive,
+    readable, and secure, and they encourage the creation of maintainable code, all
+    while delivering as much performance as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In C++, we use static compilation – meaning an entire program must be translated
+    into native code before it can be executed. This is a different approach compared
+    to languages such as Java or Python, which interpret and compile the program on
+    the fly each time a user runs it. Each method has its own unique advantages. C++
+    aims to offer a multitude of high-level tools, while simultaneously delivering
+    native performance. A C++ compiler can produce a self-contained application for
+    almost every architecture out there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creating and running a C++ program involves several steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Design your application**: This includes planning the application’s functionality,
+    structure, and behavior. Once your design is finalized, carefully write the source
+    code following best practices for code readability and maintainability.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Compile individual .cpp implementation files, also known as translation units,
+    into object files**: This step involves converting the high-level language code
+    that you’ve written into low-level machine code.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Link** **object files together into a single executable**: During this step,
+    all other dependencies, including dynamic and static libraries, are also linked.
+    This process creates an executable that can be run on the intended platform.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: To run the program, the **operating system** (**OS**) will use a tool called
+    **loader** to map the program’s machine code and all required dynamic libraries
+    into virtual memory. The loader then reads the program headers to determine where
+    execution should start and begins running the instructions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At this stage, the program’s start-up code comes into play. A special function
+    called `_start`, provided by the system’s C library, is invoked. The `_start`
+    function collects command-line arguments and environment variables, initiates
+    threading, initializes static symbols, and registers cleanup callbacks. Only after
+    this will it call `main()`, the function that programmers fill with their own
+    code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can see, a considerable amount of work takes place behind the scenes.
+    This chapter focuses on the second step from the earlier list. By considering
+    the bigger picture, we can better understand where potential issues might originate.
+    There’s no such thing as magic in software development, despite the seeming impenetrability
+    of the complexity involved. Everything has an explanation and a reason. We need
+    to understand that things can go wrong during the runtime of a program due to
+    how we compiled it, even if the compilation step itself appeared to be successful.
+    It’s simply not possible for a compiler to check all edge cases during its operation.
+    So, let’s find out what actually happens when the compiler does its job.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How compilation works
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As mentioned before, compilation is the process of translating a high-level
+    language into a low-level language. Specifically, this involves generating machine
+    code, which are instructions that a specific processor can directly execute, in
+    a binary **object file** format unique to a given platform. On Linux, the most
+    commonly used format is the **Executable and Linkable Format** (**ELF**). Windows
+    uses a PE/COFF format specification, and on macOS, we’ll encounter Mach objects
+    (the Mach-O format).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Object files** are the direct translation of individual source files. Each
+    of these files must be compiled separately and subsequently combined by a linker
+    into a single executable or library. This modular process can significantly save
+    time when modifying code, as only the files updated by the programmer need to
+    be recompiled.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The compiler has to execute the following stages to create an **object file:**
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocessing
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Linguistic analysis
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Assembly
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Optimization
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Code emission
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s explain them in more detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Preprocessing**, although automatically invoked by most compilers, is considered
+    a preparatory step prior to actual compilation. Its role is to perform rudimentary
+    manipulations on the source code; it executes `#include` directives, substitutes
+    identifiers with defined values through `#define` directives and `-D` flags, invokes
+    simple macros, and conditionally includes or excludes parts of code based on the
+    `#if`, `#elif`, and `#endif` directives. The preprocessor remains blissfully unaware
+    of the actual C++ code. In essence, it functions as an advanced find-and-replace
+    tool.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nevertheless, the role of the preprocessor is vital for building advanced programs.
+    The ability to divide code into parts and share declarations across multiple translation
+    units is the foundation of code reusability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next up is **linguistic analysis**, where the compiler conducts more intricate
+    operations. It scans the preprocessed file (which now includes all the headers
+    inserted by the preprocessor) character by character. Through a process known
+    as lexical analysis, it groups characters into meaningful tokens – these could
+    be keywords, operators, variable names, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The tokens are then assembled into chains and examined to verify whether their
+    order and presence adhere to the syntax rules of C++ – a process called syntax
+    analysis or parsing. This is typically the stage where most of the error messages
+    are generated, as it identifies syntactical issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, the compiler carries out semantic analysis. In this phase, the compiler
+    checks whether the statements in the file are logically sound. For instance, it
+    ensures that all type correctness checks are met (you cannot assign an integer
+    to a string variable). This analysis makes sure the program makes sense within
+    the rules of the programming language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The **assembly** phase is essentially a translation of these tokens into CPU-specific
+    instructions based on the available instruction set for the platform. Some compilers
+    actually generate an assembly output file, which is subsequently passed to a dedicated
+    assembler program. This program produces the machine code that the CPU can execute.
+    Other compilers produce this machine code directly in memory. Typically, such
+    compilers also provide an option to generate a textual output of human-readable
+    assembly code. However, just because this code can be read doesn’t necessarily
+    mean it’s easy to understand or beneficial to do so.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Optimization** is not confined to a single step in the compilation process
+    but occurs incrementally at each stage. There is, however, a distinct phase after
+    the initial assembly is produced, which focuses on minimizing register usage and
+    eliminating redundant code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An interesting and noteworthy optimization technique is inline expansion or
+    *inlining*. In this process, the compiler effectively “cuts” the body of a function
+    and “pastes” it in place of its call. The C++ standard doesn’t explicitly define
+    the circumstances under which this occurs – it is implementation dependent. Inline
+    expansion can enhance execution speed and reduce memory usage, but it also poses
+    significant drawbacks for debugging, as the executed code no longer corresponds
+    to the original line in the source code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The **code emission** phase involves writing the optimized machine code into
+    an *object file* in a format that aligns with the target platform’s specifications.
+    However, this *object file* isn’t ready for execution just yet – it needs to be
+    passed to the next tool in the chain, the linker. The linker’s job is to appropriately
+    relocate the sections of our *object file* and resolve references to external
+    symbols, effectively preparing the file for execution. This step marks the transformation
+    from the **American Standard Code for Information Interchange** (**ASCII**) source
+    code into *binary executable files* that can be directly processed by a CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each of these stages is significant and can be configured to meet our specific
+    needs. Let’s look at how we can manage this process with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Initial configuration
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'CMake provides several commands that can affect each stage of the compilation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`target_compile_features()`: This requires a compiler with specific features
+    to compile this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_sources()`: This adds sources to an already defined target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_include_directories()`: This sets up the preprocessor *include paths*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_compile_definitions()`: The sets up preprocessor definitions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_compile_options()`: This sets compiler-specific command-line options.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_precompile_headers()`: This sets external header files to be optimized
+    with precompilation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Each of these commands accepts similar arguments in the following format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This means that properties set with this command propagate through transitive
+    usage requirements, as discussed in *Chapter 5*, *Working with Targets,* in the
+    *What are transitive usage requirements?* section and can be utilized for both
+    executables and libraries. Also, it’s worth noting that all these commands support
+    generator expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Requiring specific features from the compiler
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As discussed in the *Checking for supported compiler features* section in *Chapter
+    4*, *Setting Up Your First CMake Project*, it’s crucial to anticipate issues and
+    aim to provide your software’s users with a clear message when something goes
+    wrong – for instance, when an available compiler, X, doesn’t provide a required
+    feature, Y. This approach is far more user friendly than having users decipher
+    the errors produced by an incompatible toolchain they might be using. We don’t
+    want users to misattribute the incompatibility issues to our code instead of their
+    outdated environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can use the following command to specify all the features that your target
+    needs to build:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake understands C++ standards and supported compiler features for these `compiler_ids`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`AppleClang`: Apple Clang for Xcode versions 4.4+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Clang`: Clang Compiler versions 2.9+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`GNU`: GNU Compiler versions 4.4+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`MSVC`: Microsoft Visual Studio versions 2010+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SunPro`: Oracle Solaris Studio versions 12.4+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Intel`: Intel Compiler versions 12.1+'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are over 60 features supported by CMake, and you’ll find a full list
+    in the official documentation, on the page explaining the `CMAKE_CXX_KNOWN_FEATURES`
+    variable. However, unless you’re after something very specific, I recommend picking
+    a high-level meta feature indicating the general C++ standard:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cxx_std_14`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cxx_std_17`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cxx_std_20`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cxx_std_23`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cxx_std_26`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Look at the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is essentially equal to `set(CMAKE_CXX_STANDARD 26)` with `set(CMAKE_CXX_STANDARD_REQUIRED
+    ON)` introduced in *Chapter 4*, *Setting Up Your First CMake Project*. However,
+    the difference is that `target_compile_features()` works on a per-target basis
+    and not globally for the project, which may be cumbersome if you need to add it
+    for all targets in the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find more details on CMake’s *supported compilers* in the official manual (See
+    the *Further reading* section for the URL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Managing sources for targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We already know how to tell CMake which source files constitute a single target,
+    whether it’s an executable or a library. We do this by supplying a list of files
+    when using the `add_executable()` or `add_library()` commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As your solution expands, the list of files for each target also grows. This
+    can lead to some rather lengthy `add_...()` commands. How do we deal with that?
+    A tempting approach might be to utilize the `file()` command in `GLOB` mode, which
+    can gather all files from subdirectories and store them in a variable. We could
+    pass it as an argument to the target declaration and not bother with the file
+    list again:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: However, this method is not recommended. Let’s understand why. CMake generates
+    buildsystems based on the changes in the listfiles. So, if no changes are detected,
+    your builds might fail without any warning (a developer’s nightmare). Besides,
+    omitting all sources in the target declaration can disrupt code inspection in
+    IDEs like CLion, which knows how to parse certain CMake commands to understand
+    your project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Using variables in target declarations is not advisable for another reason:
+    it creates a layer of indirection, causing the developers to have to unpack the
+    target definition when reading the project. To follow this advice, we’re faced
+    with another question: how do we conditionally add source files? This is a common
+    scenario when dealing with platform-specific implementation files, such as `gui_linux.cpp`
+    and `gui_windows.cpp`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `target_sources()` command allows us to append source files to a previously
+    created target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/01-sources/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This way, each platform gets its own set of compatible files. That’s great,
+    but what about long lists of sources? Well, we’ll just have to accept that some
+    things aren’t perfect just yet and keep adding them manually. If you are struggling
+    with a really long list, you’re probably doing something wrong with the structure
+    of your project: perhaps it could use partitioning sources into libraries.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we’ve covered the essentials of compilation, let’s delve into the first
+    step – preprocessing. Like all things in computer science, the devil is in the
+    details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the preprocessor
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The preprocessor plays a huge role in the process of building. Maybe this is
+    a little surprising, considering its functionality appears rather straightforward
+    and limited. In the following sections, we’ll cover providing paths to included
+    files and using the preprocessor definitions. We’ll also explain how we can use
+    CMake to configure included headers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Providing paths to included files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The most basic feature of the preprocessor is the ability to include `.h` and
+    `.hpp` header files with the `#include` directive, which exists in two forms:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Angle-bracket form: `#include <path-spec>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Quoted form: `#include "path-spec"`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As we know, the preprocessor will replace these directives with the contents
+    of the file specified in `path-spec`. Finding these files may be a challenge.
+    Which directories should be searched, and in what order? Unfortunately, the C++
+    standard doesn’t specify that exactly. We have to check the manual for the compiler
+    in use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Typically, the angle-bracket form will check standard *include directories*,
+    which include the directories where standard C++ library and standard C library
+    header files are stored in the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The quoted form starts by searching for the included file in the directory of
+    the current file and then checks the directories for the angle-bracket form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake provides a command to manipulate paths being searched for the included
+    files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This allows us to add custom paths that we want the compiler to scan. CMake
+    will add them to compiler invocations in the generated buildsystem. They will
+    be provided with a flag appropriate for the specific compiler (usually, it’s `-I`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `target_include_directories()` command modifies the target’s `INCLUDE_DIRECTORIES`
+    property by appending or prepending directories to it, based on whether the `AFTER`
+    or `BEFORE` keyword is used. However, it’s still up to the compiler to decide
+    whether the directories provided here will be checked before or after the default
+    ones (usually, it’s before).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `SYSTEM` keyword signifies to the compiler that the given directories should
+    be treated as standard system directories (to be used with the angle-bracket form).
+    For many compilers, these directories are passed with the `-isystem` flag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preprocessor definitions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Recall the preprocessor’s `#define` and `#if`, `#elif`, and `#endif` directives
+    mentioned earlier when discussing the stages of compilation. Let’s examine the
+    following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/02-definitions/definitions.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As it stands, this example accomplishes nothing, as neither `ABC` nor `DEF`
+    is defined (`DEF` would default to `0` in this example). We can easily change
+    that by adding two lines at the top of this code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After compiling and executing this code, we can see both messages in the console:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: This might seem simple enough, but what if we want to condition these sections
+    based on external factors, such as an OS, architecture, or something else? The
+    good news is that you can pass values from CMake to a C++ compiler, and it’s not
+    complicated at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `target_compile_definitions()` command will suffice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/02-definitions/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding code will behave exactly like the two `#define` statements, but
+    we have the flexibility to use CMake’s variables and generator expressions, and
+    we can place the command in a conditional block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Traditionally, these definitions are passed to the compiler with the `-D` flag
+    (for example, `-DFOO=1`) and some programmers continue to use this flag in this
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake recognizes this and will automatically remove any leading `-D` flags.
+    It will also disregard empty strings, so the following command is perfectly valid:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, `-D` is a separate argument that becomes an empty string after
+    removal and is subsequently ignored, thereby ensuring correct behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Avoid accessing private class fields in your unit tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Some online resources recommend using a combination of specific `-D` definitions
+    with `#ifdef/ifndef` directives for the purposes of unit testing. The most straightforward
+    application of this approach is to enclose the `public` access specifier in conditional
+    inclusions, effectively making all fields public when `UNIT_TEST` is defined (class
+    fields are private by default):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: While this technique offers convenience (allowing tests to directly access private
+    members), it does not result in clean code. Ideally, unit tests should focus on
+    verifying the functionality of methods within the public interface, treating the
+    underlying implementation as a black box. Consequently, I suggest using this approach
+    only as a last resort.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using git commit to track a compiled version
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Let’s think about use cases that benefit from knowing details about the environment
+    or filesystem. A prime example in professional settings might involve passing
+    the revision or commit `SHA` used to build the binary. This could be achieved
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/03-git/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The SHA could then be utilized in our application as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/03-git/print_commit.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Of course, the preceding code requires the user to have Git installed and accessible
+    in their `PATH`. This feature is particularly useful when the programs running
+    on production servers are the result of a continuous integration/deployment pipeline.
+    If there’s an issue with our software, we can quickly check which exact Git commit
+    was used to build the faulty product.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keeping track of an exact commit is extremely beneficial for debugging purposes.
+    It’s straightforward to pass a single variable to C++ code, but how would we handle
+    the scenario where dozens of variables need to be passed to our headers?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the headers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Passing definitions through `target_compile_definitions()` can become tedious
+    with numerous variables. Wouldn’t it be easier to provide a header file with placeholders
+    referencing these variables, and allow CMake to fill them in? Absolutely!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake’s `configure_file(<input> <output>)` command enables you to generate
+    new files from templates, like the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/04-configure/configure.h.in**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can utilize this command as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/04-configure/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake then generates an output file like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/04-configure/<build_tree>/configured/configure.h**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, the `@VAR@` and `${VAR}` variable placeholders were substituted
+    with the values from the CMake listfile. Additionally, `#cmakedefine` was replaced
+    with `#define` for defined variables and `/* #undef VAR */` for undefined ones.
+    If you require an explicit `#define 1` or `#define 0` for `#if` blocks, use `#cmakedefine01`
+    instead.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can incorporate this configured header in your application by simply including
+    it in your implementation file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/04-configure/configure.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'By adding the binary tree to our *include paths* with the `target_include_directories()`
+    command, we can compile the example and receive output populated from CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `configure_file()` command also includes a range of formatting and file-permission
+    options, which we won’t delve into here due to length constraints. If you’re interested,
+    you can refer to the online documentation for further details (see the *Further
+    reading* section in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having prepared a complete compilation of our headers and source files, let’s
+    discuss how the output code is shaped during the subsequent steps. While we don’t
+    have direct influence over the linguistic analysis or assembling (as these steps
+    adhere to strict standards), we can manipulate the configuration of the optimizer.
+    Let’s explore how this can impact the end result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the optimizer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The optimizer will analyze the output of previous stages and use a multitude
+    of tactics, which programmers wouldn’t use directly, as they don’t adhere to clean-code
+    principles. But that’s fine – the optimizer’s essential role is to enhance code
+    performance, striving for low CPU usage, minimal register usage, and reduced memory
+    footprint. As the optimizer traverses the source code, it heavily morphs it into
+    an almost unrecognizable form, tailored specifically to the target CPU.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The optimizer will not only decide which functions could be removed or compacted;
+    it will also move code around or even significantly duplicate it! If it can definitively
+    ascertain that certain lines of code are redundant, it will wipe them out from
+    the middle of an important function (and you won’t even notice). It recycles memory
+    so that numerous variables can inhabit the same slot at different times. It can
+    even remodel your control structures into something entirely different if that
+    translates into shaving off a few cycles here and there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If a programmer were to manually apply the aforementioned techniques to source
+    code, it would transmogrify it into an awful, unreadable mess, difficult to write
+    and reason about. However, when applied by compilers, these techniques are advantageous
+    as compilers strictly follow the provided instructions. The optimizer is a relentless
+    beast that serves one purpose: to accelerate execution speed, regardless of how
+    distorted the output becomes. Such output may contain some debugging information
+    if we are running it in our test environment, or it may not, in order to make
+    it difficult for unauthorized people to tamper with it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every compiler has its own unique tricks up its sleeve, consistent with the
+    platform it supports and the philosophy it follows. We’ll take a look at the most
+    common ones, available in GNU GCC and LLVM Clang, to gain an understanding of
+    what is practical and achievable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here’s the thing – many compilers won’t enable any optimization by default (GCC
+    included). This is okay in some cases but not so much in others. Why go slow when
+    you can go fast? To amend this, we can use the `target_compile_options()` command
+    and explicitly state our expectations from the compiler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The syntax of this command mirrors others in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: We provide command-line options to use while building the target and we also
+    specify the propagation keyword. When executed, CMake appends the given options
+    to the appropriate `COMPILE_OPTIONS` variable of the target. The optional `BEFORE`
+    keyword may be used if we want to prepend them instead. The order can be significant
+    in some scenarios, so it’s beneficial to have a choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that `target_compile_options()` is a general command. It can also be used
+    to provide other arguments to compiler-like `-D` definitions, for which CMake
+    offers the `target_compile_definition()` command as well. It is always advisable
+    to use the most specialized CMake commands wherever possible, as they are guaranteed
+    to work the same way across all the supported compilers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Time to discuss the details. The subsequent sections will introduce various
+    kinds of optimizations that you can enable in most compilers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: General level
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: All the different behaviors of the optimizer can be configured in depth by specific
+    flags that we can pass as *compile options*. Getting to know all of them is time
+    consuming and requires a lot of knowledge about the internal workings of compilers,
+    processors, and memory. What can we do if we just want the best possible scenario
+    that works well in most cases? We can aim for a general solution – an optimization-level
+    specifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most compilers offer four basic levels of optimization, from `0` to `3`. We
+    specify them with the `-O<level>` option. `-O0` means *no optimization* and, usually,
+    it’s the default level for compilers. On the other hand, `-O2` is considered a
+    *full optimization*, one that generates highly optimized code but at the cost
+    of the slowest compilation time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There’s an in-between `-O1` level, which (depending on your needs) can be a
+    good compromise – it enables a reasonable amount of optimization mechanisms without
+    slowing the compilation too much.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we can reach for `-O3`, which is *full optimization*, like `-O2`, but
+    with a more aggressive approach to subprogram inlining and loop vectorization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are also some variants of the optimization that will optimize for the
+    size (not necessarily the speed) of the produced file – `-Os`. There is a super-aggressive
+    optimization, `-Ofast`, which is an `-O3` optimization that doesn’t strictly comply
+    with C++ standards. The most obvious difference is the usage of `-ffast-math`
+    and `-ffinite-math` flags, meaning that if your program is about precise calculations
+    (as most are), you might want to avoid it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake knows that not all compilers are made equal, and for that reason, it
+    standardizes the experience for developers by providing some default flags for
+    compilers. They are stored in system-wide (not target-specific) variables for
+    the language used (`CXX` for C++) and the build configuration (`DEBUG` or `RELEASE`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMAKE_CXX_FLAGS_DEBUG` equals `-g`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_CXX_FLAGS_RELEASE` equals `-O3 -DNDEBUG`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As you can see, the debug configuration doesn’t enable any optimizations and
+    the release configuration goes straight for `O3`. If you like, you can change
+    them directly with the `set()` command or just add a target compilation option,
+    which will override this default behavior. The other two flags (`-g,` `-DNDEBUG`)
+    are related to debugging – we’ll discuss them in the *Providing information for
+    the debugger* section of this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables such as `CMAKE_<LANG>_FLAGS_<CONFIG>` are global – they apply to all
+    targets. It is recommended to configure your targets through properties and commands,
+    such as `target_compile_options()`, rather than relying on global variables. This
+    way, you can control your targets at higher granularity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By choosing an optimization level with `-O<level>`, we indirectly set a long
+    list of flags, each controlling a specific optimization behavior. We can then
+    fine-tune the optimization by appending more flags, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Enable them with an `-f` option: `-finline-functions`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Disable them with an `-fno` option: `-fno-inline-functions`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some of these flags are worth understanding better as they will often impact
+    how your program works and how you can debug it. Let’s have a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function inlining
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As you might recall, compilers can be encouraged to inline some functions,
+    either by *defining* a function inside a class *declaration* block or by explicitly
+    using the `inline` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The decision to inline a function ultimately rests with the compiler. If inlining
+    is enabled and the function is used in a singular place (or a relatively small
+    function used in a few places), inlining will most likely occur.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function inlining is an intriguing optimization technique. It operates by extracting
+    the code from the targeted function and embedding it in all the locations where
+    the function was called. This process replaces the original call and conserves
+    precious CPU cycles.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s consider the following example using the class we just defined:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without inlining, the code would execute in the `main()` frame until a method
+    call. Then, it would create a new frame for `im_inlined()`, execute in a separate
+    scope, and return to the `main()` frame. The same would happen for the `me_too()`
+    method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, when inlining takes place, the compiler will replace the calls, like
+    so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: This isn’t an exact representation because inlining happens at the level of
+    assembly or machine code (and not the source code), but it does provide a general
+    idea.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The compiler employs inlining to conserve time. It bypasses the creation and
+    teardown of a new call frame and the need to look up the address of the next instruction
+    to execute (and return to) and enhances instruction caching as they are in close
+    proximity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, inlining does come with some significant side effects. If a function
+    is used more than once, it must be copied to all locations, resulting in a larger
+    file size and increased memory usage. While this may not be as critical today
+    as it once was, it remains relevant, especially when developing software for low-end
+    devices with limited RAM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Moreover, inlining critically impacts debugging. Inlined code is no longer at
+    the original line number, making tracking more difficult, or sometimes impossible.
+    This is why a debugger breakpoint placed in a function that was inlined, never
+    gets hit (even though the code is still executed somehow). To circumvent this
+    problem, you need to disable inlining for debug builds (at the cost of not testing
+    the exact release build version).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can do that by specifying the `-O0` (o-zero) level for the target or directly
+    addressing the flags responsible for inlining:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-finline-functions-called-once`: This is only for GCC.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-finline-functions`: This is for both Clang and GCC.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-finline-hint-functions`: This is only for Clang.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Inlining can be explicitly disabled with `-fno-inline-...`, however, for detailed
+    information, it’s advisable to refer to the documentation of your specific compiler
+    version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loop unrolling
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Loop unrolling, also known as loop unwinding, is an optimization technique.
+    This strategy aims to transform loops into a series of statements that accomplish
+    the same result. Consequently, this approach exchanges the small size of the program
+    for execution speed, as it eliminates the loop control instruction, pointer arithmetic,
+    and end-of-loop checks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Consider the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The previous code will be transformed into something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: The outcome will be the same, but we no longer have to allocate the `i` variable,
+    increment it, or compare it three times with a value of `3`. If we call `func()`
+    enough times in the lifetime of the program, unrolling even such a short and small
+    function will make a significant difference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, it is important to understand two limiting factors. Firstly, loop unrolling
+    is only effective if the compiler knows or can accurately estimate the number
+    of iterations. Secondly, loop unrolling can lead to undesired consequences on
+    modern CPUs, as an increased code size might hamper effective caching.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each compiler provides a slightly different version of this flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-floop-unroll`: This is for GCC.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-funroll-loops`: This is for Clang.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re uncertain, test extensively whether this flag is affecting your particular
+    program and explicitly enable or disable it. Do note that on GCC, it is implicitly
+    enabled with `-O3` as part of the implicitly enabled `-floop-unroll-and-jam` flag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loop vectorization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The mechanism known as **single instruction, multiple data** (**SIMD**) was
+    developed in the early 1960s to achieve parallelism. As the name suggests, it
+    is designed to carry out the same operation on multiple data simultaneously. Let’s
+    look at this in practice through the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Normally, such code would loop 128 times, but with a capable CPU, the code’s
+    execution can be significantly accelerated by simultaneously calculating two or
+    more array elements. This is possible due to the absence of dependency between
+    consecutive elements and data overlap between arrays. Clever compilers can transform
+    the preceding loop into something like this (which happens at the assembly level):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'GCC will enable such automatic vectorization of loops at `-O3`. Clang enables
+    it by default. Both compilers offer different flags to enable/disable vectorization
+    in particular:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-ftree-vectorize -ftree-slp-vectorize`: This is for enabling vectorization
+    in GCC.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`-fno-vectorize -fno-slp-vectorize`: This is for disabling vectorization in
+    Clang.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The efficiency of vectorization stems from the utilization of special instructions
+    offered by CPU manufacturers, rather than merely substituting the original form
+    of the loop with an unrolled version. Hence, it’s not feasible to achieve the
+    same performance level manually (additionally, it doesn’t result in *clean code*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The optimizer plays a vital role in enhancing a program’s runtime performance.
+    By employing its strategies effectively, we’ll get more bang for our buck. Efficiency
+    matters not only after coding completion but also during the software development
+    process. If compilation times are lengthy, we can improve them by better managing
+    the process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Managing the process of compilation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As programmers and build engineers, we must also consider other aspects of compilation
+    such as the time it takes to complete and the ease with which we can identify
+    and rectify mistakes made during the solution-building process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reducing compilation time
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In busy projects that require frequent recompilations (possibly several times
+    an hour), it’s paramount to ensure the compilation process is as quick as possible.
+    This not only affects the efficiency of your code-compile-test loop but also your
+    concentration and workflow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Luckily, C++ is already pretty good at managing compilation time, thanks to
+    separate translation units. CMake will take care to only recompile sources that
+    were impacted by recent changes. However, if we need to improve things even more,
+    there are a couple of techniques we can use: header precompilation and unity builds.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Precompilation of headers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Header files (`.h`) are included in the translation unit by the preprocessor
+    before the actual compilation begins. This means they must be recompiled every
+    time the `.cpp` implementation files change. Moreover, if multiple translation
+    files are using the same shared header, it has to be compiled every time it’s
+    included. This is inefficient, but it has been the standard for a long time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Luckily, since version 3.16, CMake offers a command to enable header precompilation.
+    This allows the compiler to process headers separately from the implementation
+    file, thereby speeding up the compilation process. This is the syntax for the
+    provided command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: The list of added headers is stored in the `PRECOMPILE_HEADERS` target property.
+    As we discussed in *Chapter 5*, *Working with Targets*,in the *What are transitive
+    usage requirements?* section, we can use the propagated properties to share the
+    headers with any depending targets by choosing the `PUBLIC` or `INTERFACE` keyword;
+    however, this shouldn’t be done for targets exported with the `install()` command.
+    Other projects shouldn’t be forced to consume our precompiled headers as this
+    is not a conventional practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the `$<BUILD_INTERFACE:...>` generator expression described in *Chapter
+    6*, *Using Generator Expressions*, to prevent precompiled headers from appearing
+    in the usage requirements of targets when they’re installed. However, they will
+    still be added to targets exported from the build tree with the `export()` command.
+    Don’t worry if this seems confusing right now – it will be fully explained in
+    *Chapter 14*, *Installing and Packaging*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake will put all headers’ names in a `cmake_pch.h` or `cmake_pch.hxx` file,
+    which will then be precompiled to a compiler-specific binary file with a `.pch`,
+    `.gch`, or `.pchi` extension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can use it in our listfile like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/06-precompile/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can also use it in the corresponding source file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/06-precompile/hello.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that in our `main.cpp` file, we don’t need to include `cmake_pch.h` or
+    any other header – it will be included by CMake with compiler-specific command-line
+    options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the previous example, I used a built-in header; however, you can easily
+    add your own headers with class or function definitions. Use one of the two forms
+    to reference the header:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`header.h` (a direct path) is interpreted as relative to the current source
+    directory and will be included with an absolute path.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `[["header.h"]]` (double brackets and quotes) path will be scanned according
+    to the target’s `INCLUDE_DIRECTORIES` property, which can be configured with `target_include_directiories()`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some online references may discourage precompiling headers that aren’t part
+    of a standard library, such as `<iostream>`, or using precompiled headers altogether.
+    This is because changing the list or editing a custom header will cause recompilation
+    of all translation units in the target. With CMake, this concern is not as significant,
+    especially if you structure your project correctly (with relatively small targets
+    focused on a narrow domain). Each target has a separate precompiled header file,
+    which limits the impact of the header changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If your headers are considered relatively stable, you might decide to reuse
+    precompiled headers in your targets. For this purpose, CMake provides a convenient
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: This sets the `PRECOMPILE_HEADERS_REUSE_FROM` property of the target reusing
+    the headers and creates a dependency between these targets. Using this method,
+    the consuming target can no longer specify its own precompiled headers. Additionally,
+    all *compile options*, *compile flags*, and *compile definitions* must match between
+    targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pay attention to requirements, especially if you have any headers that use the
+    double bracket format (`[["header.h"]]`). Both targets need to set their *include
+    paths* appropriately to make sure those headers are found by the compiler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unity builds
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: CMake 3.16 introduced another compilation time optimization feature – unity
+    builds, also known as *unified builds* or *jumbo builds*. Unity builds work by
+    combining multiple implementation source files by utilizing the `#include` directive.
+    This has some interesting implications, some of which are beneficial, while others
+    could be potentially harmful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most obvious advantage is avoiding the recompilation of headers in different
+    translation units when CMake creates a unified build file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: When both sources contain a `#include "header.h"` line, the referenced file
+    will be parsed only once, thanks to *include guards* (assuming they have been
+    properly added). While not as refined as precompiled headers, it is an alternative.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second benefit of this type of build is the fact that the optimizer may
+    now act on a greater scale and optimize interprocedural calls across all bundled
+    sources. This is similar to link-time optimization, which we discussed in *Chapter
+    4*, *Setting Up Your First CMake Project*, in the *Interprocedural optimization*
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, these benefits come with trade-offs. As we reduced the number of *object
+    files* and processing steps, we also increased the amount of memory needed to
+    process larger files. Additionally, we reduced the amount of parallelizable work.
+    Compilers aren’t exceptionally good at multithreaded compiling, as they don’t
+    typically need to be – the buildsystem will usually start many compilation tasks
+    to execute all the files simultaneously on different threads. Grouping all files
+    together complicates this, as CMake now has fewer files to compile in parallel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With unity builds, you also need to consider some C++ semantic implications
+    that might not be so obvious to catch – anonymous namespaces hiding symbols across
+    files are now scoped to the unity file, rather than to an individual translation
+    unit. The same thing happens with static global variables, functions, and macro
+    definitions. This may cause name collisions, or incorrect function overloads to
+    be executed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Jumbo builds are suboptimal when recompiling, as they will compile many more
+    files than needed. They work best when the code is meant to compile all files
+    as fast as possible. Tests done on Qt Creator (a popular GUI library) show that
+    you can expect an improvement anywhere between 20% to 50% (depending on the compiler
+    used).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To enable unity builds, we have two options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set the `CMAKE_UNITY_BUILD` variable to `true` – it will initialize the `UNITY_BUILD`
+    property on every target defined thereafter.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Manually set the `UNITY_BUILD` target property to `true` on every target that
+    should use unity builds.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The second option is achieved by calling the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manually setting these properties on many targets is of course more work and
+    increases the cost of maintenance, but you may need to do so to control this setting
+    on a finer level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, CMake will create builds containing eight source files, as specified
+    by the `UNITY_BUILD_BATCH_SIZE` property of a target (copied at the creation of
+    a target from the `CMAKE_UNITY_BUILD_BATCH_SIZE` variable). You can change the
+    target property or default variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Starting from version 3.18, you can explicitly define how files should be bundled
+    with named groups. To do so, change the target’s `UNITY_BUILD_MODE` property to
+    `GROUP` (the default is `BATCH`). Then, assign your source files to groups by
+    setting their `UNITY_GROUP` property to the name of your choosing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: CMake will then disregard `UNITY_BUILD_BATCH_SIZE` and add all files from the
+    group to a single unity build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake’s documentation advises against enabling unity builds for public projects
+    by default. It is recommended that the end user of your application should be
+    able to decide whether they want jumbo builds or not by providing the -`DCMAKE_UNITY_BUILD`
+    command-line argument. If unity builds cause issues due to the way your code is
+    written, you should explicitly set the target’s property to false. However, you
+    are free to enable this feature for code that will be used internally, such as
+    within a company or for your private project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These are the most important aspects of reducing compilation time with CMake.
+    There are other aspects of programming that often cost us a lot of time – one
+    of the most notorious is debugging. Let’s see how we can improve things there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding mistakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As programmers, we spend a substantial amount of time hunting for bugs. This,
+    sadly, is a fact of our profession. The process of identifying errors and rectifying
+    them can often get under our skin, especially when it requires long hours. The
+    difficulty is amplified when we’re left flying blind, without the necessary tools
+    to help us navigate through these challenging situations. For this reason, it
+    is crucial that we pay great attention to setting up our environment in a way
+    that simplifies this process, making it as easy and bearable as possible. One
+    way we can achieve this is by configuring the compiler with `target_compile_options()`.
+    So, which *compile options* could assist us in this endeavor?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring errors and warnings
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are many stressful things about software development – fixing critical
+    bugs in the middle of the night, working on high-visibility, costly failures in
+    large systems, and dealing with annoying compilation errors. Some errors are hard
+    to understand, while others are tediously challenging to fix. In your quest to
+    simplify your work and reduce the chance of failure, you’ll find many recommendations
+    on how to configure your compiler’s warnings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One such fine piece of advice is to enable the `-Werror` flag as default for
+    all builds. On the surface, this flag’s function is deceptively simple – it treats
+    all the warnings as errors, preventing the code from compiling until you resolve
+    each one. While it may seem like a beneficial approach, it seldom is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You see, warnings are not classified as errors for a reason: they’re designed
+    to caution you. It’s up to you to decide how to address these warnings. Having
+    the liberty to overlook a warning, particularly when you’re experimenting or prototyping
+    your solution, is often invaluable.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, if you have a perfect, no-warnings, all-shiny piece of code,
+    it seems a shame to allow future modifications to tarnish this pristine state.
+    What harm could come from enabling it and just keeping it there? Seemingly none,
+    at least until your compiler gets upgraded, that is. New compiler versions tend
+    to be stricter about deprecated features or more adept at offering improvement
+    suggestions. While this is beneficial when warnings remain as warnings, it can
+    lead to unexpected build failures with unchanged code or, even more frustratingly,
+    when you need to quickly rectify a problem unrelated to the new warning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, when is it acceptable to enable all possible warnings? The short answer
+    is when you’re creating a public library. In these cases, you’ll want to preempt
+    issue tickets that fault your code for misbehavior in stricter environments than
+    yours. If you opt to enable this setting, ensure you stay updated with the new
+    compiler versions and the warnings they introduce. It’s also important to explicitly
+    manage this update process, separately from making any code changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Otherwise, let warnings be what they are, and concentrate on errors. If you
+    feel compelled to be pedantic, use the `-Wpedantic` flag. This particular flag
+    enables all warnings demanded by strict ISO C and ISO C++ standards. However,
+    bear in mind that this flag doesn’t confirm conformance with the standard; it
+    only identifies non-ISO practices that require a diagnostic message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: More lenient and down-to-earth coders will be satisfied with `-Wall`, optionally
+    coupled with `-Wextra` for an extra touch of sophistication, which should suffice.
+    These warnings are considered genuinely useful, and you should address them in
+    your code when time allows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are plenty of other warning flags that may be useful depending on your
+    project type. I recommend that you read the manual for your chosen compiler to
+    see what options are available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging the build
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Occasionally, the compilation will break. This usually happens when we try to
+    refactor a significant amount of code or clean up our buildsystem. At times, issues
+    can be resolved easily; however, there are more complex problems that require
+    a thorough investigation into the configuration steps. We already know how to
+    print more verbose CMake outputs (as discussed in *Chapter 1*, *First Steps with
+    CMake*), but how do we analyze what actually happens under the hood at each stage?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging individual stages
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The `-save-temps`, which can be passed to both GCC and Clang compilers, allows
+    us to debug individual stages of compilation. This flag will instruct the compilers
+    to store the output of certain compilation stages in files, rather than in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/07-debug/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Enabling this option will produce two extra files (`.ii` and `.s`) per translation
+    unit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first one, `<build-tree>/CMakeFiles/<target>.dir/<source>.ii`, stores the
+    output of the preprocessing stage, with comments explaining where each part of
+    the source code comes from:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The second one, `<build-tree>/CMakeFiles/<target>.dir/<source>.s`, contains
+    the output of the linguistic analysis stage, ready for the assembler stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Depending on the type of problem, we can often uncover the actual issue. For
+    instance, the preprocessor’s output can help us identify bugs, such as incorrect
+    *include paths* (which may provide the wrong version of libraries), or mistakes
+    in definitions that lead to erroneous `#ifdef` evaluations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Meanwhile, the output of the linguistic analysis is particularly beneficial
+    for targeting specific processors and resolving critical optimization problems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging issues with header file inclusion
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Debugging incorrectly included files can be a challenging task. I should know
+    – in my first corporate job, I had to port an entire code base from one buildsystem
+    to another. If you ever find yourself in a situation that requires a precise understanding
+    of the paths used to include a requested header, consider using the `-H` compile
+    option:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch07/07-debug/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The produced output will look similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: After the name of the *object file*, each row in the output contains a path
+    to a header. In this example, a single dot at the beginning of the line indicates
+    a top-level inclusion (where the `#include` directive is in `hello.cpp`). Two
+    dots signify that this file is included by the subsequent file (`<iostream>)`.
+    Each additional dot denotes another level of nesting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At the end of this output, you may also find suggestions for possible improvements
+    to your code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: While you’re not required to address issues in the standard library, you may
+    see some of your own headers listed. In such cases, you might want to consider
+    making corrections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Providing information for the debugger
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Machine code is a cryptic list of instructions and data, encoded in a binary
+    format. It doesn’t convey any greater meaning or objective. This is because the
+    CPU doesn’t care what the goal of the program is or what the sense of all of the
+    instructions is. The only requirement is the correctness of the code. The compiler
+    will translate all of the preceding into numeric identifiers of CPU instructions,
+    store data to initialize memory where needed, and provide tens of thousands of
+    memory addresses. In other words, the final binary doesn’t need to contain the
+    actual source code, variable names, signatures of functions, or any other details
+    that programmers care about. That’s the default output of the compiler – raw and
+    bare.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is done primarily to save space and execute without too much overhead.
+    Coincidentally, we are also somewhat protecting our application from reverse engineering.
+    Yes, you can understand what each CPU instruction does without the source code
+    (for example, copy this value to that register). But even basic programs contain
+    too many of these instructions to make sense of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re a particularly driven individual, you can use a tool called a **disassembler**,
+    and with a lot of knowledge (and a bit of luck), you’ll be able to decipher what
+    might be happening. However, this approach isn’t very practical, as disassembled
+    code doesn’t have original symbols, making it incredibly hard and slow to untangle
+    what goes where.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, we can ask the compiler to store the source code in the produced binary
+    along with the map of references between compiled and original code. Then, we
+    can attach a debugger to a running program and see which source line is being
+    executed at any given moment. This is indispensable when we’re working on code,
+    such as writing new functionality or correcting errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These two use cases are the reason for two build configs: `Debug` and `Release`.
+    As we’ve seen earlier, CMake will provide some flags to the compiler by default
+    to manage this process, storing them first in global variables:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMAKE_CXX_FLAGS_DEBUG` contains `-g`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_CXX_FLAGS_RELEASE` contains `-DNDEBUG`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `-g` flag simply means “add debugging information.” It’s provided in the
+    OS’s native format: stabs, COFF, XCOFF, or DWARF. These formats can then be accessed
+    by debuggers such as `gdb` (the GNU debugger). Usually, this is sufficient for
+    IDEs such as CLion (as they use `gdb` under the hood). In other cases, refer to
+    the manual of the provided debugger and check what the appropriate flag is for
+    the compiler of your choice.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For the `Release` configuration, CMake will add the `-DNDEBUG` flag. It’s a
+    preprocessor definition, which simply means “not a debug build.” Some debug-oriented
+    macros will be deliberately disabled by this option. One of them is `assert`,
+    available in the `<assert.h>` header file. If you decide to use assertions in
+    your production code, they simply won’t work:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `assert(false)` call won’t have any effect in the `Release` configuration,
+    but it will stop the execution just fine in `Debug`. What do you do if you’re
+    practicing assertive programming and still need to use `assert()` for release
+    builds? Either change the defaults that are provided by CMake (remove `NDEBUG`
+    from `CMAKE_CXX_FLAGS_RELEASE`) or implement a hardcoded override by undefining
+    the macro before the header inclusion:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Refer to the assert reference for more information: [https://en.cppreference.com/w/c/error/assert](https://en.cppreference.com/w/c/error/assert).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can consider replacing `assert()` with `static_assert()`, which was introduced
+    in C++11, if your assertions can be done during compilation time, as this function
+    isn’t protected with the `#ifndef(NDEBUG)` preprocessor directive like `assert()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With this, we have learned how to manage the process of compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We have completed yet another chapter! Undoubtedly, compilation is a complex
+    process. With all its edge cases and specific requirements, it can be difficult
+    to manage without a robust tool. Thankfully, CMake does an excellent job supporting
+    us here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what have we learned so far? We began by discussing what compilation is
+    and where it fits into the broader narrative of building and running applications
+    in the OS. We then examined the stages of compilation and the internal tools that
+    manage them. This understanding is invaluable for resolving complex issues that
+    we might encounter in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we explored how to use CMake to verify whether the compiler available
+    on the host meets all the necessary requirements for our code to build. As we
+    have already established, it’s a significantly better experience for users of
+    our solution to see a friendly message asking them to upgrade rather than an arcane
+    error printed by an outdated compiler that can’t handle the new features of the
+    language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We briefly discussed how to add sources to already defined targets, then moved
+    on to the configuration of the preprocessor. This was quite a substantial subject,
+    as this stage brings all the bits of code together and determines which parts
+    will be ignored. We talked about providing paths to files and adding custom definitions
+    both individually and in bulk (along with some use cases). Then, we discussed
+    the optimizer; we explored all the general levels of optimization and what flags
+    they implicitly add. We also went into detail about a few of them – `finline`,
+    `floop-unroll`, and `ftree-vectorize`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, it was time to revisit the bigger picture and study how to manage the
+    viability of compilation. We tackled two main aspects here – reducing the compilation
+    time (which, by extension, helps maintain the programmer’s focus) and finding
+    mistakes. The latter is extremely important for identifying what is broken and
+    why. Setting the tools correctly and understanding why things happen greatly contributes
+    to ensuring the quality of the code (and preserving our mental health).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we’ll learn about linking and everything we need to consider
+    in order to build libraries and use them in our projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information, you can refer to the following resources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake-supported compile features and compilers: [https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#supported-compilers](https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#supported-compilers)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Managing sources for targets: [https://stackoverflow.com/questions/32411963/why-is-cmake-file-glob-evil](https://stackoverflow.com/questions/32411963/why-is-cmake-file-glob-evil),
+    [https://cmake.org/cmake/help/latest/command/target_sources.html](https://cmake.org/cmake/help/latest/command/target_sources.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The include keyword: [https://en.cppreference.com/w/cpp/preprocessor/include](https://en.cppreference.com/w/cpp/preprocessor/include)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Providing paths to included files: [https://cmake.org/cmake/help/latest/command/target_include_directories.html](https://cmake.org/cmake/help/latest/command/target_include_directories.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Configuring headers: [https://cmake.org/cmake/help/latest/command/configure_file.html](https://cmake.org/cmake/help/latest/command/configure_file.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Pre-compilation of headers: [https://cmake.org/cmake/help/latest/command/target_precompile_headers.html](https://cmake.org/cmake/help/latest/command/target_precompile_headers.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unity builds: [https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Precompiled headers unity builds:[https://www.qt.io/blog/2019/08/01/precompiled-headers-and-unity-jumbo-builds-in-upcoming-cmake](https://www.qt.io/blog/2019/08/01/precompiled-headers-and-unity-jumbo-builds-in-upcoming-cmake)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Finding mistakes – compiler flags: [https://interrupt.memfault.com/blog/best-and-worst-gcc-clang-compiler-flags](https://interrupt.memfault.com/blog/best-and-worst-gcc-clang-compiler-flags)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Why use libraries and not object files:[https://stackoverflow.com/questions/23615282/object-files-vs-library-files-and-why](https://stackoverflow.com/questions/23615282/object-files-vs-library-files-and-why)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Separation of concerns[:https://nalexn.github.io/separation-of-concerns/](https://nalexn.github.io/separation-of-concerns/
+    )
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Join our community on Discord
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Join our community’s Discord space for discussions with the author and other
+    readers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/QR_Code94081075213645359.png)'
+  prefs: []
+  type: TYPE_IMG

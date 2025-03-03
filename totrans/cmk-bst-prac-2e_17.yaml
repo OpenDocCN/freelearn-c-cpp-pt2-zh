@@ -1,0 +1,693 @@
+- en: '14'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Optimizing and Maintaining CMake Projects
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Software projects tend to live for a long time, and for some, it’s not unheard
+    of for them to be under more or less active development for a decade or more.
+    But even if projects do not live that long, they tend to grow over time and attract
+    certain clutter and legacy artifacts. Often, maintaining a project does not just
+    mean refactoring code or adding a feature once in a while but also keeping build
+    information and dependencies up to date.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As projects grow in complexity, build times often increase dramatically to the
+    point that development might get tedious because of the long wait times. Long
+    build times are not just inconvenient; they might also encourage developers to
+    take shortcuts because they make trying things out hard. It is hard to try out
+    something new if each build takes hours to complete and if each push to the CI/CD
+    pipeline takes hours to return, which does not help either.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Apart from choosing a good, modular project structure to increase the effectiveness
+    of incremental builds, CMake has a few features to help with profiling and optimizing
+    build times. And if CMake alone is not enough, using technologies such as **compiler
+    cache** (**ccache**) for caching build results or precompiled headers can further
+    help speed up incremental builds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizing build times can yield good results, improve the daily life of developers
+    considerably, and even be a cost-saving factor because a CI/CD pipeline might
+    need fewer resources to build projects. However, there are pitfalls that heavily
+    optimized systems may become brittle and break down more easily and that, at one
+    point, optimizing for build time might be a trade-off with easy project maintenance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we will cover a few general tips for maintaining projects
+    and structuring them to keep the maintenance effort in check. Then, we will dive
+    into analyzing build performance and see how builds can be sped up. The following
+    topics will be covered in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keeping a CMake project maintainable
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Profiling a CMake build
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Optimizing build performance
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As with the previous chapters, all examples are tested with CMake 3.21 and
+    run on either of the following compilers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**GNU Compiler Collection** (**GCC**) 9 or newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Clang 12 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Microsoft Visual C++** (**MSVC**) 19 or newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For viewing profiling data, a third-party viewer for Google trace format is
+    needed; arguably, the most widely used is Google Chrome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Examples using `ccache` are tested with Clang and GCC but not with MSVC. To
+    obtain `ccache`, use either the package manager of your operating system or obtain
+    it from [https://ccache.dev/](https://ccache.dev/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: All examples are available at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keeping a CMake project maintainable
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When maintaining a CMake project over a long time, there are often a few tasks
+    that regularly come up. There are the usual things, such as new files being added
+    to the project or versions of dependencies increasing, which are usually relatively
+    trivial to handle with CMake. Then, there are things such as adding new toolchains
+    or platforms for cross-compiling, and lastly, there are updates to CMake itself,
+    when new features such as presets are available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Regularly updating CMake and making use of new features can help keep projects
+    maintainable. While it is often not practical to update every single new version,
+    checking for new big features of CMake and using them when they are released may
+    make projects easier to maintain. For example, the introduction of CMake presets
+    in version 3.19 of CMake is such a feature that has the potential to make many
+    complicated `CMakeLists.txt` files much simpler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keeping dependencies up to date and under control is often a task that keeps
+    maintainers busy. Here, using a consistent concept for handling dependencies will
+    make maintaining a project easier. In that regard, we recommend using package
+    managers, as described in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating
+    Third-Party Libraries and Dependency Management*, for any but the smallest project.
+    As package managers are designed to shift the complexity of managing dependencies
+    to the package manager instead of exposing it to the maintainer, they often have
+    great potential to make maintainers’ lives much easier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the root of making a project maintainable is choosing an effective project
+    structure so that things are found easily and can be improved independently from
+    each other. The exact structure to choose depends heavily on the context and size
+    of the project, so what works for one project might not work for another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The biggest gain to keeping large projects maintainable is to use a project
+    structure that fits the need. While the details of project organization depend
+    on the actual situation a project is developed in, there are a few good practices
+    that will help keep an overview of the project. Keeping a project maintainable
+    starts with the `CMakeLists.txt` root of a project. For large projects, the `CMakeLists.txt`
+    root should handle the following things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basic setup of the whole project, such as handling the `project()` call,
+    fetching toolchains, supporting programs, and helper repositories. This also includes
+    setting language standards, search behavior, and project-wide setting of compiler
+    flags and search paths.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Handling cross-cutting dependencies, especially large frameworks such as Boost
+    and Qt, should be included at the top level. Depending on the complexity of the
+    dependencies, creating and including a subdirectory with its own `CMakeLists.txt`
+    file to handle acquiring the dependencies might help keep the project maintainable.
+    Using `add_subdirectory` is recommended over using `include` for including dependencies
+    because, this way, any temporary variables used for searching dependencies are
+    scoped to the subdirectory unless they are explicitly marked as cache variables.
+    If there are more than just a few build targets, moving them to their own subdirectories
+    and including them with `add_subdirectory()` will help to keep individual files
+    small and self-contained. Aiming for a design principle of loose coupling and
+    high internal cohesion will make libraries and executables easier to maintain
+    independently. The file and project structure should reflect that, which might
+    mean that each library and executable in a project gets its own `CMakeLists.txt`
+    file.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whether unit tests are kept close to the units that they test against or as
+    a subfolder of a `tests` folder on the root level is a matter of personal preference.
+    Keeping tests in their own subdirectory with their own `CMakeLists.txt` file makes
+    it easier to handle test-specific dependencies and compiler settings.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packaging and installation instructions for the project should be centralized
+    and included at the top level of the project. If the installation instructions
+    and packaging instructions are too large, they can be put in their own `CMakeLists.txt`
+    file and included from the `CMakeLists.txt` root.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Structuring a project in this way will simplify the navigation inside the project
+    and will help to avoid unnecessary code duplication in CMake files, especially
+    when projects get larger over time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A good project setup might make the difference between fighting daily with the
+    build system and running smoothly. Using the techniques and practices from this
+    book will help to make a CMake project maintainable. Having a clearly defined
+    build environment by using CMake presets and build containers or sysroots, as
+    described in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146), *Creating Reproducible
+    Build* *Environments*, and [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform
+    Compiling and Custom Toolchains*, will help to make the build more portable between
+    developers and the CI system. Last but not least, organizing your custom CMake
+    code into macros and functions, as described in [*Chapter 13*](B30947_13.xhtml#_idTextAnchor198),
+    *Reusing* *CMake Code*, will help to avoid redundancy and duplication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Apart from the complexity of CMake files, longer configuration and build times
+    are often another concern when projects grow bigger. To manage those growing build
+    and configuration times, CMake offers a few features to optimize them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Profiling a CMake build
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'When CMake projects get big, configuring them might take quite a long time,
+    especially if there is external content loaded or if there are lots of checks
+    done for toolchain features. A first step to optimize this is to check what part
+    of the configuration process takes up how much time. Since version 3.18, CMake
+    has included command-line options to produce nice profiling graphs to investigate
+    where time is spent during configuration. By adding the `--profiling-output` and
+    `--profiling-format` profiling flags, CMake will create profiling output. At the
+    time of writing this book, only the Google trace format for output format is supported.
+    Despite this, the format and the file need to be specified to create profiling
+    information. A call to CMake to create a profiling graph could look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will write the profiling output to the `profiling.json` file in the current
+    directory. The output file can be viewed with Google Chrome by typing `about://tracing`
+    into the address bar. A tracing output for a cached build of the GitHub project
+    to this book could look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 14.1 – An example profiling graph for a CMake project displayed in
+    Google Chrome](img/B30947_14_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 14.1 – An example profiling graph for a CMake project displayed in Google
+    Chrome
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the preceding figure, it is pretty obvious that there is one call to `add_subdirectory`
+    that takes up the majority of time when configuring the project. In this case,
+    this is the `chapter5` subdirectory, taking a bit more than 3 seconds to complete.
+    By drilling down a bit, it becomes apparent that these are examples that use the
+    Conan package manager, namely the two calls to `conan_cmake_install` that make
+    the configuration relatively expensive. In this case, centralizing the calls to
+    Conan in a directory further up would cut the time CMake would take for a configuration
+    run in half.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In order to correctly interpret the profiling output, it helps to compare different
+    runs of CMake with each other, especially comparing a CMake run on a clean cache
+    with one that makes use of cached information. If only the CMake runs on a clean
+    cache take their time, but the incremental runs are fast enough, this might still
+    be acceptable for the developers. However, if the incremental CMake runs take
+    their time as well, this might be more problematic. Profiling them may help find
+    out if there are unnecessary steps done for each configuration run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fixing slow build steps will depend on the concrete situation, but common culprits
+    for long configuration times are files that are downloaded each time because there
+    is no check whether the file exists in the first place. Analyzing profiling calls
+    might often show calls such as `execute_process` or `try_compile` consuming lots
+    of execution time. The most obvious *fix* would be to try to get rid of these
+    calls, but often these calls are there for a reason. More often, following up
+    the call stack leading to the commands might reveal opportunities to reduce how
+    often these functions will be called. Maybe the results can be cached, or maybe
+    files created with `execute_process` do not need to be generated each time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Especially when cross-compiling, `find_` commands might also take up a lot
+    of time. Changing the search order by changing the various `CMAKE_FIND_ROOT_PATH_MODE_`
+    variables, as described in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating
+    Third-Party Libraries and Dependency Management*, might help a bit here. For a
+    more thorough analysis of why `find_` calls take up too much time, CMake can be
+    told to enable debug output for them by setting the `CMAKE_FIND_DEBUG_MODE` variable
+    to `true`. As this will print out a lot of information, it is a good idea to enable
+    this only for certain calls, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The profiling options of CMake allow profiling the configuration stage of the
+    build process; profiling the actual compilation and time have to be done by using
+    the respective generator. Most generators either support some profiling option
+    or log the needed information. For Visual Studio generators, the `vcperf` tool
+    ([https://github.com/microsoft/vcperf](https://github.com/microsoft/vcperf)) will
+    give a lot of insights. When using Ninja, the `.ninja_log` file can be converted
+    to Google trace format using the `ninjatracing` tool ([https://github.com/nico/ninjatracing](https://github.com/nico/ninjatracing)).
+    While CMake does not offer support to profile the actual compiling and linking
+    of software, it does offer ways to improve build times, which we will see in the
+    next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizing build performance
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Apart from raw compilation time, the main driver for long build times in C++
+    projects is often unnecessary dependencies between targets or files. If targets
+    have unnecessary linking requirements between each other, the build system will
+    be limited in executing build tasks in parallel, and some of the targets will
+    be frequently relinked. Creating a dependency graph of the targets, as described
+    in [*Chapter 6*](B30947_06.xhtml#_idTextAnchor101), *Automatically Generating
+    Documentation*, will help identify dependencies. If the resulting graph looks
+    more like a snarl of rope than a tree, optimizing and refactoring the project
+    structure might bring a lot of performance gains. Tools such as *include what
+    you use* and *link what you use*, as described in [*Chapter 7*](B30947_07.xhtml#_idTextAnchor113),
+    *Seamlessly Integrating Code Quality Tools with CMake*, may further help identify
+    unnecessary dependencies. Another common theme is C or C++ projects that expose
+    too much private information in public headers, often causing frequent rebuilds
+    and reducing the effectiveness of incremental builds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A relatively safe option to bring performance improvements is to set the `CMAKE_OPTIMIZE_DEPENDENCIES`
+    cache variable to `true`. This will cause CMake to remove some dependencies for
+    static or object libraries at generation time if they are not needed. If you work
+    with a lot of static or object libraries and a deep dependency graph, this might
+    already produce some gains regarding compile time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generally speaking, optimizing the project structure and modularizing the code
+    will often have a greater effect on build performance than optimization of the
+    code. On average, compiling and linking a project that consists of many small
+    files takes longer than projects consisting of a few large files. CMake can help
+    improve build performance with so-called unity builds, which merge several files
+    into a larger file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using unity builds
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Unity builds that CMake can support may help with build performance by concatenating
+    multiple files into larger files, thus reducing the number of files to be compiled.
+    This might bring a decrease in build time because `include` files are processed
+    only once instead of for every smaller file. So, this will have the biggest effect
+    if many of the files include the same header files and if the header files are
+    heavy to digest by the compiler. Generally speaking, these are headers containing
+    lots of macros or template metaprogramming. Creating a unity build may improve
+    build time significantly, especially when using large header-only libraries, such
+    as the Eigen math library. On the other hand, unity builds have the downside that
+    incremental builds might take longer as, usually, larger chunks of the project
+    have to be recompiled and linked when only a single file changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By setting the `CMAKE_UNITY_BUILD` cache variable to `true`, CMake will concatenate
+    the sources into one or more unity sources and build them instead of the original
+    files. The generated files are along the `unity_<lang>_<Nr>.<lang>` pattern and
+    are located in a folder called `Unity` in the build directory for the project.
+    Unity files for C++ would be named `unity_0_cxx.cxx`, `unity_1_cxx.cxx`, and so
+    on, where C files are named `unity_0_c.c` and so on. This variable is not intended
+    to be set in the `CMakeLists.txt` file but rather to be passed over the command
+    line or a preset, as it might depend on the context of whether a unity build is
+    needed or not. CMake will decide on the language of the project if merging files
+    is needed and possible. For instance, as header files are not compiled, they will
+    not be added to unity sources. For C and C++, this works quite well; for other
+    languages, this might not work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unity builds work best for projects that consist of many small files. If the
+    source files are already large on their own, unity builds might run the risk of
+    running out of memory when compiling. If only a few files are problematic in this
+    regard, they can be excluded from the unity build by setting the `SKIP_UNITY_BUILD_INCLUSION`
+    property on the source files, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the example, the `eratosthenes.cpp` file would be excluded from the unity
+    build, while `main.cpp` and `fibonacci.cpp` would be included in a single compilation
+    unit. If the preceding project is configured, the `unit_0_cxx.cxx` file would
+    contain something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the original source files are only included in the unity file, not
+    copied into the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since CMake 3.18, unity builds support two modes that are controlled with the
+    `CMAKE_UNITY_BUILD_MODE` variable or the `UNITY_BUILD_MODE` target property. The
+    mode can either be `BATCH` or `GROUP`, with `BATCH` being the default if not specified.
+    In `BATCH` mode, CMake determines which files are grouped together by default,
+    in the order in which they were added to the target. All files of a target will
+    be assigned to batches unless they are explicitly excluded. In `GROUP` mode, each
+    target has to specify explicitly how the files are grouped together. Files not
+    assigned to a group will be compiled individually. While `GROUP` mode offers more
+    precise control, using `BATCH` mode is often the preferred one, as it has significantly
+    lower maintenance overhead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, CMake will collect the files in batches of eight files when the
+    `UNITY_BUILD_MODE` property is set to `BATCH`. By setting the `UNITY_BUILD_BATCH_SIZE`
+    property of a target, this can be changed. To set the batch size globally, the
+    `CMAKE_UNITY_BUILD_BATCH_SIZE` cache variable is used. The batch size should be
+    selected carefully as setting it too low will bring little gain in performance,
+    while setting it too high might cause the compiler to use too much memory or the
+    compilation unit to hit other size constraints. If the batch size is set to `0`,
+    then all files of a target will be combined in a single batch, but this is discouraged
+    because of the reasons mentioned earlier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In `GROUP` mode, no batch size is applied, but the files have to be assigned
+    to groups by setting the `UNITY_GROUP` property of the source file, as illustrated
+    in the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the example, the `main.cpp` and `fibonacci.cpp` files would be grouped together,
+    and `erathostenes.cpp` and `pythagoras.cpp` would be compiled in a different group.
+    In `GROUP` mode, the generated files are named `unity_<groupName>_<lang>.<lang>`.
+    So, in this example, the files would be named `unity_group1_cxx.cxx` and `unity_group2_cxx.cxx`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Depending on the anatomy of a project, using unity builds can have a significant
+    effect on build performance. Another technique often used to improve build times
+    is using precompiled headers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Precompiled headers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Precompiled headers are often a significant boost for the compile time, especially
+    in cases where processing the headers is a significant part of the compile time
+    or when header files are included in many different compilation units. In a nutshell,
+    precompiled headers work by compiling some headers into a binary format that is
+    easier to process for the compilers. Since CMake 3.16, there is direct support
+    for precompiled headers, and most of the major compilers support some form of
+    precompiled headers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Precompiled headers are added to a target with the `target_precompile_headers`
+    command, which has the following signature:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `PRIVATE`, `PUBLIC`, and `INTERFACE` keywords have the usual meaning. In
+    the majority of cases, `PRIVATE` should be used. The headers specified in the
+    command will be collected in a `cmake_pch.h` or `cmake_pch.hxx` file in the build
+    folder, which will be force-included in all source files by the respective compiler
+    flag, so there is no need for the source files to have a `#include "``cmake_pch.h"`
+    directive.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The headers may be specified either as plain filenames, with angle brackets,
+    or with double quotes, in which case they have to be escaped with double square
+    brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, `myHeader.h` would be searched from the current source directory,
+    while `external_header.h` and `unordered_map` are searched for in the `include`
+    directories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In large projects, precompiled headers that are used in multiple targets are
+    relatively common. Instead of redefining them every time, the `REUSE_FROM` option
+    of `target_precompile_headers` can be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Reusing precompiled headers will introduce an automatic dependency from target
+    to `other_target`. Both targets will have the same compiler options, flags, and
+    definitions enabled. Some compilers will warn if this is not the case, but some
+    might not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Precompiled headers from another target may only be used if the current target
+    does not define its own set of precompiled headers. If the target already has
+    precompiled headers defined, CMake will halt with an error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Precompiled headers are most effective in improving build times when the headers
+    included rarely change. Any headers provided by the compiler, system, or external
+    dependencies are generally good candidates to include in precompiled headers.
+    Which headers exactly bring the most benefit is something that needs to be tried
+    out and measured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Together with unity builds, precompiled headers can improve compile time significantly,
+    especially for projects with frequent header reuse. A third way to optimize build
+    time for incremental builds is the use of compiler caches, namely `ccache`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a compiler cache (ccache) to speed up rebuilds
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Ccaches work by caching compilations and detecting when the same compilation
+    is done again. At the time of writing this book, the most popular program for
+    caching compile results is `ccache`, which is open source and distributed under
+    the `ccache` program not only affects incremental builds but also fresh builds,
+    as long as the cache is not deleted between the two runs. The cache created is
+    portable between systems running the same compilers and can be stored in remote
+    databases so that multiple developers may access the same cache. Officially, `ccache`
+    supports GCC, Clang, and `ccache` with CMake, it works best with Makefile and
+    Ninja generators. At the time of writing this book, Visual Studio was not supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use `ccache` with CMake, the `CMAKE_<LANG>_COMPILER_LAUNCHER` cache variable
+    is used, where `<LANG>` is replaced with the respective programming language.
+    The recommended way is to pass this in using a preset, but to enable `ccache`
+    for C and C++ inside a `CMakeLists.txt` file, the following code can be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Passing the variable from a preset or from the command line or a preset is also
+    a good alternative, especially because the configuration of `ccache` is done easiest
+    by using environment variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Using `ccache` with the default configuration might already bring a considerable
+    improvement regarding build times, but if the build is a bit more complex, further
+    configuration might be necessary. To configure `ccache`, certain environment variables
+    starting with `CCACHE_` can be used; for full documentation of all configuration
+    options, refer to the `ccache` documentation. Common scenarios that need special
+    attention are combining `ccache` with precompiled headers, managing dependencies
+    that are included using `FetchContent`, and combining `ccache` with other compiler
+    wrappers, such as `distcc` or `icecc` for distributed builds. For these scenarios,
+    the following environment variables are used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To work efficiently with precompiled headers, set `CCACHE_SLOPPINESS` to `pch_defines,time_macros`.
+    The reason for this is that `ccache` cannot detect changes in `#defines` in the
+    precompiled header, and it cannot tell if `__TIME__`, `__DATE__`, or `__TIMESTAMP__`
+    are used when creating precompiled headers. Optionally, setting `include_file_mtime`
+    to `CCACHE_SLOPPINESS` might further increase the cache hit performance, but it
+    carries a very small risk of a race condition.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When including big dependencies that are built from source (for instance, by
+    using `FetchContent`), setting `CCACHE_BASEDIR` to `CMAKE_BINARY_DIR` might increase
+    the cache hit rate; this might bring a performance boost especially if there are
+    many (sub)projects fetching the same dependency. On the other hand, if the sources
+    in the project itself are the ones that take more time to compile, setting this
+    to `CMAKE_SOURCE_DIR` might bring better results. It needs to be tried out to
+    learn which one brings the better result.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To work with other compiler wrappers, the `CCACHE_PREFIX` environment variable
+    is used to add commands for these wrappers. It is recommended to use `ccache`
+    first when chaining multiple wrappers so that the results of other wrappers may
+    also be cached.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Passing environment variables to CMake using a configure preset, as described
+    in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146), *Creating Reproducible Build*
+    *Environments*, is the recommended way; this can either be combined with detecting
+    `ccache` inside the `CMakeLists.txt` file or the `ccache` command may also be
+    passed using the following preset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: With these configurations, using `ccache` can yield very large benefits to the
+    compile time, but caching compiler results is a complicated matter, so to get
+    the full benefit, the `ccache` documentation should be consulted. In most cases,
+    using `ccache` will probably bring the most performance benefit with a relatively
+    trivial setup. Other tools, such as `distcc` for distributed builds, work very
+    similarly from the CMake perspective, but require a bit more setup work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distributed builds
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Distributed builds work by shoveling off some part of the compilation to different
+    machines on a network. This requires setting up the servers that can accept connections
+    and then configuring the clients to be able to connect to these servers. Setting
+    up a server for `distcc` happens with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here, `client1` and `client2` are the hostnames or IP addresses of the respective
+    build servers. On the client side, configuring CMake to use `distcc` will work
+    similarly to using `ccache` by setting `CMAKE_<LANG>_COMPILER_LAUNCHER` to the
+    `distcc` command. The list of potential servers is either configured over a configuration
+    file or by the `DISTCC_HOSTS` environment variable. Unlike the `ccache` configuration,
+    this is very host-specific, so the configuration should be put into a user preset,
+    not the project-specific preset. The respective preset might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note the `cpp` postfix after the `buildsrvr1` host. This puts `distcc` into
+    so-called *pump mode*, which further increases compilation speed by also distributing
+    the preprocessing to the servers. The `lzo` postfix tells `distcc` to compress
+    the communication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The downside to distributed builds is that in order to gain a speed benefit,
+    the network has to be fast enough or else the cost of transferring the information
+    for compiling might be higher than the reduced build time. However, in most local
+    networks, this is easily the case. Distributed builds work well if the machines
+    are similar regarding processor architecture, compilers, and operating systems.
+    While cross-compiling using `distcc` is possible, it can be quite a bit of work
+    to set up. By combining good coding practices, precompiled headers and compiler
+    caches working on large projects still work without waiting minutes for every
+    single build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we discussed some general tips on structuring and maintaining
+    CMake projects, especially larger projects. With increased project size, configuring
+    and building times usually increase, which could be a hindrance in the developer
+    workflow. We looked at how the CMake profiling feature may be a useful tool to
+    find performance hogs in the configuration process, even though it cannot be used
+    to profile the compilation itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To help with long compilation times, we showed how to use unity build and precompiled
+    headers from CMake to improve compile times themselves. And if all this does not
+    yet bring the desired effect, using a compiler cache such as `ccache`, or a distributed
+    compiler such as `distcc`, may be used by prefixing the compiler command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Optimizing build performance is a very satisfying affair, even if finding the
+    right combination of tools and methods to get the most out of CMake might be a
+    bit tedious. The downside of heavily optimized builds is, however, that the builds
+    might be more prone to failure, and the added complexity in the build process
+    might need a deeper understanding and more expert knowledge to maintain in the
+    long run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will outline some high-level strategies for migrating
+    from any build system to a CMake project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Which command-line flags are used to generate profiling information from CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: On a very high level, how do unity builds optimize compile time?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between `BATCH` and `GROUP` modes for unity builds?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How are precompiled headers added to a target?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How does CMake handle compiler caches?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The `--profiling-output <filename>` and `--profiling-format=google-trace` flags
+    are used.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: By grouping together various compilation units into a single one, the need for
+    relinking happens less often.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In `BATCH` mode, CMake automatically groups sources together, but in `GROUP`
+    mode, the grouping has to be specified by the user. By default, `BATCH` mode groups
+    all sources for a unity build, while `GROUP` mode only adds explicitly marked
+    files to the unity build.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: By using the `target_precompile_headers` function. Precompiled headers are automatically
+    included, without the need for a `#include` directive in files.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: By prefixing the compiler command with the command specified in `CMAKE_<LANG>_COMPILER_LAUNCHER`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

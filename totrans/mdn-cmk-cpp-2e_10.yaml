@@ -1,0 +1,608 @@
+- en: '10'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Using the C++20 Modules
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'C++20 introduces a new feature to the language: modules. They replace the plain-text
+    symbol declarations in header files with a module file that will be precompiled
+    to an intermediary binary format, greatly reducing the build time.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will discuss the most essential topics for C++20 modules in CMake, starting
+    with a general introduction to C++20 modules as a concept: their advantages over
+    standard header files and how they simplify the management of units in source
+    code. Although the promise of streamlining the build process is exciting, this
+    chapter highlights how difficult and long the road to their adoption is.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With the theory out of the way, we’ll move on to the practical aspects of implementing
+    the modules in our projects: we’ll discuss enabling their experimental support
+    in earlier versions of CMake, and the full release in CMake 3.28.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Our journey through C++20 modules is not just about understanding a new feature—it’s
+    about rethinking how components interact in large C++ projects. By the end of
+    this chapter, you’ll not only grasp the theoretical aspects of modules but also
+    gain practical insights through examples, enhancing your ability to leverage this
+    feature for better project outcomes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are the C++20 modules?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing projects with C++20 module support
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring the toolchain
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This chapter has different technical requirements than others. Make sure you
+    read the next section thoroughly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch10](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch10).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following toolchain utilities are required to try out the examples in this
+    chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake 3.26 or newer (3.28 recommended)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Any of the supported generators:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ninja 1.11 and newer (Ninja and Ninja Multi-Config)
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Visual Studio 17 2022 and newer
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Any of the supported compilers:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MSVC toolset 14.34 and newer
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Clang 16 and newer
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: GCC 14 (for the in-development branch, after 2023-09-20) and newer
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you’re familiar with Docker, you can use a fully tooled image introduced
+    in the *Installing CMake on different platforms* section from *Chapter 1*, *First
+    Steps with CMake*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this chapter, use the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Be sure to replace the placeholders `<build tree>` and `<source tree>` with
+    appropriate paths.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are the C++20 modules?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: I wanted to write about how to use C++ modules over three years ago. Despite
+    the fact that modules were already accepted as part of the C++20 specification,
+    the support of the C++ ecosystem was still nowhere near ready to use this feature.
+    Fortunately, a lot has changed since the first edition of this book, and with
+    the release of CMake 3.28, the C++20 modules are officially supported (although
+    experimental support has been available since 3.26).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Three years may seem like a long time to implement a single feature, but we
+    need to remember that it’s not only up to CMake. Many pieces of the puzzle have
+    to come together and work well. First, we need compilers to understand how to
+    deal with modules, then buildsystems like GNU Make or Ninja have to be able to
+    work with modules, and only then can CMake use these new mechanisms to provide
+    its support for modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This tells us one thing: not everyone will have the latest compatible tooling,
+    and even then, the current support is still in an early phase. These limitations
+    make modules unsuitable for a wide audience. So maybe don’t build production-grade
+    projects depending on them just yet.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nevertheless, if you are an enthusiast of cutting-edge solutions, you’re in
+    for a treat! If you can strictly control the build environment of your project,
+    for example, with dedicated machines or build containerization (Docker et al.),
+    you can effectively use modules internally. Just proceed with caution and understand
+    that your mileage may vary. There may be a point at which you’ll need to back
+    out of the modules altogether because of a missing or incorrectly implemented
+    feature in any of the utilities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '“Module” is quite an overloaded word in the context of C++ builds. We previously
+    discussed modules in this book in the context of CMake: find modules, utility
+    modules, and such. To clarify, C++ modules have nothing to do with CMake modules.
+    Instead, they are a native feature of the language added in the C++20 version.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At its core, a C++ module is a single source file that encapsulates the functionality
+    of headers and implementation files into one coherent unit of code. It comprises
+    two primary components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The **Binary Module Interface** (**BMI**) serves a similar purpose to a header
+    file but is in a binary format, significantly reducing the need for recompilation
+    when consumed by other translation units.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The **Module Implementation Unit** provides the implementation, definitions,
+    and internal details of the module. Its contents are not directly accessible from
+    outside the module, effectively encapsulating the implementation details.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Modules were introduced to reduce compilation time and address some problematic
+    aspects of the preprocessor and traditional header files. Let’s see how multiple
+    translation units are glued together in a typical, legacy project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_10_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 10.1: Project structure using traditional headers'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The preceding figure shows how the preprocessor would traverse the project tree
+    to build the program. As we learned in *Chapter 7*, *Compiling C++ Sources with
+    CMake*, to build each translation unit, the preprocessor mechanically stitches
+    files together. This means producing a long file containing all the headers included
+    by preprocessor directives. That way, `main.cpp` would first include its own source,
+    then the contents of `lib.h`, `a.h`, `1.h`, and `2.h`. Only then will the compiler
+    kick in and start parsing every single character to produce binary object files.
+    There’s nothing wrong with that until we realize that to compile `lib.cpp`, headers
+    included in `main.cpp` have to be compiled again. And this redundancy keeps growing
+    with every translation unit added.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are other complications with traditional headers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Include guards** are required, leading to problems when forgotten.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Symbols with circular references need **forward declarations.**
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Small changes to headers are required for the recompilation of all translation
+    units.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Preprocessor macros can be difficult to debug and maintain.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Modules solve many of these problems right off the bat, but some still remain
+    relevant: modules, like headers, can depend on each other. When one module imports
+    another, we still need to compile them in the right order, starting from the most
+    nested one first. This usually isn’t a significant issue, as modules tend to be
+    much larger in size. In many cases, an entire library can be stored in a single
+    module.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at how modules are written and used in practice. In this
+    simple example, we’ll just return the sum of two arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch10/01-cxx-modules/math.cppm**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Such a module is self-explanatory: we start with a statement that tells the
+    rest of the program that this is indeed a module called `math`. We then follow
+    with a regular function definition that has been designated with the `export`
+    keyword as available from outside the module.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You’ll notice the extension of module files is different than of regular C++
+    source code. This is a matter of convention and shouldn’t affect how this code
+    is treated. My advice is to pick based on the toolchain you’ll be using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`.ixx` is an MSVC extension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.cppm` is a Clang extension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`.cxx` is a GCC extension.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To use this module, we need to import it in our program:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch10/01-cxx-modules/main.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `import math` statement is enough to bring the symbols exported from the
+    module directly into the `main` program. We can now use the `add()` function in
+    the body of the `main()` function. On the surface, modules look very similar to
+    headers. But if we tried to write our CMake listfile as usual, we wouldn’t have
+    much success with building the project. Time to introduce the necessary steps
+    to use the C++ modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing projects with C++20 module support
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This book mainly discusses CMake 3.26, but it’s worth noting that CMake frequently
+    updates, and version 3.28 was released just before this chapter went to press.
+    If you’re using this version or newer, you can access the latest features by setting
+    the `cmake_minimum_required()` command to `VERSION 3.28.0`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, if you need to stick with an older version or want to cater
+    to a broader audience who might not have upgraded, you’ll need to enable experimental
+    support to use C++20 modules in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s explore how to do that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enabling the experimental support in CMake 3.26 and 3.27
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Experimental support represents a form of agreement: you, as the developer,
+    acknowledge that this feature is not yet production-ready and should be used solely
+    for testing purposes. To *sign* such an agreement, you’ll need to set the `CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API`
+    variable in the project’s listfile to a specific value for the CMake version you’re
+    using.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The official Kitware repository for CMake hosts an issue tracker, where you
+    can search for the label `area:cxxmodules`. Until 3.28 was released, only one
+    issue was reported (in 3.25.0), which is a good indicator of a potentially stable
+    feature. If you decide to enable the experiment, build your project to confirm
+    it will work for your users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are flags that can be found in the repository and documentation of CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`3c375311-a3c9-4396-a187-3227ef642046` for 3.25 (undocumented)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`2182bf5c-ef0d-489a-91da-49dbc3090d2a` for 3.26'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`aa1f7df0-828a-4fcd-9afc-2dc80491aca7` for 3.27'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Unfortunately, if you don’t have access to at least CMake 3.25, you’re out
+    of luck. Modules weren’t available before that version. Additionally, if CMake
+    is older than 3.27, you’ll need to set one more variable to enable dynamic dependencies
+    for modules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here’s how you might automatically pick the correct API key for the current
+    version, and explicitly disable builds for versions you don’t support (in this
+    example, we’ll only support CMake 3.26 and above).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch10/01-cxx-modules/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s break it down statement by statement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, we check if the version is 3.28 or newer. This allows us to enable the
+    `CMP0155` policy, with `cmake_policy()`. This is required if we want to support
+    versions older than 3.28.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If that’s not the case, we’ll check if the version is above 3.27\. If so, we’ll
+    set the appropriate API key.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If it’s not above 3.27, we’ll check if it’s above 3.26\. If that’s the case,
+    set the appropriate API key and enable the experimental C++20 module dynamic dependency
+    flag.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If the version is lower than 3.26, it’s not supported by our project, and a
+    fatal error message will be printed informing the user.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This allows us to support the range of CMake versions, starting from 3.26\.
+    If we have the benefit of running CMake 3.28 in every environment the project
+    is going to be built in, the above `if()` block is not necessary. So, what is?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enabling support for CMake 3.28 and up
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To use C++20 modules since 3.28, you explicitly have to declare this version
+    as minimal. Use a project header like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: It will enable the `CMP0155` policy by default if the minimum required version
+    is set to 3.28 or above. Read on to learn what other aspects we need to configure
+    before defining a module. If you require 3.27 or lower, your build will likely
+    fail, even if the project is being built with CMake 3.28 or newer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next thing to consider is the compiler requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting the compiler requirements
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Regardless of whether we’re building with CMake 3.26, 3.27, 3.28, or newer,
+    to create solutions using C++ modules, there are two global variables that we
+    need to set. The first disables unsupported C++ extensions, and the second ensures
+    that the compiler supports the required standard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch10/01-cxx-modules/CMakeLists.txt (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Setting the standard may seem redundant, given that there’s a very limited number
+    of compilers that support modules. Nonetheless, it’s good practice for future-proofing
+    projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The general configuration is quite straightforward and concludes here. We can
+    now proceed to define a module within CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Declaring a C++ module
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'CMake module definition leverages the `target_sources()` command and the `FILE_SET`
+    keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the highlighted line above, we introduce a new file set type: `CXX_MODULES`.
+    This type is supported by default only since CMake 3.28\. For 3.26, the experimental
+    API has to be enabled. Without proper support, an error message like the following
+    will occur:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you see this in the build output, check if your code is correct. This message
+    will also appear if the API key value is incorrect for the version used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining modules within the same binary where they are used offers benefits,
+    as discussed earlier. However, the advantages are more pronounced when creating
+    a library. Such libraries can be utilized in other projects or within the same
+    project by other libraries, further enhancing modularity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To declare the module and link it with the main program, the following CMake
+    configuration is used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch10/01-cxx-modules/CMakeLists.txt (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: To ensure that this library can be used in other projects, we must use the `target_compile_features()`
+    command and explicitly require `cxx_std_20`. Additionally, we have to repeat setting
+    the `CXX_EXTENSIONS OFF` on the target level. Without this, CMake will generate
+    an error and halt the build. This seems redundant and will likely be solved in
+    future versions of CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the project setup complete, it’s time to finally build it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the toolchain
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: According to a blog post on Kitware’s page (see the *Further reading* section),
+    CMake supports modules as early as version 3.25\. Despite the fact that 3.28 makes
+    the feature officially supported, this isn’t the only piece of the puzzle that
+    we have to get right to enjoy the convenience of modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The next requirement focuses on the buildsystem: it needs to support dynamic
+    dependencies. As of now, you have only two choices:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ninja 1.11 and newer (Ninja and Ninja Multi-Config)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Visual Studio 17 2022 and newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Similarly, your compiler needs to produce files that map source dependencies
+    for CMake in a specific format. This format is described in a paper written by
+    Kitware developers known as `p1589r5`. This paper has been submitted to all major
+    compilers for implementation. Currently, only three compilers have managed to
+    implement the required format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clang 16
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MSVC in Visual Studio 2022 17.4 (19.34)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: GCC 14 (for the in-development branch, after 2023-09-20) and newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Assuming you have all the necessary tools in your environment (you may use
+    the Docker image we’re providing for this book), and your CMake project is ready
+    for building, all that remains is to configure CMake to use the required toolchain.
+    As you may recall from the first chapter, you can select the buildsystem generator
+    using the `-G` command-line argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This command will configure the project to use the Ninja buildsystem. The next
+    step is to set the compiler. If your default compiler doesn’t support the modules
+    and you have another one installed to try things out, you can do this by defining
+    the global variable `CMAKE_CXX_COMPILER` like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We chose Clang 18 in our example because it’s the latest version available
+    at the time of writing (bundled in the Docker image). After successfully configuring
+    (you might see some warnings about experimental features), you need to build the
+    project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As always, be sure to replace the placeholders `<build tree>` and `<source
+    tree>` with appropriate paths. If everything goes smoothly, you can run your program
+    and observe the module function working as expected:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: There you have it, C++20 modules working in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Further reading section includes a blog post from Kitware and a proposal
+    on the source de­pendency format for C++ compilers, providing more insights into
+    the implementation and usage of C++20 modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we’ve delved into C++20 modules, clarifying that they are distinct
+    from CMake modules and represent a significant advancement in C++ to streamline
+    compilation and address challenges associated with redundant header compilation
+    and problematic preprocessor macros. We demonstrated how to write and import a
+    C++20 module using a simple example. We then explored setting up CMake for C++20
+    modules. Since this feature is experimental, specific variables need to be set,
+    and we provided a series of conditional statements to ensure your project is configured
+    correctly for the CMake version in use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Regarding the necessary tools, we emphasized that the buildsystem must support
+    dynamic dependencies, with Ninja 1.11 or newer being the current option. For compiler
+    support, Clang 16 and MSVC in Visual Studio 2022 17.4 (19.34) are suitable for
+    full C++20 module support, while GCC support is still pending. We additionally
+    guided you through configuring CMake to use the selected toolchain, involving
+    choosing a buildsystem generator and setting the compiler version. After configuring
+    and building the project, you can run your program to see the C++20 module in
+    action.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we’ll learn about importance and application of automated
+    testing, and the available CMake support for testing frameworks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information, you can refer to the following resources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Blog post describing the new feature: [https://www.kitware.com/import-cmake-c20-modules/](https://www.kitware.com/import-cmake-c20-modules/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Proposed source dependency format for C++ compilers: [https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Leave a review!
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Enjoying this book? Help readers like you by leaving an Amazon review. Scan
+    the QR code below to get a free eBook of your choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/Review_Copy.png)'
+  prefs: []
+  type: TYPE_IMG

@@ -1,0 +1,768 @@
+- en: '5'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Streamlining CMake Configuration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we’re going to take a step back from our project and address
+    some of the day-to-day pain points of working with CMake. We’ll focus on smoothing
+    off some of the rough edges of using CMake to make everyday development easier
+    and discuss some tools and techniques to reduce manual effort. These approaches
+    will also help users unaccustomed to your project get up to speed more quickly
+    without having to know all the right configuration options to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reviewing how we use CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using scripts to avoid repetitive commands
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Moving to CMake presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Going further with CMake presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A return to the CMake GUI
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reviewing how we use CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Throughout the first part of this book, we intentionally focused on running
+    all our CMake commands directly from the terminal. This is an excellent way to
+    get familiar with CMake and understand how it works, but as you get more comfortable
+    with CMake, having to repeatedly enter these commands over and over can become
+    tiresome. It’s also easy to forget all the options to use, especially if your
+    project starts adding several different configuration options, and if you have
+    a demo or project you’d like to share, expecting unfamiliar users to type in longwinded
+    commands that are easy to get wrong is a non-starter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first possibility that might seem like a promising idea to start with is
+    to set variables directly in your `CMakeLists.txt` file and prompt users to change
+    values there. The main issue with this is it becomes a maintenance nightmare and
+    makes it exceedingly difficult to support different build configurations at the
+    same time. The more settings you can lift out of your `CMakeLists.txt` file the
+    better, to allow more customization points for yourself and others to use in the
+    future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If we’re better off keeping settings outside of our `CMakeLists.txt` file, then
+    we need users to pass them at the command line by using the familiar `-D<variable>=<value>`
+    format. The flexibility this provides is great, but if users must provide multiple
+    variables every time they configure, it can get confusing and error-prone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, if we take our *Game of Life* project, we already have quite a
+    few options to pass at the command line, some of our own making and some provided
+    by CMake. A normal command might look like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If we’d decided to use the Ninja single-config generator and explicitly set
+    the build type, it would look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This already can start to look like a lot of typing, and it’s only going to
+    get worse from here. Yes, you only need to type this once to get up and running,
+    but it can be painful for people new to the team/project and tedious for even
+    experienced developers when checking out the code in a new workspace or platform.
+    So, what alternatives are there?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using scripts to avoid repetitive commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'A perfectly valid choice to start with is to introduce simple shell or batch
+    scripts on your platform of choice to encapsulate common CMake commands. For example,
+    on macOS, we could create a script called `configure-default.sh` that acts as
+    an opinionated default for users to use initially and that fits with our day-to-day
+    usage. On macOS/Linux, this might look like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create and make this file executable, we can run the following command from
+    the terminal:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On Windows, we can either rely on users using Git Bash (so that they can execute
+    the `.sh` script) or create a corresponding `.``bat` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: To provide more flexibility, it can also be helpful to provide several scripts
+    and name them according to their settings; for example, the type of generator
+    (for example, `configure-ninja.sh`, `configure-vs-2022.bat`, `configure-xcode.sh`,
+    and so on) or the type of library we’re building, be that static or shared (for
+    example, `configure-shared-ninja.sh`, `configure-static-vs-2022.bat`, and so on).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As well as speeding up daily development, the other advantage to creating these
+    scripts is to act as a form of documentation for users to see how to configure
+    and tweak your application or library without having to go hunting through the
+    `CMakeLists.txt` file at the outset. This again smooths the learning curve and
+    allows new developers to iterate on these commands themselves from the terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A useful feature within Git is the ability to create custom `.gitignore` rules
+    in your repo. These can be added to `.git/info/exclude`, so it may be worth recommending
+    users create a copy of one of the existing configure scripts, rename it to `configure-<username>.sh/bat`,
+    and then add it to their `.``git/info/exclude` file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Up until now, we’ve only focused on the configuring stage of CMake as the first
+    configure command tends to have the most options. Combining our configure scripts
+    with a build command can also be helpful to have a user be able to configure and
+    build the application all at once. A `configure-build.sh/bat` file could look
+    like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Even better would be to keep the configure logic separate and then call it
+    from the `configure-build` script. This can be achieved with the following on
+    macOS/Linux:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On Windows, this can be achieved with the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: To try out these scripts, see `ch5/part-1/app` from the book’s accompanying
+    repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re using a single-config generator, specifying your own subfolders for
+    each build type can be convenient (though in practice, the functionality provided
+    by multi-config generators is excellent and conveniently handles this complexity
+    for you).
+  prefs: []
+  type: TYPE_NORMAL
+- en: It would also be possible to include a call to run the application if you so
+    wished, though this will depend on the kind of application you’re building and
+    shouldn’t be necessary if clear instructions are provided in the `README` or `CMakeLists.txt`
+    file for where the output files are found. The working directory (where you run
+    the application from) can be important here, so keep this in mind if loading other
+    resources (we’ll cover how to handle this in [*Chapter 10*](B21152_10.xhtml#_idTextAnchor214)*,
+    Packaging the Project* *for Sharing*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having a few of these scripts can be helpful for you, and any users or maintainers
+    looking to check out or contribute to your project, but maintenance can become
+    a pain. Having to support separate `.bat` and `.sh` scripts if you’re building
+    a multiplatform project is also frustrating. The other downside is these scripts
+    need to be run from the terminal where they’re located. Attempting to run them
+    from the OS file explorer will most likely not work, as the working directory
+    is usually set to the user’s home directory `(~/` on macOS/Linux and `C:\Users\<username>`
+    on Windows).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Script GUI support
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re determined, it is possible to set the working directory to where the
+    file is found. On macOS and Linux, this can be achieved by adding `cd "$(dirname
+    "$0")"` to the start of the `.sh` file (`$0` expands to the name of the file,
+    and `dirname` gives the folder containing it), and on Windows you can add `cd
+    /d "%~dp0"` to the beginning of the `.bat` file (`%~dp0` is a batch variable that
+    expands to the drive and path of the file). You’ll have to remember to update
+    your path in certain cases depending on where CMake is installed (for example,
+    if CMake is not installed in a default system location on Linux), and you may
+    also want to consider renaming the `.sh` file to `.command` on macOS to make it
+    easily runnable from *Finder*. Due to the extra complexity, we’ll stick to just
+    running from the terminal for the remainder of the book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Luckily, there’s a relatively new CMake feature that mostly (though not entirely)
+    removes the need for `.bat` and `.sh` scripts called CMake presets (available
+    from CMake `3.19` onward), which we’ll cover in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Moving to CMake presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '`.sh` and `.bat` files but provide tighter integration with CMake, and can
+    be used with other tools such as Visual Studio Code, Visual Studio, and CLion
+    (a cross-platform C/C++ development environment).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get started with CMake presets, we need to create a file called `CMakePresets.json`
+    at the root of our project. CMake presets are simply a `{}`) as the root. A `CMakePresets.json`
+    file has multiple sections for each stage of a CMake build (configure, build,
+    test, package, and more). To begin with, we’ll focus on the configure and build
+    portions, but we will return to our `CMakePresets.json` file in later chapters
+    as the project continues to mature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authoring CMake preset files
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authoring CMake preset files can sometimes be a challenge due to their use of
+    JSON. To make life easier, it is highly recommended to use a text editor with
+    built-in syntax support for JSON (Visual Studio Code is a notable example). This
+    way, if you’re missing a quotation mark or closing brace, you’ll get immediate
+    feedback in the editor in the form of a red or yellow underline highlighting the
+    problem. Running `cmake --preset <preset>` with an invalid `CMakePreset.json`
+    file will output a `JSON Parse Error` error with a column and line number, but
+    the visual editor feedback will let you know there’s a problem as you’re typing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s review a minimal `CMakePresets.json` file for our project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: After the opening JSON object brace, we must first provide a number showing
+    the version of the schema (at the time of writing, `8` is the latest version and
+    is available from CMake `3.28` and above). If you consult the CMake documentation
+    about presets (see [https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)),
+    features are usually associated with a given schema version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next key is `configurePresets`, which maps to an array of values for different
+    configurations (this is like how we could have one or more `.bat` or `.sh` scripts
+    offering different configuration options). We have just one provided for now,
+    but it’s trivial to add more in the future. The first key for the object is the
+    `name` field; this is the only required field, and other keys are optional (there
+    are many more we’ve omitted for brevity).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Walking through the set of options, we can see how each corresponds to what
+    we would have originally used at the command line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With this preset added, we can run `cmake --list-presets` from our root directory
+    to see a list of available presets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If we want to be a bit friendlier to our users, we can provide a `displayName`
+    field like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Running `cmake --list-presets` will display the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It’s also possible to provide a description (with the `description` field);
+    however, this is not displayed from the command line or the CMake GUI. The description
+    may be displayed in other tools; for example, Visual Studio Code chooses to display
+    it when a CMake preset is present when selecting **CMake: Configure** from the
+    *Command Palette*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 5.1: Visual Studio Code CMake preset description](img/B21152_05_1.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.1: Visual Studio Code CMake preset description'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Its presence serves as documentation for those using the preset and so may
+    be worth including based on the context. With our configuration preset added,
+    simply run `cmake --preset default` from your root directory to have CMake configure
+    your project with the settings provided. The command will output the CMake variables
+    that have been provided, along with their corresponding values, and then the familiar
+    configuration output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: To see a working example of this, review `ch5/part-2/app/CMakePresets.json`
+    from the book’s accompanying repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ve covered adding a single CMake preset, which can be useful to add default
+    structured configuration options to our project, but there’s a lot more CMake
+    presets can do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Going further with CMake presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If we want to get a little more advanced and provide more flexibility for our
+    users, there are some other fields provided by `CMakePresets.json` that are good
+    to know about. The first is `inherits`, which allows one preset to inherit the
+    values of another. A small selection of keys/values are not inherited (including
+    `name`, `displayName`, `description`, and `inherits` itself), but nearly everything
+    else is. The next field is `hidden`; this allows a preset to be defined but stops
+    it from being displayed to an end user when running `cmake --list-presets`. This
+    is convenient for defining base or common types that can then be inherited by
+    more bespoke or concrete types that only then need to provide a small number of
+    custom fields.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As an example, taking our *Game of Life* project, we could define a CMake preset
+    file like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It starts with a configuration preset called `base`, which has the `hidden`
+    field set to `true`. There, we define a binary directory based on any later preset
+    name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `${sourceDir}` and `${presetName}` names are called *macros* and expand
+    to meaningful values based on the project context (`${sourceDir}` expands to the
+    project root directory, for example). In this case, we also provide our preferred
+    generator: `"generator": "``Ninja Multi-Config"`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Normally, providing a specific generator in the base preset is not advised (especially
+    as not all clients may have Ninja installed); it’s instead simpler to rely on
+    the default generator for the specific platform and provide specific generator
+    overrides as later options. In our case we've opted to stick with the Ninja multi-config
+    generator throughout to keep things consistent across macOS, Windows, and Linux
+    throughout the book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The two following configurations then use `inherits` to essentially copy the
+    value of `binaryDir` and `generator` into themselves, without having to duplicate
+    the lines of code. We give each a unique name (`shared` and `static`) and specify
+    the `MC_GOL_SHARED` CMake option to either `ON` or `OFF` respectively. Users can
+    then call `cmake --preset static` or `cmake --preset shared` to configure the
+    *Game of Life* console application to use either the static or shared version
+    of the library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Helpfully, macros are resolved in the context of the preset being used, which
+    means in the preceding example, when `base` is inherited in either `static` or
+    `shared`, the `${presetName}` variable will be substituted with `static` or `shared`
+    accordingly. This means we wind up with two build folders, `<project-root>/build/shared`
+    and `<project-root>/build/static`, that won’t overwrite each other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we run `cmake --list-presets`, we’ll see the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If we then run both `cmake --preset shared` and `cmake --preset static`, we’ll
+    see this folder structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: For a full example of the preceding code, see `ch5/part-3/app/CMakePresets.json`
+    from the book’s accompanying repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake preset overrides
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'One very handy property of CMake presets is they compose nicely with CMake
+    command-line arguments. Suppose in the preceding example, we’d like to use the
+    `shared` CMake preset, but would rather use a different generator from Ninja Multi-Config.
+    To do this, we simply pass a different generator at the command line, and CMake
+    will override the value in the CMake preset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding code will use all the values from the preset, except the generator,
+    instead preferring Xcode in this case. It’s possible to override more than one
+    value, so a potentially even better choice might be the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: The new `xcode-shared` build folder then won’t conflict with the already defined
+    `build/static` and `build/shared` folders if we decide to revert to the Ninja
+    Multi-Config generator in the future (we will have to remember to pass this folder
+    explicitly if using a build preset, introduced in the next section, so adding
+    Xcode as a configure preset longer-term likely isn’t a bad idea). It’s also worth
+    briefly mentioning Xcode is also a multi-config generator, so it’s not necessary
+    for us to provide a build type at configure time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having the flexibility to try out different options quickly is great, but we’re
+    back to the same problem again of typing long commands into the terminal. Fortunately,
+    there’s a particularly useful feature within CMake presets we can lean on called
+    CMake user presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMakeUserPresets.json` file (as opposed to the shared `CMakePresets.json`
+    file). `CMakePresets.json` is implicitly included in `CMakeUserPresets.json`,
+    so existing presets can be inherited from there, as we did earlier.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To add a custom preset that uses a generator of our choosing (in this case,
+    Xcode), we just add the following to `CMakeUserPresets.json`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can then run `cmake --preset xcode-static` to configure our project using
+    CMake, and because of the way we specified `binaryDir` in the `base` preset, our
+    build files will be created in `build/xcode-static` automatically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to note that while `CMakePresets.json` is intended to be shared
+    by multiple developers and checked into in source control, `CMakeUserPresets.json`
+    is not. It is intended purely for local development and should be added to your
+    `.gitignore` file or equivalent to avoid leaving your machine (in the *Minimal
+    CMake* repo, `CMakeUserPresets.json` is already added to the `.``gitignore` file).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another useful feature available to CMake presets is the `condition` field.
+    This is used to decide if a preset should be enabled or not. In the preceding
+    example where we specified Xcode, that generator is only useful on macOS, so we
+    could update our preset to include these lines:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: The name `Darwin` is how CMake identifies macOS. For more information about
+    how CMake determines the OS it is running on, see [https://cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html](https://cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The preceding code ensures when we run `cmake --list-presets`, we won’t see
+    `xcode-static` on any platform other than macOS. If we try to run `cmake --preset
+    xcode-static`, we’ll get this error message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The condition check is most useful in the regular `CMakePresets.json` file to
+    ensure developers aren’t presented with unnecessary options when running `cmake
+    --list-presets`, depending on the platform they’re using.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An example has been included in the book’s repository. It can be found by navigating
+    to `ch5/part3/app` and looking at `CMakeUserPresets.json.example`. To experiment
+    with the preset, simply rename the file by removing the `.``example` postfix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other kinds of CMake presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Everything we’ve covered so far about CMake presets has focused primarily on
+    CMake configuration (using `configurePresets`). Configuration presets tend to
+    be the most used, and we’ve only scratched the surface of what settings are available.
+    Before we move on, it’s useful to look at the other kinds of presets. These include
+    build, test, package, and workflow presets. For now, we’ll only cover build and
+    workflow presets, but we’ll continue to return to presets in the future as we
+    introduce tests and packaging to our application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`buildPresets` field. They can be displayed by calling `cmake --build --list-presets`
+    and are also visible in certain tools (for example, in the CMake Tools plugin
+    for Visual Studio Code, which we’ll cover in [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228),
+    *Supporting Tools and Next Steps*). Build presets aren’t quite as impactful to
+    everyday development as configure presets, but they have their uses. In our simplified
+    example, we show how `buildPresets` might be configured:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There tends to be less that can be easily shared across build presets, so we’ll
+    omit a hidden base build preset for now. Each build preset must map to exactly
+    one `configurePreset`; we’ve therefore mapped a configure preset to each build
+    preset that corresponds to the version of our application using either the static
+    or shared version of the *Game of Life* library. There is another field we can
+    add called `configuration`, which is equivalent to passing `--config` from the
+    command line when invoking CMake. This would look like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: One issue with this is we’d then need `shared-debug`, `shared-release`, `static-debug`,
+    `static-release`, and so on. This might be necessary and can come in handy when
+    we begin implementing things such as **continuous integration**(**CI**) build
+    scripts in the future, but for now, it’s probably overkill (it’s worth mentioning
+    discussions around how to avoid the combinatorial explosion of build presets is
+    an open area of investigation for Kitware, the maintainers of CMake).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To invoke a build preset, we run `cmake --build --preset <build-preset-name>`
+    (after first running `cmake --preset <configure-preset-name>`), as in the following
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A quick reminder that in this context, it’s possible to also specify the configuration
+    with `--config` without needing all config variations in the `CMakePresets.json`
+    file, which can be useful for local development. Here’s an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: The last handy preset we’ll mention for now is the workflow preset. **Workflow
+    presets** allow you to chain together presets to run one after another, allowing
+    you to potentially configure, build, test, and package all with one command. The
+    configure preset must come first, and then any later presets can run (right now,
+    we just have a build preset, but we might want to expand this in the future).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Workflow presets take the following form:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'They can be invoked with `cmake --workflow --preset <workflow-preset-name>`.
+    In our case, we run the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ll then see the following output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unfortunately, we can’t provide the `--config` override with the `--workflow`
+    command. This means build preset variants specifying the configuration (in the
+    case of multi-config generators) would be necessary to have workflows build all
+    different configurations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, to show all presets, we can run `cmake --list-presets all` from the
+    command line to display every kind of preset at once. Preset names only need to
+    be unique within a preset type, so we can use the same name for configure, build
+    and workflow presets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: To see an example of both build and workflow presets, take a moment to visit
+    `ch5/part-4/app/CMakePresets.json` on the accompanying *Minimal* *CMake* repo.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake presets are an excellent mechanism for keeping your `CMakeLists.txt` files
+    clean and uncluttered with configuration details. They must be treated with care
+    as the number of presets can grow exponentially with the combinatorial explosion
+    of settings. Sticking to the most common presets is a good place to start; they
+    can then be expanded to handle more complex configurations in the future to ease
+    cross-team collaboration and project maintenance. They also integrate nicely with
+    CMake tooling. In [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228), *Supporting
+    Tools and Next Steps*, we’ll look at how CMake presets make building and debugging
+    in Visual Studio Code a breeze.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this section, we saw how to create configure CMake presets to avoid duplication,
+    how CMake presets can be used in combination with command-line overrides, and
+    understood where build and workflow presets fit in. There’s even more CMake presets
+    can do, which we’ll return to when we look at testing and, later, packaging. Next,
+    we’ll get reacquainted with the CMake GUI.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A return to the CMake GUI
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Throughout this book, we’ve focused almost exclusively on using CMake from the
+    command line/terminal. This is the best way to get familiar with how CMake works
+    and understand the most common commands. It’s often the fastest way to get things
+    done and we’ll continue to use it, but sometimes getting a fresh perspective on
+    a project can be worthwhile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is where the CMake GUI comes in. The CMake GUI is somewhat limited in what
+    it provides (you’re not able to build a project directly from the GUI) but getting
+    a graphical view of all relevant CMake variables is often immensely helpful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most reliable way to open the CMake GUI is by running `cmake-gui .` from
+    the root of your project. This ensures the tool inherits the same environment
+    variables you have configured from the terminal. This is important on Windows
+    as we’re using the *Visual Studio Command Prompt*, and on macOS, opening from
+    *Finder* won’t have the same environment variables as from the terminal. If we
+    don’t do this, it’s possible the CMake GUI won’t find CMake, a C/C++ compiler,
+    or the generator we want to use (for example, Ninja on Windows).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The installers for CMake on Windows and macOS will add a shortcut/icon for opening
+    the CMake GUI, but unfortunately, opening it this way is not always guaranteed
+    to work. If you would like to open the CMake GUI from the desktop on Linux, you
+    can either navigate to `/opt/cmake-3.28.1-linux-<arch>/bin/` and double-click
+    `cmake-gui` or to add a desktop icon for the CMake GUI, (this is specifically
+    if you’ve installed CMake using the approach outlined in [*Chapter 1*](B21152_01.xhtml#_idTextAnchor019),
+    *Getting Started*). Launching the CMake GUI with the `cmake-gui .` command is
+    the most reliable cross-platform way to have the CMake GUI open at the right place.
+    The documentation states passing `-S` and `-B` for the source and build directory
+    is supported; however, from personal experience, this seems to not work consistently
+    across all platforms. Once a project is configured, running just `cmake-gui` (without
+    `.`) will open things where you left off. If you don’t provide a starting directory,
+    you can select the source and build directory from within the tool, though this
+    can be a fiddly process. It’s also possible to use CMake presets in combination
+    with the CMake GUI, either providing one directly at the command line or selecting
+    one inside the tool.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When first opening the CMake GUI, you’ll be presented with a view resembling
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 5.2: CMake GUI](img/B21152_05_2.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.2: CMake GUI'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The top section shows the source directory, preset (if selected), and build
+    directory. The center section displays all CMake variables after configuration,
+    and the bottom section shows the output you’d normally see when running CMake
+    from the terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMake GUI is set up to work better with project files that can be opened
+    in some kind of `CMakeLists.txt` file, and the tools handle configuration (such
+    as Visual Studio Code from Microsoft or CLion from JetBrains). There is an updated
+    `CMakePreset.json` file in `ch5/part-5/app` that shows configurations for Xcode,
+    Visual Studio, and Ninja Multi-Config.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once the source directory and build folder are set, clicking **Configure**
+    will display all new (or changed) CMake variables. These display in red, which
+    can initially be a little disconcerting, but isn’t an error. Press the **Configure**
+    button again to check if any CMake variables have changed; all the red highlights
+    should then disappear:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 5.3: CMake GUI after initial configuration](img/B21152_05_3.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.3: CMake GUI after initial configuration'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMake GUI explicitly separates the **Configure** and **Generate** steps,
+    which normally happen together when running from the command line. Once the configuration
+    is complete, press the **Generate** button to create the project files. In the
+    preceding example, we’ve used the Visual Studio generator, so clicking **Open
+    Project** will open the Visual Studio solution. Visual Studio can then be used
+    to build the project directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Toggling the `MC_GOL_SHARED` in an ungrouped section, but in the future, entries
+    beginning with `MC_` will be grouped together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checking `list_cmake_variables` function we saw in [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065),
+    *Using FetchContent with External Dependencies*, but it’s a good place to start
+    and is often sufficient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last useful feature is the **Add Entry** button. Clicking it provides a
+    form to add new CMake variables to the CMake cache. This interface can be a little
+    friendlier than adding variables from the command line. Remember to run **Configure**
+    again after adding a new variable (it will appear in red in the central section
+    of the tool as a reminder). There is also a corresponding **Remove Entry** button,
+    which will remove CMake variables from the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s good to know about the CMake GUI, but for the rest of this book, we’ll
+    stick predominantly to the command line to get things done. Please use it if you
+    prefer, and most of what’s covered will be transferable between the CMake GUI
+    and the command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Excellent work getting to this point. In this chapter, we learned how using
+    simple scripts can take some of the monotony out of typing the same CMake commands
+    over and over again, as well as how this can make life easier for new users checking
+    out your project. We then looked at how to use CMake presets to further improve
+    how we configure projects and ensure we keep our `CMakeLists.txt` files clean.
+    We saw how to use CMake presets to create configure, build, and workflow commands.
+    Lastly, we took a closer look at the CMake GUI to gain a deeper understanding
+    of how it works and what we can use it for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we’re going to change gears and return to our *Game of
+    Life* project. We are going to leave our console application behind and move to
+    a proper cross-platform windowed experience. To achieve this, we’ll learn how
+    to add larger dependencies to our project and understand exactly what it means
+    to *install* a library.
+  prefs: []
+  type: TYPE_NORMAL

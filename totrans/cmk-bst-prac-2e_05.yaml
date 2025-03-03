@@ -1,0 +1,65 @@
+- en: Part 2 – Practical CMake – Getting Your Hands Dirty with CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this part, you will be able to set up a software project using CMake in a
+    way that suits the vast majority of use cases. *Chapters 4* and *5* will cover
+    aspects of installing and packaging your project, dependency management, and the
+    use of package managers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Chapters 6, 7,* and *8* will be about integrating external tools into your
+    CMake project to create documentation, ensure code quality, or do almost any arbitrary
+    task required for building software. *Chapters 9* and *10* will be about creating
+    reusable environments for building projects and handling big projects from distributed
+    repositories.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, [*Chapter 11*](B30947_11.xhtml#_idTextAnchor170) will dive a bit into
+    the macOS ecosystem and cover some specific requirements for building and deploying
+    software for Apple systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This part has the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B30947_04.xhtml#_idTextAnchor071)*, Packaging, Deploying, and*
+    *I**nstalling a CMake* *P**roject*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B30947_05.xhtml#_idTextAnchor084)*,* *Integrating Third-Party
+    Libraries and Dependency Management*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B30947_06.xhtml#_idTextAnchor101)*, Automatically Generating
+    Documentation*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B30947_07.xhtml#_idTextAnchor113)*, Seamlessly Integrating Code
+    Quality Tools With CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B30947_08.xhtml#_idTextAnchor132)*, Executing Custom Tasks With
+    CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B30947_09.xhtml#_idTextAnchor146)*, Creating Reproducible Build
+    Environments*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B30947_10.xhtml#_idTextAnchor158)*,* *Handling Distributed Repositories
+    and Dependencies in a Super-Build*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B30947_11.xhtml#_idTextAnchor170)*, Creating Software for Apple
+    Systems*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

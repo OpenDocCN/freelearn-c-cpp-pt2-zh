@@ -1,0 +1,619 @@
+- en: '15'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Migrating to CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: While CMake is evolving into a de facto industry standard for C++ and C projects,
+    there are still projects—sometimes large ones—that use different build systems.
+    Of course, there is nothing wrong with that as long as it fits your needs. However,
+    at some point, and for whatever reason, you might wish to switch to CMake. For
+    instance, maybe the software should be buildable by different IDEs or on different
+    platforms, or the dependency management has become cumbersome. Another common
+    situation is when the repository structure changes from a big mono-repo, where
+    all libraries are checked in, to distributed repositories for each library project.
+    Whatever the reason, migrating to CMake can be a challenge, especially for large
+    projects, but the results could be worth it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While converting a project in one go would be the preferred way, often, there
+    are non-technical requirements that might not make this possible. For instance,
+    development might still need to go on in some parts during the migration, or some
+    parts of the project cannot be migrated right from the start because of various
+    requirements that are outside a team’s control.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, a step-by-step approach is often needed. Changing the build system will
+    most likely influence any CI/CD process, so this should also be considered. In
+    this chapter, we will look at a few high-level strategies regarding how projects
+    could be migrated, step by step, to CMake. However, note that the concrete migration
+    paths are very dependent on the individual situation. For example, migrating from
+    a project based on Makefiles in a single repository will work differently from
+    moving from a Gradle-based build that spans multiple repositories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changing the build system and, possibly, the project structure too can be very
+    disruptive for all those involved, as they will have become accustomed to working
+    with the existing structure and build system. Therefore, the decision to switch
+    to a build system should not be taken lightly and should only be done if the benefits
+    are significant.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While this chapter focuses on the CMake aspect of migrating projects, often,
+    migrations are not done with the goal of switching the build system but have other
+    primary goals instead, such as simplifying the project structure or reducing coupling
+    between parts of the project to make them easier to maintain independently. When
+    talking about the benefits, remember that they do not necessarily have to be purely
+    technical benefits, such as having faster build speeds because of being able to
+    better parallelize the build. The benefits could also be more from a “social”
+    side—for instance, having a standardized, well-known way to build software will
+    reduce the ramp-up time for new developers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we will cover the following topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: High-level migration strategies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Migrating small projects
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Migrating large projects to CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In this chapter, we will introduce some higher-level concepts for migrating
+    from any build system to CMake. As you will see, migrating small projects might
+    be quite straightforward, whereas large, complex projects require more planning
+    upfront. By the end of the chapter, you will have a good idea of the different
+    strategies for migrating projects of various sizes to CMake. Additionally, we
+    will provide a few hints regarding what to check for when migrating, along with
+    a rough step-by-step guide for migrations and how to interact with legacy build
+    systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This chapter does not have specific technical requirements, as it shows concepts
+    rather than concrete examples. However, it is recommended that when migrating
+    to CMake, the newest version of CMake is used. The examples in this chapter assume
+    that CMake 3.21, or newer, is being used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: High-level migration strategies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before migrating a software project to CMake, first, it pays to answer a few
+    questions about the existing project and define what the endpoint should look
+    like. At a very high level of abstraction, usually, software projects define how
+    the following things are handled:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How the individual parts of the software—that is, the libraries and executables—are
+    compiled and how they are linked together
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Which external dependencies are used, how they are found, and how they are used
+    in the project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Which tests to build and how to run them
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: How the software is to be installed or packaged
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Providing additional information such as license information, documentation,
+    changelogs, and more
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some projects might only define a subset of the preceding points. But typically,
+    these are the tasks that we, as developers, want to be handled in a project setup.
+    Often, these tasks are defined in a structured way such as with Makefiles or IDE-specific
+    project definitions. There are countless ways regarding how projects are organized
+    and structured, and what works for one setting might not work for another. So,
+    in any case, an individual assessment of the situation is necessary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A few tools exist that can automatically convert some build systems, such as
+    `qmake`, Autotools, or Visual Studio, into CMake, but the quality of the resulting
+    CMake files is doubtful at best, and they tend to assume certain conventions.
+    Because of this, using them is not recommended.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, a project might define how it is built, tested, and deployed in
+    a CI/CD pipeline, and while this is closely related, the definition of the CI/CD
+    pipeline is not often seen as *part of* the project description but rather as
+    something that *uses* the project definition. Changing from one build system to
+    another will invariably affect the CI/CD pipeline, and often, the desire to modernize
+    or change the CI/CD infrastructure might be the trigger to change the build system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is important to realize that migrating is only complete when the old way
+    of building is no longer used. So, we recommend removing any old build instructions
+    once projects are migrated to CMake to eliminate the need to maintain backward
+    compatibility with the old way of building.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In an ideal world, all parts of the project will be migrated to CMake. However,
+    there are situations where this is not possible, or it is economically questionable
+    if a part of a project actually should be migrated. For instance, a project could
+    rely on a library that is no longer actively maintained and is destined to be
+    phased out soon. The best case is that the migration effort can be used as a trigger
+    to actually remove the dependency; however, more often than not, this is not feasible.
+    In cases where the legacy dependency cannot be completely removed, it might be
+    a good idea to remove it from the project. This is so that it is no longer considered
+    an internal dependency but an external dependency with its own release cycle.
+    Also, if this is not possible or the effort is too big, making an exception for
+    this particular library and using the legacy build system with `ExternalProject`
+    might be the solution for a limited time. For the migration strategies discussed
+    in this chapter, we differentiate between internal and external dependencies.
+    Internal dependencies are those that are actively developed by the same organization
+    or person of the project that is to be migrated so that the developers can potentially
+    change the build process. External dependencies are those where developers have
+    limited or no control over the build process or the code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One thing to consider when migrating projects is how many people will be blocked
+    from working on the project during its migration and how long the old way of building
+    software and CMake have to be maintained side by side. Changing the build system
+    is very intrusive to the developer’s workflow. There will likely be times when
+    some part of a project cannot be worked on until it has been fully migrated. The
+    easiest way to work around this is to stop feature development for the moment
+    and get everybody to help with the migration. However, if this is not possible,
+    good communication and good partitioning of the work are often what is needed.
+    Having said that, avoid the trap of stopping the migration halfway through: having
+    some parts of a large project migrated while some are still using the old way
+    to build is very likely to bring in the disadvantages of both ways to build the
+    software while bringing the benefit of neither.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, how do you go forward when migrating a project from one build system to
+    another? For small projects that mainly have external dependencies, this might
+    be quite straightforward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Migrating small projects
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We define *small projects* as any projects that contain only a few targets that
+    are usually all deployed together. Small projects are self-contained inside a
+    single repository, and usually, you can get a relatively quick overview of them.
+    These might be projects that build a single library or an executable with a few
+    external dependencies. In these cases, migrating to CMake is often relatively
+    trivial. For small projects, in the first iteration, putting everything inside
+    a single file will probably be the easiest way to go for a relatively quick and
+    early result. Rearranging files and splitting up the `CMakeLists.txt` file into
+    multiple parts to be used with `add_subdirectory()` is much easier if the project
+    has already been built correctly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A general approach for migrating to CMake could be the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create an empty `CMakeLists.txt` file inside the root of the project.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Identify the targets and associated files in the project and create the appropriate
+    targets inside the `CMakeLists.txt` file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Find all external dependencies and `include` paths and add them to the CMake
+    targets where necessary.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Identify the necessary compiler features, flags, and compiler definitions, if
+    any, and make them available to CMake.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Migrate any tests to CTest by creating the necessary targets and calling `add_test()`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Identify any installation or packaging instructions to CMake, including the
+    need to install any resource files and more.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Clean up and make the project nice. Create presets, rearrange files and folders
+    if necessary, and split up the `CMakeLists.txt` file if needed.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Naturally, what exactly has to be done for each step depends very much on how
+    the original project is organized and which technology is being used. Often, a
+    migration will require several iterations of the `CMakeLists.txt` file until everything
+    works, and if the first implementation of a CMake project does not yet look particularly
+    nice, that is often quite normal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For small projects, handling dependencies is one of the more difficult tasks
+    to do, as there are some implicit assumptions about where to find dependencies
+    and how they are internally structured or hidden inside the project. Using a package
+    manager, as described in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating
+    Third-Party Libraries and Dependency Management*, might reduce the complexity
+    of handling dependencies significantly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Usually, the process of migrating small, mostly self-contained projects is relatively
+    straightforward, although depending on how messy the original setup was, it might
+    be quite a bit of work to get everything organized and working again. In larger
+    organizations, several such smaller projects might be used together in a software
+    portfolio, which, again, might be described as a project. Their migration needs
+    a bit more planning to go forward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Migrating large projects to CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Migrating large projects that contain a number of libraries and several executables
+    can be quite a challenge. On a closer look, those projects might, in fact, be
+    multiple hierarchically nested projects, with one or more root projects that pull
+    together multiple subprojects, which, in turn, contain or require multiple subprojects
+    themselves. Depending on the size and complexity of the software portfolio of
+    an organization, many root projects that share common subprojects might exist
+    side by side, which might complicate migration. Creating a dependency graph, such
+    as the one in the following diagram, of projects and subprojects often helps us
+    to figure out the migration order. Each project might, in itself, contain multiple
+    projects or targets that have their own dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 15.1 – An example project hierarchy showing the various dependencies](img/B30947_15_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 15.1 – An example project hierarchy showing the various dependencies
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before migrating, the first thing to do is a thorough analysis of how the projects
+    depend on each other and in what order they need to be built. Depending on the
+    state of the project, the resulting graph might be quite large, so figuring out
+    where to start might be a bit of a challenge. In reality, dependency graphs are
+    often not as neat as the ones shown in this book. Whether it is easier to first
+    disentangle the project and then move to CMake or move to CMake first and then
+    disentangle the project depends on the actual situation. If projects are very
+    large and complex, start by finding islands in the graph that are as self-contained
+    as possible and start from there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For complex, hierarchical projects, there are two general migration strategies
+    to consider. One is a top-down approach, where the root project(s) are migrated
+    and replaced first, and then the child projects are ordered by which one project
+    has the *fewest incoming dependencies*. The second is a bottom-up approach, where
+    individual projects are migrated one by one, starting with the one that has the
+    *most* *incoming dependencies*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A top-down approach will have the benefit of ensuring the full project can be
+    built, tested, and packaged with CMake early on, but it requires the existing
+    build system to be integrated into CMake with `ExternalProject`. The downside
+    of a top-down approach might be that, in the early stages, the resulting CMake
+    project contains a lot of custom code to work with packages built by the old system.
+    In practice, using a few temporary workarounds to include existing projects in
+    the build is often the most pragmatic way of getting good results relatively quickly,
+    and it partially mitigates the effort of maintaining two build systems for the
+    same subprojects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A bottom-up approach has the benefit that each library that is migrated to CMake
+    can use dependencies that have already been migrated. The downside is that the
+    root project can only be replaced once all the child projects are made buildable
+    with CMake. Even though the projects are migrated from the bottom up, a good practice
+    is for the root CMake project to be created early on. It lives side by side with
+    the root project in the original build system. This allows you to put in external
+    dependencies and install configuration and packaging instructions inside the new
+    CMake project early on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following diagram illustrates how the top-down and bottom-up strategies
+    look side by side. The numbers beside the boxes represent the order of migration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 15.2 – An example of migration order](img/B30947_15_02.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 15.2 – An example of migration order
+  prefs: []
+  type: TYPE_NORMAL
+- en: Apart from the overall migration strategy, another thing to consider is whether
+    the project is going to be set up as a superbuild or as a regular project. When
+    working with a top-down approach, a superbuild structure might be easier to migrate,
+    as one of its benefits is that it is easier to integrate non-CMake projects by
+    design. More information about superbuild structures can be found in [*Chapter
+    10*](B30947_10.xhtml#_idTextAnchor158), *Handling Distributed Repositories and
+    Dependencies in* *a Super-Build*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'No matter whether you choose a top-down approach or a bottom-up approach for
+    migrating individual projects, the general strategy for migrating large will look
+    like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Analyze what the dependencies, project hierarchy, and deployment units are.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Decide on a migration strategy and whether a regular project structure or a
+    superbuild is intended.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Create or migrate the root project and pull in all not-yet-converted projects
+    using `ExternalProject`, `FetchContent`, or intermediate `find` modules if working
+    with binary packages.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Handle project-wide dependencies using CMake.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Convert the child projects, one by one, into CMake, as described in the last
+    section of this chapter. If using intermediate find modules, replace them one
+    by one:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If desired, at this point, change the dependency handling to a package manager.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Find common options, propagate them toward the root, and create presets.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When migrating children, organize the packaging in CMake if you have not already
+    done so.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Clean up, reorganize the files and projects, improve performance, and more.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Starting the migration by analyzing the existing project hierarchy and dependencies
+    will help you set up a migration plan to communicate with all of the people involved.
+    Creating a visualization such as the one from earlier is often a good tool, although,
+    for very large projects, this can become quite a challenge in itself. Another
+    important point to bear in mind when creating a migration plan is to identify
+    what is commonly deployed together and which subproject has which frequency for
+    releases. Projects that are rarely changed and released might not be as critical
+    to migrate as those that are frequently touched and released. Identifying deployment
+    units is closely related to how projects are packaged. Depending on how this is
+    organized, it might not be possible to migrate the packaging to CMake until all
+    projects have been migrated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So far, we have mostly talked about subprojects, but while analyzing the existing
+    structure, it is important to recognize which of the subprojects are actually
+    projects that should be buildable as standalone and inside the full project context
+    and which can be handled as regular CMake targets that are rarely built outside
+    the project context.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creating a root `CMakeLists.txt` file will cover the basic project setup and
+    include the necessary modules, such as `FetchContent`, `CTest`, `CPack`, and more.
+    While not directly in the `CMakeLists.txt` file, setting up toolchain files, build
+    containers, or sysroots for cross-compiling will also be done here. For large
+    projects, often, the root `CMakeLists.txt` file does not contain targets directly.
+    Rather, it includes them either by `add_subdirectory` or `FetchContent`, or in
+    the case of a superbuild, with `ExternalProject`. The root `CMakeLists.txt` file
+    should have the following structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The **project definition** and the minimum required version of CMake.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Global properties and default variables**, such as the minimum language standard,
+    custom build types, and search and module paths.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Any **modules and helper functions** that are used project-wide.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Project-wide `find_package()`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `add_subdirectory`, `FetchContent`, or, in the case of a superbuild, `ExternalProject`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Tests** for the whole project. Typically, each subproject will have its own
+    unit tests, but integration or system tests might be at the top level.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Packaging** instructions for CPack.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Depending on the complexity of the definitions, it might help to put the handling
+    of external dependencies, tests, and packaging into their own subdirectories to
+    keep the CMake file short and concise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The external dependencies that are used project-wide might be large software
+    frameworks, such as Qt or Boost, or small but common utility libraries that are
+    used frequently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a top-down approach, subprojects will be imported at the beginning and then
+    migrated one by one. When using a bottom-up strategy, the build targets and subprojects
+    will most likely be empty at the beginning and then become filled as projects
+    are migrated. When migrating subprojects, keep your eyes open for common dependencies
+    or build options that can be propagated to the root project or moved to presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once all of the child projects have been migrated, typically, there are some
+    maintenance tasks still open, such as organizing the packaging and orchestrating
+    and grouping tests together. Also, it is not unusual for there to still be some
+    clutter left in the CMake files after migrating everything, so having an extra
+    round of cleaning up the centralizing functions will make sure that the migrated
+    project is ready to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Often, migrating large projects is a challenge, especially if the build process
+    is complicated and – unfortunately, as is frequently the case – lacks proper documentation.
+    Software is built in many different ways, and the strategy described in this section
+    tries to give a general approach. However, in the end, each migration will be
+    unique in its own way. There are cases where the build system is so complex that
+    the migration strategies described earlier are more of a hindrance than a help;
+    for instance, including non-migrated projects into CMake is so difficult that
+    a step-by-step migration might be more effort than just starting the build from
+    scratch. Let’s take a closer look at how subprojects that use the original build
+    system could be included when starting with a top-down approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Integrating legacy projects when migrating top-down
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For the top-down migration strategy, existing projects are made available to
+    CMake at the beginning. The easiest way is by using `ExternalProject`, regardless
+    of whether a superbuild is intended or not. The imported targets can either be
+    defined directly or with find modules. For regular projects, this is just an intermediate
+    step to be able to build the full project relatively quickly and hand over control
+    of the configuration and build order to CMake. The resulting CMake code might
+    not look particularly nice, but the first goal is to get the root project building
+    with CMake. However, be sure to clean it up, step by step, when migrating subprojects.
+    For regular projects that consist of a mono-repo or that pull in dependencies
+    with Git submodules or similar, `ExternalProject_Add` might omit downloading by
+    specifying the `SOURCE_DIR` property. The resulting CMake code for including the
+    Autotools project might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: As `ExternalProject` only makes the content available during build time, this
+    approach only works for subprojects that are already available in a local folder.
+    Since they include directories of an imported target that have to exist at configuration
+    time when using them in `target_link_libraries`, the exported location should
+    point to the source directory rather than to the installation location of the
+    external project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These practices are for temporary workarounds
+  prefs: []
+  type: TYPE_NORMAL
+- en: The practices using `ExternalProject` and `FetchContent` described here are
+    meant for temporary workarounds, to be able to include legacy projects in the
+    CMake build while migrating. These are not good practices to use in a production
+    environment. This pattern allows the use of the original build system and will
+    provide an imported target to link against projects that have already been migrated.
+    Whether the effort of creating such an intermediate project structure is justified
+    by being able to build the full project with CMake early on has to be considered
+    for each case separately.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If migrating from Microsoft Visual Studio instead of using `ExternalProject`,
+    the `include_external_msproject()` function might be used to directly include
+    the project files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With this, you should have all the concepts to migrate to CMake from another
+    build system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, you learned about some concepts and strategies for migrating
+    projects of various sizes to CMake. The effort and actual work to be done when
+    migrating projects to CMake will very much depend on the individual setup of a
+    project. However, with the approaches described here, choosing the right strategy
+    will hopefully be easier. Changing the build processes and developer workflow
+    is often disruptive, so you have to carefully consider whether the effort is worth
+    it. Nevertheless, switching a project to CMake will open up the possibilities
+    of all the features and practices for building quality software, as described
+    in this book. Additionally, having a clean and well-maintained build system to
+    work with will allow developers to focus on their main task, which is writing
+    code and shipping software.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This brings us to the final chapter of this book, which is about getting access
+    to the CMake community, finding further reading material, and contributing to
+    CMake itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What are the two main strategies for migrating large projects?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When choosing a bottom-up approach for migrating projects, which subprojects
+    or targets are migrated first?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When choosing a top-down approach, which projects should be migrated first?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are the advantages and disadvantages of a top-down approach?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are the benefits and drawbacks of using a bottom-up approach for migrating?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Large projects can be migrated from the top down or the bottom up.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When working with a bottom-up approach, projects or targets with the most incoming
+    dependencies should be migrated first.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When choosing a top-down approach, projects with the fewest incoming dependencies
+    should be migrated first.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Top-down approaches quickly allow you to build the whole project using CMake
+    as an entry point. Additionally, for each migrated project, the old build system
+    can be discarded when the project is done. The downside is that a top-down approach
+    will require some intermediate code.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: A bottom-up approach will require less intermediate code than a top-down approach
+    and allow for clean CMake code right from the start. The downside is that the
+    full project can only be built when all of the subprojects have been migrated.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

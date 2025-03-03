@@ -1,0 +1,1164 @@
+- en: '7'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Adding Install Support for Your Libraries
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies
+    and ExternalProject_Add*, we looked at installing existing libraries and using
+    them in our project. Understanding how to use installed libraries can be incredibly
+    useful, especially when combined with `ExternalProject_Add`. Now, we’re going
+    to turn the tables and look at how to add install support to our own library.
+    This is a large topic, and there are many different options available. We won’t
+    be able to cover everything, but we’ll aim to introduce the CMake `install` command,
+    what it does, and how to use it, as well as several available configuration options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The skills you’ll learn in this chapter will be very useful if you ever choose
+    to make your own library installable and available through `ExternalProject_Add`
+    or your application packageable. By doing this, you’ll make it easier for other
+    developers to use your library and potentially save them from having to build
+    it multiple times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding install support to a library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Dealing with nested dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When and how to use `COMPONENTS`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Supporting different versions of a library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing a find module file
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding install support to a library
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When adding install support to a library, everything revolves around the `install`
+    command. The `install` command is how we tell CMake what to install, as well as
+    the relative layout of files. The good news is there’s very little to change in
+    our existing `CMakeLists.txt` files, and in most cases, there’s not a great deal
+    to add either. What we do add though can be quite confusing at first glance, which
+    we’ll try to demystify here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with earlier chapters, we’ll work through a concrete example and show how
+    to add install support to the simplest of our existing libraries, `mc-array`.
+    This is a static library that provides support for a resizable array in C (very
+    similar to `std::vector` in C++). We’ve used this throughout our *Game of Life*
+    application and it’s a particularly useful utility to rely on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ll start by looking at `ch7/part-1/lib/array/CMakeLists.txt`. The first
+    change is we’ve now committed this library to be used as a static library by explicitly
+    providing the `STATIC` argument to the `add_library` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: include(GNUInstallDirs)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_include_directories(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: PUBLIC
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'FetchContent), the first generator expression, BUILD_LOCAL_INTERFACE, will
+    evaluate to true, so ${CMAKE_CURRENT_SOURCE_DIR}/include will be used. In the
+    case when our library is installed, the relative location of the include files
+    may be different from that of a normal build, so we can provide a slightly different
+    location relative to the install include directory. ${CMAKE_INSTALL_INCLUDEDIR}
+    is provided by GNUInstallDirs, and we’ll use it later in one of our install commands
+    when we install (copy) the .h files to the install folder. It’s also possible
+    to use a relative path for $<INSTALL_INTERFACE>, which will be evaluated from
+    the root of the install prefix:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: set_target_properties(${PROJECT_NAME} PROPERTIES mc-array, when building Debug
+    and Release respectively, we’ll get libmc-arrayd.a and libmc-array.a on macOS
+    and Linux, and mc-array d.lib and mc-array.lib on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With that, we have everything we need to start adding the `install` commands
+    themselves.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The CMake install command
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: CMake’s `install` command is incredibly versatile, but its usage can be difficult
+    to grasp when first encountering it. A key thing to be aware of is the functionality
+    of `install` varies wildly based on the arguments passed to it. For those familiar
+    with C++, you can think of how `install` is implemented as a form of `install`
+    are context-dependent (their order, or positioning, is significant), which can
+    also make things quite confusing. With all this in mind, let’s look at a concrete
+    example.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The first argument passed to `install` decides what kind of `install` command
+    will be performed; these are called `TARGETS`, `EXPORT`, and `DIRECTORY`. The
+    rule essentially defines what the `install` command is concerned with.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Let’s review the first install command in our `CMakeLists.txt` file:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The effect of this command is to install the build artifact of our library,
+    in this case, `libmc-array.a` on macOS/Linux, and `mc-array.lib` on Windows, to
+    a `lib` folder under the install location we selected using `CMAKE_INSTALL_PREFIX`
+    (or a default system location if this is not provided).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The first argument, `TARGETS`, refers to the targets we want to install. In
+    our case, this is the library we created with the `add_library` command earlier
+    in the `CMakeLists.txt` file. As this is a small library, we reused the project
+    name for the target, but if we selected a different name, we would refer to that.
+    An example showing this is illustrated below:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: See `ch7/part-2/lib/array/CMakeLists.txt` for an example of using a different
+    name for the library (target), rather than reusing the project name. We’ll use
+    this approach throughout the remainder of the chapter to help disambiguate the
+    project/package from the individual targets/libraries.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The second argument we pass to the first `install` command is `EXPORT ${PROJECT_NAME}-config`.
+    Exporting means making targets available to other projects (usually through `find_package`).
+    By adding this line, we’re notifying CMake that we want to export this target
+    and associate it with a config file named after our project (`${PROJECT_NAME}-config`),
+    which expands to `mc-array-config` in our case). This step does not yet create
+    the export file but allows us to refer to the export in a later `install` command
+    to generate a `<project-name>-config.cmake` file (we could also have gone with
+    `${PROJECT_NAME}Config` and had CMake generate a `<ProjectName>Config.cmake` file
+    for us).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The final argument is `ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}`. This tells
+    CMake where we want to install our static library’s `.a`/`.lib` file. This isn’t
+    strictly necessary, as CMake will select a default system location, but being
+    explicit and using the helpful `CMAKE_INSTALL_LIBDIR` variable provided by `GNUInstallDirs`
+    will make our `CMakeLists.txt` file more self-documenting. It’s highly likely
+    `${CMAKE_INSTALL_LIBDIR}` will simply expand to `lib`, but using this approach
+    does provide a customization point if users want to override the library install
+    directory for some reason.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With just the preceding `install` command added to our `CMakeLists.txt` file,
+    if we run the following command from `ch7/part-1/lib/array`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ll see the following output:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: (For context, `ch7/part-1/lib/array/CMakeLists.txt` does already contain a complete
+    install example, but feel free to comment out the later `install` commands to
+    see what does and doesn’t get installed with each command.)
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'This is a good start, but there’s still not enough information for CMake to
+    find and use our library. Now that our library file is installed, and the export
+    target is created, we can review the next `install` command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This `install` command refers to the `EXPORT` rule. The first argument, `EXPORT
+    ${PROJECT_NAME}-config`, links this command to the earlier `install(TARGETS)`
+    command that introduced the `${PROJECT_NAME}-config` export. This command creates
+    and installs the export file itself, ensuring it ends up in our `install` folder
+    (this is the `mc-array-config.cmake` file). We need to provide the location of
+    where this file should be installed. If we don’t, we’ll see the following error
+    message:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is achieved with the `DESTINATION` argument. We again lean on the `GNUInstallDirs`
+    variable `CMAKE_INSTALL_LIBDIR`, and then specify a folder named `cmake`, followed
+    by our project name. CMake knows to search this location, and it’s also possible
+    to switch the order of `${PROJECT_NAME}` and `cmake` if preferred (this is more
+    important if installing to the default system directory and will determine how
+    the CMake config files are organized):'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'NAMESPACE minimal-cmake::'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[2/3] Install the project...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Install configuration: "Debug"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Installing: .../array/install/lib/libmc-arrayd.a'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Installing: .../array/install/lib/cmake/mc-array/mc-array-config.cmake'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Installing: .../array/install/lib/cmake/mc-array/mc-array-config-debug.cmake'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --build build --target install --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Installing: .../array/install/lib/cmake/mc-array/mc-mc-array-config.cmake
+    and mc-array-config-debug.cmake/mc-array-config-release.cmake files to see what’s
+    going on under the hood. There’s quite a lot of generated code that we can safely
+    ignore, but the key lines to notice are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake is creating an imported target for us (as `mc-array` has already been
+    built) and is then setting properties on the target to show where to find its
+    `include` files. It then iterates through the different build config files, and
+    in each of them sets more properties on the imported target based on the configuration:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: This informs CMake where to find the library, and what the build type (or configuration)
+    is.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Delving into these files isn’t something that’s often needed, but knowing roughly
+    what they’re doing is a huge help in understanding how to debug issues when things
+    can’t be found. It’s also good to appreciate there’s no magic going on; CMake
+    has just automatically generated a number of the commands we’d otherwise have
+    to write by hand (and has likely done a better job than we’d manage on our own).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The final (and thankfully simplest) `install` command concerns the `DIRECTORY`
+    rule:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this install step, we’re simply copying the contents of one directory to
+    another, in this case, the `include` directory. We use `CMAKE_CURRENT_LIST_DIR`
+    to get the path to the current `CMakeLists.txt` file we’re in, and then refer
+    to the `include` files in our source directory from there. For the `DESTINATION`,
+    we use `CMAKE_INSTALL_INCLUDEDIR` (which should look familiar from the earlier
+    `target_include_directories` call where we used it along with the `INSTALL_INTERFACE`
+    generator expression). This will add our `include` files under `include/minimal-cmake`
+    (by convention, `CMAKE_INSTALL_INCLUDEDIR` will expand to `include`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'If we run `cmake --build build --target install` once more, we’ll see our `include`
+    file will be copied to the expected install location:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: File sets
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: CMake `3.23` introduced a new feature called `target_sources` command. Specifying
+    a file set allows headers to automatically be installed as part of the `TARGET`
+    install command. We,re sticking with the traditional approach in this book, but
+    do see [https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets](https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets)
+    for more information on specifying file sets.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: With our `.h` files in place, we now have everything we need to install our
+    library and use it in another project.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The `install` folder structure now looks like the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: We,ve covered a lot, so don’t worry if everything doesn’t 100% make sense. The
+    concepts of installing, exporting, and importing targets will all start to make
+    more sense the more you use them. The silver lining is adding install support
+    only took around 10 lines of code, which isn’t too bad in the grand scheme of
+    things. In `ch7/part-2/lib/array`, as well as changing the name of the `mc-array`
+    target to `dynamic-array`, we’ve added a `CMakePreset.json` file to set the `install`
+    directory (`"installDir"`). Simply run `cmake --preset default`, and then `cmake
+    --build build --``target install`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Let’s now look at how to use our array library from our *Game of* *Life* application.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Using our newly installed library
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The good news is using the library we’ve just installed is a lot simpler. If
+    we review `ch7/part-2/app/CMakeLists.txt`, there are two additions and one removal
+    compared to the earlier example in `ch6/part-4/app/CMakeLists.txt`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The first addition is as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: The name of the package (`mc-array`) is the name we assigned to the export.
+    This is not the same as the target. It is equivalent to the name we assigned to
+    the config file (`mc-array-config.cmake`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The `FetchContent` call which was used to bring `minimal-cmake-array` into
+    the build has been removed as it’s no longer needed, and the only other change
+    is updating the `target_link_libraries` command to refer to the new target along
+    with the namespace prefix we added:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '"CMAKE_PREFIX_PATH":'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${sourceDir}/../third-party/installshared-ninja), and then build a configuration
+    of our choosing, for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ve now successfully used our installed library from our current application.
+    The application can be launched as normal by running `./build/shared-ninja/Debug/minimal-cmake_game-of-life_window`
+    from the application directory. As each `part-<n>` is entirely self-contained,
+    every example will also need to have the third-party dependencies installed as
+    before, as well as the shaders compiled by running `compile-shader-<platform>.sh/bat`.
+    Each chapter’s `README.md` file describes the commands required to build and run
+    every example; please refer to them for a recap of all the necessary steps.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Now we’ve installed a simple static library, we’re going to look at a slightly
+    more complex case where we handle installing a library with its own dependencies.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Dealing with nested dependencies
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: When we say nested dependencies, we mean dependencies of the library we’d like
+    to depend on ourselves (you can think of these as indirect dependencies, also
+    known as **transitive dependencies**). For example, if an application depends
+    on Library A, and Library A depends on Library B, then as far as the application
+    is concerned, Library B is nested inside Library A. Whether that dependency is
+    private (hidden from the application) or public (visible to the application) also
+    affects how we handle it.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In the example we just looked at (`mc-array`), we fortunately did not have any
+    dependencies to worry about when providing install support. Things get a little
+    more complicated when we do, but once we understand what is needed and why, it’s
+    not that much work to support.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To better understand this, we’ll turn our attention to our *Game of Life* library,
+    `mc-gol`, situated in `ch7/part-2/lib/gol`. It would be good to add install support
+    to this library as well as `mc-array`, so, if we replicate the three CMake `install`
+    commands we just walked through, and add them to the bottom of `ch7/part-2/lib/gol/CMakeLists.txt`,
+    along with adding `include(GNUInstallDirs)` at the top and updating `target_include_directories`
+    with `INSTALL_INTERFACE`), we can see what happens (see `part-3` for the exact
+    changes).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'If we configure, build, and install the shared version of the library from
+    `ch7/part-2/lib/gol` (by setting `MC_GOL_SHARED=ON`), things will work as expected,
+    but if we try to build the static version of the library, we’ll see three errors
+    reported by CMake:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: The reason for these errors is that the dependencies we,re using in `mc-gol`
+    we brought in with `FetchContent` also need to be exported, as they’re treated
+    as being part of the static library that’s being built and installed. This is
+    the case even if the dependencies are marked `PRIVATE` in `target_link_libraries`.
+    There are two separate ways to handle this problem. We’ll look at the first as
+    part of `mc-gol`, and the second as part of a new library we’ll extract in the
+    *Public nested* *dependencies* section.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Private nested dependencies
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'In the case of `mc-gol`, we explicitly made all dependencies private (they
+    are only used in `gol.c`), and we do not want clients or users of the library
+    to be aware of them. Fortunately, there is a convenient generator expression we
+    can use to ensure these targets are not exported and are only visible at build
+    time. We’ve come across it before in the context of `target_include_directories`,
+    and that is `BUILD_LOCAL_INTERFACE`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_link_libraries(
+  prefs: []
+  type: TYPE_NORMAL
+- en: game-of-life PRIVATE
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<BUILD_LOCAL_INTERFACE:minimal-cmake::dynamic-array
+  prefs: []
+  type: TYPE_NORMAL
+- en: as-c-math and mc-utils) inside BUILD_LOCAL_INTERFACE, but putting everything
+    inside it ensures minimal-cmake::dynamic-array is not added to INTERFACE_LINK_LIBRARIES
+    in the generated mc-gol-config.cmake file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The only other change needed is to ensure we install the shared library files
+    (which we didn’t need in the case of `mc-array`, as it could only be built as
+    static). The `install` `TARGET` command now looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_link_libraries(
+  prefs: []
+  type: TYPE_NORMAL
+- en: draw
+  prefs: []
+  type: TYPE_NORMAL
+- en: PUBLIC as-c-math
+  prefs: []
+  type: TYPE_NORMAL
+- en: PRIVATE $<BUILD_LOCAL_INTERFACE:bgfx::bgfx minimal-cmake::dynamic-array>)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: install(
+  prefs: []
+  type: TYPE_NORMAL
+- en: EXPORT ${PROJECT_NAME}-config
+  prefs: []
+  type: TYPE_NORMAL
+- en: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'NAMESPACE minimal-cmake::'
+  prefs: []
+  type: TYPE_NORMAL
+- en: find_package command for the mc-draw package to first locate the as-c-math dependency,
+    before attempting to locate the draw library that depends on as-c-math.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On its own, all the preceding change does is change the name of what would
+    have been the generated `mc-draw-config.cmake` file to `mc-draw-targets.cmake`,
+    but this is because we’re going to craft our own config file, and then refer to
+    this generated file from there. To do this, we create a new file called `mc-draw-config.cmake.in`
+    in the same directory as our `CMakeLists.txt` file. It is a template file used
+    to generate the real `mc-draw-config.cmake` file and its contents are as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first line is needed when using `configure_package_config_file` (a command
+    we’ll get to shortly), we then bring in a CMake module (`CMakeFindDependencyMacro`)
+    to allow us to call `find_dependency` on `as-c-math`. The `find_dependency` command
+    is a wrapper around `find_package` and is specially designed to be used in package
+    configuration files (see [https://cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html](https://cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html)
+    for more information about `find_dependency`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Even though we brought `as-c-math` in using `FetchContent`, and built it as
+    part of the main build, it also needs install support for us to be able to make
+    it part of the export set. This is so the call to `find_package(mc-draw)` can
+    first find `as-c-math`, as mentioned earlier (to see how this support was added,
+    please refer to [https://github.com/pr0g/as-c-math](https://github.com/pr0g/as-c-math)
+    and see the `bfdd853` commit). The last line includes the generated file from
+    our earlier `install` `EXPORT` command (`mc-draw-targets.cmake`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'What is left is to now manually generate the new `mc-draw-config.cmake` file
+    using this template as input. To do this, we use the previously mentioned `configure_package_config_file`
+    command. We need to include the `CMakePackageConfigHelpers` CMake module first,
+    and then the calling code is as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: find_package(mc-draw CONFIG REQUIRED)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Found package configuration file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ../minimal-cmake/ch7/part-4/lib/draw/install/lib/cmake/mc-draw/mc-draw-config.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'but it set mc-draw_FOUND to FALSE so package "mc-draw" is considered to be
+    NOT FOUND.  Reason given by package:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following imported targets are referenced, but are missing: NOT_FOUND until
+    the issue can be addressed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Everything should now be working, so from `ch7/part-4/app`, if we configure
+    and build (using the CMake preset will make this easier), we can launch our updated
+    application:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remember, we’ll also need to have built and installed the other required libraries
+    in `part-4`, which includes `SDL2` and `bgfx` in the `third-party` folder, and
+    `mc-array`, `mc-gol`, and `mc-draw` in the `lib` folder. There are `CMakePreset.json`
+    files in every `lib` folder to correctly configure the install and prefix paths;
+    simply run `cmake --preset list` to display which are available, and then `cmake
+    --preset <preset-name>` to configure. To build and install, run `cmake --build
+    build/<build-folder> --target install` for each library.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: A reminder for the third-party dependencies, just run `cmake -B build -G <generator>`
+    and `cmake --build build` in the `third-party` folder to have `ExternalProject_Add`
+    handle everything with `SDL2` and `bgfx`. The one last thing to remember is to
+    compile the shaders if you haven’t already (this can be done by running the corresponding
+    batch/shell script for your platform from the `app` folder after building and
+    installing `bgfx`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The reward will be an updated *Game of Life* application with slightly more
+    pleasant colors and grid lines with the help of our new `mc-draw` library.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '![Figure 7.1: Improved Game of Life application](img/B21152_07_1.jpg)'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_IMG
+- en: 'Figure 7.1: Improved Game of Life application'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The enhanced *Game of Life* application is also now interactive. Clicking outside
+    the grid will pause and resume the simulation, and clicking a grid square will
+    toggle the cell on or off. It’s fun to experiment with the wild patterns you can
+    generate by making a few small modifications to the grid.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Next, we’re going to look at how to break up a library into separate pieces
+    called **components**.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: When and how to add COMPONENTS
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: As a library grows, there may come a point when it makes sense to split the
+    overall library into several smaller pieces. At this point, you may want to start
+    thinking of your library as more of a package, composed of one or more different
+    libraries. Splitting your package into separate components can be helpful for
+    users as they then only need to link to the functionality they need to use. This
+    can help keep application binary sizes down and improve build times by reducing
+    link times to external dependencies. On the library side, it can also be beneficial
+    for decoupling code and breaking dependencies.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'To demonstrate this, we’re going to update our `mc-draw` library to have three
+    separate components: `vertex`, `line`, and `quad`. We can then explicitly request
+    the components we need in the `find_package` call like so:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_link_libraries(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: minimal-cmake::vertex
+  prefs: []
+  type: TYPE_NORMAL
+- en: minimal-cmake::line
+  prefs: []
+  type: TYPE_NORMAL
+- en: minimal-cmake::quad
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: '@PACKAGE_INIT@'
+  prefs: []
+  type: TYPE_NORMAL
+- en: valid components that can be searched for
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: set(_draw_supported_components vertex line quad)
+  prefs: []
+  type: TYPE_NORMAL
+- en: iterate through components attempting to be found
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: foreach(component ${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# if we couldn''t find the component, set the draw library to no'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# longer be found and notify the user about the missing component'
+  prefs: []
+  type: TYPE_NORMAL
+- en: if (NOT ${component} IN_LIST _draw_supported_components)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(mc-draw_FOUND False)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'set(mc-draw_NOT_FOUND_MESSAGE "Unsupported component: ${component}")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: else()
+  prefs: []
+  type: TYPE_NORMAL
+- en: include(${CMAKE_CURRENT_LIST_DIR}/${component}-config.cmake)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: endforeach()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: find_package(mc-draw CONFIG REQUIRED COMPONENTS circle)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Found package configuration file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ../minimal-cmake/ch7/part-5/lib/draw/install/lib/cmake/mc-draw/mc-draw-config.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'but it set mc-draw_FOUND to FALSE so package "mc-draw" is considered to be
+    NOT FOUND.  Reason given by package:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unsupported component: circle'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: project(
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc-draw
+  prefs: []
+  type: TYPE_NORMAL
+- en: LANGUAGES C
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakeLists.txt file in the same way we can refer to the project name, only instead
+    of using ${PROJECT_NAME}, we use ${PROJECT_VERSION}.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most of the remaining changes then simply replace `${PROJECT_NAME}` with `${PROJECT_NAME}-${PROJECT_VERSION}`,
+    or append it in the case of the `ARCHIVE`, `LIBRARY`, and `RUNTIME` destinations.
+    The reason for this change is to make it possible to install multiple versions
+    of the same library in the same location.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The last addition we need is the `write_basic_package_version_file` CMake command
+    to generate a `*-config-version` file for us. It looks as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: We name it `mc-draw-config-version` and pass `${PROJECT_VERSION}` to the `VERSION`
+    argument. The `COMPATIBILITY` field is to decide how strict the library should
+    be when accepting a version request. The options are `AnyNewerVersion`, `SameMajorVersion`,
+    `SameMinorVersion`, and `ExactVersion`. We’ve chosen `SameMajorVersion`, which
+    means so long as at least the first number in the version matches, the library
+    will be found.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The `find_package` call in our app folder’s `CMakeLists.txt` file is updated
+    very slightly to the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake Error at CMakeLists.txt:16 (find_package):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Could not find a configuration file for package "mc-draw" that is compatible
+    with requested version "2.0".
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following configuration files were considered but not accepted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ../minimal-cmake/ch7/part-6/lib/draw/install/lib/cmake/mc-draw-3.5.4/mc-draw-config.cmake,
+    AnyNewerVersion when we installed the library, asking for 2.0 would not produce
+    an error as the installed version, 3.5.4, would be greater than the 2.0 version
+    requested. Deciding which scheme to use can be difficult and will depend on your
+    willingness to support backward compatibility. For more information about the
+    different compatibility modes, please see https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing a find module file
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Before we wrap up talking about installing, there’s one more topic that is useful
+    to cover. So far, we’ve talked exclusively about finding dependencies using config
+    mode, but there is an alternative mode we briefly touched on in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152),
+    *Installing Dependencies and ExternalProject_Add*, called **Module mode**. Module
+    mode is useful when integrating with libraries that are not natively built with
+    CMake (so config files cannot be automatically generated for us).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In `ch7/part-7/cmake`, a new file has been added called `Findmc-gol.cmake`,
+    which acts as a find module file for the `mc-gol` library we’ll install in `ch7/part-7/lib/gol/install`.
+    The find module file is technically redundant, as we can use the generated `mc-gol-config.cmake`
+    file in config mode as before, however, imagine we’d built this library using
+    a separate tool, and know where the build artifacts (library files) and header
+    files are found.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'To bring the `mc-gol` library into our build using `find_package`, we first
+    need to review the `Findmc-gol.cmake` find module file. The first line uses the
+    `find_path` CMake command to populate the `mc-gol_INCLUDE_DIR` variable:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `mc-gol_PATH` variable is one we provide when configuring our main application
+    to give the path relative to the include and library files (this is set in our
+    `CMakePresets.json` file found in `ch7/part-7/app`). What’s essentially happening
+    is a form of pattern matching, where the value we pass to `PATHS` matches the
+    path to where the `include` files will be found.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The next line does a nearly identical operation, only this time instead of
+    populating the `include` directory variable, it populates `mc-gol_LIBRARY`, holding
+    the path to the library file using `find_library`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `NAMES` argument expects the exact name of our library (multiple names can
+    be provided here). We must also include the name of the debug version of our library
+    with the `d` postfix as we’re using `CMAKE_DEBUG_POSTFIX` to disambiguate `Debug`
+    and `Release` versions of our library. If we don’t do this, `find_library` will
+    not find the debug version of our library. It’s also worth mentioning that `find_library`
+    is not recursive, so we must provide the exact folder location where our library
+    files are stored.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Next comes a handy CMake-provided utility called `find_package_handle_standard_args`
+    to handle proper messaging if the two earlier variables (`mc-gol_INCLUDE_DIR`
+    and `mc-gol_LIBRARY`) cannot be found. It handles other details related to the
+    `find_package` call too, though, for the moment, we don’t need to concern ourselves
+    with them. To learn more about what the command is doing behind the scenes, you
+    can visit [https://cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html](https://cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html)
+    for more information.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Finally, if the library was found, we call `add_library` with `minimal-cmake::game-of-life`
+    as an imported target, and `set_target_properties`, associating the variables
+    we populated with the `minimal-cmake::game-of-life` target:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding two commands are remarkably like the commands CMake generates
+    for us in the `mc-gol-config-debug/release.cmake` and `mc-gol-config.cmake` files
+    in `ch7/part-7/lib/gol/install/lib/cmake/mc-gol`. To keep things simple, we’re
+    not doing as much to handle different configurations (debug versus release) or
+    library types (static versus shared), but all this is possible if needed.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The penultimate step is to let CMake know where to find our new `Findmc-gol.cmake`
+    file, and to fill in the `mc-gol_PATH` variable. We do both things in `ch7/part-7/app/CMakePresets.json`
+    by updating `CMAKE_MODULE_PATH` to include the location of our new find module
+    file, and setting `mc-gol_PATH` to where our library files are found:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The final change is to our `CMakeLists.txt` file in `ch7/part-7/app`, where
+    we must explicitly specify `MODULE`, instead of `CONFIG` for `mc-gol`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '-- Found mc-gol: /Users/tomhultonharrop/dev/minimal-cmake/ch7/part-'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7/lib/gol/install/lib/libgame-of-lifed.dylib
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,896 @@
+- en: Index
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As this ebook edition doesn't have fixed pagination, the page numbers below
+    are hyperlinked for reference only, based on the printed edition of this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A
+  prefs: []
+  type: TYPE_NORMAL
+- en: application
+  prefs: []
+  type: TYPE_NORMAL
+- en: installing [159](B21152_08.xhtml#_idIndexMarker348)-[162](B21152_08.xhtml#_idIndexMarker353)
+  prefs: []
+  type: TYPE_NORMAL
+- en: application binary interface (ABI) [64](B21152_04.xhtml#_idIndexMarker144)
+  prefs: []
+  type: TYPE_NORMAL
+- en: application programming interface (API) [122](B21152_07.xhtml#_idIndexMarker267)
+  prefs: []
+  type: TYPE_NORMAL
+- en: as-c-math [50](B21152_03.xhtml#_idIndexMarker115)
+  prefs: []
+  type: TYPE_NORMAL
+- en: B
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfx
+  prefs: []
+  type: TYPE_NORMAL
+- en: example, running [116](B21152_06.xhtml#_idIndexMarker255), [117](B21152_06.xhtml#_idIndexMarker257)
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [113](B21152_06.xhtml#_idIndexMarker248)
+  prefs: []
+  type: TYPE_NORMAL
+- en: book repository, Windows
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, from CMake [22](B21152_02.xhtml#_idIndexMarker033)
+  prefs: []
+  type: TYPE_NORMAL
+- en: build presets [89](B21152_05.xhtml#_idIndexMarker186)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bundle [190](B21152_10.xhtml#_idIndexMarker411)
+  prefs: []
+  type: TYPE_NORMAL
+- en: C
+  prefs: []
+  type: TYPE_NORMAL
+- en: C++ Slack Workspace
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [232](B21152_11.xhtml#_idIndexMarker504)
+  prefs: []
+  type: TYPE_NORMAL
+- en: C/C++ build recommendations [228](B21152_11.xhtml#_idIndexMarker489), [229](B21152_11.xhtml#_idIndexMarker493)
+  prefs: []
+  type: TYPE_NORMAL
+- en: unity builds [229](B21152_11.xhtml#_idIndexMarker495), [230](B21152_11.xhtml#_idIndexMarker497)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CDash, using with CTest [184](B21152_09.xhtml#_idIndexMarker400)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CDash project, creating [185](B21152_09.xhtml#_idIndexMarker402)
+  prefs: []
+  type: TYPE_NORMAL
+- en: code coverage, adding [186](B21152_09.xhtml#_idIndexMarker406), [187](B21152_09.xhtml#_idIndexMarker408)
+  prefs: []
+  type: TYPE_NORMAL
+- en: test results, uploading [185](B21152_09.xhtml#_idIndexMarker404), [186](B21152_09.xhtml#_idIndexMarker405)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CLion
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, using with [227](B21152_11.xhtml#_idIndexMarker488)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake
+  prefs: []
+  type: TYPE_NORMAL
+- en: configs [33](B21152_02.xhtml#_idIndexMarker062)
+  prefs: []
+  type: TYPE_NORMAL
+- en: download link [8](B21152_01.xhtml#_idIndexMarker011)
+  prefs: []
+  type: TYPE_NORMAL
+- en: dynamic array, adding [36](B21152_02.xhtml#_idIndexMarker072)
+  prefs: []
+  type: TYPE_NORMAL
+- en: file, adding [36](B21152_02.xhtml#_idIndexMarker071)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GLOB, using [37](B21152_02.xhtml#_idIndexMarker076)
+  prefs: []
+  type: TYPE_NORMAL
+- en: interface files, referencing in target_sources [38](B21152_02.xhtml#_idIndexMarker077)
+  prefs: []
+  type: TYPE_NORMAL
+- en: invoking [23](B21152_02.xhtml#_idIndexMarker034), [24](B21152_02.xhtml#_idIndexMarker038)
+  prefs: []
+  type: TYPE_NORMAL
+- en: linker errors [36](B21152_02.xhtml#_idIndexMarker074), [37](B21152_02.xhtml#_idIndexMarker075)
+  prefs: []
+  type: TYPE_NORMAL
+- en: project [34](B21152_02.xhtml#_idIndexMarker068), [35](B21152_02.xhtml#_idIndexMarker069)
+  prefs: []
+  type: TYPE_NORMAL
+- en: scripts, automating with [151](B21152_08.xhtml#_idIndexMarker327)-[156](B21152_08.xhtml#_idIndexMarker340)
+  prefs: []
+  type: TYPE_NORMAL
+- en: script structure [230](B21152_11.xhtml#_idIndexMarker498), [231](B21152_11.xhtml#_idIndexMarker500)
+  prefs: []
+  type: TYPE_NORMAL
+- en: usage, reviewing [80](B21152_05.xhtml#_idIndexMarker167)
+  prefs: []
+  type: TYPE_NORMAL
+- en: used, for building [24](B21152_02.xhtml#_idIndexMarker039), [25](B21152_02.xhtml#_idIndexMarker041)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, from command line [22](B21152_02.xhtml#_idIndexMarker029)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake configs [33](B21152_02.xhtml#_idIndexMarker063)
+  prefs: []
+  type: TYPE_NORMAL
+- en: multi-config generators [34](B21152_02.xhtml#_idIndexMarker066)
+  prefs: []
+  type: TYPE_NORMAL
+- en: single-config generators [33](B21152_02.xhtml#_idIndexMarker064)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake generators [31](B21152_02.xhtml#_idIndexMarker059)
+  prefs: []
+  type: TYPE_NORMAL
+- en: specifying [32](B21152_02.xhtml#_idIndexMarker060)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake GUI [92](B21152_05.xhtml#_idIndexMarker196)-[94](B21152_05.xhtml#_idIndexMarker201)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake library code
+  prefs: []
+  type: TYPE_NORMAL
+- en: using [42](B21152_03.xhtml#_idIndexMarker086), [43](B21152_03.xhtml#_idIndexMarker090)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakeLists.txt file [58](B21152_04.xhtml#_idIndexMarker129)
+  prefs: []
+  type: TYPE_NORMAL
+- en: application, declaring [29](B21152_02.xhtml#_idIndexMarker052)
+  prefs: []
+  type: TYPE_NORMAL
+- en: application, updating [53](B21152_03.xhtml#_idIndexMarker121), [54](B21152_03.xhtml#_idIndexMarker122)
+  prefs: []
+  type: TYPE_NORMAL
+- en: debugging [219](B21152_11.xhtml#_idIndexMarker468)
+  prefs: []
+  type: TYPE_NORMAL
+- en: examining [26](B21152_02.xhtml#_idIndexMarker045)
+  prefs: []
+  type: TYPE_NORMAL
+- en: language features, setting [31](B21152_02.xhtml#_idIndexMarker057)
+  prefs: []
+  type: TYPE_NORMAL
+- en: minimum version, setting [26](B21152_02.xhtml#_idIndexMarker047)-[28](B21152_02.xhtml#_idIndexMarker049)
+  prefs: []
+  type: TYPE_NORMAL
+- en: project, naming [28](B21152_02.xhtml#_idIndexMarker050), [29](B21152_02.xhtml#_idIndexMarker051)
+  prefs: []
+  type: TYPE_NORMAL
+- en: source files, adding [30](B21152_02.xhtml#_idIndexMarker056)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake preset files
+  prefs: []
+  type: TYPE_NORMAL
+- en: authoring [83](B21152_05.xhtml#_idIndexMarker176)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake presets [83](B21152_05.xhtml#_idIndexMarker174)-[86](B21152_05.xhtml#_idIndexMarker180),
+    [91](B21152_05.xhtml#_idIndexMarker195)
+  prefs: []
+  type: TYPE_NORMAL
+- en: and Visual Studio Code [217](B21152_11.xhtml#_idIndexMarker465), [218](B21152_11.xhtml#_idIndexMarker466)
+  prefs: []
+  type: TYPE_NORMAL
+- en: build presets [89](B21152_05.xhtml#_idIndexMarker187)
+  prefs: []
+  type: TYPE_NORMAL
+- en: improvements [109](B21152_06.xhtml#_idIndexMarker233)
+  prefs: []
+  type: TYPE_NORMAL
+- en: overrides [87](B21152_05.xhtml#_idIndexMarker182), [88](B21152_05.xhtml#_idIndexMarker184)
+  prefs: []
+  type: TYPE_NORMAL
+- en: workflow presets [90](B21152_05.xhtml#_idIndexMarker191), [91](B21152_05.xhtml#_idIndexMarker193)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake script
+  prefs: []
+  type: TYPE_NORMAL
+- en: invoking, from CMakeLists.txt [156](B21152_08.xhtml#_idIndexMarker341)-[158](B21152_08.xhtml#_idIndexMarker344)
+  prefs: []
+  type: TYPE_NORMAL
+- en: tests [183](B21152_09.xhtml#_idIndexMarker396), [184](B21152_09.xhtml#_idIndexMarker397)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake search modes [104](B21152_06.xhtml#_idIndexMarker216)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Config mode [104](B21152_06.xhtml#_idIndexMarker218)
+  prefs: []
+  type: TYPE_NORMAL
+- en: module mode [104](B21152_06.xhtml#_idIndexMarker220), [105](B21152_06.xhtml#_idIndexMarker221)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake user presets [87](B21152_05.xhtml#_idIndexMarker183)
+  prefs: []
+  type: TYPE_NORMAL
+- en: command-line interface (CLI) [168](B21152_09.xhtml#_idIndexMarker355)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Command Prompt [7](B21152_01.xhtml#_idIndexMarker008)
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMPONENTS
+  prefs: []
+  type: TYPE_NORMAL
+- en: adding [133](B21152_07.xhtml#_idIndexMarker296)-[135](B21152_07.xhtml#_idIndexMarker299)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conan
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL [231](B21152_11.xhtml#_idIndexMarker502)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Config mode [104](B21152_06.xhtml#_idIndexMarker219)
+  prefs: []
+  type: TYPE_NORMAL
+- en: continuous integration (CI) build scripts [90](B21152_05.xhtml#_idIndexMarker190)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack [190](B21152_10.xhtml#_idIndexMarker410)
+  prefs: []
+  type: TYPE_NORMAL
+- en: common properties [194](B21152_10.xhtml#_idIndexMarker420)
+  prefs: []
+  type: TYPE_NORMAL
+- en: integrating [193](B21152_10.xhtml#_idIndexMarker418), [194](B21152_10.xhtml#_idIndexMarker419)
+  prefs: []
+  type: TYPE_NORMAL
+- en: uses [207](B21152_10.xhtml#_idIndexMarker445), [208](B21152_10.xhtml#_idIndexMarker446)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack Linux Debian package [200](B21152_10.xhtml#_idIndexMarker432)-[202](B21152_10.xhtml#_idIndexMarker435)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack macOS bundle package [198](B21152_10.xhtml#_idIndexMarker428)-[200](B21152_10.xhtml#_idIndexMarker431)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack presets
+  prefs: []
+  type: TYPE_NORMAL
+- en: adding [205](B21152_10.xhtml#_idIndexMarker441)-[207](B21152_10.xhtml#_idIndexMarker444)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack Windows NSIS package [195](B21152_10.xhtml#_idIndexMarker422)-[198](B21152_10.xhtml#_idIndexMarker427)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTest [168](B21152_09.xhtml#_idIndexMarker354)
+  prefs: []
+  type: TYPE_NORMAL
+- en: benefit [180](B21152_09.xhtml#_idIndexMarker391)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CDash, using with [184](B21152_09.xhtml#_idIndexMarker398), [185](B21152_09.xhtml#_idIndexMarker401)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakeLists.txt changes [169](B21152_09.xhtml#_idIndexMarker362)-[171](B21152_09.xhtml#_idIndexMarker365)
+  prefs: []
+  type: TYPE_NORMAL
+- en: end-to-end tests, integrating with [179](B21152_09.xhtml#_idIndexMarker388),
+    [180](B21152_09.xhtml#_idIndexMarker390)
+  prefs: []
+  type: TYPE_NORMAL
+- en: D
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dear ImGui [173](B21152_09.xhtml#_idIndexMarker370)
+  prefs: []
+  type: TYPE_NORMAL
+- en: used, for integrating end-to-end tests [175](B21152_09.xhtml#_idIndexMarker379)-[179](B21152_09.xhtml#_idIndexMarker386)
+  prefs: []
+  type: TYPE_NORMAL
+- en: dependencies [39](B21152_03.xhtml#_idIndexMarker078)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Diff Folders [222](B21152_11.xhtml#_idIndexMarker477)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discourse community
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL [232](B21152_11.xhtml#_idIndexMarker503)
+  prefs: []
+  type: TYPE_NORMAL
+- en: docstring [53](B21152_03.xhtml#_idIndexMarker119)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t Repeat Yourself (DRY) [30](B21152_02.xhtml#_idIndexMarker055)
+  prefs: []
+  type: TYPE_NORMAL
+- en: dynamic link library (DLL) [69](B21152_04.xhtml#_idIndexMarker153)
+  prefs: []
+  type: TYPE_NORMAL
+- en: E
+  prefs: []
+  type: TYPE_NORMAL
+- en: end-to-end tests [168](B21152_09.xhtml#_idIndexMarker358)
+  prefs: []
+  type: TYPE_NORMAL
+- en: adding, to application [173](B21152_09.xhtml#_idIndexMarker369)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dear ImGui, used for integrating [175](B21152_09.xhtml#_idIndexMarker378)-[178](B21152_09.xhtml#_idIndexMarker385)
+  prefs: []
+  type: TYPE_NORMAL
+- en: integrating, with CTest [179](B21152_09.xhtml#_idIndexMarker387), [180](B21152_09.xhtml#_idIndexMarker389)
+  prefs: []
+  type: TYPE_NORMAL
+- en: UI library, integrating with [174](B21152_09.xhtml#_idIndexMarker375), [175](B21152_09.xhtml#_idIndexMarker377)
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add
+  prefs: []
+  type: TYPE_NORMAL
+- en: multiple libraries, handling with [113](B21152_06.xhtml#_idIndexMarker247)-[115](B21152_06.xhtml#_idIndexMarker251)
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [44](B21152_03.xhtml#_idIndexMarker099)
+  prefs: []
+  type: TYPE_NORMAL
+- en: usage, improving [111](B21152_06.xhtml#_idIndexMarker243)-[113](B21152_06.xhtml#_idIndexMarker245)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, to streamline installation [109](B21152_06.xhtml#_idIndexMarker235)-[111](B21152_06.xhtml#_idIndexMarker239)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, with custom libraries [142](B21152_08.xhtml#_idIndexMarker311)-[144](B21152_08.xhtml#_idIndexMarker314)
+  prefs: []
+  type: TYPE_NORMAL
+- en: F
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent [40](B21152_03.xhtml#_idIndexMarker080)
+  prefs: []
+  type: TYPE_NORMAL
+- en: avoiding [41](B21152_03.xhtml#_idIndexMarker083)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake library code, using [42](B21152_03.xhtml#_idIndexMarker085), [43](B21152_03.xhtml#_idIndexMarker089)
+  prefs: []
+  type: TYPE_NORMAL
+- en: need for [40](B21152_03.xhtml#_idIndexMarker081), [41](B21152_03.xhtml#_idIndexMarker082)
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [44](B21152_03.xhtml#_idIndexMarker098)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using [41](B21152_03.xhtml#_idIndexMarker084)
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent_Declare [44](B21152_03.xhtml#_idIndexMarker093)
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent functionality [43](B21152_03.xhtml#_idIndexMarker092), [44](B21152_03.xhtml#_idIndexMarker097)
+  prefs: []
+  type: TYPE_NORMAL
+- en: branch names, using [47](B21152_03.xhtml#_idIndexMarker105)
+  prefs: []
+  type: TYPE_NORMAL
+- en: dependency, linking [49](B21152_03.xhtml#_idIndexMarker111), [50](B21152_03.xhtml#_idIndexMarker112)
+  prefs: []
+  type: TYPE_NORMAL
+- en: dependency source, making [48](B21152_03.xhtml#_idIndexMarker109), [49](B21152_03.xhtml#_idIndexMarker110)
+  prefs: []
+  type: TYPE_NORMAL
+- en: libraries, using from GitHub [45](B21152_03.xhtml#_idIndexMarker100)-[47](B21152_03.xhtml#_idIndexMarker104)
+  prefs: []
+  type: TYPE_NORMAL
+- en: local libraries, using [47](B21152_03.xhtml#_idIndexMarker107), [48](B21152_03.xhtml#_idIndexMarker108)
+  prefs: []
+  type: TYPE_NORMAL
+- en: find module file
+  prefs: []
+  type: TYPE_NORMAL
+- en: writing [137](B21152_07.xhtml#_idIndexMarker306)-[139](B21152_07.xhtml#_idIndexMarker309)
+  prefs: []
+  type: TYPE_NORMAL
+- en: find_package command [104](B21152_06.xhtml#_idIndexMarker215)
+  prefs: []
+  type: TYPE_NORMAL
+- en: returning to [105](B21152_06.xhtml#_idIndexMarker223), [106](B21152_06.xhtml#_idIndexMarker227)
+  prefs: []
+  type: TYPE_NORMAL
+- en: function overloading [122](B21152_07.xhtml#_idIndexMarker266)
+  prefs: []
+  type: TYPE_NORMAL
+- en: G
+  prefs: []
+  type: TYPE_NORMAL
+- en: Game of Life
+  prefs: []
+  type: TYPE_NORMAL
+- en: cross-platform additions [72](B21152_04.xhtml#_idIndexMarker161), [73](B21152_04.xhtml#_idIndexMarker163)
+  prefs: []
+  type: TYPE_NORMAL
+- en: making, as shared library [65](B21152_04.xhtml#_idIndexMarker145)-[68](B21152_04.xhtml#_idIndexMarker149)
+  prefs: []
+  type: TYPE_NORMAL
+- en: moving, to library [64](B21152_04.xhtml#_idIndexMarker142)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Game of Life, as shared library
+  prefs: []
+  type: TYPE_NORMAL
+- en: on Linux [70](B21152_04.xhtml#_idIndexMarker157), [71](B21152_04.xhtml#_idIndexMarker159)
+  prefs: []
+  type: TYPE_NORMAL
+- en: on macOS [70](B21152_04.xhtml#_idIndexMarker156), [71](B21152_04.xhtml#_idIndexMarker158)
+  prefs: []
+  type: TYPE_NORMAL
+- en: on Windows [68](B21152_04.xhtml#_idIndexMarker151)-[70](B21152_04.xhtml#_idIndexMarker155)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GenerateExportHeader
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [68](B21152_04.xhtml#_idIndexMarker150)
+  prefs: []
+  type: TYPE_NORMAL
+- en: generator expressions [61](B21152_04.xhtml#_idIndexMarker135)
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [61](B21152_04.xhtml#_idIndexMarker137)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Git
+  prefs: []
+  type: TYPE_NORMAL
+- en: installing [19](B21152_01.xhtml#_idIndexMarker026)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY [44](B21152_03.xhtml#_idIndexMarker094)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Git tag [45](B21152_03.xhtml#_idIndexMarker102)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GNU Compiler Collection (GCC) [186](B21152_09.xhtml#_idIndexMarker407), [228](B21152_11.xhtml#_idIndexMarker492)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GNUInstallDirs
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [121](B21152_07.xhtml#_idIndexMarker262)
+  prefs: []
+  type: TYPE_NORMAL
+- en: GNU’s Not Unix (GNU) [121](B21152_07.xhtml#_idIndexMarker261)
+  prefs: []
+  type: TYPE_NORMAL
+- en: graphical user interface (GUI) [173](B21152_09.xhtml#_idIndexMarker371)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Graphics Processing Unit (GPU) [114](B21152_06.xhtml#_idIndexMarker250)
+  prefs: []
+  type: TYPE_NORMAL
+- en: H
+  prefs: []
+  type: TYPE_NORMAL
+- en: header-only libraries [73](B21152_04.xhtml#_idIndexMarker165), [74](B21152_04.xhtml#_idIndexMarker166)
+  prefs: []
+  type: TYPE_NORMAL
+- en: HG_REPOSITORY [44](B21152_03.xhtml#_idIndexMarker096)
+  prefs: []
+  type: TYPE_NORMAL
+- en: I
+  prefs: []
+  type: TYPE_NORMAL
+- en: ICOConvert
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [196](B21152_10.xhtml#_idIndexMarker424)
+  prefs: []
+  type: TYPE_NORMAL
+- en: immediate mode [173](B21152_09.xhtml#_idIndexMarker373)
+  prefs: []
+  type: TYPE_NORMAL
+- en: imported target [105](B21152_06.xhtml#_idIndexMarker225)
+  prefs: []
+  type: TYPE_NORMAL
+- en: include command
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [43](B21152_03.xhtml#_idIndexMarker091)
+  prefs: []
+  type: TYPE_NORMAL
+- en: in-source build [24](B21152_02.xhtml#_idIndexMarker037)
+  prefs: []
+  type: TYPE_NORMAL
+- en: install command [122](B21152_07.xhtml#_idIndexMarker265)-[126](B21152_07.xhtml#_idIndexMarker274)
+  prefs: []
+  type: TYPE_NORMAL
+- en: adding, to CMake [120](B21152_07.xhtml#_idIndexMarker260), [121](B21152_07.xhtml#_idIndexMarker263)
+  prefs: []
+  type: TYPE_NORMAL
+- en: library, using [126](B21152_07.xhtml#_idIndexMarker275), [127](B21152_07.xhtml#_idIndexMarker276)
+  prefs: []
+  type: TYPE_NORMAL
+- en: installed library
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, informing where to search [106](B21152_06.xhtml#_idIndexMarker228), [107](B21152_06.xhtml#_idIndexMarker229)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakePreset improvements [109](B21152_06.xhtml#_idIndexMarker234)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake search modes [104](B21152_06.xhtml#_idIndexMarker214)
+  prefs: []
+  type: TYPE_NORMAL
+- en: location, providing [107](B21152_06.xhtml#_idIndexMarker230)-[109](B21152_06.xhtml#_idIndexMarker232)
+  prefs: []
+  type: TYPE_NORMAL
+- en: returning, to find_package command [105](B21152_06.xhtml#_idIndexMarker222),
+    [106](B21152_06.xhtml#_idIndexMarker226)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using [99](B21152_06.xhtml#_idIndexMarker205)-[104](B21152_06.xhtml#_idIndexMarker213)
+  prefs: []
+  type: TYPE_NORMAL
+- en: installing process [98](B21152_06.xhtml#_idIndexMarker203)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instruments [227](B21152_11.xhtml#_idIndexMarker487)
+  prefs: []
+  type: TYPE_NORMAL
+- en: integrated development environment (IDE) [93](B21152_05.xhtml#_idIndexMarker199)
+  prefs: []
+  type: TYPE_NORMAL
+- en: integration tests [168](B21152_09.xhtml#_idIndexMarker357)
+  prefs: []
+  type: TYPE_NORMAL
+- en: interface libraries [73](B21152_04.xhtml#_idIndexMarker164)
+  prefs: []
+  type: TYPE_NORMAL
+- en: internal tests
+  prefs: []
+  type: TYPE_NORMAL
+- en: benefit [180](B21152_09.xhtml#_idIndexMarker392)-[183](B21152_09.xhtml#_idIndexMarker395)
+  prefs: []
+  type: TYPE_NORMAL
+- en: J
+  prefs: []
+  type: TYPE_NORMAL
+- en: JavaScript Object Notation (JSON) [83](B21152_05.xhtml#_idIndexMarker175)
+  prefs: []
+  type: TYPE_NORMAL
+- en: L
+  prefs: []
+  type: TYPE_NORMAL
+- en: libcurl
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL [115](B21152_06.xhtml#_idIndexMarker252)
+  prefs: []
+  type: TYPE_NORMAL
+- en: library compatibility, with FetchContent [56](B21152_04.xhtml#_idIndexMarker123)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakeLists.txt file [58](B21152_04.xhtml#_idIndexMarker128), [59](B21152_04.xhtml#_idIndexMarker130)
+  prefs: []
+  type: TYPE_NORMAL
+- en: generator expressions [60](B21152_04.xhtml#_idIndexMarker134), [61](B21152_04.xhtml#_idIndexMarker136)
+  prefs: []
+  type: TYPE_NORMAL
+- en: interfaces [62](B21152_04.xhtml#_idIndexMarker138)
+  prefs: []
+  type: TYPE_NORMAL
+- en: library, creating [59](B21152_04.xhtml#_idIndexMarker131), [60](B21152_04.xhtml#_idIndexMarker133)
+  prefs: []
+  type: TYPE_NORMAL
+- en: library, using [63](B21152_04.xhtml#_idIndexMarker140)
+  prefs: []
+  type: TYPE_NORMAL
+- en: project structure [56](B21152_04.xhtml#_idIndexMarker124)-[58](B21152_04.xhtml#_idIndexMarker127)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Linux/macOS
+  prefs: []
+  type: TYPE_NORMAL
+- en: C, using from CMake [22](B21152_02.xhtml#_idIndexMarker030)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Linux (Ubuntu)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, installing [15](B21152_01.xhtml#_idIndexMarker021)-[18](B21152_01.xhtml#_idIndexMarker025)
+  prefs: []
+  type: TYPE_NORMAL
+- en: M
+  prefs: []
+  type: TYPE_NORMAL
+- en: macOS
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, installing [10](B21152_01.xhtml#_idIndexMarker014)-[15](B21152_01.xhtml#_idIndexMarker020)
+  prefs: []
+  type: TYPE_NORMAL
+- en: macOS bundle
+  prefs: []
+  type: TYPE_NORMAL
+- en: building [203](B21152_10.xhtml#_idIndexMarker436)-[205](B21152_10.xhtml#_idIndexMarker440)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Make [25](B21152_02.xhtml#_idIndexMarker040)
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc-draw library version [135](B21152_07.xhtml#_idIndexMarker302)-[137](B21152_07.xhtml#_idIndexMarker305)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Microsoft Visual C++ (MSVC) [228](B21152_11.xhtml#_idIndexMarker491)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Minimal CMake source code
+  prefs: []
+  type: TYPE_NORMAL
+- en: building [214](B21152_11.xhtml#_idIndexMarker453)-[216](B21152_11.xhtml#_idIndexMarker458)
+  prefs: []
+  type: TYPE_NORMAL
+- en: configuring [214](B21152_11.xhtml#_idIndexMarker452)-[216](B21152_11.xhtml#_idIndexMarker459)
+  prefs: []
+  type: TYPE_NORMAL
+- en: debugging [214](B21152_11.xhtml#_idIndexMarker454)-[216](B21152_11.xhtml#_idIndexMarker460)
+  prefs: []
+  type: TYPE_NORMAL
+- en: navigating [212](B21152_11.xhtml#_idIndexMarker448)-[214](B21152_11.xhtml#_idIndexMarker450)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Module mode [137](B21152_07.xhtml#_idIndexMarker307)
+  prefs: []
+  type: TYPE_NORMAL
+- en: multi-config [25](B21152_02.xhtml#_idIndexMarker043)
+  prefs: []
+  type: TYPE_NORMAL
+- en: multiple libraries, with ExternalProject_Add
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfx example, running [116](B21152_06.xhtml#_idIndexMarker256), [117](B21152_06.xhtml#_idIndexMarker258)
+  prefs: []
+  type: TYPE_NORMAL
+- en: N
+  prefs: []
+  type: TYPE_NORMAL
+- en: namespace [105](B21152_06.xhtml#_idIndexMarker224)
+  prefs: []
+  type: TYPE_NORMAL
+- en: nested dependencies
+  prefs: []
+  type: TYPE_NORMAL
+- en: dealing with [127](B21152_07.xhtml#_idIndexMarker277), [128](B21152_07.xhtml#_idIndexMarker279)
+  prefs: []
+  type: TYPE_NORMAL
+- en: private nested dependencies [128](B21152_07.xhtml#_idIndexMarker280), [129](B21152_07.xhtml#_idIndexMarker283)
+  prefs: []
+  type: TYPE_NORMAL
+- en: public nested dependencies [129](B21152_07.xhtml#_idIndexMarker284)-[133](B21152_07.xhtml#_idIndexMarker295)
+  prefs: []
+  type: TYPE_NORMAL
+- en: nested files
+  prefs: []
+  type: TYPE_NORMAL
+- en: options, setting [158](B21152_08.xhtml#_idIndexMarker345), [159](B21152_08.xhtml#_idIndexMarker346)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nullsoft Scriptable Install System (NSIS) [190](B21152_10.xhtml#_idIndexMarker412)
+  prefs: []
+  type: TYPE_NORMAL
+- en: O
+  prefs: []
+  type: TYPE_NORMAL
+- en: OpenSSL
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL [115](B21152_06.xhtml#_idIndexMarker254)
+  prefs: []
+  type: TYPE_NORMAL
+- en: operating system (OS) [40](B21152_03.xhtml#_idIndexMarker079), [120](B21152_07.xhtml#_idIndexMarker259)
+  prefs: []
+  type: TYPE_NORMAL
+- en: out-of-source build [24](B21152_02.xhtml#_idIndexMarker036)
+  prefs: []
+  type: TYPE_NORMAL
+- en: P
+  prefs: []
+  type: TYPE_NORMAL
+- en: private nested dependencies [128](B21152_07.xhtml#_idIndexMarker281), [129](B21152_07.xhtml#_idIndexMarker282)
+  prefs: []
+  type: TYPE_NORMAL
+- en: public nested dependencies [129](B21152_07.xhtml#_idIndexMarker285)-[133](B21152_07.xhtml#_idIndexMarker294)
+  prefs: []
+  type: TYPE_NORMAL
+- en: R
+  prefs: []
+  type: TYPE_NORMAL
+- en: repetitive commands
+  prefs: []
+  type: TYPE_NORMAL
+- en: avoiding, with scripts [80](B21152_05.xhtml#_idIndexMarker169)-[82](B21152_05.xhtml#_idIndexMarker173)
+  prefs: []
+  type: TYPE_NORMAL
+- en: resources, relative to executable
+  prefs: []
+  type: TYPE_NORMAL
+- en: loading [190](B21152_10.xhtml#_idIndexMarker413)-[193](B21152_10.xhtml#_idIndexMarker417)
+  prefs: []
+  type: TYPE_NORMAL
+- en: retained mode [173](B21152_09.xhtml#_idIndexMarker372)
+  prefs: []
+  type: TYPE_NORMAL
+- en: RPATH handling
+  prefs: []
+  type: TYPE_NORMAL
+- en: reference link [71](B21152_04.xhtml#_idIndexMarker160)
+  prefs: []
+  type: TYPE_NORMAL
+- en: rules [122](B21152_07.xhtml#_idIndexMarker268)
+  prefs: []
+  type: TYPE_NORMAL
+- en: S
+  prefs: []
+  type: TYPE_NORMAL
+- en: scripts
+  prefs: []
+  type: TYPE_NORMAL
+- en: automating, with CMake [151](B21152_08.xhtml#_idIndexMarker328)-[156](B21152_08.xhtml#_idIndexMarker339)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, to avoid repetitive commands [80](B21152_05.xhtml#_idIndexMarker168)-[82](B21152_05.xhtml#_idIndexMarker172)
+  prefs: []
+  type: TYPE_NORMAL
+- en: semantic versioning (SemVer) [136](B21152_07.xhtml#_idIndexMarker303)
+  prefs: []
+  type: TYPE_NORMAL
+- en: shaders [114](B21152_06.xhtml#_idIndexMarker249)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shared Object Name (soname) [161](B21152_08.xhtml#_idIndexMarker351)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simple Directmedia Layer (SDL) [99](B21152_06.xhtml#_idIndexMarker206)
+  prefs: []
+  type: TYPE_NORMAL
+- en: single-config [25](B21152_02.xhtml#_idIndexMarker042)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Software Development Kit (SDK) [135](B21152_07.xhtml#_idIndexMarker301)
+  prefs: []
+  type: TYPE_NORMAL
+- en: streamline installation
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add, using to [109](B21152_06.xhtml#_idIndexMarker236)-[111](B21152_06.xhtml#_idIndexMarker240)
+  prefs: []
+  type: TYPE_NORMAL
+- en: super build [145](B21152_08.xhtml#_idIndexMarker316)
+  prefs: []
+  type: TYPE_NORMAL
+- en: configuring [145](B21152_08.xhtml#_idIndexMarker315)
+  prefs: []
+  type: TYPE_NORMAL
+- en: integrating [145](B21152_08.xhtml#_idIndexMarker317)-[151](B21152_08.xhtml#_idIndexMarker325)
+  prefs: []
+  type: TYPE_NORMAL
+- en: SVN_REPOSITORY [44](B21152_03.xhtml#_idIndexMarker095)
+  prefs: []
+  type: TYPE_NORMAL
+- en: T
+  prefs: []
+  type: TYPE_NORMAL
+- en: target [29](B21152_02.xhtml#_idIndexMarker053)
+  prefs: []
+  type: TYPE_NORMAL
+- en: test options
+  prefs: []
+  type: TYPE_NORMAL
+- en: building [50](B21152_03.xhtml#_idIndexMarker113)-[53](B21152_03.xhtml#_idIndexMarker120)
+  prefs: []
+  type: TYPE_NORMAL
+- en: timer_lib [50](B21152_03.xhtml#_idIndexMarker114)
+  prefs: []
+  type: TYPE_NORMAL
+- en: toolchain files [231](B21152_11.xhtml#_idIndexMarker501)
+  prefs: []
+  type: TYPE_NORMAL
+- en: transitive dependencies [127](B21152_07.xhtml#_idIndexMarker278)
+  prefs: []
+  type: TYPE_NORMAL
+- en: U
+  prefs: []
+  type: TYPE_NORMAL
+- en: unit tests [168](B21152_09.xhtml#_idIndexMarker356)
+  prefs: []
+  type: TYPE_NORMAL
+- en: adding, to library [169](B21152_09.xhtml#_idIndexMarker360)
+  prefs: []
+  type: TYPE_NORMAL
+- en: running [172](B21152_09.xhtml#_idIndexMarker367), [173](B21152_09.xhtml#_idIndexMarker368)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unity [170](B21152_09.xhtml#_idIndexMarker364)
+  prefs: []
+  type: TYPE_NORMAL
+- en: unity builds [229](B21152_11.xhtml#_idIndexMarker494)
+  prefs: []
+  type: TYPE_NORMAL
+- en: V
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, using with [223](B21152_11.xhtml#_idIndexMarker479)-[226](B21152_11.xhtml#_idIndexMarker484)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio Code
+  prefs: []
+  type: TYPE_NORMAL
+- en: and CMake presets [217](B21152_11.xhtml#_idIndexMarker464), [218](B21152_11.xhtml#_idIndexMarker467)
+  prefs: []
+  type: TYPE_NORMAL
+- en: auto-formatting [221](B21152_11.xhtml#_idIndexMarker473), [222](B21152_11.xhtml#_idIndexMarker475)
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake Tools [212](B21152_11.xhtml#_idIndexMarker447)
+  prefs: []
+  type: TYPE_NORMAL
+- en: compile_commands.json, generating [220](B21152_11.xhtml#_idIndexMarker471)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Diff Folders [222](B21152_11.xhtml#_idIndexMarker476), [223](B21152_11.xhtml#_idIndexMarker478)
+  prefs: []
+  type: TYPE_NORMAL
+- en: feature [35](B21152_02.xhtml#_idIndexMarker070)
+  prefs: []
+  type: TYPE_NORMAL
+- en: setting up [19](B21152_01.xhtml#_idIndexMarker027), [20](B21152_01.xhtml#_idIndexMarker028)
+  prefs: []
+  type: TYPE_NORMAL
+- en: syntax highlighting [220](B21152_11.xhtml#_idIndexMarker470)
+  prefs: []
+  type: TYPE_NORMAL
+- en: versus Visual Studio [4](B21152_01.xhtml#_idIndexMarker001)
+  prefs: []
+  type: TYPE_NORMAL
+- en: W
+  prefs: []
+  type: TYPE_NORMAL
+- en: Windows
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, installing [4](B21152_01.xhtml#_idIndexMarker000)-[10](B21152_01.xhtml#_idIndexMarker013)
+  prefs: []
+  type: TYPE_NORMAL
+- en: using, from CMake [22](B21152_02.xhtml#_idIndexMarker031)
+  prefs: []
+  type: TYPE_NORMAL
+- en: workflow presets [90](B21152_05.xhtml#_idIndexMarker192), [91](B21152_05.xhtml#_idIndexMarker194)
+  prefs: []
+  type: TYPE_NORMAL
+- en: X
+  prefs: []
+  type: TYPE_NORMAL
+- en: Xcode
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake, using with [226](B21152_11.xhtml#_idIndexMarker485), [227](B21152_11.xhtml#_idIndexMarker486)
+  prefs: []
+  type: TYPE_NORMAL

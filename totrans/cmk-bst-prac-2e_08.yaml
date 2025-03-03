@@ -1,0 +1,763 @@
+- en: '6'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Automatically Generating Documentation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Documentation is—without a doubt—an essential part of all projects. Documentation
+    conveys information that is not implicitly available to the user. It is a way
+    of sharing the intent, functionality, capabilities, and restrictions regarding
+    a project and it enables both technical and non-technical people to work on a
+    project. However, it is indeed a time-consuming process to write documentation.
+    Thus, it is crucial to make use of the tools available for generating documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This chapter will show you ways of integrating Doxygen, `dot`, and PlantUML
+    into CMake to speed up the documentation process. These tools will let us lessen
+    the context switch between code and documentation and ease the maintenance burden
+    of documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand the skills shared in this chapter, we’ll cover the following
+    main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating documentation from your code
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Packaging and distributing documentation with CPack
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Creating dependency graphs of CMake targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s begin with the technical requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before you dive further into this chapter, you should have a good grasp of
+    the content covered in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging,
+    Deploying, and Installing a CMake Project*, and [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084),
+    *Integrating Third-Party Libraries* *and Dependency Management*. The techniques
+    that will be used in this chapter are all covered in those two chapters. Additionally,
+    it is recommended to obtain this chapter’s example content from [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06).
+    All the examples assume that you will be using the development environment container
+    provided by the project found at the following link: [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
+    This is a Debian-like environment that contains all the prerequisites installed
+    beforehand. Commands and outputs may differ slightly if a different environment
+    is used. If you are not using the provided Docker container, ensure that you have
+    installed Doxygen, PlantUML, and Graphviz in your environment. Consult your package
+    manager’s index for installation details.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s dive into the realm of documentation by learning ways of generating documentation
+    from existing code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating documentation from your code
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Most people, either knowingly or not, structure their software projects in an
+    organized way. The organization is a positive side effect of methodologies and
+    procedures such as **object-oriented** (**OO**) design, programming language rules,
+    personal preference, or habits, or is dictated by project rules. Although rules
+    and conventions tend to be boring, adhering to them results in a more understandable
+    project structure. When procedures, rules, order, and organization exist, the
+    computer can make sense of things. Documentation generation software leverages
+    that fact to our benefit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the most prominent tools to generate documentation out of code is Doxygen.
+    As a de facto standard for code documentation in C++, it integrates very well
+    with CMake. We will learn how we can integrate Doxygen with CMake to automatically
+    generate documentation for CMake projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding what Doxygen is
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Doxygen is very popular documentation software for C++ projects that allows
+    the generation of documentation from code. Doxygen understands C and C++ grammar
+    and can see the code structure in a way that a compiler would see it. This allows
+    Doxygen to dive into the structure of a software project and look into all class
+    definitions, namespaces, anonymous functions, encapsulation, variables, inheritance
+    relations, and so on. Doxygen combines this information with inline code documentation
+    written by the programmer. The final result is human-readable documentation in
+    various formats that is compatible with both online and offline reading.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to be able to make sense of code comments, Doxygen requires comments
+    to be in a predefined set of formats. The full documentation of how to create
+    code comments that Doxygen can understand can be found here: [https://www.doxygen.nl/manual/docblocks.html](https://www.doxygen.nl/manual/docblocks.html)
+    We will be using **Javadoc**-style comments in our examples, which are commonly
+    used, but feel free to use whatever suits your personal preference. An example
+    Javadoc comment for a C++ function is provided here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Doxygen also requires a **Doxyfile**, which essentially contains all the parameters
+    of documentation generation, such as output format, excluded file patterns, project
+    name, and so on. Because of the sheer number of configuration parameters, configuring
+    Doxygen may be intimidating at the start, but fear not—CMake will generate a Doxyfile
+    for you too.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As we dive further into this chapter, you will start to see the benefits of
+    using documentation generation software for your project. Through this, it is
+    way easier to keep the documentation consistent with code, and the ability to
+    read the code structure also makes graphing easier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s see how Doxygen and CMake work together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Doxygen with CMake
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: CMake, being a C++-oriented build system generator, has good support for integrating
+    external tools that are commonly used in C++ projects. As you would expect, integrating
+    Doxygen with CMake is pretty straightforward. We’ll utilize the `FindDoxygen.cmake`
+    module of CMake to integrate Doxygen into our projects. This module is, by default,
+    provided by the CMake installation and requires no extra setup.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FindDoxygen.cmake` is, as the name suggests, a module package file designated
+    to be consumed by the `find_package()` CMake function. Its primary use is locating
+    Doxygen in the environment, and also providing some extra utility functions to
+    enable documentation generation in a CMake project. To illustrate Doxygen’s abilities,
+    we will be following the `Chapter 6` `- Example 01` example for this section.
+    Our target is to generate documentation for a simple calculator library along
+    with its `README` file. The interface definition of this library looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `calculator` class implements the class interface defined in the `calculator_interface`
+    class. It is properly documented in Javadoc format. We will expect Doxygen to
+    generate `calculator` and `calculator_interface` classes, together with an inheritance
+    diagram. The class definition is in the `calculator.hpp` file and can be found
+    under the `include/chapter6/ex01` subdirectory of the `chapter6/ex01_doxdocgen`
+    directory. Additionally, we have a Markdown file named `README.md` in the `chapter6/ex01_doxdocgen`
+    directory—this contains essential information about the example project’s layout.
+    We expect this file to be the main page of the documentation. As our input material
+    is ready, let’s start diving into the example further by inspecting the example’s
+    `CMakeLists.txt` file, `chapter6/ex01_doxdocgen/CMakeLists.txt`, as usual. The
+    `CMakeLists.txt` file begins with finding the Doxygen package, as can be seen
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `find_package(...)` call will utilize the `FindDoxygen.cmake` module provided
+    by the CMake installation to find Doxygen in the environment if present. The `REQUIRED`
+    parameter is omitted in order to allow package maintainers to pack the project
+    without needing to install Doxygen beforehand, ensuring that Doxygen is detected
+    in their environment before proceeding further.. The subsequent lines are setting
+    several Doxygen configurations. These configurations will be placed into the Doxyfile
+    that will be generated by CMake. Detailed descriptions for each option are listed
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_OUTPUT_DIRECTORY`: Sets the output directory for Doxygen.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_GENERATE_HTML`: Instructs Doxygen to emit **HyperText Markup Language**
+    (**HTML**) output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_GENERATE_MAN`: Instructs Doxygen to emit `MAN` page output.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_AUTOLINK_SUPPORT`: Allows Doxygen to automatically link language symbols
+    and filenames to relevant documentation pages if available.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_HAVE_DOT`: Tells Doxygen the environment has the `dot` command available
+    that can be utilized for generating graphs. This will enable Doxygen to enrich
+    generated documentation with diagrams such as dependency, inheritance, and collaboration
+    diagrams.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_COLLABORATION_GRAPH`: Tells Doxygen to generate collaboration diagrams
+    for classes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_CLASS_GRAPH`: Tells Doxygen to generate class diagrams for classes.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_UML_LOOK`: Instructs Doxygen to generate **Unified Modeling Language**
+    (**UML**)-like diagrams.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_DOT_UML_DETAILS`: Adds type and parameter information to UML diagrams.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_DOT_WRAP_THRESHOLD`: Sets the line wrapping threshold for UML diagrams.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_CALL_GRAPH`: Instructs Doxygen to generate call graphs for functions
+    in function documentation.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOXYGEN_QUIET`: Suppresses Doxygen output generated to **standard** **output**
+    (**stdout**).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Doxygen’s set of options is pretty extensive and offers a lot more than just
+    the options we’ve covered. If you want to customize documentation generation further,
+    take a look at a full list of parameters that can be used in Doxyfiles at [https://www.doxygen.nl/manual/config.html](https://www.doxygen.nl/manual/config.html).
+    To set any Doxygen option in CMake, prefix the variable name with `DOXYGEN_` and
+    set the desired value using `set()`. With that side note written down, let’s go
+    back to the example code. The CMake code shown before is followed by the target
+    declarations. The following lines of code define a regular static library that
+    contains our example code for the documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Subsequently, the following lines of code define an executable that consumes
+    the static library target defined before:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Lastly, the `doxygen_add_docs(...)` function is called to specify the code
+    that we wish to generate documentation from, as can be seen next:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `doxygen_add_docs(...)` function is a function provided by the `FindDoxygen.cmake`
+    module. Its sole purpose is to provide a convenient way to create a CMake target
+    for documentation generation without explicitly dealing with Doxygen. The signature
+    for the `doxygen_add_docs(...)` function is shown here (non-relevant parameters
+    are omitted):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first parameter of the `targetName` function is the name of the documentation
+    target. The function will generate a custom target named `targetName`. This target
+    will trigger Doxygen and create documentation from the code when built. The next
+    list of parameters, `filesOrDirs`, is a list of files or directories that contain
+    the code we want to generate from the documentation. The `ALL` parameter is used
+    to make CMake’s `ALL` meta-target depend on the documentation target created by
+    the `doxygen_add_docs(...)` function, so documentation generation is automatically
+    triggered when the `ALL` meta-target is built. Lastly, the `COMMENT` parameter
+    is for making CMake print a message to the output when the target is being built.
+    `COMMENT` is primarily useful for diagnostic purposes so that we can quickly know
+    whether documentation is being generated or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After this brief introduction of `doxygen_add_docs(...)`, let’s go back to the
+    example code and explain what the `doxygen_add_docs(...)` function call does in
+    our scenario. It creates a target named `ch6_ex01_doxdocgen_generate_docs`, adds
+    `${CMAKE_CURRENT_LIST_DIR}` to the documentation generation directory, requests
+    the `ALL` meta-target to depend on it, and specifies a `COMMENT` parameter that
+    will be printed when the target is built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All right—it’s time to test whether this works or not. Go into the `chapter06/`
+    directory and configure the project in the `build/` directory with the following
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Check the CMake output to see whether the configuration succeeded or not. If
+    the configuration was successful, that means CMake succeeded in finding Doxygen
+    in the environment. You should be able to see that in the CMake output, as can
+    be seen next:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After a successful configuration, let’s try to build it with the following
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the build output, you should be able to see that the text we’ve given into
+    the `COMMENT` parameter is being printed to the CMake output. This means the documentation
+    target is being built and Doxygen is running. Notice that we did not specify a
+    `--target` argument to the CMake `build` command, which effectively causes CMake
+    to build the `ALL` meta-target. Since we have given the `ALL` argument to the
+    `doxygen_add_docs(...)` function, a `ch6_ex01_doxdocgen_generate_docs` target
+    is built too. The output of the `build` command should look similar to the output
+    given here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It seems we have succeeded in building the project and the documentation. Let’s
+    inspect the generated documentation in the `${CMAKE_CURRENT_BINARY_DIR}/docs`
+    output folder, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here, we can see Doxygen has emitted the `HTML` and `MAN` page output into
+    the `html/` and `man/` directories. Let’s inspect the result for each type. To
+    inspect the generated `MAN` page, simply type the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To use `man` in the dev container supplied with the repo run, use `sudo unminimize`
+    first, as the container image is optimized for size. The command will open the
+    Man page and show something like this screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.1 an example man page generated with Doxygen
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Great! Our code comments turned into a Man page. Similarly, let’s inspect the
+    HTML output as well. Use a browser of your choice to open the `build/ex01_doxdocgen/docs/html/index.html`
+    file, as shown next:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will display the main page of your documentation, as shown in the following
+    screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_02.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.2 – The main page of the documentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the preceding screenshot, we can see that Doxygen has rendered the `README.md`
+    Markdown file content into the main page. Note that the main page is just provided
+    as an example. Doxygen can embed an arbitrary number of Markdown files into generated
+    documentation. It even replaces filenames, class names, and function names with
+    links to the relevant documentation. This is achieved by Doxygen’s `AUTOLINK`
+    feature and the `@ref` Doxygen command. Click on the `calculator` link under the
+    `calculator` class. The `calculator` class documentation page should look similar
+    to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_03.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.3 – Generated HTML documentation for the calculator class (basic layout)
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the preceding screenshot, we can see that Doxygen is aware that the `calculator`
+    class inherits from `calculator_interface` and draws an inheritance diagram for
+    the `calculator` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: Doxygen requires the `dot` tool to render diagrams. The `dot` tool is available
+    in the Graphviz software package.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Also, the generated diagrams contain function names and encapsulation symbols
+    in UML style. Let’s take a look at the detailed member function documentation
+    shown in the following screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_04.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.4 – Generated documentation for the div() function of the calculator
+    class
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As we can see in *Figure 6**.3*, Doxygen did a pretty good job of putting the
+    contents into a clear, readable layout. If you were reading this API documentation,
+    you would be happy. Lastly, let’s navigate to `main.cpp` to look at the documentation
+    of `main.cpp` to illustrate what a dependency graph looks like. You can see a
+    representation of the documentation page in the following screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_05.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.5 – main.cpp documentation page
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The dependency graph in the preceding screenshot shows that the `main.cpp`
+    file directly depends on `iostream` and `chapter6/ex06/calculator.hpp` and indirectly
+    depends on `chapter6/ex06/calculator_interface.hpp` files. It is pretty useful
+    to have dependency information available in the documentation. The consumers will
+    know exactly what the file dependencies are without having to dive into the code.
+    If you scroll down a bit more, you will see a call graph for the `main()` function
+    as well, as can be seen in the following screenshot:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_06.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.6 – main() function call graph
+  prefs: []
+  type: TYPE_NORMAL
+- en: Splendid! We have generated documentation with graphs for our code in two different
+    formats with fewer than 20 lines of extra CMake code. How cool is that? Now, with
+    that power in your hands, it is hard to find an excuse to avoid documentation.
+    But our journey in this chapter is not over yet. The upcoming section will enrich
+    our knowledge by teaching us how to embed custom UML diagrams into documentation.
+    Let’s go!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Embedding custom UML diagrams into documentation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In the previous section, we learned how to utilize Doxygen to generate diagrams
+    and documentation for our CMake project, but not every diagram is inferable from
+    the code. We might want to draw custom diagrams to illustrate the elaborate relationships
+    of an entity with an external system that is not available in the code context.
+    To tackle this, the obvious choice would be somehow making this context available
+    in the code or comments to utilize documentation generation again. Well, as could
+    be expected, this too is possible with Doxygen. Doxygen allows the embedding of
+    PlantUML diagrams into comments, which will enable us to draw any diagram that
+    PlantUML supports. But before starting to put PlantUML code in Doxygen comments,
+    there’s a small thing that must be taken care of: enabling PlantUML support in
+    Doxygen. We have got ourselves a starting point. Let’s roll!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Enabling PlantUML support in Doxygen is pretty easy. Doxygen requires a `PLANTUML_JAR_PATH`
+    variable to be set to the location of the `plantuml.jar` file in the environment.
+    So, we have to find out where that file is located. To do that, we will use the
+    `find_path(...)` CMake function. The `find_path(...)` function is similar to `find_program(...)`,
+    except it is designated for locating the path of files instead of program locations.
+    So, that means we should be able to locate the path of `plantuml.jar` with `find_path(...)`,
+    give this path to Doxygen, and ... profit! Let’s put that theory to the test.
+    We will be following `Chapter 6` `- Example 02` for this section. As ever, let’s
+    dive into the `CMakeLists.txt` file of the example code, located at the `chapter06/ex02_doxplantuml/CMakeLists.txt`
+    path. Let’s start inspecting from the `find_path(...)` call, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the `find_path(...)` call here, `PLANTUML_JAR_PATH` is the name of the output
+    variable. `NAMES` are the filenames that will be searched in the search locations.
+    `HINTS` are extra paths in addition to default search locations. These are useful
+    for discovering stuff in non-standard locations. Lastly, the `REQUIRED` parameter
+    is used for finding `plantuml.jar` a requirement, so CMake will fail and exit
+    when `plantuml.jar` cannot be located. The following Doxygen configuration section
+    is exactly the same as our previous example, `Chapter 6` `- Example 01`, except
+    we are setting `DOXYGEN_PLANTUML_JAR_PATH` to the PlantUML directory path we found
+    with the `find_path(...)` call. Also, variables that are not required for this
+    example are omitted too. Doxygen should be able to use PlantUML right now. Let’s
+    test that with an example PlantUML graph, embedded into the `src/main.cpp` source
+    file, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `@startuml` and `@enduml` Doxygen comment keywords are for indicating the
+    beginning and the end of a PlantUML diagram, respectively. Regular PlantUML code
+    can be placed inside of a `@startuml - @enduml` block. In our example, we have
+    a simple system interaction diagram of the application. If everything goes as
+    expected, we should see the embedded PlantUML diagram in the `main()` function’s
+    documentation. Let’s generate documentation by building the example with the code
+    shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The documentation for the second example should be built now. Open the generated
+    `build/ex02_doxplantuml/docs/html/index.html` HTML documentation with the browser
+    of your choice, by running the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you scroll down to the main function, you’ll see our UML sequence diagram,
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_07.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.7 – Embedded PlantUML diagram in the main() function documentation
+  prefs: []
+  type: TYPE_NORMAL
+- en: In *Figure 6**.6*, we can see that Doxygen has generated a PlantUML diagram
+    and embedded it into the documentation. With that, we’re now able to embed custom
+    diagrams into our generated documentation as well. This will allow us to explain
+    complicated systems and relationships without having to interact with external
+    graphing tools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have the right tools for generating documentation, it’s time to
+    learn how to package and deliver them. In the next section, we will learn about
+    ways of delivering documentation, together with the software involved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Packaging and distributing documentation with CPack
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Packaging documentation is no different than packaging software and its artifacts—documentation
+    is an artifact of a project, after all. Thus, we will use the techniques we learned
+    in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging, Deploying, and
+    Installing a CMake Project*, to package our documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you have not yet read [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging,
+    Deploying, and Installing a CMake Project*, it is strongly recommended to do so
+    before reading this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To illustrate this section, we will return to `Chapter 6` `- Example 01`. We
+    will make the documentation we have generated in this example installable and
+    packageable. Let’s dive back into the `CMakeLists.txt` file located in the `chapter06/ex01_doxdocgen/`
+    folder. With the following code, we will make the `html` and `man` documentation
+    installable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Remember that we were using `install(DIRECTORY...)` to install any kind of
+    folder while preserving its structure in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071),
+    *Packaging, Deploying, and Installing a CMake Project*? This is exactly what is
+    happening here. We are making the generated documentation installable by installing
+    `docs/html` and `docs/man` in the default documentation and man page directories
+    provided by the `GNUInstallDirs` module. Also, recall that if a thing is installable,
+    it means it is also packageable since CMake is able to generate the required packaging
+    code from `install(...)` calls. So, let’s include the `CPack` module to enable
+    packaging for this example too. The code is illustrated in the following snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And there we have it! Simple as that. Let’s try building and packaging the
+    example project by invoking the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So, let’s summarize what is happening here. We have configured and built the
+    `chapter06/` code and invoked CPack to package the project into the `build/pak`
+    folder using the generated `CPackConfig.cmake` file. To check whether everything
+    is in order, let’s extract the contents of the generated package into the `/tmp/ch6-ex01`
+    path by invoking the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After the extraction completes, the documentation must become available under
+    the `/tmp/ch6-ex01/usr/share` path. Since we have used a non-default path, we
+    have used the `MANPATH` environment variable to let the `man` command know the
+    path of our documentation. Let’s start by checking whether we can access the man
+    pages by invoking the `man` command, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `chapter6_ex01_calculator` name is automatically inferred by Doxygen from
+    the `chapter6::ex01::calculator` class name. You should be able to see the man
+    page output we covered in the previous section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Up to now, we have learned a great deal about generating and packaging documentation.
+    Up next, we will be learning about generating dependency graphs of CMake targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating dependency graphs of CMake targets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In the previous sections, we have been covering the documentation and graphing
+    of the software code, but in a large project, we may also need to document and
+    visualize the CMake code as well. The relations between CMake targets may be complex,
+    and this may make keeping track of all the dependencies hard. Fortunately, CMake
+    can again help with this by providing a graph showing all dependencies between
+    targets. By calling `cmake --graphviz=my-project.dot /path/to/build/dir`, CMake
+    will create files in the DOT language that contain how targets depend on each
+    other. The DOT language is a description language for graphs and can be interpreted
+    by a multitude of programs, the most famous one being the freely available Graphviz.
+    DOT files can be converted to images or even `dot` command-line utility from Graphviz,
+    like this: `dot -Tpng filename.dot -``o out.png`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As [*Chapter 3*](B30947_03.xhtml#_idTextAnchor054) offers more varied targets,
+    let’s run this command on the `build` folder for this chapter. This will produce
+    an output similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B30947_06_08.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 6.8 – The project structure of chapter3 visualized with the DOT language
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Behavior and options can be controlled by the variables provided in `CMakeGraphVizOptions`.
+    When creating DOT graphs, CMake will look for a file called `CMakeGraphVizOptions.cmake`
+    in the `PROJECT_SOURCE_DIR` and `PROJECT_BINARY_DIR` directories and, if found,
+    will use the values provided within. An example of such a config file might look
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, CMake creates dependency graphs for all targets. Setting `GRAPHVIZ_GENERATE_PER_TARGET`
+    and `GRAPHVIZ_GENERATE_DEPENDERS` to `FALSE` will reduce the number of files generated.
+    A full set of available options can be found in the CMake documentation at [https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we briefly introduced Doxygen and learned how to generate documentation
+    from code, as well as how to package generated documentation for deployment. It
+    is crucial to have these skills under your belt when it comes to any software
+    project. Generating documentation from code greatly reduces the effort for technical
+    documentation and has virtually no maintenance cost. From the perspective of a
+    software professional, automating deterministic stuff and generating inferable
+    information in different representations is most desired. This approach creates
+    space and time for other engineering tasks that require more human problem-solving
+    skills. Automating tasks reduces the maintenance cost, makes the product more
+    stable, and reduces the overall need for human resources. It is a way of converting
+    pure human effort to spent electricity by enabling a machine to do the same job.
+    Machines are amazingly better at performing deterministic jobs than humans. They
+    are never sick, rarely break, and are easily scaled and never tired. Automation
+    is a way of harnessing this untamed power.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The main orientation of this book is not to teach you how to do things, but
+    to teach you how to make a machine work for a particular task. This approach indeed
+    requires learning first, but keep in mind that if you are doing a costly operation
+    that could be done by a machine manually more than once, you are wasting your
+    precious time. Invest in automating things—it is a profitable investment that
+    pays for itself quickly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will learn how we can improve our code quality by integrating
+    unit testing, code sanitizers, static code analysis, micro-benchmarking, and code
+    coverage tools into a CMake project, and of course, we will be automating all
+    of this as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See you in the next chapter!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'After completing this chapter, you should be able to answer the following questions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is Doxygen?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the easiest way to integrate Doxygen into a CMake project?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Can Doxygen draw diagrams and graphs? If so, how can we enable this behavior?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which Doxygen tags should be used to embed a PlantUML diagram into Doxygen documentation?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which configuration steps should be taken to enable Doxygen to use PlantUML?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Given that man/page output is present under the `build/` folder, how can we
+    make this documentation installable?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Doxygen is the de facto standard of documentation generation tools for C and
+    C++ projects.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Since CMake already provides a `find` module for Doxygen, this could be done
+    by using the `find_package(...)` CMake command.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Yes—Doxygen can draw graphs given that graphing software such as `dot`, Graphviz,
+    and PlantUML is available in the environment. To enable DOT graphing, setting
+    `HAVE_DOT` to `TRUE` is sufficient. For PlantUML, `PLANTUML_JAR_PATH` needs to
+    be set to the path that contains the `plantuml.jar` file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`@startuml` and `@enduml`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`PLANTUML_JAR_PATH` needs to be set to the path that contains the `plantuml.jar`
+    file.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: With the help of the `install(DIRECTORY)` command.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

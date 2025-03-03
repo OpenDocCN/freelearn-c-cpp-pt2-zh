@@ -1,0 +1,556 @@
+- en: '3'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Using FetchContent with External Dependencies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we are up and running with CMake, one of the most useful features to
+    be aware of is `FetchContent`. `FetchContent` is a CMake feature that allows you
+    to bring external libraries (also called **dependencies**) into your project.
+    It only takes a few lines of code and is quick and convenient to use. It does
+    rely on the dependency also using CMake, but the good news is that a considerable
+    proportion of open source software written in C and C++ uses CMake to build itself.
+    Even if the dependency doesn’t use CMake, adding CMake support is often quite
+    easy and makes consuming the library a lot simpler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll see how to use `FetchContent` in the context of our project to introduce
+    some new useful functionality to our app. We’ll also cover some subtleties to
+    be aware of while using it. By the end of the chapter, you’ll be able to use external
+    libraries with confidence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why FetchContent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using FetchContent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Describing our dependency
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting options on dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Updating our application
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why FetchContent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '`FetchContent` is a relatively new addition to CMake, only appearing in CMake
+    3.11 in March 2018\. `FetchContent` allows you to provide a path to a source library
+    (this is usually a repository URL of some kind, though a URL to a ZIP file or
+    local directory path is also supported) and have CMake download (or **fetch**)
+    the code for you. In the most basic case, this path is all that you need to provide
+    (we’ll cover some of the additional arguments shortly).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When to use FetchContent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: An incredibly valuable property of `FetchContent` is that it allows you to keep
+    the source of any third-party dependency out of your codebase. When working with
+    a third-party library without using `FetchContent`, there are a few different
+    options, all with various trade-offs. One solution is to copy/paste the third-party
+    library into your source directory (ideally in a well-designated folder). If that
+    project is using CMake, it’s possible to use a feature called `add_subdirectory`
+    to add that library relatively cleanly. The alternative is adding the separate
+    library files into your own `CMakeLists.txt` files, which can get unwieldy quickly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having the source readily available has some advantages, but great care must
+    be taken not to make any modifications. If this happens, it will make future upgrades
+    incredibly painful. You must also be careful when it comes to licensing and attribution
+    (ensuring a `LICENSE` file exists in that library’s root folder is particularly
+    important).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another potential approach is to rely on Git submodules. They have the advantage
+    of keeping the source files of third-party dependencies out of your project (at
+    least as tracked files) but using Git submodules can be fiddly, and makes cloning
+    and updating your own project more complex.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FetchContent` solves all of these problems, keeping good hygiene between your
+    code and dependencies and avoiding introducing any unwanted complexity or maintenance
+    headaches.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One last point to note is that using `FetchContent` will make the dependency
+    available at configure time. This means your target can depend on the targets
+    provided by the dependency at configure time (as if the dependency was local).
+    The dependency will be built at the same time as your code, with the build artifacts
+    added to a folder called `_deps` inside your `build` folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When not to use FetchContent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: While `FetchContent` is an incredibly useful tool, it is not without its downsides.
+    The main trade-off to be aware of when building using `FetchContent` is that you
+    are building your dependencies at the same time as your own code. This often adds
+    unnecessary work and makes it difficult to rebuild your code without also rebuilding
+    the dependencies (ideally, we want to build our dependencies once and then forget
+    about them). This isn’t so much of a problem with small dependencies, but as we’ll
+    see later, there are better alternatives when using larger dependencies (we’ll
+    cover this in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies*
+    *and ExternalProject_Add*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: One other factor to be aware of when using both `FetchContent` and `ExternalProject_Add`
+    is that the dependencies that are referenced might become unavailable in the future
+    (a repository may be deleted, or a remote file could be renamed or moved). These
+    are risks we need to account for, and taking steps such as forking public repos
+    or self-hosting important files might be something to consider.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lastly, if a dependency we wish to use doesn’t currently have CMake support,
+    we can’t use it with `FetchContent`. For smaller dependencies, adding CMake support
+    might not be too difficult, but for larger dependencies, it can be challenging.
+    The ongoing maintenance effort of keeping the CMake support up to date can also
+    be a significant overhead (this is where CMake find modules can help, described
+    in [*Chapter 7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for*
+    *Your Libraries*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we’re familiar with `FetchContent` and where it fits into the bigger
+    CMake picture, we can dive into the concrete commands needed to use it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using FetchContent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Now that we’ve covered what `FetchContent` is and why we’d use it, let’s look
+    at how we can integrate a dependency into our project using `FetchContent` commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The library we’ll be introducing is a cross-platform timer library called `timer_lib`.
+    `timer_lib` will allow our `Game of Life` application to run on its own without
+    the user needing to hit the *Enter* key to transition to the next stage of the
+    board.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The preceding snippet is taken from `ch3/part-1/CMakeListst.txt` in the book’s
+    GitHub repository and appears directly under the CMake commands we reviewed in
+    [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello CMake!* (see `ch2/part-3/CMakeLists.txt`).
+    We’ll now walk through each command in turn.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Including other CMake code
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s begin by seeing how we can use CMake library code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `include` command is used to bring in CMake functionality stored in a separate
+    file. `FetchContent` is a **module** provided by CMake, which can be found in
+    your CMake install folder. This breaks down per platform as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Windows: `C:\Program Files\CMake\share\cmake-3.28\Modules`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'macOS: `/Applications/CMake.app/Contents/share/cmake-3.28/Modules`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Linux: `/opt/cmake-3.28.1-linux-aarch64/share/cmake-3.28/Modules`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The preceding paths match the location where we installed CMake in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. In the case of Windows
+    and macOS, the paths will usually only differ based on the CMake version. With
+    Linux, the path may be quite different depending on how CMake was installed (for
+    example, if CMake was installed using a package manager such as `apt`, the install
+    location will likely be `/usr/share/cmake-<version>/Modules`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake knows to search in the `Modules/` folder to look for these default modules
+    (maintained by the CMake developers). It’s also possible to use the `include`
+    command to bring in our own CMake files. For example, we can write a quick CMake
+    function to list all CMake variables. Let’s make a new file called `CMakeHelpers.cmake`
+    and add this command as a function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Add the following code and then save the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Don’t worry about understanding the implementation of this function right now.
+    This is just an example to show how to extract useful CMake functionality to reuse
+    in our `CMakeLists.txt` files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: From `ch3/part-1/CMakeLists.txt`, we can now write `include(CMakeHelpers.cmake)`
+    anywhere after the `project` command and then call `list_cmake_variables()` at
+    the end of our script. To see all CMake variables printed to the terminal, after
+    making the suggested changes, run `cmake -B build` from `ch3/part-1` (if you’d
+    rather not implement the changes yourself, navigate to `ch3/part-2` for a working
+    example of this functionality).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The output from the command is quite noisy, and not something to leave on by
+    default. The sort order is also a little unconventional, appearing in case-sensitive
+    sorted order (uppercase `Z` appears before lowercase `a`), but occasionally enabling
+    such debug functionality can help us better understand what CMake is doing behind
+    the scenes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: One difference you may have spotted between our `include` call and the `FetchContent`
+    `include` call is that we had to specify the full filename including the extension
+    (`include(CMakeHelpers.cmake)` as opposed to `include(CMakeHelpers)`). The reason
+    for this is that when we omit the `.cmake` extension, instead of looking for a
+    file, CMake looks for a module. A module isn’t any different from our example
+    file. The only difference is that it can be found in `CMAKE_MODULE_PATH`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As a quick test to verify this, we can add the following code before our call
+    to `include`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding command adds the directory with our `CMakeLists.txt` file to `CMAKE_MODULE_PATH`.
+    Now `include(CMakeHelpers)` works. This isn’t recommended but is to show that
+    there’s no special syntax or commands to turn a regular `.cmake` file into a module.
+    `CMakeHelpers.cmake` only needs to be discoverable by looking through directories
+    in `CMAKE_MODULE_PATH`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To learn more about CMake’s `include` command, see [https://cmake.org/cmake/help/latest/command/include.html](https://cmake.org/cmake/help/latest/command/include.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Describing our dependency
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'With the `FetchContent` functionality now available to us, we can specify the
+    library we want to depend on:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`FetchContent_Declare` allows us to describe how to retrieve our dependency.
+    In the command shown here, we’ve used a subset of options for simplicity. These
+    are usually sufficient but many more are available. To begin, we will name the
+    dependency. It’s important to note that this name can be completely arbitrary
+    and does not come from the library itself. Here we could instead have called the
+    dependency `CoolTimingLibrary` and used that name in the `FetchContent_MakeAvailable`
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'GIT_TAG 2d7217 # v1.0'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: timer_lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/pr0g/timer_lib.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG 2d7217114f1ab10d9b46a2e7544009867b80b59c)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# 2d72171 will work too'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dependency-name>
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_DIR <path/to/dependency>)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: ├── minimal-cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: │   └── ch3
+  prefs: []
+  type: TYPE_NORMAL
+- en: │       └── part-1
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── timer-lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: timer_lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_DIR ../../../../timer-lib)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_MakeAvailable(timer_lib)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: LibraryA
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: LibraryB
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent_MakeAvailable(LibraryA LibraryB)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_include_directories(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: PRIVATE third-party/timer-lib/include)
+  prefs: []
+  type: TYPE_NORMAL
+- en: target_link_directories(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME} PRIVATE
+  prefs: []
+  type: TYPE_NORMAL
+- en: third-party/timer-lib/lib/macos
+  prefs: []
+  type: TYPE_NORMAL
+- en: third-party/timer-lib/lib/win
+  prefs: []
+  type: TYPE_NORMAL
+- en: third-party/timer-lib/lib/linux)
+  prefs: []
+  type: TYPE_NORMAL
+- en: target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: as-c-math
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/pr0g/as-c-math.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG 616fe946956561ef4884fc32c4eec2432fd952c8)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'FetchContent_MakeAvailable(timer_lib add_library (we’ll learn more about add_library
+    in *Chapter 4*, *Creating Libraries for FetchContent*), which contains the name
+    of the target we want to link to in target_link_libraries. In this case, it’s
+    the name of the project, using the same technique we discussed in *Chapter 2*,
+    *Hello CMake!* (using the ${PROJECT_NAME} CMake variable). Let’s add that dependency
+    now to ensure we are linking against it correctly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -G "Ninja Multi-Config"
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[11/11] Linking C executable _deps/as-c-math-build/Debug/as-c-math-test'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: option(AS_MATH_ENABLE_TEST "Enable testing" ON)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(AS_MATH_ENABLE_TEST)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: as-c-math
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/pr0g/as-c-math.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG 616fe946956561ef4884fc32c4eec2432fd952c8)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(AS_MATH_ENABLE_TEST OFF CACHE INTERNAL "")
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(AS_MATH_ENABLE_COVERAGE OFF CACHE INTERNAL "")
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent_MakeAvailable(timer_lib as-c-math)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(AS_MATH_ENABLE_TEST ON CACHE BOOL "Enable testing").
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: //Enable coverage
+  prefs: []
+  type: TYPE_NORMAL
+- en: AS_MATH_ENABLE_COVERAGE:BOOL=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: //Enable testing
+  prefs: []
+  type: TYPE_NORMAL
+- en: AS_MATH_ENABLE_TEST:BOOL=ON
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'set given invalid arguments for CACHE mode: missing type and docstring'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: //Enable coverage
+  prefs: []
+  type: TYPE_NORMAL
+- en: AS_MATH_ENABLE_COVERAGE:INTERNAL=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: //Enable testing
+  prefs: []
+  type: TYPE_NORMAL
+- en: AS_MATH_ENABLE_TEST:INTERNAL=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE

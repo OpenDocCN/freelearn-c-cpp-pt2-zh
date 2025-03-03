@@ -1,0 +1,1119 @@
+- en: '4'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Creating Libraries for FetchContent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with
+    External Dependencies*, we covered a lot of ground understanding how to use `FetchContent`
+    as an application developer. This is super useful, and if you’re not interested
+    in creating your own libraries, then this knowledge will take you a long way.
+    If, however, you’re excited about the possibility of creating a library to share
+    across more than one of your projects (or even better, with the broader open source
+    community!), then this chapter is for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this chapter, we’re going to cover the CMake commands to create a library,
+    and then make it easily accessible through `FetchContent`. The skills you’ll learn
+    here are useful for your libraries but can also be applied to other projects not
+    using CMake. Depending on the size and complexity of the library, it can often
+    only take a few commands to add `FetchContent` support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Making a library compatible with FetchContent
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Moving Game of Life to a library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Making Game of Life a shared library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Final cross-platform additions
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Interface libraries
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The code examples in this chapter can be found at https://github.com/PacktPublishing/Minimal-CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Making a library compatible with FetchContent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Returning to our ongoing project, let’s begin by identifying an area of code
+    that is ripe for reuse: `array`. Let’s pull this functionality out to a separate
+    library so that we can consume it from our main application and potentially reuse
+    it in other projects in the future (or share it with other developers who might
+    want to try it out).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Project structure
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before we look at the `CMakeLists.txt` file, let’s make some minor changes to
+    the project structure to ensure our library is following common conventions. These
+    changes aren’t strictly needed (the libraries we included earlier in [*Chapter
+    3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External Dependencies*
+    (`timer_lib` and `as-c-math`), do not adhere to these guidelines), but they’re
+    useful to know and will help keep our projects clean and organized as they grow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Starting with the `array/` folder we saw throughout [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032)*,*
+    *Hello, CMake!*, and [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent
+    with External Dependencies*, the structure looked like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: To support reuse, we are going to move `array.h` and `array.c` to a new folder
+    outside of our Game of Life application (if you’re following along, create a new
+    folder called `minimal-cmake-array` outside the `minimal-cmake` repository and
+    copy `array.h` and `array.c` to the locations shown next).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To keep things self-contained in the *Minimal CMake* book repository ([https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)),
+    we’ve moved things to `ch4/part-1/lib/array` for now (think of this as being synonymous
+    with a top-level CMake project).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The structure is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice the introduction of two new directories, `include` and `src`. These names
+    are well-established across the open source ecosystem (why `include` and `source`
+    or `inc` and `src` are not more common is likely an accident of history). By convention,
+    the `include` folder is for public headers (those headers to be included by a
+    client); any headers that are solely used within the library itself (private headers)
+    should be kept within the `src` folder, along with the source files themselves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another possibility would be to leave `array.h` and `array.c` at the root,
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is arguably fine for small libraries but does come with some downsides.
+    If we want to add more source files, these can clutter the root directory and
+    make navigation more difficult. Keeping implementation details under the `src`
+    folder is a helpful signal to users of the library that they can focus their attention
+    elsewhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An advantage of creating an `include` folder and subdirectory with the name
+    of the project is to make `#include` directives in the consuming application or
+    library clearer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It’s much more helpful to see the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Compare the preceding code to the following, which is more difficult to understand:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: With the first approach, it’s clear exactly where the dependency is coming from.
+    This also reduces the likelihood of naming collisions with other libraries (this
+    approach falls under the umbrella of *code hygiene*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: An alternative is to prefix your library files with an identifier. For example,
+    we could have decided to rename `array.h` to `mc-array.h`, or `minimal-cmake-array.h`,
+    and omitted the subfolder. Prefixing files, as well as function and type names
+    (for example, `mc_array_push`) with a project identifier, is also generally good
+    practice to help avoid naming collisions with other libraries. In C++, namespaces
+    are the preferred mechanism for this, but in C, we must rely on explicit functions
+    and type prefixes. This is the approach we’ll take with our array implementation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the example presented here, the `src` folder does not have any subfolders.
+    This is arbitrary and remains up to the library author to decide. A flat structure
+    with no hierarchy under `src` might be fine for a smaller library. For a larger
+    library, we might decide to group certain files for better organization. Since
+    everything under the `src` folder can be thought of as private to the library,
+    the structure under `src` shouldn’t impact clients of the library, so it can be
+    anything you like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A quick note about our C implementation is that we may want to use this library
+    alongside a C++ application in the future. To accommodate this, we need to wrap
+    or annotate all functions with `extern "C"` to ensure that when we’re compiling
+    this library with C++, *name mangling* (the process by which C++ supports function
+    overloading) doesn’t kick in (in C, you can’t overload functions and the symbol
+    names remain unchanged). We also need to ignore `extern "C"` when compiling as
+    normal C code. To achieve this, we can use the `__cplusplus` macro to check if
+    we’re compiling C++ code or not (`__cplusplus` will only be defined when using
+    C++). Putting this all together, we end up with the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lastly, adopting the folder structure discussed previously will make life easier
+    when we reach the topic of installing. In practice, for smaller libraries, this
+    may be considered a form of over-engineering, especially if you never plan to
+    install such libraries, but we’ve covered it for completeness as this is something
+    we’ll need later on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMakeLists.txt file
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the folder structure in place, we can review the `CMakeLists.txt` file
+    for our new `array` library. The `CMakeLists.txt` file is included in its entirety
+    here. We’ll walk through each line step by step, as we did in earlier chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s skim over the first two lines as they’re the same as before:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: There’s the obligatory `cmake_minimum_required` command, followed by the equally
+    important `project` command. The only difference here is that we’ve given our
+    library a name that matches the functionality it provides (an array interface),
+    and we’ve also included the prefix we intend to use throughout the project (in
+    this case, `mc` for *Minimal CMake*). This might be overkill, and there are alternative
+    approaches offered by CMake that let you *namespace* your library by using `ALIAS`.
+    We’ll return to this in a later chapter, but what we have here is sufficient for
+    our purposes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating the library
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Next, we have the first new command we’ve seen in a while:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Since we’re creating a library, as opposed to an application, we must use the
+    `add_library` command instead of `add_executable`. By default, CMake will create
+    a static library for us (with a static library, the contents will be baked into
+    our executable and linked at compile time). To override this behavior, when configuring
+    the CMake project (running `cmake -B build`), it is possible to pass `-DBUILD_SHARED_LIBS=ON`
+    to switch to building a shared library. To ensure this works across all platforms
+    (Windows, macOS, and Linux), there’s a bit more we need to do, so we’ll leave
+    this for now. To provide a setting different from the default, it’s possible to
+    add an option to our `CMakeLists.txt` file, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: For more information about the `BUILD_SHARED_LIBS` option, please see [https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html](https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To hardcode either static or shared, it’s possible to provide the library type
+    to `add_library` by passing `STATIC` or `SHARED` after the library name. Here’s
+    an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_sources(${PROJECT_NAME} PRIVATE PRIVATE here as array.c is an implementation
+    detail and we don’t want – or need it – to be recompiled. The only difference
+    is we’re referring to it at its new location.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The remaining new command (which we briefly touched on in [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065),
+    *Using FetchContent with External Dependencies*, when looking at linking to dependencies),
+    is `target_include_directories`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command tells the dependency the location the include files are relative
+    to. We’re setting this directly on the target, and we want this property to be
+    visible to clients, or users of the library, which is why we specify `PUBLIC`
+    instead of `PRIVATE`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Generator expressions
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Looking at the previously mentioned `target_include_directories` command, the
+    third line of it may look a little alien at first. What you’re seeing is a feature
+    provided by CMake called **generator expressions**. If we temporarily remove the
+    generator expression, the command looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s remind ourselves of the file structure we reviewed previously:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: This ensures an application can include `array.h` by using `#include <minimal-cmake/array.h>`.
+    This is great because it means clients don’t need to mess around setting their
+    own `include` directories; they just link against the target and inherit this
+    property automatically.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: It’s a nice idea to include an example, either as a small application or a snippet
+    in the `README` file of your project to show how to include the dependency and
+    what the include paths are. Users can figure this out, but the more information
+    you can provide, the easier you make adopting the library and the less likely
+    people will get stuck trying to use it.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Let’s return to the generator expression we saw previously:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In its simplest form, the structure is `$<condition:value>`. If `condition`
+    is set (it exists), then `value` is provided; otherwise, the expression evaluates
+    to nothing. Generator expressions are a bit like a ternary operator (`<condition>
+    ? <true> : <false>`) in C or C++. It’s essentially a terse, declarative way to
+    write conditions in your `CMakeLists.txt` scripts without resorting to more verbose
+    `if`/`else` branches that follow a more imperative approach.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: There’s a balance to strike when using generator expressions; they can be convenient
+    and simplify `CMakeLists.txt` files, but if overused, they can make code harder
+    to understand. Strive to use them judiciously and if you think something is clearer
+    with an explicit `if`/`else` statement, use that approach instead. Splitting up
+    complex generator expressions using several CMake variables can also be a valuable
+    approach rather than trying to achieve everything in one single expression.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The term `cmake -B build`, CMake first runs the configure step and then runs
+    the generate step. This is where generator expressions are evaluated, and project
+    files are created. This is shown in the output of the `cmake` command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Working with generator expressions can be difficult, and being able to debug
+    what an expression becomes is incredibly useful. Unfortunately, the normal CMake
+    `message` statements to output logs to the console don’t work with generator expressions
+    due to the time they’re evaluated (configure time versus generation time). To
+    work around this, it’s possible to write the result of an expression to a file
+    by using this approach:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: When running `cmake -B build`, this will write the result of the generator expression
+    (`"$<...>"`) to the filename specified (this will be inside the `build/` folder
+    if a relative path is provided). The contents of the file can then be checked
+    to verify the value is what’s expected.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To learn more about generator expressions and the many variations supported
+    by them, visit [https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Include interfaces
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'We covered why specifying `target_include_directories` is important and what
+    generator expressions are, but not why we needed `BUILD_LOCAL_INTERFACE` specifically.
+    The reason for this is to allow us to use different include paths based on whether
+    we’re building the library or using it after it has been installed. Installing
+    is important for libraries and is something we’ll cover in more detail in [*Chapter
+    7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for Your Libraries*,
+    but for now, just knowing this alternative exists is enough. It is common to see
+    something akin to this in a library `CMakeLists.txt` file:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Based on the context, the target will have different include paths set if it’s
+    depended on and built within the same build tree (as with `FetchContent` or `add_subdirectory`)
+    or installed to another location and depended on from there (what’s called an
+    imported target). It’s common for include files for an installed library to be
+    different from that of the library itself (the developer might wish to flatten
+    the include hierarchy to make the library interface simpler to use). It’s generally
+    a nice idea to specify `BUILD_LOCAL_INTERFACE` when first creating a library.
+    It’s then possible to add `INSTALL_INTERFACE` should you later decide to add install
+    support. By being explicit about this, you avoid needing to match the build and
+    install interfaces in the future.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: BUILD_LOCAL_INTERFACE versus BUILD_INTERFACE
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: You’re likely to come across `BUILD_INTERFACE` in addition to `BUILD_LOCAL_INTERFACE`
+    out in the wild. The `BUILD_LOCAL_INTERFACE` generator expression is a newer addition
+    (added in CMake `3.26`) and it will only expand its contents when used by another
+    target in the same build system, whereas `BUILD_INTERFACE` will expand its contents
+    when used by another target in the same build system and when the property is
+    exported using the `export` command. As we don’t intend to export our targets
+    from the build tree, we’re opting for the more restrictive of the two commands.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Finally, we set the compile features to a standard version to ensure we get
+    consistent behavior across different compilers:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s all we need to make our library available to other users through `FetchContent`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Using our library
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'We can now update our app’s existing `CMakeLists.txt` file to bring in our
+    new array library:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: ├── app
+  prefs: []
+  type: TYPE_NORMAL
+- en: │   ├── CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: │   └── main.c
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── array
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── CMakeLists.txt
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── include
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── src
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: FetchContent_Declare(
+  prefs: []
+  type: TYPE_NORMAL
+- en: minimal-cmake-array
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_DIR ../../lib/array)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: // forward declare board
+  prefs: []
+  type: TYPE_NORMAL
+- en: typedef struct mc_gol_board_t mc_gol_board_t;
+  prefs: []
+  type: TYPE_NORMAL
+- en: // lifetime
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc_gol_board_t* mc_gol_create_board(int32_t width, int32_t height);
+  prefs: []
+  type: TYPE_NORMAL
+- en: void mc_gol_destroy_board(mc_gol_board_t* board);
+  prefs: []
+  type: TYPE_NORMAL
+- en: // process
+  prefs: []
+  type: TYPE_NORMAL
+- en: void mc_gol_update_board(mc_gol_board_t* board);
+  prefs: []
+  type: TYPE_NORMAL
+- en: // queries
+  prefs: []
+  type: TYPE_NORMAL
+- en: int32_t mc_gol_board_width(const mc_gol_board_t* board);
+  prefs: []
+  type: TYPE_NORMAL
+- en: int32_t mc_gol_board_height(const mc_gol_board_t* board);
+  prefs: []
+  type: TYPE_NORMAL
+- en: bool mc_gol_board_cell(
+  prefs: []
+  type: TYPE_NORMAL
+- en: const mc_gol_board_t* board, int32_t x, int32_t y);
+  prefs: []
+  type: TYPE_NORMAL
+- en: // mutations
+  prefs: []
+  type: TYPE_NORMAL
+- en: void mc_gol_set_board_cell(
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc_gol_board_t* board, int32_t x, int32_t y, bool alive);
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: option(MC_GOL_SHARED "Enable shared library (dynamic linking)" OFF)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(MC_GOL_LIB_TYPE STATIC)
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(MC_GOL_SHARED)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(MC_GOL_LIB_TYPE SHARED)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_library(${PROJECT_NAME} ${MC_GOL_LIB_TYPE})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: include(GenerateExportHeader)
+  prefs: []
+  type: TYPE_NORMAL
+- en: generate_export_header(${PROJECT_NAME} BASE_NAME mc_gol)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_include_directories(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: PUBLIC $<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_include_directories(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PUBLIC "$<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/build/mc_gol_export.h,
+    we’ll see that several macros have been generated for us. The most important one
+    for our purposes is MC_GOL_EXPORT. With our current settings on macOS or Linux,
+    this will currently expand to nothing (as all symbols are visible/public by default),
+    but on Windows, when building a shared library, we’ll see that the following has
+    been generated:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: The compiler directives, `__declspec(dllexport)` and `__declspec(dllimport)`,
+    are Microsoft-specific. When building a shared library, `__declspec(dllexport)`
+    is used to make symbols available outside the library, and when a library is used,
+    `__declspec(dllimport)` must be present to show which symbols are being imported.
+    Leveraging CMake to generate these macros for us is very convenient; it is guaranteed
+    to do the right thing whatever platform we build for, and whatever compiler settings
+    we have enabled.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'If we decide to build `mc-gol` as a static library again, then `MC_GOL_EXPORT`
+    will expand to nothing. There is an added `#define` we can set when building a
+    static version of the library, which in this case is `MC_GOL_STATIC_DEFINE`. We
+    can define this like so:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: MC_GOL_EXPORT mc_gol_board_t* mc_gol_create_board(
+  prefs: []
+  type: TYPE_NORMAL
+- en: int32_t width, int32_t height);
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -DMC_GOL_SHARED=ON
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./build/Debug/minimal-cmake_game-of-life_console.exe
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'C:/Path/to/minimal-cmake/ch4/part-3/app/build/Debug/minimal-cmake_game-of-life_console.exe:
+    error while loading shared libraries: ?: cannot open shared object file: No such
+    file or directory'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: set PATH=C:\Path\to\minimal-cmake\ch4\part-3\app\build\_deps\minimal-cmake-gol-build\Debug;%PATH%
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(WIN32)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc-gol PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_CURRENT_BINARY_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(WIN32)
+  prefs: []
+  type: TYPE_NORMAL
+- en: add_custom_command(
+  prefs: []
+  type: TYPE_NORMAL
+- en: TARGET ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: POST_BUILD
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:mc-gol>
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<TARGET_FILE_DIR:${PROJECT_NAME}>
+  prefs: []
+  type: TYPE_NORMAL
+- en: VERBATIM)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'dyld[10168]: Library not loaded: @rpath/libmc-gol.dylib'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Reason: tried: ''/path/to/minimal-cmake/ch4/part-3/app/build/_deps/minimal-cmake-gol-build/libmc-gol.dylib''
+    (no such file)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '${PROJECT_NAME} PROPERTIES BUILD_RPATH @loader_path) # macOS only'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '${PROJECT_NAME} PROPERTIES BUILD_RPATH $ORIGIN) # Linux only'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: PROPERTIES
+  prefs: []
+  type: TYPE_NORMAL
+- en: BUILD_RPATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"$<$<PLATFORM_ID:Linux>:$ORIGIN>$<$<PLATFORM_ID:Darwin>:@loader_path>")set_target_properties
+    for macOS and Linux separately, and then a cross-platform combined version using
+    generator expressions to set the right value for the RPATH value, depending on
+    the platform (it won’t set anything on Windows in this case).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To inspect the value of `RPATH`, it’s possible to use the `otool` utility on
+    macOS or the `readelf` utility on Linux (both are tools that display object files
+    for their respective platforms). The `otool -l minimal-cmake_game-of-life_console`
+    command on macOS and `readelf -d minimal-cmake_game-of-life_console` on Linux
+    will show the values listed.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The following is a snippet of the output from `otool` on macOS:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: '0x..001 (NEEDED)  Shared library: [ld-linux-aarch64.so.1]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 0x..01d @loader_path and $ORIGIN appear as expected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To learn more about `RPATH` handling in CMake, go to [https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling).
+    There are also many different approaches when it comes to configuring shared libraries
+    and we’ve only just scratched the surface. Here, we looked at one possible solution,
+    but it won’t work for everything. This is an area to continue exploring, depending
+    on the types of applications you’ll be creating. We’ll be certain to revisit these
+    topics later in this book when we discuss installing libraries and packaging projects.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Final cross-platform additions
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Before we wrap up, let’s cover a few small updates we can make to ensure our
+    library is more consistent across different platforms. We can use the now-familiar
+    `set_target_properties` command to apply these settings only to our library.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The first two related properties are `C_VISIBILITY_PRESET` and `VISIBILITY_INLINES_HIDDEN`.
+    We set `C_VISIBILITY_PRESET` to `hidden` and `VISIBILITY_INLINES_HIDDEN` to `ON`.
+    This ensures that the symbol visibility behavior between the Visual Studio compiler
+    (MSVC) on Windows and the Clang/GCC compilers on macOS/Linux is the same. This
+    will ensure that, by default, unless symbols are explicitly annotated with `MC_GOL_EXPORT`,
+    they will remain hidden. This helps prevent incompatibilities between platforms.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With these settings enabled, if we generate our export header again on macOS
+    or Linux by running `cmake -B build` as normal, we’ll see the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is better than seeing the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: With these settings enabled, if we try to use a symbol (a type or function)
+    that has not been explicitly exported on macOS or Linux, we’ll get a linker error,
+    just as we did on Windows. If we’re working on a cross-platform library, it’s
+    advisable to keep behavior as consistent as possible across platforms. There are
+    also good reasons for not automatically exporting all symbols by default to reduce
+    the export symbol table size and overall binary size.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The next two properties are `C_STANDARD_REQUIRED` and `C_EXTENSIONS`. We’ll
+    set `C_STANDARD_REQUIRED` to `ON` and `C_EXTENSIONS` to `OFF`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Setting `C_STANDARD_REQUIRED` to `ON` ensures that we get the minimum C language
+    version we specified in `target_compile_features` with `c_std_17`. It’s also possible
+    to set the language version using `set_target_properties` and `C_STANDARD 17`,
+    though it’s arguable that `target_compile_features` is a little clearer, which
+    is why it’s preferred in this book.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Setting `C_EXTENSIONS` to `OFF` ensures we don’t inadvertently use language
+    features added by different compiler vendors that do not appear in the C standard
+    (or C++ standard if we used `CXX_EXTENSIONS`). Again, this is to help enforce
+    cross-platform code that doesn’t rely on features available only on one compiler
+    or platform. If you intend to build for one platform or compiler, this is less
+    important, but it’s a good practice to get into. This is especially true if one
+    day you decide to port your code to another platform. It’ll be a lot easier if
+    you aren’t relying on specific compiler features.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The final expression looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: For good measure, we also add `MC_GOL_STATIC_DEFINE` if we’re not building `mc-gol`
+    as a shared library (again, this is not strictly necessary in this case, but it’s
+    a good, low-effort defensive measure to avoid potentially annoying link time issues
+    in the future, depending on the state of `mc_gol_export.h`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To see everything in one place, you can go to [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)
+    and review `ch4/part-5/lib/gol/CMakeLists.txt`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: That wraps up all changes to our *Game of Life* library! There’s just one more
+    important topic we’ve yet to cover before we move on to the next chapter.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Interface libraries
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In addition to static and shared libraries, there is another well-known library
+    type often referred to as `.h` files). It is not compiled or linked ahead of time,
+    the `.h` files are simply included and then compiled with the source of the main
+    application.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Header-only libraries are popular because of their ease of integration (you
+    can include the `.h` file in your project and things will usually just work).
+    The downside is that you pay a cost by compiling that library whenever you change
+    your code, which, depending on the complexity of the library, can add a lot of
+    overhead. Header-only libraries tend to be popular in C++ with template libraries,
+    which require their implementation to be present in the header file itself.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Fortunately, CMake offers a straightforward way to create header-only libraries
+    that can be used like any other library. A complete header-only `CMakeLists.txt`
+    file is shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: The file should look remarkably familiar to the earlier `CMakeLists.txt` files
+    we’ve seen. The major difference is the addition of the `INTERFACE` keyword, which
+    has replaced the use of `STATIC` or `SHARED` in the `add_library` command, and
+    `PUBLIC` or `PRIVATE` in the specific `target_...` commands.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The `INTERFACE` keyword informs CMake that there are no source files to build
+    for this target and that no artifact (library file) will be produced. All it does
+    is provide requirements for using it (in our case, we’re specifying where to find
+    the include files, and that `c_std_17` or above is needed to use it). The `INTERFACE`
+    keyword also allows us to confer a list of source files for a dependent target
+    to compile via the `target_sources` command (we'll see a use for this in [*Chapter
+    9*](B21152_09.xhtml#_idTextAnchor195)*, Writing Tests for* *the Project*).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The preceding code is a contrived example where we’ve extracted a single useful
+    utility function not specific to *Game of Life* that we may want to use (and add
+    to) in the future. The function is `try_wrap`, which is essentially a more robust
+    modulus function that better handles negative numbers when wrapping.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Now, we can use this library in `mc-gol` like so:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’re not technically linking against the library, but we must add the target
+    as a dependency to `target_link_libraries` so that the include search paths for
+    our target application get populated. Then, we just need to add `#include <minimal-cmake/utils.h>`
+    to `gol.c` to access the function.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: As this is still a C header-only library, we need to annotate our function implementation
+    with `static` to avoid linker errors. This will cause copies of our function to
+    be generated in each translation unit (`.c` file) they are used, which isn’t ideal,
+    but will work for us in this simple case. C++ has much better support for header-only
+    libraries. In this case, the `inline` keyword should be preferred (`inline` is
+    also supported in C, but it means something slightly different than it does in
+    C++, and its usage is a bit more complicated).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Using header-only libraries this way provides all the advantages discussed in
+    [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External
+    Dependencies*, which include keeping your code and dependencies separate, as well
+    as making setting up include paths a lot simpler.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: You can find a full example in `ch4/part6/lib/utils/CMakeLists.txt` and `ch4/part6/app/CMakeLists.txt`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you’ve made it this far, give yourself a well-deserved pat on the back –
+    you’ve come a long way! In this chapter, we discussed how to make a library compatible
+    with `FetchContent`. This involved reviewing the project’s physical structure,
+    how to create a library, and how to use generator expressions to control include
+    interfaces. Then, we looked at how to make use of our new library. With that in
+    place, we extracted our *Game of Life* logic to a separate library with a new
+    interface. We looked in depth at how to make it a shared library and the many
+    concerns to account for across Windows, macOS, and Linux, as well as how CMake
+    can help us (in terms of export headers, custom commands for DLL copying on Windows,
+    and customizing target properties to help with relocatable libraries on macOS
+    and Linux). We wrapped up by making some minor improvements to help avoid cross-platform
+    issues and looking at interface (or header-only) libraries and how to create them
+    using CMake.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you haven’t already, please take some time to familiarize yourself with the
+    examples that were discussed throughout this chapter by going to [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)
+    and trying to configure and build the projects (see `ch4` for step-by-step examples).
+    Working examples are incredibly helpful when it comes to building understanding
+    and familiarity with these concepts. Hopefully, some of the examples should be
+    easy to extract and build on for your projects. Understanding how to create libraries
+    is a major milestone and presents exciting opportunities to write code others
+    can easily start using.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Now that you have a solid understanding of creating libraries, it’s time to
+    look at how to leverage some useful CMake features to make day-to-day development
+    faster, easier, and more reliable. We’ll do exactly that in the next chapter.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE

@@ -1,0 +1,1373 @@
+- en: '4'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Setting Up Your First CMake Project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We have now gathered enough information to start talking about the core function
+    of CMake: *building projects*. In CMake, a **project** contains all the source
+    files and the configuration necessary to manage the process of bringing our solutions
+    to life. Configuration starts by performing all the checks: verifying if the target
+    platform is supported, ensuring the presence of all essential dependencies and
+    tools, and confirming the compatibility of the provided compiler with the required
+    features.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the preliminary checks are completed, CMake proceeds to generate a buildsystem
+    tailored to the selected build tool. Then, the buildsystem is executed, which
+    means compiling the source files and linking them together with their respective
+    dependencies to create the output artifacts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resulting artifacts can be distributed to consumers in different ways. They
+    can be shared directly with users as binary packages, allowing them to install
+    them on their systems using package managers. Alternatively, they can be distributed
+    as single-executable installers. Additionally, end-users have the option to create
+    the artifacts themselves by accessing projects shared in an open-source repository.
+    In this scenario, users can utilize CMake to compile the projects on their own
+    machines and subsequently install them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Leveraging CMake projects to their fullest extent can significantly enhance
+    the development experience and the overall quality of the generated code. By harnessing
+    the power of CMake, numerous mundane tasks can be automated, such as executing
+    tests after the build and running code coverage checkers, formatters, validators,
+    linters, and other tools. This automation not only saves time but also ensures
+    consistency and promotes code quality throughout the development process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To unlock the power of CMake projects, we’ll make a few key decisions first:
+    how to correctly configure the project as a whole and how to partition it and
+    set up the source tree so that all files are neatly organized in the right directories.
+    By establishing a coherent structure and organization from the beginning, the
+    CMake project can be effectively managed and scaled as it evolves.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next up, we’ll take a look at the project’s build environment. We’ll find out
+    things like the architecture we’re working with, the tools at our disposal, the
+    features they support, and the language standard we’re using. To make sure everything
+    is in sync, we’ll compile a test C++ file and see if our chosen compiler meets
+    the standard requirements we’ve set for our project. It’s all about ensuring a
+    smooth fit between our project, the tools we’re using, and the standards we’ve
+    chosen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the basic directives and commands
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Partitioning your project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Thinking about the project structure
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Scoping the environment
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring the toolchain
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Disabling in-source builds
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this book, always use the recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace the placeholders `<build tree>` and `<source tree>` with
+    appropriate paths. As a reminder: **build tree** is the path to the target/output
+    directory and **source tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the basic directives and commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In *Chapter 1*, *First Steps with CMake*, we already looked at a simple project
+    definition. Let’s revisit it. It is a directory with a `CMakeLists.txt` file that
+    contains a few commands configuring the language processor:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**chapter01/01-hello/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the same chapter, in the section named *Project files*, we learned about
+    a few basic commands. Let’s explain them in depth here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specifying the minimum CMake version
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: It’s important to use the `cmake_minimum_required()` command at the very top
+    of your project files and scripts. This command not only verifies if the system
+    has the correct CMake version but also implicitly triggers another command, `cmake_policy(VERSION)`,
+    which specifies the policies to be used for the project. These policies define
+    how commands behave within CMake, and they have been introduced over the course
+    of CMake’s development to accommodate changes and improvements in the supported
+    languages and CMake itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To keep the language clean and simple, the CMake team introduced policies whenever
+    there was a backward-incompatible change. Each policy enables the new behavior
+    associated with that change. These policies ensure that projects can adapt to
+    the evolving features and functionalities of CMake, while preserving compatibility
+    with older codebases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By calling `cmake_minimum_required()`, we tell CMake that it needs to apply
+    the default policies configured at the version provided in the argument. When
+    CMake gets upgraded, we don’t need to worry about it breaking our project, as
+    the new policies coming with the new version won’t be enabled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Policies can affect every single aspect of CMake, including other important
+    commands like `project()`. For that reason, it is important to start your `CMakeLists.txt`
+    file by setting the version you’re working with. Otherwise, you will get warnings
+    and errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each CMake version introduces numerous policies. However, it’s not necessary
+    to delve into details unless you encounter challenges when upgrading older projects
+    to the latest CMake version. In such cases, it is recommended to refer to the
+    official documentation on policies for comprehensive information and guidance:
+    [https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining languages and metadata
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It’s recommended to put the `project()` command just after `cmake_minimum_required()`,
+    even though it’s technically not. Doing so will ensure that we use the right policies
+    when configuring the project. We can use one of its two forms:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We need to specify `<PROJECT-NAME>`, but the other arguments are optional.
+    Calling this command will implicitly set the following variables:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'What languages are supported? Quite a few. And you can use more than one at
+    a time! Here’s a list of language keywords you can use to configure your project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ASM, ASM_NASM, ASM_MASM, ASMMARMASM, ASM-ATT`: Dialects of Assembler'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`C`: C'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CXX`: C++'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CUDA`: Compute Unified Device Architecture by Nvidia'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OBJC`: Objective-C'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`OBJCXX`: Objective-C++'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Fortran`: Fortran'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HIP`: Heterogeneous(-compute) Interface for Portability (for Nvidia and AMD
+    platforms)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ISPC`: Implicit SPMD Program Compiler’s language'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CSharp`: C#'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Java`: Java (requires extra steps, see official documentation)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CMake enables both C and C++ by default, so you may want to explicitly specify
+    only `CXX` for your C++ projects. Why? The `project()` command will detect and
+    test the available compilers for your chosen language, so stating the required
+    ones will allow you to save time during the configuration stage, by skipping any
+    checks for unused languages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Specifying the `VERSION` keyword will automatically set the variables that
+    can be used to configure packages, or exposed in the header files to be consumed
+    during the compilation (we’ll cover this in the *Configuring the headers* section
+    of *Chapter 7*, *Compiling C++ Sources with CMake*):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can also set `DESCRIPTION` and `HOMEPAGE_URL`, which will set the following
+    variables for similar purposes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `cmake_minimum_required()` and `project()` commands will allow us to create
+    a basic listfile and initialize an empty project. While the structure may not
+    have been a significant concern for the small, single-file projects, it becomes
+    crucial as the codebase expands. How do you prepare for that?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Partitioning your project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As our solutions grow in terms of lines of code and the number of files they
+    contain, it becomes apparent that we must address the looming challenge: either
+    we begin partitioning the project, or risk being overwhelmed by its complexity.
+    There are two ways we can tackle this problem: splitting the CMake code and relocating
+    the source files to subdirectories. In both cases, we aim to follow the design
+    principle called **separation of concerns**. Put simply, we break down the code
+    into smaller parts, grouping together closely related functionality while keeping
+    other pieces of code separate to establish clear boundaries.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We talked a bit about partitioning CMake code when discussing listfiles in *Chapter
+    1*, *First Steps with CMake*. We spoke about the `include()` command, which allows
+    CMake to execute the code from an external file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This method helps with the separation of concerns, but only a little – specialized
+    code is extracted to separate files and can even be shared across unrelated projects,
+    but it can still pollute the global variable scope with its internal logic, if
+    the author is not careful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You see, calling `include()` doesn’t introduce any additional scopes or isolations
+    beyond what is already defined within the file. Let’s see why this is a potential
+    problem by considering an example, a piece of software that supports a small car
+    rental company. It will have many source files defining different aspects of the
+    software: managing customers, cars, parking spots, long-term contracts, maintenance
+    records, employee records, and so on. If we were to put all these files in a single
+    directory, finding anything would be a nightmare. Therefore, we create a number
+    of directories in the main directory of our project and move the related files
+    inside it. Our `CMakeLists.txt` file might look similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/01-partition/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'That’s all great, but as you can see, we still have the list of source files
+    from the nested directory in a top-level file! To increase the separation of concerns,
+    we could extract the list of sources to another listfile and store it in a `sources`
+    variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/02-include/cars/cars.cmake**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can reference this file with the `include()` command to gain access
+    to the `sources` variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/02-include/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake would effectively set `sources` in the same scope as `add_executable`,
+    filling the variable with all the files. This solution works, but it has a few
+    flaws:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**The variables from the nested directory will pollute the top-level scope
+    (and vice versa)**:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: While it’s not an issue in a simple example, in more complex, multi-level trees
+    with multiple variables used in the process, it can quickly become a hard-to-debug
+    problem. What if we have multiple included listfiles that define their `sources`
+    variable?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**All of the directories will share the same configuration**:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This issue shows its true colors as projects mature over the years. Without
+    any granularity, we have to treat every source file the same, and we cannot specify
+    different compilation flags, choose a newer language version for some parts of
+    the code, and silence warnings in chosen areas of the code. Everything is global,
+    meaning that we need to introduce changes to all of the translation units at the
+    same time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**There are shared compilation triggers**:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Any changes to the configuration will mean that all the files will have to be
+    recompiled, even if the change is meaningless for some of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**All the paths are relative to the top level**:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that in `cars.cmake`, we had to provide a full path to the `cars/car.cpp`
+    file. This results in a lot of repeated text ruining the readability and going
+    against the **Don’t Repeat Yourself** (**DRY**) principle of clean coding (unnecessary
+    repetition leads to mistakes). Renaming a directory would be a struggle.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The alternative is to use the `add_subdirectory()` command, which introduces
+    a variable scope and more. Let’s take a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Managing scope with subdirectories
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It’s a common practice to structure your project following the natural structure
+    of the filesystem, where nested directories represent the discrete elements of
+    the application, the business logic, GUI, API, and reporting, and finally, separate
+    directories with tests, external dependencies, scripts, and documentation. To
+    support this concept, CMake offers the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: As already established, this adds a source directory to our build. Optionally,
+    we may provide a path that built files will be written to (`binary_dir` or the
+    build tree). The `EXCLUDE_FROM_ALL` keyword will disable the automatic building
+    of targets defined in the subdirectory (we’ll cover **targets** in the next chapter).
+    This may be useful for separating parts of the project that aren’t needed for
+    the core functionality (like *examples* or *extensions*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add_subdirectory()` will evaluate the `source_dir` path (relative to the current
+    directory) and parse the `CMakeLists.txt` file in it. This file is parsed within
+    the directory scope, eliminating the issues mentioned in the previous method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables are isolated to the nested scope.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The nested artifacts can be configured independently.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Modifying the nested `CMakeLists.txt` file doesn’t require rebuilding unrelated
+    targets.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Paths are localized to the directory and can be added to the parent **include
+    path** if desired.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'This is what the directory structure looks like for our `add_subdirectory()`
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here, we have two `CMakeLists.txt` files. The top-level file will use the nested
+    directory, `cars`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/03-add_subdirectory/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The last line is used to link the artifacts from the `cars` directory to the
+    `Rental` executable. It is a target-specific command, which we’ll discuss in depth
+    in the next chapter: *Chapter 5*, *Working with Targets*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s see what the nested listfile looks like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/03-add_subdirectory/cars/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this example, I have used `add_library()` to produce a globally visible
+    **target** `cars`, and added the `cars` directory to its public **include directories**
+    with `target_include_directories()`. This informs CMake where the `cars.h` resides,
+    so when `target_link_libraries()` is used, the `main.cpp` file can consume the
+    header without providing a relative path:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can see the `add_library()` command in the nested listfile, so did we start
+    working with libraries in this example? Actually, no. Since we used the `OBJECT`
+    keyword, we’re indicating we’re only interested in producing the **object files**
+    (exactly as we did in the previous example). We just grouped them under a single
+    logical target (`cars`). You may already have a sense of what a **target** is.
+    Hold that thought – we’ll explain the details in the next chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When to use nested projects
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the previous section, we briefly mentioned the `EXCLUDE_FROM_ALL` argument
+    used in the `add_subdirectory()` command to indicate extraneous elements of our
+    codebase. The CMake documentation suggests that if we have such parts living inside
+    the source tree, they should have their own `project()` commands in their `CMakeLists.txt`
+    files so that they can generate their own buildsystems and can be built independently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Are there any other scenarios where this would be useful? Sure. For example,
+    one scenario would be when you’re working with multiple C++ projects built in
+    one **CI**/**CD** pipeline (perhaps when building a framework or a set of libraries).
+    Alternatively, maybe you’re porting the buildsystem from a legacy solution, such
+    as GNU Make, which uses plain **makefiles**. In such a case, you might want an
+    option to slowly break things down into more independent pieces – possibly to
+    put them in a separate build pipeline, or just to work on a smaller scope, which
+    could be loaded by an IDE such as **CLion**. You can achieve that by adding the
+    `project()` command to the listfile in the nested directory. Just don’t forget
+    to prepend it with `cmake_minimum_required()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since project nesting is supported, could we somehow connect related projects
+    that are built side by side?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keeping external projects external
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While it is technically possible to reference the internals of one project
+    from another in CMake, it is not a regular or recommended practice. CMake does
+    provide some support for this, including the `load_cache()` command to load values
+    from another project’s cache. However, using this approach can result in problems
+    with cyclical dependencies and project coupling. It’s best to avoid this command
+    and make a decision: should our related projects be nested, connected through
+    libraries, or merged into a single project?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'These are the partitioning tools at our disposal: *including listfiles*, *adding
+    subdirectories*, and *nesting projects*. But how should we use them so our projects
+    stay maintainable and easy to navigate and extend? To do this, we need a well-defined
+    project structure.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thinking about the project structure
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s no secret that as a project grows, it becomes harder and harder to find
+    things in it – both in listfiles and in the source code. Therefore, it is very
+    important to maintain the project hygiene right from the start.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imagine a scenario where you need to deliver some important, time-sensitive
+    changes, and they don’t fit well in either of the two directories in your project.
+    Now, you need to additionally push a *cleanup commit* to restructure the file
+    hierarchy to fit your changes neatly. Or, worse, you decide to just shove them
+    anywhere and add a TODO to deal with the issue later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Over the course of the year, these problems accumulate, the technical debt grows,
+    and so does the cost of maintaining the code. This becomes extremely troublesome
+    when there’s a crippling bug in a live system that needs a quick fix or when people
+    unfamiliar with the codebase need to introduce occasional changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, we need a good project structure. But what does this mean? There are a
+    few rules that we can borrow from other areas of software development like system
+    design. The project should have the following characteristics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Easy to navigate and extend
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Well bounded (project-specific files should be contained to the project directory)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Individual targets follow the hierarchical tree
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There isn’t one definitive solution, but out of the various project structure
+    templates available online, I suggest using this one as it is simple and extensible:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_04_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 4.1: An example of a project structure'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This project outlines the directories for the following components:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cmake`: Shared macros and functions, find_modules, and one-off scripts'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`src`: Source and header files for binaries and libraries'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`test`: Source code for automated tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In this structure, the `CMakeLists.txt` file should exist in the following
+    directories: the top-level project directory, `test`, and `src` and all its subdirectories.
+    The main listfile shouldn’t declare any build steps on its own, but instead, it
+    should configure the general aspects of the project and delegate the responsibility
+    of building to the nested listfiles with the `add_subdirectory()` command. In
+    turn, these listfiles may delegate this work to even deeper layers if needed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some developers suggest separating the executables from the libraries and creating
+    two top-level directories instead of one: `src` and `lib`. CMake treats both artifacts
+    the same, and separation at this level doesn’t really matter. Feel free to follow
+    that model if it’s your preference.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Having multiple directories in the `src` directory comes in handy for bigger
+    projects. But if you’re building just a single executable or library, you may
+    skip them and store your source files directly in `src`. In any case, remember
+    to add a `CMakeLists.txt` file there and execute any nested listfiles as well.
+    This is how your file tree might look for a single, simple target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_04_02.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 4.2: The directory structure of an executable'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In *Figure 4.1*, we see a `CMakeLists.txt` file in the root of the `src` directory
+    – it will configure the key project settings and include all listfiles from nested
+    directories. The `app1` directory (visible in *Figure 4.2*) contains another `CMakeLists.txt`
+    file along with the `.cpp` implementation files: `class_a.cpp` and `class_b.cpp`.
+    There’s also the `main.cpp` file with the executable’s entry point. The `CMakeLists.txt`
+    file should define a target that uses these sources to build an executable – again,
+    we’ll learn how to do that in the next chapter.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Our header files are placed in the `include` directory and can be used to declare
+    symbols for other C++ translation units.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Next, we have a `lib3` directory, which contains a library specific to this
+    executable only (libraries used elsewhere in the project or exported externally
+    should live in the `src` directory). This structure offers great flexibility and
+    allows for easy project extensions. As we continue adding more classes, we can
+    conveniently group them into libraries to improve compilation speed. Let’s see
+    what a library looks like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_04_03.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 4.3: The directory structure of a library'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Libraries should adhere to the same structure as executables, with a minor
+    distinction: an optional `lib1` directory is added to the include directory. This
+    directory is included when the library is intended for external use beyond the
+    project. It contains public header files that other projects will consume during
+    compilation. We’ll return to this subject when we start building our own libraries
+    in *Chapter 7*, *Compiling C++ Sources with CMake.*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, we have discussed how files are laid out in a directory structure. Now,
+    it’s time to take a look at how individual `CMakeLists.txt` files come together
+    to form a single project and what their role is in a bigger scenario.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_04_04.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 4.4: How CMake merges listfiles together in a single project'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the preceding figure, each box represents a `CMakeLists.txt` listfile residing
+    in each directory, while the labels in italics represent the actions executed
+    by each file (from top to bottom). Let’s analyze this project once more from CMake’s
+    perspective (for all the details, look at the example in the `ch04/05-structure`
+    directory):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The execution starts from the root of the project – that is, from a `CMakeLists.txt`
+    listfile residing at the top of the source tree. This file will set the minimum
+    required CMake version with the appropriate policies, set the project name, supported
+    languages, and global variables, and include the files from the `cmake` directory,
+    so that their contents are available globally.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The next step is to enter the scope of the `src` directory by calling the `add_subdirectory(src
+    bin)` command (we’d like to put compiled artifacts in `<binary_tree>/bin` rather
+    than `<binary_tree>/src`).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'CMake reads the `src/CMakeLists.txt` file and discovers that its only purpose
+    is to add four nested subdirectories: `app1`, `app2`, `lib1`, and `lib2`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CMake enters the variable scope of `app1` and learns about another nested library,
+    `lib3`, which has its own `CMakeLists.txt` file; then the scope of `lib3` is entered.
+    As you may have noticed, this is a depth-first traversal of the directory structure.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `lib3` library adds a static library target with the same name. CMake returns
+    to the parent scope of `app1`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `app1` subdirectory adds an executable that depends on `lib3`. CMake returns
+    to the parent scope of `src`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CMake will continue entering the remaining nested scopes and executing their
+    listfiles until all `add_subdirectory()` invocations have been completed.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CMake returns to the top-level scope and executes the remaining command `add_subdirectory(test)`.
+    Each time, CMake enters the new scope and executes commands from the appropriate
+    listfile.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: All the targets are collected and checked for their correctness. CMake now has
+    all the necessary information to generate a buildsystem.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: It’s important to note that the previous steps occur in the exact order in which
+    we wrote the commands in our listfiles. In some cases, this order is significant,
+    while in others, it may not be as crucial. We will delve deeper into this topic
+    in the next chapter, *Chapter 5*, *Working with Targets*, to understand its implications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, when is the right time to create the directories to contain all of the elements
+    of the project? Should we do it right from the start – create everything needed
+    for the future and keep the directories empty – or wait until we actually have
+    the files that need to go in their own category? This is a choice – we could follow
+    the **Extreme Programming** (**XP**) rule **YAGNI** (**you aren’t gonna need it**),
+    or we could try to make our project future-proof and lay good foundations for
+    new developers to come.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Try to aim for a good balance between these approaches – if you suspect that
+    your project might someday need an `extern` directory, then add it (your version
+    control system may require an empty `.keep` file to check a directory into the
+    repository).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another effective approach to guide others in placing their external dependencies
+    is by creating a `README` file that outlines the recommended structure. This can
+    be particularly beneficial for less experienced programmers who will work on the
+    project in the future. You may have observed this yourself: developers are reluctant
+    to create directories, especially in the root of the project. If we provide a
+    good project structure, others will be inclined to follow it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some projects can be built in almost every environment, while others are quite
+    particular about their requirements. The top-level listfile is the perfect place
+    to determine the appropriate course of action. Let’s see how to do this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scoping the environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake provides multiple ways of querying the environment with `CMAKE_` variables,
+    `ENV` variables, and special commands. For example, collected information can
+    be used to support cross-platform scripts. These mechanisms allow us to avoid
+    using platform-specific shell commands that may not be easily portable or differ
+    in naming across environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For performance-critical applications, it will be useful to know all the features
+    of the building platform (for example, instruction sets, CPU core count, and more).
+    This information can then be passed to the compiled binaries so that they can
+    be tuned to perfection (we’ll learn how to do the passing in the next chapter).
+    Let’s explore the native information provided by CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Detecting the operating system
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are many occasions when it is useful to know what the target operating
+    system is. Even as mundane a thing as a filesystem differs greatly between Windows
+    and Unix in things such as case sensitivity, file path structures, the presence
+    of extensions, privileges, and so on. Most commands present on one system won’t
+    be available on another; they could be named differently (for example, `ifconfig`
+    on Unix and `ipconfig` on Windows) or produce totally different output altogether.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you ever need to support multiple target operating systems with a single
+    CMake script, just check the `CMAKE_SYSTEM_NAME` variable so that you can act
+    accordingly. Here’s a simple example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If needed, there’s a variable containing the operating system version: `CMAKE_SYSTEM_VERSION`.
+    However, my recommendation is to try and make your solutions as system-agnostic
+    as possible and use the built-in CMake cross-platform functionality. Especially
+    for operations on filesystems, you should use the `file()` command described in
+    the *Appendix*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cross-compilation – what are host and target systems?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '**Cross-compilation** refers to the process of compiling code on one machine
+    to be executed on a different target platform. For example, using the appropriate
+    toolset, it is possible to compile applications for Android by running CMake on
+    a Windows machine. Although cross-compilation is beyond the scope of this book,
+    it’s important to understand how it impacts some parts of CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the necessary steps to allow cross-compilation is setting the `CMAKE_SYSTEM_NAME`
+    and `CMAKE_SYSTEM_VERSION` variables to the values appropriate for the operating
+    system that you’re compiling for (the CMake documentation refers to it as the
+    **target system**). The operating system used to perform the build is called a
+    **host system**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Regardless of the configuration, the information on the host system is always
+    accessible in variables with the `HOST` keyword in their name: `CMAKE_HOST_SYSTEM`,
+    `CMAKE_HOST_SYSTEM_NAME`, `CMAKE_HOST_SYSTEM_PROCESSOR`, and `CMAKE_HOST_SYSTEM_VERSION`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are a few more variables with a `HOST` keyword in their name, so just
+    keep in mind that they’re explicitly referencing the host system. Otherwise, all
+    variables reference the target system (which is normally the host system anyway,
+    unless we’re cross-compiling).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re interested in reading more about cross-compilation, I suggest referencing
+    the CMake documentation at [https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Abbreviated variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'CMake will predefine a few variables that will provide information about the
+    host and target systems. If a specific system is used, an appropriate variable
+    will be set to a non-`false` value (that is, `1` or `true`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ANDROID, APPLE, CYGWIN, UNIX, IOS, WIN32, WINCE, WINDOWS_PHONE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_HOST_APPLE, CMAKE_HOST_SOLARIS, CMAKE_HOST_UNIX, CMAKE_HOST_WIN32`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `WIN32` and `CMAKE_HOST_WIN32` variables will be `true` for 32- and 64-bit
+    versions of Windows and MSYS (this value is kept for legacy reasons). Also, `UNIX`
+    will be `true` for Linux, macOS, and Cygwin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Host system information
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'CMake could provide more variables, but to save time, it doesn’t query the
+    environment for rarely needed information, such as *whether a processor supports
+    MMX* or *what the total physical memory is*. That doesn’t mean this information
+    isn’t available – you just need to ask for it explicitly with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We need to provide a target variable and a list of keys we’re interested in.
+    If we provide just one key, the variable will contain a single value; otherwise,
+    it will be a list of values. We can ask for many details about the environment
+    and the OS:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Key** | **Description** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HOSTNAME` | Hostname |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FQDN` | Fully qualified domain name |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `TOTAL_VIRTUAL_MEMORY` | Total virtual memory in MiB |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `AVAILABLE_VIRTUAL_MEMORY` | Available virtual memory in MiB |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `TOTAL_PHYSICAL_MEMORY` | Total physical memory in MiB |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `AVAILABLE_PHYSICAL_MEMORY` | Available physical memory in MiB |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `OS_NAME` | Output of `uname -s` if this command is present; either `Windows`,
+    `Linux`, or `Darwin` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `OS_RELEASE` | The OS sub-type, such as `on Windows Professional` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `OS_VERSION` | The OS build ID |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `OS_PLATFORM` | [`On`](http://On) Windows, `$ENV{PROCESSOR_ARCHITECTURE}`.
+    On Unix/macOS, `uname -m` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'If needed, we can even query processor-specific information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Key** | **Description** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `NUMBER_OF_LOGICAL_CORES` | Number of logical cores |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `NUMBER_OF_PHYSICAL_CORES` | Number of physical cores |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_SERIAL_NUMBER` | `1` if the processor has a serial number |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PROCESSOR_SERIAL_NUMBER` | Processor serial number |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PROCESSOR_NAME` | Human-readable processor name |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PROCESSOR_DESCRIPTION` | Human-readable full processor description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `IS_64BIT` | `1` if processor is 64-bit |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_FPU` | `1` if processor has floating-point units |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_MMX` | `1` if processor supports MMX instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_MMX_PLUS` | `1` if processor supports Ext. MMX instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_SSE` | `1` if processor supports SSE instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_SSE2` | `1` if processor supports SSE2 instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_SSE_FP` | `1` if processor supports SSE FP instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_SSE_MMX` | `1` if processor supports SSE MMX instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_AMD_3DNOW` | `1` if processor supports 3DNow instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_AMD_3DNOW_PLUS` | `1` if processor supports 3DNow+ instructions |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `HAS_IA64` | `1` if IA64 processor is emulating x86 |'
+  prefs: []
+  type: TYPE_TB
+- en: Does the platform have 32-bit or 64-bit architecture?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In 64-bit architecture, memory addresses, processor registers, processor instructions,
+    address buses, and data buses are 64 bits wide. While this is a simplified definition,
+    it gives a rough idea of how 64-bit platforms are different from 32-bit platforms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In C++, different architectures mean different bit widths for some fundamental
+    data types (`int` and `long`) and pointers. CMake utilizes the pointer size to
+    gather information about the target machine. This information is available through
+    the `CMAKE_SIZEOF_VOID_P` variable, and it will contain a value of `8` for 64
+    bits (because a pointer is 8 bytes wide) and `4` for 32 bits (4 bytes):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: What is the endianness of the system?
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Architectures can be categorized as either **big-endian** or **little-endian**
+    based on the byte order within a word or the natural unit of data for a processor.
+    In a **big-endian** system, the most significant byte is stored at the lowest
+    memory address, while the least significant byte is stored at the highest memory
+    address. On the other hand, in a **little-endian** system, the byte order is reversed,
+    with the least significant byte stored at the lowest memory address and the most
+    significant byte at the highest memory address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In most cases, **endianness** doesn’t matter, but when you’re writing bit-wise
+    code that needs to be portable, CMake will provide you with a `BIG_ENDIAN` or
+    `LITTLE_ENDIAN` value stored in the `CMAKE_<LANG>_BYTE_ORDER` variable, where
+    `<LANG>` is `C`, `CXX`, `OBJC`, or `CUDA`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we know how to query the environment, let’s shift our focus to the
+    key settings of the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring the toolchain
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For CMake projects, a toolchain consists of all the tools used in building and
+    running the application – for example, the working environment, the generator,
+    the CMake executable itself, and the compilers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imagine what a less-experienced user feels when your build stops with some mysterious
+    compilation and syntax errors. They must dig into the source code and try to understand
+    what happened. After an hour of debugging, they discover that the correct solution
+    is to update their compiler. Could we provide a better experience for users and
+    check if all the required functions are present in the compiler before starting
+    the build?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sure! There are ways to specify these requirements. If the toolchain doesn’t
+    support all of the required features, CMake will stop early and show a clear message
+    of what happened, asking the user to step in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting the C++ standard
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One of the initial steps we may consider is specifying the required C++ standard
+    that the compiler should support for building our project. For new projects, it
+    is recommended to set a minimum of C++14, but preferably C++17 or C++20\. Starting
+    from CMake 3.20, it is possible to set the required standard to C++23 if the compiler
+    supports it. Additionally, since CMake 3.25, there is an option to set the standard
+    to C++26, although this is currently a placeholder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It has been over 10 years since the official release of **C++11**, and it is
+    no longer considered to be *the modern C++ standard*. It’s not recommended to
+    start projects with this version unless your target environment is very old.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another reason to stick to old standards is if you are building legacy targets
+    that are too hard to upgrade. However, the C++ committee works very hard to keep
+    C++ backward compatible, and in most cases, you won’t have any problems bumping
+    the standard to a higher version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake supports setting the standard on a target-by-target basis (this is useful
+    if parts of your codebase are really old), but it’s better to converge to a single
+    standard across the project. This can be done by setting the `CMAKE_CXX_STANDARD`
+    variable to one of the following values: `98`, `11`, `14`, `17`, `20`, `23`, or
+    `26`, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will be a default value for all subsequently defined targets (so it’s
+    best to set it close to the top of the root listfile). You can override it on
+    a per-target basis if needed, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The second version allows us to specify multiple targets if that’s needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Insisting on standard support
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `CXX_STANDARD` property mentioned in the previous section won’t stop CMake
+    from continuing with the build, even if the compiler isn’t supporting the desired
+    version – it’s treated as a preference. CMake doesn’t know if our code actually
+    uses the brand-new features that aren’t available in the previous compilers, and
+    it will try to work with what it has available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we know for certain that this won’t be successful, we can set another variable
+    (which is overridable per target in the same manner as the previous one) to explicitly
+    require the standard we target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this case, if the compiler present in the system doesn’t support the required
+    standard, the user will see the following message and the build will stop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Asking for C++23 might be a bit excessive, even for a modern environment. But
+    C++20 should be fine on up-to-date systems, as it has been generally supported
+    in **GCC**/**Clang/MSVC** since 2021/2022.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Vendor-specific extensions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Depending on the policy you implement in your organization, you might be interested
+    in allowing or disabling vendor-specific extensions. What are these? Well, let’s
+    just say that the C++ standard is moving a bit slow for the needs of some compiler
+    producers, so they decided to add their own enhancements to the language – *extensions*,
+    if you like. For example, C++ **Technical Report 1** (**TR1**) was a library extension
+    that introduced regular expressions, smart pointers, hash tables, and random number
+    generators before they became commonplace. To support such plugins released by
+    the GNU project, CMake will substitute the compiler flag responsible for standard
+    (`-std=c++14`) with `-std=gnu++14`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On the one hand, this may be desired, as it allows for some convenient functionality.
+    On the other hand, your code will lose portability as it will fail to build if
+    you switch to a different compiler (or if your users do!). This is also a per-target
+    property for which there is a default variable, `CMAKE_CXX_EXTENSIONS`. CMake
+    is more liberal here, and allows the extensions unless we specifically tell it
+    not to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: I recommend doing so, if possible, as this option will insist on having vendor-agnostic
+    code. Such code won’t impose any unnecessary requirements on the users. Similarly
+    to previous options, you can use `set_property()` to change this value on a per-target
+    basis.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interprocedural optimization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Usually, compilers optimize the code on the level of a single translation unit,
+    which means that your `.cpp` file will be preprocessed, compiled, and then optimized.
+    The intermediary files generated during these operations are then passed to the
+    linker to create a single binary. However, modern compilers have the capability
+    of performing **interprocedural optimization** at link time, also known as **link-time
+    optimization**. This allows all compilation units to be optimized as a unified
+    module, which in principle will achieve better results (sometimes at the cost
+    of slower builds and more memory consumption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If your compiler supports interprocedural optimization, it may be a good idea
+    to use it. We’ll follow the same method. The variable responsible for this setting
+    is called `CMAKE_INTERPROCEDURAL_OPTIMIZATION`. But before we set it, we need
+    to make sure it is supported to avoid errors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, we had to include a built-in module to get access to the `check_ipo_supported()`
+    command. This code will fail gracefully, and fall back to default behavior if
+    the optimization is not supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checking for supported compiler features
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As we discussed earlier, if our build is to fail, it’s best if it fails early,
+    so we can provide a clear feedback message to the user and shorten the wait. Sometimes
+    we’re specifically interested in which C++ features are supported (and which aren’t).
+    CMake will question the compiler during the configuration stage and store a list
+    of the available features in the `CMAKE_CXX_COMPILE_FEATURES` variable. We may
+    write a very specific check and ask if a certain feature is available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/07-features/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you may guess, writing one for every feature we use is a daunting task.
+    Even the authors of CMake recommend only checking if certain high-level **meta-features**
+    are present: `cxx_std_98`, `cxx_std_11`, `cxx_std_14`, `cxx_std_17`, `cxx_std_20`,
+    `cxx_std_23`, and `cxx_std_26`. Each **meta-feature** indicates that the compiler
+    supports a specific C++ standard. If you wish, you can use them exactly as we
+    did in the previous example.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A full list of features known to CMake can be found in the documentation: [https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Compiling a test file
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One particularly interesting scenario occurred to me when I was compiling an
+    application with GCC 4.7.x. I had manually confirmed in the compiler’s reference
+    that all of the C++11 features we were using were supported. However, the solution
+    still didn’t work correctly. The code silently ignored the call to the standard
+    `<regex>` header. As it turned out, this specific compiler had a bug, and the
+    regex library wasn’t implemented.
+  prefs: []
+  type: TYPE_NORMAL
+- en: No single check can protect you from such rare bugs (and you shouldn’t need
+    to check for them!), but there’s a chance you may want to use some cutting-edge
+    experimental feature of the latest standard, and you’re not sure which compilers
+    support it. You can test if your project is going to work by creating a test file
+    that uses those specially required features in a small sample that can be quickly
+    compiled and executed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake provides two configure-time commands, `try_compile()` and `try_run()`,
+    to verify that everything you need is supported on the target platform.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `try_run()` command gives you more freedom, as you can ensure that the
+    code is not only compiling but that it is also executing correctly (you could
+    potentially test if `regex` is working). Of course, this won’t work for cross-compilation
+    scenarios (as the host won’t be able to run an executable built for a different
+    target). Just remember that the aim of this check is to provide a quick piece
+    of feedback to the user if the compilation is working, so it’s not meant to run
+    any unit tests or anything complex – keep the file as basic as possible. For example,
+    something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/08-test_run/main.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Calling `try_run()` isn’t very complicated at all. We start by setting the
+    required standard, after which we call `try_run()` and print the collected information
+    to the user:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/08-test_run/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command may seem overwhelming at first, but only a few arguments are actually
+    required to compile and run a very basic test file. I additionally used the optional
+    `RUN_OUTPUT_VARIABLE` keyword to collect the output from `stdout`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next step is to extend our basic test file by using some of the more modern
+    C++ features that we’re going to use throughout the actual project – perhaps by
+    adding a variadic template to see if the compiler on the target machine can digest
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we can check in the conditional blocks if the collected output is meeting
+    our expectations and `message(SEND_ERROR <error>)` is printed when something isn’t
+    right. Remember that `SEND_ERROR` keyword will allow CMake to continue through
+    the configuration stage but will prevent the generation of the buildsystem. This
+    is useful to show all the encountered errors before aborting the build. We now
+    know how to ensure the compilation can complete in full. Let’s move on to the
+    next subject, disabling in-source builds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Disabling in-source builds
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In *Chapter 1*, *First Steps with CMake*, we talked about in-source builds,
+    and how it is recommended to always specify the build path to be out of source.
+    This not only allows for a cleaner build tree and a simpler `.gitignore` file,
+    but it also decreases the chances you’ll accidentally overwrite or delete any
+    source files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To stop the build early you may use the following check:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch04/09-in-source/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you would like more information about the STR prefix and variable references,
+    please revisit *Chapter 2*, *The CMake Language*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Notice, however, that no matter what you do in the preceding code, it seems
+    like CMake will still create a `CMakeFiles/` directory and a `CMakeCache.txt`
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You might find online suggestions to use undocumented variables to make sure
+    that the user can’t write in the source directory under any circumstances. Relying
+    on undocumented variables to restrict writing in the source directory is not recommended.
+    They may not work in all versions and can be subject to removal or modification
+    without warning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re worried about users leaving those files in the source directory, add
+    them to the `.gitignore` (or equivalent), and change the message to request a
+    manual cleanup.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we covered valuable concepts that lay a strong foundation for
+    building robust and future-proof projects. We discussed setting the minimum CMake
+    version and configuring essential project aspects like name, languages, and metadata
+    fields. Establishing these foundations enables our projects to scale effectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We explored project partitioning, comparing the use of basic `include()` with
+    `add_subdirectory`, which offers benefits such as scoped variable management,
+    simplified paths, and increased modularity. The ability to create nested projects
+    and build them separately proved useful in gradually breaking down code into more
+    independent units. After understanding the available partitioning mechanisms,
+    we delved into creating transparent, resilient, and extensible project structures.
+    We examined CMake’s traversal of listfiles and the correct order of configuration
+    steps. Next, we studied how we can scope the environment of our target and host
+    machines, what the differences are between them, and what kind of information
+    about the platform and system is available through different queries. We also
+    covered configuring the toolchain, including specifying the required C++ version,
+    handling vendor-specific compiler extensions, and enabling important optimizations.
+    We learned how to test the compiler for required features and execute sample files
+    to test compilation support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the technical aspects covered so far are essential for a project, they
+    are not sufficient to make it truly useful. To increase the project’s utility,
+    we need to understand the concept of **targets**. We briefly touched on the topic
+    earlier, but now we are ready to approach it in full, as we finally have a solid
+    understanding of related fundamentals. Targets, introduced in the next chapter,
+    will play a crucial role in further enhancing the functionality and effectiveness
+    of our projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Separation of concerns: [https://nalexn.github.io/separation-of-concerns/](https://nalexn.github.io/separation-of-concerns/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Complete CMake variable reference: [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`try_compile` and `try_run` references: [https://cmake.org/cmake/help/latest/command/try_compile.html](https://cmake.org/cmake/help/latest/command/try_compile.html),
+    [https://cmake.org/cmake/help/latest/command/try_run.html](https://cmake.org/cmake/help/latest/command/try_run.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'CheckIPOSupported reference: [https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html](https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Leave a review!
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Enjoying this book? Help readers like you by leaving an Amazon review. Scan
+    the QR code below to get a free eBook of your choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/Review_Copy.png)'
+  prefs: []
+  type: TYPE_IMG

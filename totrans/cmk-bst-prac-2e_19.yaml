@@ -1,0 +1,260 @@
+- en: 'Appendix: Contributing to CMake and Further Reading Material'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: ''
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This has been a long journey, and we have learned a great deal about CMake.
+    However, as you may have realized by now, CMake is a huge ecosystem, and one book
+    is not enough to cover the vast number of topics that can be discussed. Thus,
+    in this chapter, we are going to take a look at the resources that will help you
+    understand CMake even better as well as the ways of getting involved in the CMake
+    project itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake is a flexible tool and is used in many projects in the software industry.
+    As a result, CMake has an ever-growing community supporting it. There are plenty
+    of resources available online for learning and troubleshooting the CMake problems
+    that you may experience.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand the skills shared in this chapter, we’ll cover the following
+    main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where to find the CMake community
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Contributing to CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Recommended books and blogs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s begin!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prerequisites
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This is a read-through chapter that has no practices or examples. So, the only
+    requirement is a compatible device, a quiet place, and, of course, your time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where to find the CMake community
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: After getting involved with CMake, you may feel the need to exchange ideas and
+    find a platform for asking questions of people who will likely know the answers.
+    For that purpose, I have a few online platform recommendations for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stack Overflow
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '**Stack Overflow** is a popular Q&A platform and the go-to place for most developers.
+    If you are having an issue with CMake or have any questions, you can search for
+    answers to your questions on Stack Overflow first. It is highly likely that someone
+    has experienced that issue or asked the same or similar questions before. You
+    can also take a look at the popular questions list to discover new ways of doing
+    things with CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When asking questions, ensure that you are labeling your questions with the
+    `cmake` tag. This will allow individuals who are interested in answering CMake-related
+    questions to find your question easier. You can access the Stack Overflow home
+    page at [https://stackoverflow.com/](https://stackoverflow.com/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reddit (r/cmake)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`r/cmake` subreddit that contains CMake-specific questions, announcements,
+    and shares. You can discover many useful GitHub repositories, get notified about
+    recent CMake releases, and discover blog posts and materials that can help you.
+    You can access the `r/cmake` subreddit at [https://www.reddit.com/r/cmake/](https://www.reddit.com/r/cmake/).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMake Discourse forum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The **CMake Discourse forum** is the main place for CMake developers and users
+    to meet. It is completely dedicated to CMake-specific matters only. The forum
+    contains announcements, guides on how to use CMake, a community space, a CMake
+    development space, and much more content that you may be interested in. You can
+    access the discourse forum at [https://discourse.cmake.org/](https://discourse.cmake.org/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Kitware CMake GitLab repository
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Kitware’s CMake repository is also a good resource for finding solutions to
+    issues you may experience. Try searching for the issue you have in the issue list
+    available at [https://gitlab.kitware.com/cmake/cmake/-/issues](https://gitlab.kitware.com/cmake/cmake/-/issues).
+    There is a good chance that somebody else may already have filed an issue about
+    the topic. If that’s not the case, you can create a new issue by adhering to CMake’s
+    contributing rules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The preceding list is non-exhaustive and many more forums are available online.
+    These four platforms will be sufficient to get you started. Next, we will talk
+    about the ways of contributing to the CMake project itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contributing to CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you already know, CMake is open-source software developed by Kitware. Kitware
+    maintains development activity for CMake in a dedicated GitLab instance at [https://gitlab.kitware.com/cmake](https://gitlab.kitware.com/cmake).
+    Having everything available as open source and transparent means that getting
+    involved in CMake is pretty easy. You can view the issues, merge requests, and
+    get involved in the development of CMake. If you believe you have discovered a
+    bug in CMake or want to make a feature request, you can create a new issue at
+    [https://gitlab.kitware.com/cmake/cmake/-/issues](https://gitlab.kitware.com/cmake/cmake/-/issues).
+    If you have an idea about improving CMake, discuss that idea by creating an issue
+    first. You can also take a look at open merge requests at [https://gitlab.kitware.com/cmake/cmake/-/merge_requests](https://gitlab.kitware.com/cmake/cmake/-/merge_requests)
+    to assist in reviewing the code being developed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contributing to open-source software is crucial for the sustainability of the
+    open-source world. Please don’t hesitate to help the open-source community in
+    whatever ways are convenient. The help you provide may only be small, but small
+    contributions quickly add up to greater achievements. Next, we will look at reading
+    material that you may find useful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recommended books and blogs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There are a lot of books, blogs, and resources regarding CMake. The following
+    is a curated list of hand-selected resources that you may find useful. This list
+    will allow you to discover more about CMake and expand your horizons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**CMake official** **documentation**: [https://cmake.org/documentation/](https://cmake.org/documentation/).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The official documentation for CMake. It is very broad and up to date.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Professional CMake: A Practical* *Guide*: [https://crascit.com/professional-cmake/](https://crascit.com/professional-cmake/).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A comprehensive book written by CMake’s co-maintainer, Craig Scott. It is very
+    extensive and contains many details that you can’t find elsewhere. Reading this
+    book is highly recommended if you want to gain a really deep understanding of
+    CMake.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`awesome-cmake`: [https://github.com/onqtam/awesome-cmake](https://github.com/onqtam/awesome-cmake).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A vast curation of CMake-related resources. It is very extensive and regularly
+    updated.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*Getting Started with CMake: Helpful* *Resources*: [https://embeddedartistry.com/blog/2017/10/04/getting-started-with-cmake-helpful-resources/](https://embeddedartistry.com/blog/2017/10/04/getting-started-with-cmake-helpful-resources/).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A curation about helpful CMake resources gathered together by Embedded Artistry.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*An Introduction to Modern* *CMake*: [https://cliutils.gitlab.io/modern-cmake/](https://cliutils.gitlab.io/modern-cmake/).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: An online book and a good resource about learning modern CMake in detail. It
+    is written by Henry Schreiner and many other contributors.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*More Modern* *CMake*: [https://hsf-training.github.io/hsf-training-cmake-webpage/01-intro/index.html](https://hsf-training.github.io/hsf-training-cmake-webpage/01-intro/index.html).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is a follow-up book to *An Introduction to Modern CMake*, written by the
+    HEP Software Foundation.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*More Modern CMake - Deniz Bahadir - Meeting C++* *2018*: [https://www.youtube.com/watch?v=y7ndUhdQuU8](https://www.youtube.com/watch?v=y7ndUhdQuU8).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This YouTube video is a presentation performed by Deniz Bahadir at Meeting C++
+    2018\. Its main aim is to give tips about using CMake correctly.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*Deep CMake for Library Authors - Craig Scott - CppCon* *2019*: [https://www.youtube.com/watch?v=m0DwB4OvDXk](https://www.youtube.com/watch?v=m0DwB4OvDXk).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This YouTube video is a CppCon talk given by Craig Scott, co-maintainer of the
+    CMake project. It covers CMake topics oriented toward library development.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*C++Now 2017: Daniel Pfeifer “Effective* *CMake”*: [https://www.youtube.com/watch?v=bsXLMQ6WgIk](https://www.youtube.com/watch?v=bsXLMQ6WgIk).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This YouTube video is a talk given by Daniel Pfeifer about using CMake effectively.
+    It covers overall CMake usage.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '*CMake init – a CMake project* *initializer*: [https://github.com/friendlyanon/cmake-init](https://github.com/friendlyanon/cmake-init).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A powerful script to initialize CMake projects for various usages from scratch.
+    The repository also contains a lot of links to examples for various kinds of CMake
+    projects.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: With that said, we have reached another chapter’s end. Next, we’ll summarize
+    what we have learned in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we briefly discussed the CMake communities that you can find
+    online, contributing to CMake, and also good recommendations for reading and watching.
+    There are tons of material and talks about CMake, and the content is growing day
+    by day. Always keep an eye out for updates about CMake and regularly visit your
+    forums of choice to keep yourself in the loop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With that said, if you are here and reading this paragraph, then congratulations!
+    You have reached the end of the topics we wanted to cover in this book. This was
+    the last chapter to cover. Don’t forget to apply and practice what you have learned
+    from this book in your everyday workflow. We enjoyed the journey we were on together
+    and hope that the knowledge you have gained from this book may prove useful.
+  prefs: []
+  type: TYPE_NORMAL

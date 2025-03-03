@@ -1,0 +1,854 @@
+- en: '6'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Installing Dependencies and ExternalProject_Add
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we’re going to dive into `FetchContent` to download other libraries,
+    they still ended up in the same build folder. Installing is a bit different. With
+    installing, we keep the library entirely separate from the application when building
+    it. There’s then a second step we take to install it in a location where our application
+    can find it. Installing might sound mysterious, but it’s essentially just copying
+    a collection of files from one location to another (albeit following an established
+    convention).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once we’re comfortable building and installing libraries manually, we’ll look
+    at how to leverage `ExternalProject_Add` to significantly reduce the manual steps
+    required when installing. This will allow us to integrate external libraries more
+    cleanly with our ever-evolving application. Luckily, there aren’t too many new
+    commands to learn, and when you’ve been through the process once, it’s easily
+    transferable to other projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is installing
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing a library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using an installed library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using `ExternalProject_Add` to streamline installation
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Handling multiple libraries with `ExternalProject_Add`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **Operating** **System**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is installing?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Installing, at its core, is just copying files from one place to another. Once
+    those files are copied to a particular location, applications (or other libraries)
+    can search for them there when building.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several reasons why installing is useful in practice. The first advantage
+    is that you can build a library once, install only the necessary files to a known
+    location, and then have multiple applications use it. This can save a lot of time
+    and resources and let you avoid needlessly building the same code repeatedly.
+    The other advantage is that only the required files are copied to the install
+    location. When we build normally, the build folder gets filled up with a lot of
+    intermediate files that the application, depending on our library, may not care
+    about. When we install, we specify only the necessary files (usually the built
+    library files such as `.lib`/`.a` or `.dll`/`.dylib`/`.so`, header files, and
+    CMake configuration files). We also can more precisely control the interface of
+    our library by only installing the header files that we want to make public in
+    a layout that is simpler to use than the internal build structure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, when we install a library, the files are copied to a predetermined
+    system location. On macOS and Linux, this is usually `/usr/local/lib` for the
+    libraries, `/``usr/local/include` for the header files, `/usr/local/bin` for executables,
+    and `/usr/local/share` for any kind of documentation or license files. On Windows,
+    this tends to be `C:/Program Files (x86)/<library-name>`, with the `lib`, `include`,
+    `share`, and `bin` subfolders underneath the library name. When we get to the
+    point of installing a library, we’ll review the folder structure in more detail
+    and see which files are included.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To find an installed library, CMake needs to know where to look for it. The
+    advantage of installing to one of the default locations mentioned earlier is that
+    CMake already knows to search there, so we don’t need to provide any other information
+    when configuring a project depending on that library. One of the downsides to
+    this approach is that it changes the global host environment we’re running in,
+    which might not always be what you want. This speaks to a lack of isolation that
+    we’ll show you how to address later in *Installing a library*. Another issue to
+    be aware of is that installing to a system location can often require elevated
+    permissions that builders of the library may not have. For example, installing
+    to `C:\Program Files\` on Windows requires administrator privileges.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll next look at the steps required to download and install a library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing a library
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before looking at using an installed library, let’s first install one ourselves
+    using CMake. We’ll choose a library that we’re going to use for our *Game of Life*
+    application to continue improving its functionality; the library we’re going to
+    use is called **Simple Directmedia Layer** (**SDL**). SDL is a cross-platform
+    windowing library that provides support for input, graphics, audio, and much more.
+    SDL 2 is the latest stable release, though at the time of writing, SDL 3 is available
+    in prerelease to try out. SDL 2 is distributed under the zlib license, which allows
+    it to be used freely in any kind of software. To learn more about SDL, visit [https://www.libsdl.org/](https://www.libsdl.org/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL is an open source project and is conveniently hosted on GitHub; it can be
+    accessed by visiting [https://github.com/libsdl-org/SDL](https://github.com/libsdl-org/SDL).
+    From the SDL GitHub homepage, let’s start by copying the `.git` URL by clicking
+    the `ch6/part-1/third-party` (as a reminder, the *Minimal CMake* accompanying
+    examples can be found by going to [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Run the following command to clone the repo into `third-party/sdl`(there''s
+    a `clone.sh/.bat` script you can use if you''d prefer to, along with some other
+    convenience scripts containing the necessary commands to configure and build the
+    library):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ve created the new `third-party` folder as a sibling of both `app` and `lib`
+    to hold external dependencies. This is to keep code logically grouped within the
+    current chapter, but in a real project, it could be moved to a top-level folder
+    if that is more convenient. To avoid issues with the SDL repository being nested
+    inside the `Minimal CMake` repository, the `third-party` folder has `sdl` added
+    to its own `.gitignore` file. We could instead have used Git submodules and run
+    `git submodule init` and `git submodule update`, but the idea here is to show
+    each step of manually installing a library. Feel free to use Git submodules in
+    your own projects if it simplifies configuration, but before doing so, ensure
+    to read the later section, *Using ExternalProject_Add to streamline installation*,
+    to see an alternative CMake provides.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the SDL repository cloned, before we build, we need to make sure that we’re
+    using the right SDL release. The default branch (`main`) for SDL is now SDL 3,
+    but as this is still in pre-release and under active development, we’ll use SDL
+    2 for our *Game of Life* project. At the time of writing, the latest release is
+    `2.30.2`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Change the directory to the `sdl` folder and check out the latest stable release
+    (if you used the `clone.sh/.bat` script you''ll already be on the right branch):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: To find the latest release, from the SDL GitHub repository, click `release-2.XX.X`
+    row (feel free to use `release-2.30.2`, which the examples were tested against).
+    With the correct release selected, move back to the `third-party` directory (`cd
+    ..`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cloning only what we need
+  prefs: []
+  type: TYPE_NORMAL
+- en: To save having to clone the whole repo and perform the added step of checking
+    out a specific tag, it’s possible to instead use the `git clone https://github.com/libsdl-org/SDL.git
+    --branch release-2.30.2 --depth 1 sdl` command. This will only clone the branch
+    we need and perform a shallow copy, omitting all but the most recent Git commit.
+    This reduces the size of the repo from approximately 187 MB to 91 MB, roughly
+    a 50% saving. The `clone.sh`/`bat` scripts use this approach and can be used instead
+    of the preceding manual steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To keep the build folder outside of the SDL source tree, let’s run CMake from
+    the `third-party` folder and pass the location of the source and build directory
+    to CMake (called `sdl` and `build-sdl`, respectively):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Issuing this command will configure and generate build files for SDL, just like
+    with our examples from earlier chapters. CMake will output a lot of diagnostic
+    information from SDL to show what architecture it’s being built for, the compiler
+    features it can find, and what standard library functions it has access to. This
+    information is useful to understand what features SDL will use and can help diagnose
+    problems if anything isn’t working correctly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After running the command, you should see this at the end of the output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Before performing the build, there’s an important argument that we left out
+    when first configuring. At the start of the chapter, we discussed how CMake will
+    install to a default location if no override is specified. This is sometimes what
+    you want, but a big downside is that by doing this, the build of your project
+    is no longer self-contained. You are writing outside the confines of your project,
+    which could cause unintentional changes to other applications on your system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One solution to this is to opt for some kind of containerization or virtualization
+    for the project (e.g., create a virtual machine specifically for *Minimal CMake*
+    that can have all the required dependencies installed in the default system location).
+    This will keep things isolated, but takes a bit more time and effort to set up.
+    Fortunately, there is an alternative.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When configuring SDL, we can pass another command line argument called `CMAKE_INSTALL_PREFIX`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: └── third-party
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── build-sdl
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── install
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── sdl
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'cmake --build build-sdl --target install after the build command, we’re saying
+    that we want to build the install target, which depends on the library to build.
+    The library must therefore be built first, and then can be installed. The dependency
+    graph looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Remember that as we’re using a multi-config generator, doing this will, by
+    default, build and install the `Debug` configuration. To build and install the
+    `Release` version of the library, we need to specify the `Release` configuration
+    explicitly:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It’s also possible to install the library using the separate CMake `install`
+    command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For this command to work, you first need to have built the library, as running
+    it after only configuring will generate the following error:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Notice that by default, the `--install` command looks for the `Release` configuration
+    rather than the `Debug` one. To have the install command perform as expected,
+    first build the `Release` version of the library, then run the install command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can pass `--config` to the `--install` command as well to install the `Debug`
+    or `RelWithDebInfo` version of the library if you’ve built those instead:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'cmake --install build-sdl CMAKE_DEBUG_POSTFIX variable. It’s often convenient
+    to install the Debug and Release versions of a library to the same folder (as
+    we’ve done with the install directory). If we built the Debug version of the library
+    and installed it, and then built the Release version and installed it, the Debug
+    library files would be overwritten. To avoid this, CMake can append a postfix
+    to the Debug versions of the library (the convention is usually a single lowercase
+    d). This means that in the install folder, we’ll see the following (on Windows
+    the .dll files will be in the bin folder, with everything else in the lib folder):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: git clone https://github.com/libsdl-org/SDL.git --branch release-2.30.2 --single-branch
+    sdl --depth 1
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake -S sdl -B build-sdl -G "Ninja Multi-Config" -DCMAKE_INSTALL_PREFIX=install
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build-sdl --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --install build-sdl --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: find_package(SDL2 CONFIG REQUIRED)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: find_package(SDL2 CONFIG, we’re informing the find_package command to only look
+    for config files, and not to fall back to Module mode if it can’t find the dependency
+    that way. This helps ensure that we find the exact dependency we’re after. The
+    third argument, REQUIRED, tells CMake to stop processing the CMakeLists.txt file
+    if SDL2 cannot be found. This is mainly useful to ensure that we get clearer error
+    messages and don’t continue configuration in an invalid state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The only other change we need to make to start using `SDL2` is to add a reference
+    to it in our `target_link_libraries` command. The command now looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: copy SDL2.dll to the same folder as the executable
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: add_custom_command(
+  prefs: []
+  type: TYPE_NORMAL
+- en: TARGET ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: POST_BUILD
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_COMMAND} -E copy_if_different
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<TARGET_FILE:SDL2::SDL2>
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<TARGET_FILE_DIR:${PROJECT_NAME}>
+  prefs: []
+  type: TYPE_NORMAL
+- en: VERBATIM)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'CMake Error at CMakeLists.txt:4 (find_package):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Could not find a package configuration file provided by "SDL2" with any of
+    the following names:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL2Config.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: sdl2-config.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add the installation prefix of "SDL2" to CMAKE_PREFIX_PATH or set "SDL2_DIR"
+    to a directory containing one of the above files. If "SDL2" provides a separate
+    development package or SDK, be sure it has been installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: find_package(
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL2 CONFIG REQUIRED
+  prefs: []
+  type: TYPE_NORMAL
+- en: NO_CMAKE_ENVIRONMENT_PATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: NO_CMAKE_SYSTEM_PACKAGE_REGISTRY
+  prefs: []
+  type: TYPE_NORMAL
+- en: NO_SYSTEM_ENVIRONMENT_PATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: NO_CMAKE_PACKAGE_REGISTRY
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL2_DIR), which will show the folder in which the dependency was found (for
+    us, this should be /path/to/minimal-cmake/ch6/part-1/third-party/install/lib/cmake/SDL2).
+    This can be checked by opening ch6/part-1/app/build/CMakeCache.txt and searching
+    for SDL2_DIR (or more generally, <LIBRARY_NAME>_DIR), checking in the CMake GUI,
+    or running cmake -L <build-folder> to quickly list all CMake cache variables (it’s
+    also possible to use ccmake <build-folder> to view and edit cache variables from
+    the terminal, though as mentioned in *Chapter 3*, *Using FetchContent with External
+    Dependencies*, this is only available on macOS and Linux).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Providing the location of our library
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'When we configure the application, we need to tell CMake where to find our
+    installed library. We can do this by setting `CMAKE_PREFIX_PATH` at the command
+    line when running the configure step:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: CMake will now be able to find the library we installed in the earlier step.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'In earlier versions of CMake, an absolute path needed to be provided to `CMAKE_PREFIX_PATH`.
+    This could be worked around by using `$(pwd)` on macOS and Linux, or `%cd%` on
+    Windows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: cd ch6/part-1/third-party
+  prefs: []
+  type: TYPE_NORMAL
+- en: './everything.sh # (everything.bat on Windows)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: cd ../app
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake -B build -DCMAKE_PREFIX_PATH=../third-party/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: git clone https://github.com/libsdl-org/SDL.git --branch release-2.30.2 --depth
+    1 sdl
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake -S sdl -B build-sdl -G "Ninja Multi-Config" -DCMAKE_INSTALL_PREFIX=install
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build-sdl --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --install build-sdl --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"cacheVariables": {'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"CMAKE_PREFIX_PATH": "${sourceDir}/../third-party/install"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake_minimum_required(VERSION 3.28)
+  prefs: []
+  type: TYPE_NORMAL
+- en: project(third-party)
+  prefs: []
+  type: TYPE_NORMAL
+- en: include(ExternalProject)
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL2
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG release-2.30.2
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_SHALLOW TRUE
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: TMP_DIR      = <prefix>/tmp
+  prefs: []
+  type: TYPE_NORMAL
+- en: STAMP_DIR    = <prefix>/src/<name>-stamp
+  prefs: []
+  type: TYPE_NORMAL
+- en: DOWNLOAD_DIR = <prefix>/src
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_DIR   = <prefix>/src/<name>
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR   = <prefix>/src/<name>-build
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_DIR  = <prefix>
+  prefs: []
+  type: TYPE_NORMAL
+- en: LOG_DIR      = <STAMP_DIR>
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: .
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── build
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── SDL2-prefix
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── bin
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── include
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    └── SDL2
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    ├── cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    └── pkgconfig
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── share
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    ├── aclocal
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    └── licenses
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── src
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    ├── SDL2
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    ├── SDL2-build
+  prefs: []
+  type: TYPE_NORMAL
+- en: │    └── SDL2-stamp
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── tmp
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '"cacheVariables": {'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"CMAKE_PREFIX_PATH": "${sourceDir}/../third-party/build/SDL2-prefix"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '-- Install configuration: ""'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(NOT isMultiConfig)
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(NOT CMAKE_BUILD_TYPE)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# set Debug as default build type if one is not provided (match CMake default
+    behavior)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(CMAKE_BUILD_TYPE
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: CACHE STRING "" FORCE)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# give different build types their own folder with single config generators'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(build_type_dir ${CMAKE_BUILD_TYPE})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '# pass through build type arg to ExternalProject_Add command'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(build_type_arg -DCMAKE_BUILD_TYPE=$<CONFIG>)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/SDL2-prefix/src/SDL2-build/${build_type_dir}
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_ARGSBINARY_DIR to point to a folder mapping to the current configuration
+    (we’ll get the same layout as before with multi-config generators), and in CMAKE_ARGS,
+    we pass through the build type (e.g., CMAKE_BUILD_TYPE=Debug) to use at configure
+    time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we test this with a single-config generator by running the below commands:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ll see this printed in the install output, instead of an empty string as
+    before:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can specify a different configuration explicitly, such as the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’d then see the following in the install output:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfxt
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/bkaradzic/bgfx.cmake.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG v1.127.8710-464
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_SHALLOW TRUE
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bgfxt-build/${build_type_dir}
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_ARGS ${build_type_arg} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_CACHE_ARGS -DCMAKE_DEBUG_POSTFIX:STRING=d)
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfx
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/bkaradzic/bgfx.cmake.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG v1.127.8710-464
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_SHALLOW TRUE
+  prefs: []
+  type: TYPE_NORMAL
+- en: DEPENDS bgfxt
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bgfx-build/${build_type_dir}
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_ARGS ${build_type_arg} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  prefs: []
+  type: TYPE_NORMAL
+- en: -DBGFX_LIBRARY_TYPE=SHARED -DBGFX_BUILD_TOOLS=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: -DBGFX_BUILD_EXAMPLES=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_CACHE_ARGS -DCMAKE_DEBUG_POSTFIX:STRING=d)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: -DBGFX_LIBRARY_TYPE=SHARED -DBGFX_BUILD_TOOLS=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: -DBGFX_BUILD_EXAMPLES=OFF
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./build/shared-ninja/Debug/minimal-cmake_game-of-life_window
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE

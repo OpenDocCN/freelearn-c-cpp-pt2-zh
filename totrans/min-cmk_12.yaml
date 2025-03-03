@@ -1,0 +1,976 @@
+- en: '9'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Writing Tests for the Project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to look at how CMake can help us with an incredibly
+    important aspect of software development: **testing**. Testing is essential in
+    any widely used or long-lived project to build confidence in its functionality
+    and help avoid regressions as new features are added and improved. In a normal
+    project, it’s strongly recommended to think about testing from the outset; introducing
+    tests down the line can be a challenge. Fortunately, with how we’ve structured
+    our project by breaking out functionality into separate libraries, testing becomes
+    a lot simpler.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake provides a complimentary application called **CTest** to bring many kinds
+    of testing together under one umbrella. We’ll see how to add tests to our libraries,
+    as well as our application, and see how to leverage CTest to make running them
+    from CMake easy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding CTest
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding unit tests to a library
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding end-to-end tests to an application
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding other kinds of tests
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using CDash with CTest
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding CTest
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before we begin looking at the details of adding CTest to our existing `CMakeLists.txt`
+    files and using the `ctest` command-line application, it’s important to understand
+    what CTest is, and, perhaps more importantly, what it is not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two components to `CMakeLists.txt` files, used to describe and add
+    tests, and the `ctest` **command-line interface** (**CLI**), which is used to
+    run the tests after they have been compiled. CTest is not itself a language-specific
+    testing library. It is perfectly reasonable to add tests to a project created
+    with CMake without using CTest at all (for example, by creating a separate test
+    executable that depends on a well-known testing library, such as Google Test ([https://github.com/google/googletest](https://github.com/google/googletest))
+    or Catch2 ([https://github.com/catchorg/Catch2](https://github.com/catchorg/Catch2)).
+    CTest is not a substitute for one of these libraries that provide excellent support
+    for writing unit and integration style tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Types of tests
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Throughout this chapter, we’ll refer to three different kinds of tests: unit
+    tests, integration tests, and end-to-end tests. Briefly, **unit tests** typically
+    test an individual type or component without introducing any dependencies (for
+    example, testing operations on a specific math type such as a vector or matrix
+    would qualify as a unit test). **Integration tests** are a lot fuzzier; they usually
+    sit on a spectrum and will involve multiple types/classes/components interacting
+    together to ensure they perform as expected (for example, in a game, an integration
+    test might check how the player character and camera component interact). At this
+    stage, this is where stubs and/or mocks (a way to avoid the need to create expensive
+    or unreliable dependencies, such as databases or remote APIs) enter the picture,
+    and things can get a lot more complicated (as unit and integration tests in the
+    context of CMake are very similar, we’ll focus on unit tests in this chapter).
+    Finally, **end-to-end tests** exercise the application as if the end user were
+    interacting with it. These tend to be the most complex and fragile kind of tests
+    but do carry value, and maintaining a small number can help ensure the full application
+    is performing as expected without manual checks. These three types of tests are
+    often represented within the testing pyramid (unit tests at the bottom, integration
+    tests in the middle, and end-to-end tests at the top). The general advice is the
+    higher up the pyramid you go, the fewer types of that kind of test there are (lots
+    of unit tests, not many end-to-end tests), and this is primarily driven by metrics,
+    such as time, reliability, and cost.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What CTest offers is a unified interface to run many kinds of tests together
+    and report failures in a consistent manner. This can be incredibly valuable when
+    working with different kinds of tests across a spectrum of languages and styles.
+    For example, an application may have a suite of unit and integration tests written
+    using C or C++ compiled as a separate test executable, end-to-end tests that launch
+    and run the application to have it test itself (usually through the use of a scripting
+    language, such as Python, or an in-built test runner) and ad hoc shell scripts
+    to verify generated files. With CTest, all these testing approaches can be combined
+    and executed with a single command, their output reduced to a pass or fail outcome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTest is an incredibly flexible tool and supports a wide array of different
+    kinds of tests (even compiling code during the testing phase). We won’t be covering
+    everything it can do, but we will aim to cover some of the most useful operations
+    and provide a starting point for using CTest in your own projects in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding unit tests to a library
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Now that we understand what CTest offers, let’s look at a concrete example
+    of adding unit tests to a couple of our existing libraries, we’ll start with `mc-array`.
+    Just to note at the outset, there are a few different ways we can choose to structure
+    our project to support testing. One choice is to create a subdirectory in the
+    root of the project that is decoupled from our root-level `CMakeLists.txt` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this setup, users are required to navigate to the subfolder and run the
+    standard CMake configure and build commands. The test project would link against
+    the top-level application, likely relying on `FetchContent` with a relative path
+    using `SOURCE_DIR`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another option is to keep the preceding layout but use `add_subdirectory` to
+    add the `tests` subfolder if a testing option is enabled. The nested `CMakeLists.txt`
+    file can link against the library as it will be in scope when `add_subdirectory`
+    is called. If the library is small enough, it’s also fine to omit the `tests`
+    folder entirely and keep the test executable inline in the root-level `CMakeLists.txt`
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `ch9/part-1/lib/array/CMakeLists.txt`, we have opted for keeping things in
+    line, and in `ch9/part-1/lib/gol/CMakeLists.txt`, we use `add_subdirectory`. This
+    is just to give an example of both versions; the content is almost identical.
+    The only notable difference is specifying `CMAKE_SOURCE_DIR` when referring to
+    the test file in our project in the nested folder example. This is so the path
+    to the file is relative to the root `CMakeLists.txt` file, not the `tests` subfolder.
+    There’s also one subtle difference needed when invoking `ctest` between the two
+    versions, which we’ll cover later in this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMakeLists.txt changes for CTest
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Beginning with `ch9/part-1/lib/array/CMakeLists.txt`, let’s walk through the
+    changes required to add CTest support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first change is adding a new option called `MC_ARRAY_BUILD_TESTING` to
+    either enable or disable building the tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice that we use the `MC_ARRAY` prefix to reduce the likelihood of a collision
+    with any other project. We also default it to `OFF` (a CMake constant for false;
+    we could also use `0`, `NO`, or `FALSE`, but `OFF` is clearest in this context.
+    See [https://cmake.org/cmake/help/latest/command/if.html#constant](https://cmake.org/cmake/help/latest/command/if.html#constant)
+    for more information.) We do this to be good citizens and stop downstream users
+    from inadvertently building the tests if they forget to disable `MC_ARRAY_BUILD_TESTING`
+    themselves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At the bottom of the `CMakeLists.txt` file, we then check if the `MC_ARRAY_BUILD_TESTING`
+    option is defined, and only if it is do we then bring in the CTest module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: When we include this module, a new `BUILD_TESTING` option is created by CMake.
+    This unfortunately defaults to `ON`, which from a user perspective isn’t ideal.
+    If we decided to include the CTest module at the top of our `CMakeLists.txt` file,
+    we could use the `if (BUILD_TESTING)` check around our test code; however, this
+    is an all-or-nothing setting if including this project in the context of `FetchContent`.
+    For example, our *Game of Life* library depends on `mc-array`, and if we included
+    `mc-array` using `FetchContent`, and both it and `mc-gol` used `BUILD_TESTING`,
+    we’d only be able to run all the tests or none of the tests. We likely only want
+    to run our *Game of Life* tests when making changes to that library, so having
+    a per-project option gives us more control and granularity over which projects
+    build their tests or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After `include(CTest`), we use `FetchContent` to bring in a testing library
+    called `dynamic-array-test`, and add the new test file we have that exercise its
+    functionality:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Notice that we have added our new test file in the same physical location as
+    `array.c`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_link_libraries(
+  prefs: []
+  type: TYPE_NORMAL
+- en: dynamic-array-test PRIVATE dynamic-array unity)
+  prefs: []
+  type: TYPE_NORMAL
+- en: target_compile_features(
+  prefs: []
+  type: TYPE_NORMAL
+- en: dynamic-array-test PRIVATE c_std_17)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_test(
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAME "dynamic array unit tests"
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND dynamic-array-test)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --preset test
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build/test
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctest --test-dir build/test-C Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Internal ctest changing into directory: .../ch9/part-1/lib/array/build/test'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Test project ../ch9/part-1/lib/array/build/test
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Start 1: dynamic array unit tests'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '1/1 Test #1: dynamic array unit tests ... Passed 0.17 sec'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 100% tests passed, 0 tests failed out of 1
+  prefs: []
+  type: TYPE_NORMAL
+- en: Total Test time (real) = 0.17 sec
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./build/test/Debug/dynamic-array-test
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'ctest --test-dir build -C Debug --output-on-failure argument can be used to
+    have CTest output only when a test fails. This can help avoid clutter in the test
+    output as the test suite grows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --workflow --preset multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./build/multi-ninja-super/Release/minimal-cmake_game-of-life_window
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: option(MC_GOL_APP_BUILD_TESTING "Enable testing" OFF)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_library(${PROJECT_NAME}-common INTERFACE)
+  prefs: []
+  type: TYPE_NORMAL
+- en: target_sources(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}-common
+  prefs: []
+  type: TYPE_NORMAL
+- en: INTERFACE
+  prefs: []
+  type: TYPE_NORMAL
+- en: main.cpp imgui/sdl2/imgui_impl_sdl2.cpp
+  prefs: []
+  type: TYPE_NORMAL
+- en: imgui/bgfx/imgui_impl_bgfx.cpp)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: add_executable(${PROJECT_NAME})
+  prefs: []
+  type: TYPE_NORMAL
+- en: target_link_libraries(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME} PRIVATE PROJECT_NAME variable with the common postfix, and mark
+    it INTERFACE. We then add sources and libraries as we did before, only instead
+    of adding them directly to the executable, we use the INTERFACE library. After
+    creating the executable with add_executable, we then only need to link against
+    ${PROJECT_NAME}-common to bring in all the usage requirements defined by it. The
+    good news is we can then do the same thing with our ${PROJECT_NAME}-test executable
+    target without any further duplication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Target properties only apply to the target they’re set on, so if we set them
+    on `${PROJECT_NAME}-common`, they won’t carry over to our main application (`${PROJECT_NAME}`)
+    or test target (`{PROJECT_NAME}-test`). One workaround to avoid duplication between
+    the two targets is to create a CMake function called `set_common_target_properties`
+    that takes a target as an argument. We can then move our shared code inside of
+    it, and call the new function for both the main application and our test code.
+    Below is a snippet of what this looks like (see `ch9/part-3/app/CMakeLists.txt`
+    for a full example):'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_compile_definitions(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '${PROJECT_NAME}-test PRIVATE main.cpp file, we can then wrap our test initialization
+    code in an #ifdef:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We forward declare the `RegisterGolTests` function at the top of our `main.cpp`
+    file and provide the implementation in a separate file called `gol-tests.cpp`,
+    which we only include in the test target:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: if (current_event.type == SDL_MOUSEBUTTONDOWN) {
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL_MouseButtonEvent* mouse_button =
+  prefs: []
+  type: TYPE_NORMAL
+- en: (SDL_MouseButtonEvent*)&current_event;
+  prefs: []
+  type: TYPE_NORMAL
+- en: if (mouse_button->button == SDL_BUTTON_LEFT) {
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: t = IM_REGISTER_TEST(e, "gol-tests", "Click board");
+  prefs: []
+  type: TYPE_NORMAL
+- en: t->UserData = board;
+  prefs: []
+  type: TYPE_NORMAL
+- en: t->TestFunc = [](ImGuiTestContext* ctx) {
+  prefs: []
+  type: TYPE_NORMAL
+- en: const auto* board=(mc_gol_board_t*)ctx->Test->UserData;
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctx->SetRef("Game of Life");
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctx->MouseMoveToPos(ImVec2(200, 200));
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctx->MouseClick(ImGuiMouseButton_Left);
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctx->MouseMoveToPos(ImVec2(400, 200));
+  prefs: []
+  type: TYPE_NORMAL
+- en: ctx->MouseClick(ImGuiMouseButton_Left);
+  prefs: []
+  type: TYPE_NORMAL
+- en: IM_CHECK_EQ(mc_gol_board_cell(board, 6, 6), true);
+  prefs: []
+  type: TYPE_NORMAL
+- en: IM_CHECK_EQ(mc_gol_board_cell(board, 19, 6), true);
+  prefs: []
+  type: TYPE_NORMAL
+- en: '};'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_test(
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAME "game of life end-to-end tests"
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND ${PROJECT_NAME}-test
+  prefs: []
+  type: TYPE_NORMAL
+- en: add_test command we saw when registering our library tests with CTest earlier
+    in the chapter, only this time, we pass one additional argument, WORKING_DIRECTORY,
+    which we set to CMAKE_SOURCE_DIR to ensure our application uses the CMake root
+    directory so our shader files are available at the expected relative location.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another option is to copy the compiled shader files in `app/shader/build` to
+    the same folder as the compiled test application, and then set `WORKING_DIRECTORY`
+    to `${CMAKE_BINARY_DIR}/$<CONFIG>` (this works correctly with both single and
+    multi-config generators as `$<CONFIG>` will evaluate to an empty string in the
+    single-config generator case).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With everything compiled and registered correctly, all that is left is to run
+    the test application. This can be achieved by executing the following commands
+    from the `ch9/part-3/app` folder:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Before we wrap up this section, it’s also worth noting we can further improve
+    this by adding support for test presets in our `CMakePreset.json` file. We can
+    add a key called `"testPresets"` and a JSON object such as the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: We then need only run `ctest --preset multi-ninja-super-test` after configuring
+    and building to launch our tests (this can store many of the configuration options
+    we’d otherwise have to pass at the command line to `ctest`). Please see [https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset)
+    for more information about the different options `testPresets` provides.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The final touch is to include a CMake workflow preset for all of the earlier
+    code, which allows us to configure, build, and test everything with the following
+    command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: That covers a good chunk of what you need to know when it comes to creating
+    a testable version of your application with the help of CMake and CTest. Next,
+    we’re going to look at adding a few more kinds of tests directly to our application
+    and integrating them with CTest.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Adding other kinds of tests
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Testing is an incredibly broad topic, and often applications require many kinds
+    of tests to provide effective coverage of their behavior and functionality. A
+    benefit of CTest is it integrates with these diverse types of tests and allows
+    them to be managed and run together. In this section, we’re going to look at two
+    more kinds of tests that CTest helps support.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Internal tests
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The first example we’ll cover is still technically a unit test, but we’re going
+    to add it in the context of our application instead of going through the process
+    of extracting the functionality to its own library. This can be useful to do in
+    the short term if some functionality cannot or should not be extracted. The example
+    we’ve selected is the viewport projection functions that map from world space
+    to screen space and back again. Previously, these were added in our `main.c` (now
+    `main.cpp`) file and could not be used in other files. We can extract these two
+    functions to a new pair of files called `screen.h` and `screen.cpp` and include
+    `screen.h` in `main.cpp`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'This refactoring allows us to add tests to verify the behavior of the functions
+    and help catch regressions should we in the future decide to restructure or optimize
+    the internal implementations. To add the tests, we can follow the same approach
+    we took with the library examples we saw at the beginning of the chapter, and
+    add a new file called `screen.test.cpp` to hold our tests. We’ll use the well-known
+    C++ testing library Catch2 for the tests. The reason we’re using Catch2 over the
+    Unity testing library introduced at the start of the chapter is that Catch2 is
+    built for C++, and comes with lots of useful features (function overloading and
+    not requiring tests to be called manually, also known as automatic test registration,
+    to name a few). We can add this as a dependency using either `FetchContent` or
+    `ExternalProject_Add`. As Catch2 takes a little time to build, we’ve opted for
+    the second approach. Our updated third-party `CMakeLists.txt` file in `ch9/part-4/app/third-party`
+    now has the following additions:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: First off, we only include Catch2 if we’re building tests for our application.
+    We then introduce a variable, `TEST_DEPENDENCIES`, which will evaluate to an empty
+    string if `MC_GOL_APP_BUILD_TESTING` is not set, and `Catch2` if it is. We then
+    ensure to pass this variable to the `DEPENDS` argument in the `ExternalProject_Add`
+    call for our super build.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: If you review `ch9/part-4/app/third-party/CMakeLists.txt`, at the top of the
+    file, we’ve also added the `MC_GOL_APP_BUILD_TESTING` CMake option, which appears
+    in `ch9/part-4/app/CMakeLists.txt`. This is technically redundant but ensures
+    consistency when building the third-party dependencies separately, or as a super
+    build.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Now that Catch2 is available as a third-party dependency, we can return to
+    our application’s `CMakeLists.txt` file and review the changes needed there. Inside
+    the `if(MC_GOL_APP_BUILD_TESTING)` block, after our end-to-end test executable
+    configuration, we add the commands needed to test our refactored `screen.cpp`
+    code. First, we use the `find_package` command to bring in the Catch2 library
+    we added in the earlier section:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: We then need to set up a new executable to compile our tests. Unfortunately,
+    adding tests for an application in this way is a little more complicated than
+    the library case we saw at the start of the chapter. As mentioned earlier, it
+    is not possible to link against an executable file, so we can’t add a new test
+    executable and link against the application to test. Instead, we need to specify
+    the files we want to test and link against any libraries our main application
+    uses that we may need when compiling them.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The following extract from `ch9/part-4/app/CMakeLists.txt` shows one way to
+    do this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: We first create a new executable called `${PROJECT_NAME}-unit-test` (which will
+    expand to `minimal-cmake_game-of-life_window-unit-test`). We next add the files
+    we need to compile for the tests to build and run (`screen.cpp` and `screen.test.cpp`).
+    We must link against Catch2 (`Catch2WithMain` is useful to avoid needing to create
+    our own custom `main()` entry point for the tests; see [https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets)
+    for more information) and `as-c-math`, which the interface and implementation
+    of `screen.h/cpp` depend on. We finally ensure to explicitly set the language
+    version (in this case, C++ `20`), to ensure a consistent language version across
+    different compilers and platforms.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The last step is simply to register the test executable with CTest using the
+    `add_test` command shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, CTest will report success if it detects `0` returned from the command
+    under test and failure for any non-zero value. This is a convention adhered to
+    universally, not just by CTest, so Catch2 and Unity, the C testing library we
+    saw earlier, handle this for us.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'To confirm this, it’s possible to check the return value of an executable on
+    program exit with a simple console command. After running the application, use
+    this command on Windows (if using PowerShell or Command Prompt):'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use this command if using macOS or Linux (or GitBash or equivalent on Windows):'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the case of Catch2, the number returned is the number of failing tests.
+    To verify this, we can change one or two of the expected outcome values in our
+    `screen.test.cpp` file, compile the test executable again, run it, and then run
+    one of the preceding commands. If two tests fail, then we’ll see the following
+    output:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If, for whatever reason, this default behavior is not sufficient, CTest provides
+    a `PASS_REGULAR_EXPRESSION` and `FAIL_REGULAR_EXPRESSION` property that can be
+    set on a test to check for a particular pattern coming from `stdout` or `stderr`.
+    For example, to verify all tests Catch2 ran succeeded, we could use the following
+    regular expression check:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(NOT EXISTS
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_SOURCE_DIR}/shader/build/vs_vertcol.bin)
+  prefs: []
+  type: TYPE_NORMAL
+- en: message(FATAL_ERROR "vs_vertcol.bin missing")
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_test(
+  prefs: []
+  type: TYPE_NORMAL
+- en: NAME "shaders compiled"
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND ${CMAKE_COMMAND} -P tests/shaders-compiled.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: ctest --test-dir build/multi-ninja-super-test -R "game of life unit tests" -C
+    Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: set_tests_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"game of life end-to-end tests"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PROPERTIES --label-regex (-L) and the pattern to match to ctest:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(CTEST_PROJECT_NAME minimal-cmake)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTEST_SUBMIT_URL
+  prefs: []
+  type: TYPE_NORMAL
+- en: https://my.cdash.org/submit.php?project=minimal-cmake)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: ctest --test-dir <build-dir> -C Debug -D option in this context is slightly
+    different from how we’ve used it before (to set CMake cache variables); here,
+    -D refers to the CDash web dashboard (--dashboard) and informs CTest to act as
+    a CDash client. This essentially means after the tests are run, the results will
+    be uploaded to the CDash project we set in our CTestConfig.cmake file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here, `Experimental` refers to the mode, and `Experimental` is meant to be used
+    by an individual developer to test local changes. There are multiple other modes
+    (`Nightly`, `Continuous`) that can be configured independently and are used in
+    different contexts.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: With this change, we can review the CDash web interface and see which tests
+    ran and whether they succeeded or failed.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '![Figure 9.2: CDash test results](img/B21152_09_2.jpg)'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_IMG
+- en: 'Figure 9.2: CDash test results'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: This increased visibility into which tests are passing or failing is great for
+    a development team to stay on top of issues and detect regressions early.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Adding code coverage
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: One other useful feature CDash offers is a clean interface to report the lines
+    of code executed while running our tests. This unfortunately is only supported
+    in **GNU Compiler Collection** (**GCC**) and Clang compilers, so won’t work by
+    default on Windows (although setting up Clang in a Windows environment isn’t too
+    difficult if you’re determined).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'To support capturing code coverage information, we need to make some minor
+    additions to our `CMakeLists.txt` file. Please see `ch9/part-5/app/CMakeLists.txt`
+    for the full example, but the key lines are shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(CTEST_CUSTOM_COVERAGE_EXCLUDE
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CTEST_CUSTOM_COVERAGE_EXCLUDE}
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"src/imgui/sdl2" "third-party/install/include")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: configure_file(
+  prefs: []
+  type: TYPE_NORMAL
+- en: CTestCustom.cmake.in
+  prefs: []
+  type: TYPE_NORMAL
+- en: '${CMAKE_BINARY_DIR}/CTestCustom.cmake COPYONLY to indicate no variable replacements
+    should take place. Now, when we run the ctest command we saw earlier, coverage
+    information will also be uploaded, along with the test results. It’s possible
+    to see a file’s overall test coverage as a percentage, and see line by line what
+    code was executed while running the tests:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 9.3: CDash coverage results](img/B21152_09_3.jpg)'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_IMG
+- en: 'Figure 9.3: CDash coverage results'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: This was an incredibly brief introduction to CDash and only really scratched
+    the surface of what’s possible. As well as using the default `ctest` functionality,
+    it’s possible to fully script `ctest` execution (see [https://cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands](https://cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands)
+    for the full list of `ctest` commands). Setting up recurring nightly builds and
+    different kinds of reports is also possible, as well as enabling several forms
+    of static analysis (detection of source code errors). It’s also fine to not bother
+    with CDash if you decide to opt for a different tool or don’t require the visibility
+    features; CTest can be used independently without it.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: This brings us to the end of our first foray into testing. There is a huge amount
+    we didn’t cover, but hopefully, this has given you a flavor of what is possible
+    with CTest and how it can bring an array of different testing approaches together.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In this chapter, we were introduced to CTest to understand what it is and how
+    it can help us manage various kinds of tests across our libraries and applications.
+    Testing is critical and understanding where CTest fits into the testing ecosystem
+    is important. We saw how to use CTest when adding unit tests to our foundational
+    libraries, how to structure unit tests within an application, and how to create
+    a separate testable executable for running full end-to-end tests. We also saw
+    how to author CMake scripts to test other parts of our project. This was all orchestrated
+    and connected through CTest. These skills will help you build successful and reliable
+    software projects.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: We then took a brief tour of CDash to understand what it offers and how it integrates
+    with CTest. We looked at reporting test results and code coverage and saw how
+    a tool like CDash can help software teams work together more effectively.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In the next chapter, we are going to turn our attention to another of CMake’s
+    companion tools called CPack. We’ll use this to package our application ready
+    for distribution and look at some of the challenges around handling platform-specific
+    differences.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE

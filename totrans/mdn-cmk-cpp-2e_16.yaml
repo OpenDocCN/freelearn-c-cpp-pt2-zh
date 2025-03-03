@@ -1,0 +1,1005 @@
+- en: '16'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Writing CMake Presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Presets were added to CMake in version 3.19 to make it easier to manage project
+    settings. Before presets, users had to memorize lengthy command-line configurations
+    or set overrides directly in the project files, which could become complicated
+    and prone to mistakes. Presets let users handle settings such as the generator
+    used for configuring the project, the number of concurrent build tasks, and the
+    project components to build or test in a more straightforward manner. With presets,
+    CMake becomes simpler to use. Users can set up presets once and use them whenever
+    needed, making each CMake execution more consistent and easier to understand.
+    They also help standardize settings across different users and computers, simplifying
+    collaborative project work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Presets are compatible with four primary modes of CMake: configuring the buildsystem,
+    building, running tests, and packaging. They allow users to link these parts together
+    in workflows, making the whole process more automatic and organized. Additionally,
+    presets offer features like conditions and macro expressions (or simply macros),
+    granting users greater control.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using presets defined in a project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing a preset file
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Defining stage-specific presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Defining workflow presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding conditions and macros
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The commands needed to execute the examples in this chapter will be provided
+    in each section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using presets defined in a project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The configuration of projects can become a complex task when we need to be specific
+    about elements such as cache variables, chosen generators, and more—especially
+    when there are multiple ways to build our project. This is where presets come
+    in handy. Instead of memorizing command-line arguments or writing shell scripts
+    to execute `cmake` with different arguments, we can create a preset file and store
+    the required configuration in the project itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake utilizes two optional files to store project presets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMakePresets.json`: Official presets delivered by project authors.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMakeUserPresets.json`: Dedicated to users who wish to add custom presets
+    to the project. Projects should add this file to the VCS ignore list to ensure
+    that custom settings don’t inadvertently get shared in the repository.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Preset files must be placed in the top directory of the project for CMake to
+    recognize them. Each preset file can define multiple presets for each stage: configure,
+    build, test, package, and workflow presets that encompass multiple stages. Users
+    can then select a preset to execute through the IDE, GUI, or command line.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Presets can be listed by adding the `--list-presets` argument to the command
+    line, specific to the stage we’re listing for. For example, build presets can
+    be listed with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Test presets can be listed with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: To use a preset, we need to follow the same pattern, and provide the preset
+    name after the `--preset` argument.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Additionally, you can’t list package presets with the `cmake` command; you
+    need to use `cpack`. Here’s a command line for the package preset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: After picking the preset, you can, of course, add stage-specific command-line
+    arguments, for example, to specify your build tree or installation path. Added
+    arguments override whatever is set in the preset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There’s a special case for workflow presets, which can be listed and applied
+    if the additional `--workflow` argument is present when running the `cmake` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s how you can apply and review available presets in a project. Now, let’s
+    explore how the preset file is structured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing a preset file
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'CMake searches for `CMakePresets.json` and `CMakeUserPresets.json` in the top-level
+    directory. Both files use the same JSON structure to define presets, hence there
+    isn’t much difference between them to discuss. The format is a JSON object with
+    the following keys:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`version`: This is a required integer that specifies the version of the preset
+    JSON schema'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cmakeMinimumRequired`: This is an object that specifies the required CMake
+    version'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`include`: This is an array of strings that includes external presets from
+    file paths provided in the array (since schema version 4)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`configurePresets`: This is an array of objects that defines the configuration
+    stage presets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`buildPresets`: This is an array of objects that defines the build stage presets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`testPresets`: This is an array of objects that are specific to the test stage
+    presets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`packagePresets`: This is an array of objects that are specific to the package
+    stage presets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`workflowPresets`: This is an array of objects that are specific to the workflow
+    mode presets'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`vendor`: This is an object that contains custom settings defined by IDEs and
+    other vendors; CMake does not process this field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When writing a preset, CMake requires the `version` entry to be present; other
+    values are optional. Here’s an example preset file (actual presets will be added
+    in subsequent sections):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: There’s no requirement to add empty arrays like in the preceding example; entries
+    other than `version` are optional. Speaking of which, the appropriate schema version
+    for CMake 3.26 is `6`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we understand the structure of the preset file, let’s actually learn
+    how to define the presets themselves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining stage-specific presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Stage-specific presets are simply presets that configure individual CMake stages:
+    configure, build, test, package, and install. They allow for a granular and structured
+    approach to defining build configurations. Here’s an overview of the common features
+    shared across all preset stages, followed by an introduction to defining presets
+    for individual stages.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Common features across presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are three features that are used to configure presets regardless of the
+    CMake stage. Namely, these are unique name fields, optional fields, and associations
+    with configuration presets. The following sections will cover each, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unique name fields
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Every preset must have a unique name field within its stage. Given that `CMakeUserPresets.json`
+    (if it exists) implicitly includes `CMakePresets.json` (if it exists), both files
+    share the namespace, preventing duplicate names across them. For example, you
+    can’t have two package-stage presets with the name `myPreset` in both files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A minimal preset file might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Optional fields
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Every stage-specific preset can use the same optional fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`displayName`: This is a string that provides a user-friendly name for the
+    preset'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`description`: This is a string that offers an explanation of what the preset
+    does'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`inherits`: This is a string, or an array of strings, that effectively copies
+    the configuration of presets named in this field as a base, to be further extended
+    or modified'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`hidden`: This is a Boolean that hides the preset from the listings; such hidden
+    presets can only be used through inheritance'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`environment`: This is an object that overrides `ENV` variables for this stage;
+    each key identifies an individual variable, and values can be strings or `null`;
+    it supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`condition`: This is an object that enables or disables this preset (more on
+    this later)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`vendor`: This is a custom object that contains vendor-specific values and
+    follows the same convention as a root-level `vendor` field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Presets can form a graph-like inheritance structure, provided there are no cyclic
+    dependencies. `CMakeUserPresets.json` can inherit from project-level presets but
+    not the other way around.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Association with configuration-stage presets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: All stage-specific presets must be associated with a configuration preset, as
+    they must know the location of the build tree. While the `configure` preset is
+    inherently associated with itself, build, test, and package presets need to explicitly
+    define this association via the `configurePreset` field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contrary to what you might think, this association doesn’t mean CMake will automatically
+    execute the configuration preset when you decide to run any of the subsequent
+    presets. You still need to execute each preset manually, or use a workflow preset
+    (we’ll get to that in a bit).
+  prefs: []
+  type: TYPE_NORMAL
+- en: With these foundational concepts in place, we can continue into the specifics
+    of presets for individual stages, starting with the configuration stage. As we
+    progress, we’ll explore how these presets interact and how they can be used to
+    streamline the project configuration and building process in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining configuration-stage presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As previously indicated, configuration presets reside within the `configurePresets`
+    array. They can be listed by adding the `--list-presets` argument to the command
+    line, specific to the configuration stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To configure a project with a chosen preset, specify its name after the `--preset`
+    argument, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The configuration preset has some general fields like `name` and `description`,
+    but it also has its own unique set of optional fields. Here are the simplified
+    descriptions of the most important ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`generator`: A string that specifies a generator to use for the preset; required
+    for schema version < `3`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`architecture` and `toolset`: A string that configures generators supporting
+    these options'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`binaryDir`: A string that provides a relative or absolute path to the build
+    tree; required for schema version < `3`; supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`installDir`: A string that provides a relative or absolute path to the installation
+    directory; it is required for schema version < `3` and it supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cacheVariables`: A map that defines cache variables; values support macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When defining the `cacheVariables` map, remember the order in which variables
+    are resolved in the project. As you can see in *Figure 16.1*, any cache variables
+    defined through the command line will override preset variables. Any cache or
+    environment preset variables will override those coming from the cache file or
+    the host environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_16_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 16.1: How presets override CMakeCache.txt and the system environment
+    variables'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s declare a simple `myConfigure` configuration preset that specifies the
+    generator, build tree, and installation path:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Our introduction to `configure` presets is complete, which brings us to build-stage
+    presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining build-stage presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You won’t be surprised to learn that build presets reside within the `buildPresets`
+    array. They can be listed by adding the `--list-presets` argument to the command
+    line, specific to the build stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To build a project with a chosen preset, specify its name after the `--preset`
+    argument, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The build preset also has some general fields like `name` and `description`,
+    and it has its unique set of optional fields. The simplified descriptions of the
+    most important ones are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`jobs`: An integer that sets the number of parallel jobs used to build the
+    project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`targets`: A string or string array that sets targets to build and supports
+    macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`configuration`: A string that determines the build type for multi-configuration
+    generators (`Debug`, `Release`, etc.)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cleanFirst`: A Boolean that ensures that the project is always cleaned before
+    the build'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'That’s it. Now, we can write a build preset like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll notice that the required `configurePreset` field is set to point to the
+    `myConfigure` preset we defined in the previous section. Now, we’re able to move
+    on to the test presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining test-stage presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Test presets live within the `testPresets` array. They can be displayed by
+    adding the `--list-presets` argument to the command line, specific to the test
+    stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To test a project using a preset, specify its name after the `--preset` argument,
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The test preset also has its own unique set of optional fields. The simplified
+    descriptions of the most important ones are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`configuration`: A string that determines the build type for multi-configuration
+    generators (`Debug`, `Release`, etc.)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`output`: An object that configures the output'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`filter`: An object that specifies which tests to run'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`execution`: An object that configures the execution of tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Each object maps the appropriate command-line options to configuration values.
+    We’ll highlight a few essential options, but this isn’t an exhaustive list. Refer
+    to the *Further reading* section for a full reference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Optional entries for the `output` object include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`shortProgress`: Boolean; progress will be reported within a single line'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`verbosity`: A string that sets the output verbosity to one of the following
+    levels: default, verbose, or extra'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`outputOnFailure`: A Boolean that prints the program output upon test failure'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`quiet`: Boolean; suppress all output'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For exclude, some of the accepted entries are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name`: A string that excludes tests with names matching a regex pattern and
+    supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label`: A string that excludes tests with labels matching a regex pattern
+    and supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fixtures`: An object that determines which fixtures to exclude from the test
+    (see official documentation for more details)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Finally, the execution object accepts the following optional entry:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`outputLogFile`: A string that specifies the output logfile path and supports
+    macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `filter` object accepts `include` and `exclude` keys to configure the filtering
+    of test cases; here’s a partially filled structure to illustrate this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Each key defines its own object of options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For `include`, entries include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name`: A string that includes tests with names matching a regex pattern and
+    supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label`: A string that includes tests with labels matching a regex pattern
+    and supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`index`: An object that selects tests to run with accepting `start`, `end`,
+    and `stride` integers, and a `specificTests` array of integers; it supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`useUnion`: A Boolean that enables the usage of a union of tests determined
+    by `index` and `name`, rather than the intersection'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For `exclude`, entries include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name`: A string that excludes tests with names matching a regex pattern and
+    supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`label`: A string that excludes tests with labels matching a regex pattern
+    and supports macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fixtures`: An object that determines which fixtures to exclude from the test
+    (see official documentation for more details)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Finally, the `execution` object can be added right here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It accepts the following optional entries:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`stopOnFailure`: A Boolean that enables halting the tests if any fail'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`enableFailover`: A Boolean that resumes previously interrupted tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`jobs`: An integer that runs a number of multiple tests in parallel'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`repeat`: An object that determines how to repeat tests; the object must have
+    the following fields:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`mode` – A string with one of the following values: `until-fail`, `until-pass`,
+    `after-timeout`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`count` – An integer that determines the number of repeats'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`scheduleRandom`: A Boolean that enables a random order of test execution'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`timeout`: An integer that sets a limit (in seconds) on the total execution
+    time for all tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`noTestsAction`: A string that defines the action if no tests are found, with
+    options like `default`, `error`, and `ignore`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'While there are many configuration options, simple presets are also viable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: As with the build preset, we also set the required `configurePreset` field for
+    the new test preset to neatly tie things together. Let’s take a look at the last
+    stage-specific preset type, the package preset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining package-stage presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Package presets were introduced in schema version `6`, meaning you’ll need
+    at least CMake 3.25 to utilize them. These presets should be included in the `packagePresets`
+    array. They can also be displayed by appending the `--list-presets` argument to
+    the command line, specific to the test stage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create a project package using a preset, specify its name after the `--preset`
+    argument, like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A package preset leverages the same shared fields as other presets while introducing
+    some optional fields specific to itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`generators`: An array of strings that sets the package generators to use (`ZIP`,
+    `7Z`, `DEB`, etc.)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`configuration`: An array of strings that determines the list of build types
+    for CPack to package (`Debug`, `Release`, etc.)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`filter`: An object that specifies which tests to run'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`packageName`, `packageVersion`, `packageDirectory`, and `vendorName`: Strings
+    thatspecify the metadata for the created package'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let’s extend our preset file with a concise package preset as well:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Such a configuration will allow us to streamline the creation of project packages,
+    but we’re still missing one key ingredient: project installation. Let’s find out
+    how we can make it work.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding the installation preset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You might’ve noticed that the `CMakePresets.json` object doesn’t support defining
+    `"``installPresets"`. There’s no explicit way to install your project through
+    a preset, which seems odd since the configure preset provides an `installDir`
+    field! So, do we have to resort to manual installation commands?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Fortunately, no. There’s a workaround that enables us to use the build preset
+    to achieve our goal. Take a look:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can create a build preset with a `targets` field set to `install`. The `install`
+    target is implicitly defined by the project when we configure the installation
+    correctly. Building with this preset will execute the necessary steps to install
+    the project to `installDir` specified in the associated configure preset (if the
+    `installDir` field is empty, the default location will be used):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: This neat trick can help us save a few cycles. It would be even better if we
+    could provide a single command for our end users that takes care of everything,
+    from configuration to installation. Well, we can, with workflow presets. Let’s
+    take a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining workflow presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Workflow presets are the ultimate automation solution for our project. They
+    allow us to automatically execute multiple stage-specific presets in the predetermined
+    order. That way, we can practically perform an end-to-end build in a single step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To discover available workflows for a project, we can execute the following
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To select and apply a preset, use the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Additionally, with the `--fresh` flag, we can wipe the build tree and clear
+    the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Defining workflow presets is quite simple; we need to define a name and we
+    can optionally provide `displayName` and `description`, just like for stage-specific
+    presets. After that, we must enumerate all the stage-specific presets the workflow
+    should execute. This is done by providing a `steps` array containing objects with
+    `type` and `name` properties, as illustrated here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch16/01-presets/CMakePresets.json (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Each object in the `steps` array references a preset we defined earlier in
+    this chapter, indicating its type (`configure`, `build`, `test`, or `package`)
+    and a name. These presets collectively execute all necessary steps to fully build
+    and install a project from scratch with a single command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Workflow presets are the ultimate solution for automating C++ building, testing,
+    packaging, and installing. Next, let’s explore how to manage some edge cases with
+    conditions and macros.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding conditions and macros
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When we discussed the general fields for each stage-specific preset, we mentioned
+    the `condition` field. It’s time to return to that subject. The **condition**
+    field enables or disables a preset, revealing its true potential when integrated
+    with workflows. Essentially, it allows us to bypass presets that aren’t suitable
+    under certain conditions and create alternative presets that are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditions require preset schema version 3 or above (introduced in CMake 3.22)
+    and are JSON objects that codify a few simple logical operations that can determine
+    whether circumstances, like used OS, environment variables, or even chosen generators,
+    fit the scenario of a preset. CMake provides this data through macros, which are
+    essentially a limited set of read-only variables usable in the preset file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The structure of a condition object varies based on the check type. Each condition
+    must include a `type` field and additional fields as defined by the type. Recognized
+    basic types include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`const`: This checks whether the value provided in the `value` field is Boolean
+    `true`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`equals`, `notEquals`: This compares the `lhs` field value to the value in
+    the `rhs` field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`inList` and `notInList`: These check for the presence of the value provided
+    in the `string` field within the array in the `list` field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`matches` and `notMatches`: These evaluate whether the `string` field’s value
+    aligns with the pattern defined in the `regex` field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'An example condition looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `const` condition’s practical use is primarily for disabling a preset without
+    removing it from the JSON file. Apart from `const`, all basic conditions permit
+    the use of macros in the fields they introduce: `lhs`, `rhs`, `string`, `list`,
+    and `regex`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Advanced condition types, which function like “not”, “and”, and “or” operations,
+    utilize other conditions as arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`not`: A Boolean inversion of the condition provided in the `condition` field'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`anyOf` and `allOf`: These check whether any or all conditions in the `conditions`
+    array are `true`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: This condition evaluates as `true` if the system is either Linux or Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Through these examples, we’ve introduced our first macro: `${hostSystemName}`.
+    Macros follow a simple syntax and are limited to specific instances, like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`${sourceDir}`: This is the path of the source tree'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${sourceParentDir}`: This is the path of the source tree’s parent directory'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${sourceDirName}`: This is the project’s directory name'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${presetName}`: This is the name of the preset'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${generator}`: This is the generator used to create the buildsystem'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${hostSystemName}`: This is the system name: `Linux`, `Windows`, or `Darwin`
+    on macOS'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${fileDir}`: This is the name of the file containing the current preset (applicable
+    when an `include` array is used to import external presets)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${dollar}`: This is the escaped dollar sign (`$`)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${pathListSep}`: This is the environment-specific path separator'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$env{<variable-name>}`: This returns the environment variable if specified
+    by the preset (case-sensitive), or the parent environment value'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$penv{<variable-name>}`: This returns the environment variable from the parent
+    environment'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$vendor{<macro-name>}`: This allows IDE vendors to introduce their own macros'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These macros provide sufficient flexibility for use in presets and their conditions,
+    enabling the effective toggling of workflow steps as needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We have just completed a comprehensive overview of CMake presets, introduced
+    in CMake 3.19, to streamline project management. Presets allow product authors
+    to provide a neatly prepared experience for their users by configuring all the
+    stages of the project build and delivery. Presets not only simplify the usage
+    of CMake but also enhance consistency and allow environment-aware setups.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We explained the structure and usage of the `CMakePresets.json` and `CMakeUserPresets.json`
+    files, providing insights into defining various types of presets, such as configure
+    presets, build presets, test presets, package presets, and workflow presets. Each
+    type is described in detail: we learned about common fields, how to structure
+    presets internally, establish inheritance between them, and the specific configuration
+    options available for the end user.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the *configure preset*, we covered important topics like selecting the generator,
+    build, and installation directory, and linking presets together with the `configurePreset`
+    field. We now know how to handle *build presets* and set the build job count,
+    targets, and cleaning options. Then, we learned how the *test preset* assists
+    with test selection through extensive filtering and ordering options, output formatting,
+    and execution parameters such as timeouts and fault tolerance. We understand how
+    to manage *package presets* by specifying package generators, filtering, and package
+    metadata. We even introduced a workaround to execute the installation stage through
+    a specialized build preset application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we discovered how workflow presets allow the grouping of multiple stage-specific
+    presets. Finally, we discussed conditions and macro expressions, providing project
+    authors with greater control over the behavior of individual presets and their
+    integration into a workflow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Our CMake journey is complete! Congratulations – you now possess all the tools
+    necessary to develop, test, and package high-quality C++ software. The best way
+    forward is to apply what you’ve learned and create excellent software for your
+    users. Good luck!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information, you can refer to the following resource:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Official documentation for presets:[https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Join our community on Discord
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Join our community’s Discord space for discussions with the author and other
+    readers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/QR_Code94081075213645359.png)'
+  prefs: []
+  type: TYPE_IMG

@@ -1,0 +1,1170 @@
+- en: '5'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Working with Targets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The entire application in CMake can be built from a single source code file
+    (such as the classic `helloworld.cpp`). But it’s equally possible to create a
+    project where the executable is built from many source files: dozens or even thousands.
+    Many beginners follow this path: they build their binaries with only a few files
+    and let their projects grow organically without strict planning. They keep adding
+    files as required and before they know it, everything is linked directly to a
+    single binary without any structure whatsoever.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As software developers, we deliberately draw boundaries and designate components
+    to group one or more units of translation (`.cpp` files). We do it to increase
+    code readability, manage coupling and connascence, speed up the build process,
+    and finally, discover and extract reusable components into autonomic units.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every big project will push you to introduce some form of partitioning. This
+    is where CMake targets find their use. A CMake target represents a logical unit
+    that focuses on a specific objective. Targets can have dependencies on other targets,
+    and their construction follows a declarative approach. CMake takes care of determining
+    the proper order for building targets, optimizing with parallel builds where possible,
+    and executing the necessary steps accordingly. As a general principle, when a
+    target is built, it generates an artifact that can be utilized by other targets
+    or serve as the final output of the build process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Notice the usage of the word *artifact*. I intentionally refrain from using
+    specific terms because CMake offers flexibility beyond just generating executables
+    or libraries. In practice, we can utilize generated buildsystems to produce various
+    types of outputs: additional source files, headers, object files, archives, configuration
+    files, and more. The only requirements are a command-line tool (like a compiler),
+    optional input files, and a designated output path.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Targets are an incredibly powerful concept that greatly streamlines the process
+    of building a project. Understanding how they function and mastering the art of
+    configuring them in an elegant and organized manner is crucial. This knowledge
+    ensures a smooth and efficient development experience.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the concept of a target
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting properties of targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing custom commands
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this book, always use the recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace the `<build tree>` and `<source tree>` placeholders with
+    appropriate paths. As a reminder: **build tree** is the path to the target/output
+    directory, while **source tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the concept of a target
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you have ever used GNU Make, you have already seen the concept of a target.
+    Essentially, it’s a recipe that a buildsystem follows to compile a set of files
+    into another file. It can be a `.cpp` implementation file compiled into a `.o`
+    **object file** or a group of `.o` files packaged into a `.a` static library.
+    There are numerous combinations and possibilities when it comes to targets and
+    their transformations within a buildsystem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake, however, allows you to save time and skip defining the intermediate
+    steps of those recipes; it works on a higher level of abstraction. It understands
+    how most languages build an executable directly from their source files. So, you
+    don’t need to write explicit commands to compile your C++ **object files** (as
+    you would using GNU Make). All that’s required is an `add_executable()` command
+    with the name of the executable target followed by a list of the source files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have used this command in the previous chapters, and we already know how
+    executable targets are used in practice – during the generation step, CMake will
+    create a buildsystem and fill it with appropriate recipes to compile each of the
+    source files and link them together into a single binary executable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In CMake, we can create a target using these three commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add_executable()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_library()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_custom_target()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Before building executables or libraries, CMake performs a check to determine
+    whether the generated output is older than the source files. This mechanism helps
+    CMake avoid recreating artifacts that are already up to date. By comparing timestamps,
+    CMake efficiently identifies which targets need to be rebuilt, reducing unnecessary
+    recompilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All commands defining targets require the name of the target to be provided
+    as a first argument, so it can be later referenced in other commands that do things
+    with targets, like `target_link_libraries()`, `target_sources()`, or `target_include_directories()`.
+    We’ll learn about those commands later, but for now, let’s take a closer look
+    at what kind of targets we can define.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining executable targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The command to define an executable target, `add_executable()`, is self-explanatory
+    (we leaned on this fact and used it already in previous chapters). The formal
+    structure looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If we’re compiling for Windows, by adding the optional argument, the `WIN32`
+    keyword, we’ll produce an executable that won’t show the default console window
+    (where we usually see the output streamed to `std::cout`). Instead, the application
+    will be expected to generate its own GUI.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next optional argument, `MACOSX_BUNDLE`, is quite similar in a way; it makes
+    the applications produced for macOS/iOS launchable from the Finder as GUI apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `EXCLUDE_FROM_ALL` keyword, when used, will prevent the executable target
+    from being built in a regular, default build. Such a target will have to be explicitly
+    mentioned in the *build command*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we’re expected to provide the list of sources that will be compiled
+    into the target. The following extensions are supported:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For C: `c`, `m`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'For C++: `C`, `M`, `c++`, `cc`, `cpp`, `cxx`, `m`, `mm`, `mpp`, `CPP`, `ixx`,
+    `cppm`, `ccm`, `cxxm`, `c++m`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that we’re not adding any **header files** to the sources list. That can
+    be done either implicitly, by providing a path to the directory where those files
+    are with the `target_include_directories()` command, or by using a `FILE_SET`
+    feature of the `target_sources()` command (added in CMake 3.23). This is an important
+    topic for executables, but since it’s complex and orthogonally related to targets,
+    we’ll dive into its details in *Chapter 7*, *Compiling C++ Sources with CMake*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining library targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Defining the libraries is very similar to defining executables, but, of course,
+    it doesn’t require keywords that define how GUI aspects will be handled. Here’s
+    the signature of the command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Rules regarding the name, *exclusion from all*, and sources match the executable
+    targets exactly. The only difference is in the `STATIC`, `SHARED`, and `MODULE`
+    keywords. If you have any experience with libraries, you’ll know that these define
+    what sort of artifact CMake will generate: statically linked libraries, shared
+    (dynamic libraries), or modules. Again, it is quite a vast subject, which will
+    be covered in depth in *Chapter 8*, *Linking Executables and Libraries*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Custom targets are a bit different than executables or libraries. They extend
+    the build functionality beyond what CMake provides out of the box by executing
+    explicitly given command lines; for example, they can be used to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calculate the checksums of other binaries.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Run the code sanitizer and collect the results.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Send a compilation report to the metrics pipeline.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As you can guess from this list, custom targets are only useful in quite advanced
+    projects, so we’ll just cover the basics to move on to more important topics.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To define a custom target, use the following syntax (some options have been
+    removed for brevity):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom targets have certain drawbacks to consider. Since they involve shell
+    commands, they can be system specific, potentially limiting portability. Additionally,
+    custom targets may not provide a straightforward means for CMake to determine
+    the specific artifacts or byproducts being generated, if any.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom targets also don’t apply the staleness check like executables and libraries
+    (they don’t verify whether the sources are newer than the binaries), because by
+    default they’re not added to the **dependency graph** (so the `ALL` keyword works
+    in opposite to `EXCLUDE_FROM_ALL`). Let’s find out what that dependency graph
+    is about.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dependency graph
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Mature applications are often built from many components, specifically, internal
+    libraries. Partitioning the project is useful from a structural perspective. When
+    related things are packaged together in a single logical entity, they can be linked
+    with other targets: another library or an executable. This is especially convenient
+    when multiple targets are using the same library. Take a look at *Figure 5.1*,
+    which describes an exemplary dependency graph:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_05_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.1: Order of building dependencies in the BankApp project'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this project, we have two libraries, two executables, and a custom target.
+    Our use case here is to provide a banking application with a nice GUI for users
+    (**GuiApp**) and a command-line version to be used as part of an automated script
+    (**TerminalApp**). Both executables depend on the same **Calculations** library,
+    but only one of them needs the **Drawing** library. To guarantee that our app’s
+    binaries were downloaded from a genuine source, we’ll also calculate a checksum,
+    and distribute it through separate secure channels. CMake is pretty flexible when
+    it comes to writing listfiles for such a solution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch05/01-targets/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: We link our libraries with executables by using the `target_link_libraries()`
+    command. Without it, the building of executables would fail because of undefined
+    symbols. Have you noticed that we invoked this command before declaring any of
+    the libraries? When CMake configures the project, it collects information about
+    targets and their properties – their names, dependencies, source files, and other
+    details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After parsing all the files, CMake will attempt to build a dependency graph.
+    Like with all valid dependency graphs, they’re **Directed Acyclic Graph** (**DAGs**).
+    This means that there is a clear direction of which target depends on which, and
+    such dependencies cannot form cycles.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When we execute `cmake` in build mode, the generated buildsystem will check
+    what top-level targets we have defined and recursively build their dependencies.
+    Let’s consider our example from *Figure 5.1*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Start from the top and build both libraries in group 1.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When the **Calculations** and **Drawing** libraries are complete, build group
+    2 – **GuiApp** and **TerminalApp**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Build a checksum target; run specified command lines to generate checksums (`cksum`
+    is a Unix checksum tool, which means that this example won’t build on other platforms).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'There’s a slight issue, though – the preceding solution doesn’t guarantee that
+    a checksum target will be built after the executables. CMake doesn’t know that
+    a checksum depends on the executable binaries being present, so it’s free to start
+    building it first. To resolve this problem, we can put the `add_dependencies()`
+    command at the end of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will ensure that CMake understands the relationship between the checksum
+    target and the executables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That’s great, but what’s the difference between `target_link_libraries()` and
+    `add_dependencies()`? `target_link_libraries()` is intended to be used with actual
+    libraries and allows you to control property propagation. The second is meant
+    to be used only with top-level targets to set their build order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As projects grow in complexity, the dependency tree gets harder to understand.
+    How can we simplify this process?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visualizing dependencies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Even small projects can be difficult to reason about and share with other developers.
+    A neat diagram will go a long way here. After all, a picture is worth a thousand
+    words. We can do the work and draw a diagram ourselves, just like I did in *Figure
+    5.1*. But this is tedious and requires updates whenever the project changes. Luckily,
+    CMake has a great module to generate dependency graphs in the `dot/graphviz` format,
+    and it supports both internal and external dependencies!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use it, we can simply execute this command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The module will produce a text file that we can import to the Graphviz visualization
+    software, which can render an image or produce a PDF or SVG file that can be stored
+    as part of the software documentation. Everybody loves great documentation, but
+    hardly anyone likes to create it – now, you don’t need to!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Custom targets are not visible by default and we need to create a special configuration
+    file, `CMakeGraphVizOptions.cmake`, that will allow us to customize the graph.
+    Use the `set(GRAPHVIZ_CUSTOM_TARGETS TRUE)` command to enable custom targets in
+    your graph:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch05/01-targets/CMakeGraphVizOptions.cmake**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other options allow the addition of a graph name, a header, and node prefixes
+    and configure which targets should be included or excluded from the output (by
+    name or type). Visit the official CMake documentation for the `CMakeGraphVizOptions`
+    full description of this module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’re in a rush, you can even run Graphviz straight from your browser at
+    this address: [https://dreampuf.github.io/GraphvizOnline/](https://dreampuf.github.io/GraphvizOnline/).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All you need to do is copy and paste the contents of the `test.dot` file into
+    the window on the left and your project will be visualized (*Figure 5.2*). Quite
+    convenient, isn’t it?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_05_02.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.2: A visualization of the BankApp example in Graphviz'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using this method, we can quickly see all the explicitly defined targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we understand the concept of a target, we know how to define different
+    types of targets, including executables, libraries, and custom targets, as well
+    as how to create a dependency graph and print it. Let’s use this information to
+    do a deeper dive and see how to configure them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting properties of targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Targets have properties that work in a similar way to fields of C++ objects.
+    Some of these properties are meant to be modified, and some are read only. CMake
+    defines a large list of “known properties” (see the *Further reading* section)
+    that are available depending on the type of the target (executable, library, or
+    custom). You can also add your own properties if you like. Use the following commands
+    to manipulate the properties of a target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: To print a target property on the screen, we first need to store it in the `<var>`
+    variable and then message itto the user. Reading of the properties has to be done
+    one by one; setting properties on a target allows us to specify multiple properties
+    at the same time, on multiple targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The concept of properties isn’t unique to targets; CMake supports setting properties
+    of other scopes as well: `GLOBAL`, `DIRECTORY`, `SOURCE`, `INSTALL`, `TEST`, and
+    `CACHE`. To manipulate all kinds of properties, there are general `get_property()`
+    and `set_property()` commands. In some projects, you’ll see these low-level commands
+    used to do exactly what the `set_target_properties()` command does, just with
+    a bit more work:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Generally, it’s better to use as many high-level commands as you can. In some
+    cases, CMake offers short-hand commands that come with additional mechanisms.
+    For example, `add_dependencies(<target> <dep>)` is a shorthand for appending dependencies
+    to the `MANUALLY_ADDED_DEPENDENCIES` target property. In this case, we can query
+    it with `get_target_property()` exactly as with any other property. However, we
+    can’t use `set_target_properties()` to change it (it’s read only), as CMake insists
+    on using the `add_dependencies()` command to restrict operations to appending
+    only.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll introduce more property-setting commands when we discuss compiling and
+    linking in upcoming chapters. Meanwhile, let’s focus on how the properties of
+    one target can be carried over to another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are Transitive Usage Requirements?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Let’s just agree that naming is hard, and sometimes one ends up with a label
+    that’s difficult to understand. “Transitive Usage Requirements” is, unfortunately,
+    one of those cryptic titles that you will encounter in the online CMake documentation.
+    Let’s untangle this strange name and perhaps propose a term that is easier to
+    understand.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Starting from the middle term: **Usage**. As we previously discussed, one target
+    may depend on another. CMake documentation sometimes refers to such dependency
+    as **usage**, as in one target *uses* another.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There will be cases when such a *used target* sets specific *properties* or
+    *dependencies* for itself, which, in turn, constitute **requirements** for *other
+    targets* that use it: link some libraries, include a directory, or require specific
+    compiler features.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last part of our puzzle, **transitive**, describes the behavior correctly
+    (maybe could be a bit simpler). CMake appends some properties/requirements of
+    *used targets* to properties of *using targets*. You can say that some properties
+    can transition (or simply propagate) across targets implicitly, so it’s easier
+    to express dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simplifying this whole concept, I see it as **propagated properties** between
+    the **source target** (targets that get used) and **destination targets** (targets
+    that use other targets).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s look at a concrete example to understand why it’s there and how it works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: This target command will populate the `COMPILE_DEFINITIONS` property of a `<source>`
+    target. **Compile definitions** are simply `-Dname=definition` flags passed to
+    the compiler that configure the C++ preprocessor definitions (we’ll get to that
+    in *Chapter 7*, *Compiling C++ Sources with CMake*). The interesting part here
+    is the second argument. We need to specify one of three values, `INTERFACE`, `PUBLIC`,
+    or `PRIVATE`, to control which targets the property should be passed to. Now,
+    don’t confuse these with C++ access specifiers – this is a separate concept in
+    its own right.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Propagation keywords work like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRIVATE` sets the property of the source target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INTERFACE` sets the property of the destination targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PUBLIC` sets the property of the source and destination targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When a property is not to be transitioned to any destination targets, set it
+    to `PRIVATE`. When such a transition is needed, go with `PUBLIC`. If you’re in
+    a situation where the source target doesn’t use the property in its implementation
+    (`.cpp` files) and only in the headers, and these are passed to the consumer targets,
+    `INTERFACE` is the keyword to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How does this work under the hood? To manage those properties, CMake provides
+    a few commands such as the aforementioned `target_compile_definitions()`. When
+    you specify a `PRIVATE` or `PUBLIC` keyword, CMake will store provided values
+    in the property of the target, in this case, `COMPILE_DEFINITIONS`. Additionally,
+    if a keyword is `INTERFACE` or `PUBLIC`, it will store the value in a property
+    with an `INTERFACE_` prefix – `INTERFACE_COMPILE_DEFINITIONS`. During the configuration
+    stage, CMake will read the interface properties of source targets and append their
+    contents to destination targets. There you have it – propagated properties, or
+    Transitive Usage Requirements, as CMake calls them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Properties managed with the `set_target_properties()` command can be found
+    at [https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html),
+    in the *Properties on Targets* section (not all target properties are transitive).
+    Here are the most important ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`COMPILE_DEFINITIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPILE_FEATURES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPILE_OPTIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INCLUDE_DIRECTORIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_DEPENDS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_DIRECTORIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_LIBRARIES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`LINK_OPTIONS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POSITION_INDEPENDENT_CODE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PRECOMPILE_HEADERS`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SOURCES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We’ll discuss most of these options in the following pages, but remember that
+    all of these options are, of course, described in the CMake manual. Find them
+    described in detail at the following link (replace `<PROPERTY>` with a property
+    that interests you): `https://cmake.org/cmake/help/latest/prop_tgt/<PROPERTY>.html`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next question that comes to mind is how far this propagation goes. Are the
+    properties set just on the first destination target, or are they sent to the very
+    top of the dependency graph? You get to decide.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create a dependency between targets, we use the `target_link_libraries()`
+    command. The full signature of this command requires a propagation keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, this signature also specifies a propagation keyword, and it
+    controls how properties from the *source target* get stored in the *destination
+    target*. *Figure 5.3* shows what happens to a propagated property during the generation
+    stage (after the configuration stage is completed):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_05_03.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5.3: How properties are propagated to destination targets'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Propagation keywords work like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRIVATE` appends the source value to the **private** property of the *source
+    target*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INTERFACE` appends the source value to the **interface** property of the *source
+    target*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PUBLIC` appends to both properties of the *source target*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As we discussed before, interface properties are only used to propagate the
+    properties further down the chain (to the next *destination target*), and the
+    *source target* won’t use them in its build process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The basic `target_link_libraries(<target> <item>...)` command that we used before
+    implicitly specifies the `PUBLIC` keyword.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you correctly set propagation keywords for your source targets, properties
+    will be automatically placed on destination targets for you – unless there’s a
+    conflict…
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dealing with conflicting propagated properties
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When one target depends on multiple other targets, there may be a situation
+    where propagated properties are in outright conflict with each other. Say that
+    one used target specifies the `POSITION_INDEPENDENT_CODE` property as `true` and
+    the other as `false`. CMake understands this as a conflict and will print an error
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is useful to receive such a message, as we explicitly know that we introduced
+    this conflict, and we need to resolve it. CMake has its own properties that must
+    “agree” between source and destination targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On rare occasions, this may become important – for example, if you’re building
+    software using the same library in multiple targets that are then linked to a
+    single executable. If these source targets are using different versions of the
+    same library, you may run into problems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make sure that we’re only using the same specific version, we can create
+    a custom interface property, `INTERFACE_LIB_VERSION`, and store the version there.
+    This is not enough to solve the problem, as CMake won’t propagate custom properties
+    by default (this mechanism works only on built-in target properties). We must
+    explicitly add a custom property to a list of “compatible” properties.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each target has four such lists:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_BOOL`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_STRING`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_NUMBER_MAX`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`COMPATIBLE_INTERFACE_NUMBER_MIN`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Appending your property to one of them will trigger propagation and compatibility
+    checks. The `BOOL` list will check whether all properties propagated to the destination
+    target evaluate to the same Boolean value. Analogically, `STRING` will evaluate
+    to a string. `NUMBER_MAX` and `NUMBER_MIN` are a bit different – propagated values
+    don’t have to match, but the destination target will just receive the highest
+    or the lowest value instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This example will help us understand how to apply this in practice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch05/02-propagated/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: We create three targets here; for simplicity, all are using the same empty source
+    file. On both *source targets*, we specify our custom property with the `INTERFACE_`
+    prefix, and we set them to the same matching library version. Both *source targets*
+    are linked to the destination target. Finally, we specify a `STRING` compatibility
+    requirement as a property for `source1` (we don’t add the `INTERFACE_` prefix
+    here).
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake will propagate this custom property to the *destination target* and check
+    whether the version of all the source targets is an exact match (the compatibility
+    property can be set on just one target).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we understand what regular targets are, let’s take a look at other
+    things that look like targets, smell like targets, and sometimes act like targets
+    but, as it turns out, aren’t the real deal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Meet the pseudo targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The concept of a target is so useful that it would be great if some of its
+    behaviors could be borrowed for other things too; ones that do not represent outputs
+    of the buildsystem but rather inputs – external dependencies, aliases, and so
+    on. These are the pseudo targets, or targets that don’t make it to the generated
+    buildsystem:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imported targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Alias targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Interface libraries
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s take a look.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imported targets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you skimmed the table of contents of this book, you know that we’ll be talking
+    about how CMake manages external dependencies – other projects, libraries, and
+    so on. `IMPORTED` targets are essentially products of this process. CMake can
+    define them as a result of the `find_package()` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can adjust the target properties of such a target: **compile definitions**,
+    **compile** **options**, **include directories**, and so on – and they will even
+    support Transitive Usage Requirements. However, you should treat them as immutable;
+    don’t change their sources or dependencies.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The scope of the definition of an `IMPORTED` target can be global or local to
+    the directory where it was defined (visible in subdirectories but not in parent
+    directories).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alias targets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Alias targets do exactly what you expect – they create another reference to
+    a target under a different name. You can create alias targets for executables
+    and libraries with the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Properties of alias targets are read only, and you cannot install or export
+    aliases (they aren’t visible in the generated buildsystem).
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what is the reason to have aliases at all? They come in handy in scenarios
+    where some part of a project (such as a subdirectory) requires a target with a
+    specific name, and the actual implementation may be available under different
+    names depending on circumstances. For example, you may wish to build a library
+    shipped with your solution or import it based on a user’s choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This is an interesting construct – a library that doesn’t compile anything but
+    instead serves as a utility target. Its whole concept is built around propagated
+    properties (Transitive Usage Requirements).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries have two primary uses – to represent header-only libraries,
+    and to bundle a bunch of propagated properties into a single logical unit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Header-only libraries are fairly easy to create with `add_library(INTERFACE)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To use such a library, we just must link it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: No actual linking occurs here, but CMake will understand this command as a request
+    to propagate all the `INTERFACE` properties to the `executable` target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second use case leverages exactly the same mechanism but for a different
+    purpose – it creates a logical target that can be a placeholder for propagated
+    properties. We can then use this target as a dependency for other targets and
+    set properties in a clean, convenient way. Here’s an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `add_library(INTERFACE)` command creates a logical `warning_properties`
+    target that is used to set **compile options** specified in the second command
+    on the `executable` target. I recommend using these `INTERFACE` targets, as they
+    improve the readability and reusability of your code. Think of it as refactoring
+    a bunch of magic values to a well-named variable. I also suggest explicitly adding
+    a suffix like `_properties` to easily differentiate interface libraries from the
+    regular ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Object libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Object libraries* are used to group multiple source files under a single logical
+    target and are compile them into (`.o`) *object files* during a build. To create
+    an *object library*, we follow the same method as with other libraries, but with
+    the `OBJECT` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '*Object files* produced during the build can be incorporated as compiled elements
+    to other targets with the `$<TARGET_OBJECTS:objlib>` generator expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Alternatively, you can add them as dependencies with the `target_link_libraries()`
+    command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the context of our `Calc` library, *object libraries* will be useful to avoid
+    redundant compilation of library sources for the static and shared versions of
+    the library. It’s essential to explicitly compile the *object files* with `POSITION_INDEPENDENT_CODE`
+    enabled, a prerequisite for shared libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returning to the project’s targets: `calc_obj` will supply compiled *object
+    files*, which then will be used for both the `calc_static` and `calc_shared` libraries.
+    Let’s explore the practical distinctions between these two types of libraries
+    and understand why one might opt to create both.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Are pseudo targets exhausting the concept of the target? Of course not! That
+    would simply be too easy. We still need to understand how these targets are then
+    used to generate buildsystems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build targets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The term “target” can have different meanings depending on the context within
+    a project and the generated buildsystems. In the context of generating a buildsystem,
+    CMake “compiles” the listfiles written in the CMake language into the language
+    of the selected build tool, such as creating a Makefile for GNU Make. These generated
+    Makefiles have their own set of targets. Some of these targets are direct conversions
+    of the targets defined in the listfiles, while others are created implicitly as
+    part of the buildsystem generation process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One such buildsystem target is `ALL`, which CMake generates by default to contain
+    all top-level listfile targets, such as executables and libraries (not necessarily
+    custom targets). `ALL` is built when we run `cmake --build <build tree>` without
+    choosing any specific target. As you might remember from the first chapter, you
+    can choose one by adding the `--target <name>` parameter to the `cmake` build
+    command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some executables or libraries might not be needed in every build, but we’d
+    like to keep them as part of the project for those rare occasions when they come
+    in useful. To optimize our default build, we can exclude them from the `ALL` target
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom targets work the other way around – by default, they’re excluded from
+    the `ALL` target unless you explicitly add them with an `ALL` keyword, as we did
+    in the BankApp example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another implicitly defined build target is `clean`, which simply removes produced
+    artifacts from the build tree. We use it to get rid of all old files and build
+    everything from scratch. It’s important, though, to understand that it doesn’t
+    just simply delete everything in the build directory. For `clean` to work correctly,
+    you need to manually specify any files that your custom targets might create as
+    `BYPRODUCTS` (see the BankApp example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This concludes our journey through targets and their different aspects: we
+    know how to create them, configure their properties, use pseudo targets, and decide
+    whether they should be built by default or not. There’s also an interesting non-target
+    mechanism to create custom artifacts that can be used in all actual targets –
+    **custom commands** (not to be confused with **custom targets**).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing custom commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Using custom targets has one drawback – as soon as you add them to the `ALL`
+    target or start depending on them for other targets, they will be built every
+    single time. Sometimes, this is what you want, but there are cases when custom
+    behavior is necessary to produce files that shouldn’t be recreated without reason:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating a source code file that another target depends on
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Translating another language into C++
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Executing a custom action immediately before or after another target was built
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are two signatures for a custom command. The first one is an extended
+    version of `add_custom_target()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you might have guessed, a custom command doesn’t create a logical target,
+    but just like custom targets, it has to be added to a dependency graph. There
+    are two ways of doing that – using its output artifact as a source for an executable
+    (or library), or explicitly adding it to a `DEPENDS` list for a custom target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a custom command as a generator
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Admittedly, not every project needs to generate C++ code from other files. One
+    such occasion might be a compilation of **Google’s Protocol Buffer’s** (**Protobuf’s**)
+    `.proto` files. If you’re not familiar with this library, Protobuf is a platform-neutral
+    binary serializer for structured data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In other words: it can be used to encode objects to and from binary streams:
+    files or network connections. To keep Protobuf cross-platform and fast at the
+    same time, Google’s engineers invented their own Protobuf language that defines
+    models in `.proto` files, such as this one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Such a file can be then used to encode data in multiple languages – C++, Ruby,
+    Go, Python, Java, and so on. Google provides a compiler, `protoc`, that reads
+    `.proto` files and outputs structure and serialization source code valid for the
+    chosen language (that later needs to be compiled or interpreted). Smart engineers
+    don’t check those generated source files into a repository but will use the original
+    Protobuf format and add a step to generate the source files to the build chain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We don’t know yet how to detect whether (and where) a Protobuf compiler is
+    available on the target host (we’ll learn this in *Chapter 9*, *Managing Dependencies
+    in CMake*). So, for now, let’s just assume that the compiler’s `protoc` command
+    is residing in a location known to the system. We have prepared a `person.proto`
+    file and we know that the Protobuf compiler will output `person.pb.h` and `person.pb.cc`
+    files. Here’s how we would define a custom command to compile them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, to allow serialization in our executable, we can just add output files
+    to the sources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Assuming we dealt correctly with the inclusion of header files and linking the
+    Protobuf library, everything will compile and update automatically when we introduce
+    changes to the `.proto` file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A simplified (and much less practical) example would be to create the necessary
+    header by copying it from another location:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch05/03-command/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Our “compiler”, in this case, is the `cp` command. It fulfills a dependency
+    of the `main` target by creating a `constants.h` file in the build tree root,
+    simply by copying it from the source tree.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a custom command as a target hook
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The second version of the `add_custom_command()` command introduces a mechanism
+    to execute commands before or after building a target:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We specify what target we’d like to “enhance” with the new behavior in the
+    first argument and under the following conditions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PRE_BUILD` will run before any other rules for this target (Visual Studio
+    generators only; for others, it behaves like `PRE_LINK`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PRE_LINK` binds the command to be run just after all sources have been compiled
+    but before the linking (or archiving) of the target. It doesn’t work for custom
+    targets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POST_BUILD` will run after all other rules have been executed for this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Using this version of `add_custom_command()`, we can replicate the generation
+    of the checksum from the previous BankApp example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch05/04-command/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: After the build of the `main` executable completes, CMake will execute `cksum`
+    with the provided arguments. But what is happening in the first argument? It’s
+    not a variable, as then it would be wrapped in curly braces (`${}`), not in angle
+    brackets (`$<>`). It’s a **generator expression** evaluating to a full path to
+    the target’s binary file. This mechanism is useful in the context of many target
+    properties, which we’ll explain in the next chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Understanding targets is critical to writing clean, modern CMake projects.
+    In this chapter, we have not only discussed what constitutes a target and how
+    to define three different types of targets: executables, libraries, and custom
+    targets. We have also explained how targets depend on each other through a dependency
+    graph and we learned how to visualize it using the Graphviz module. With this
+    general understanding, we were able to learn about the key feature of targets
+    – properties. We not only went through a few commands to set regular properties
+    on targets but we also solved the mystery of Transitive Usage Requirements also
+    known as propagated properties.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This was a hard one to crack, as we had to not only understand how to control
+    which properties are propagated but also how that propagation affects subsequent
+    targets. Furthermore, we discovered how to guarantee the compatibility of properties
+    consumed from multiple sources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We then briefly discussed pseudo targets: imported targets, alias targets,
+    and interface libraries. All of them will come in handy later in our projects,
+    especially when we know how to connect them with propagated properties for our
+    benefit. Then, we talked about generated build targets and how the configuration
+    stage affects them. Afterward, we spent some time looking at a mechanism that
+    is similar to targets, but not exactly it: the custom commands. We touched on
+    how they can generate files consumed by other targets (compiled, translated, and
+    so on) and their hooking function: executing additional steps when a target is
+    built.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With such a solid foundation, we are ready for the next topic – compiling C++
+    sources into executables and libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Graphviz module documentation: [https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz),
+    [https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Graphviz software: [https://graphviz.org](https://graphviz.org)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'CMake target properties: [https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Transitive Usage Requirements: [https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements
+    )'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Join our community on Discord
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Join our community’s Discord space for discussions with the author and other
+    readers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/QR_Code94081075213645359.png)'
+  prefs: []
+  type: TYPE_IMG

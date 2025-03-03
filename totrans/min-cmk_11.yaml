@@ -1,0 +1,35 @@
+- en: 'Part 3: Wrapping Up'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we have a fully functioning application, we want some guarantees it’ll
+    keep working, which is where testing comes in. We’ll show how to use the accompanying
+    CMake tool, CTest, to provide support for many kinds of tests for your libraries
+    and applications. After creating an application, the most critical requirement
+    is the ability to share it with others (and ensure it doesn’t just work on your
+    machine). This is where packaging comes in; we’ll show how to use another CMake
+    adjacent tool called CPack to make distributable packages for Windows, macOS,
+    and Linux. Finally, we’ll look at the various tools available today that integrate
+    seamlessly with CMake and make working with it even easier. By the end of the
+    book, you’ll have learned a lot, but there’s always more to discover; so, we’ll
+    take some time to look at what other resources are available to help you continue
+    your CMake journey.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This part has the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B21152_09.xhtml#_idTextAnchor195), *Writing Tests for the Project*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B21152_10.xhtml#_idTextAnchor214), *Packaging the Project for
+    Sharing*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B21152_11.xhtml#_idTextAnchor228), *Supporting Tools and Next
+    Steps*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

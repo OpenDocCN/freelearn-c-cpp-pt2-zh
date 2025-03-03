@@ -1,0 +1,432 @@
+- en: '10'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Handling Distributed Repositories and Dependencies in a Super-Build
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As we should have learned by now, every big project comes with its own set of
+    dependencies. The easiest way of dealing with these dependencies is by using a
+    package manager, such as **Conan** or **vcpkg**. But using a package manager might
+    not always be possible or feasible, due to company policies, project requirements,
+    or lack of resources. Thus, the project authors might consult traditional, old-style
+    ways of dealing with dependencies. The usual way of dealing with these dependencies
+    may include shipping all dependencies embedded into the repository’s build code.
+    Alternatively, project authors may decide to let the end user deal with the dependencies
+    from scratch. Neither of these ways is clean and has its own drawbacks. What if
+    I told you there is a middle ground? Welcome to the *super-build* approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A super-build is a method that can be used to decouple the logic required for
+    satisfying dependencies from project code, like how package managers work. In
+    fact, we can call this method *the poor man’s package manager*. Separating the
+    dependency logic from the project code allows us to have a more flexible and maintainable
+    project structure. In this chapter, we will learn how to achieve this in detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand the skills shared in this chapter, we’ll cover the following
+    main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The requirements and prerequisites for a super-build
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Building across multiple code repositories
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ensuring version consistency in a super-build
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s begin with the technical requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before you dive further into this chapter, you should have a good grasp of the
+    content covered in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating
+    Third-Party Libraries* *and Dependency Management*. This chapter will follow the
+    teaching-by-example approach. Thus, it is recommended to obtain this chapter’s
+    example content from [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10).
+    All of the examples assume that you will be using the container provided by the
+    project at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s begin learning about super-builds by inspecting the prerequisites and
+    requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The requirements and prerequisites for a super-build
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Super-builds can be structured as a grand build that builds multiple projects
+    or as an in-project submodule that deals with dependencies. Therefore, having
+    the means of acquiring repositories is a must. Fortunately, CMake has stable and
+    established ways of doing so. To name a few, `ExternalProject` and `FetchContent`
+    are the most popular CMake modules for dealing with external dependencies. We
+    will be using the `FetchContent` CMake module in our examples, since it is cleaner
+    and easier to deal with. Please note that using the means provided by CMake is
+    not a strict requirement but a convenience. A super-build can also be structured
+    by using version control system utilities, such as `git submodule` or `git subtree`.
+    Since CMake is this book’s focal point and Git’s support of `FetchContent` is
+    quite decent, we prefer to utilize it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That’s it for now. Let’s continue by learning about building a project that
+    spans multiple code repositories.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building across multiple code repositories
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Software projects, either directly or indirectly, span multiple code repositories.
+    Dealing with local project code is the easiest, but software projects are rarely
+    standalone. Things may get complicated quickly without a proper dependency management
+    strategy. The first recommendation of this chapter is to *use a package manager
+    or a dependency provider if you can*. As described in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084),
+    *Integrating Third-Party Libraries and Dependency Management*, package managers
+    greatly reduce the effort spent on dependency management. If you are not able
+    to use a pre-built package manager, you may need to roll your very own mini project-specific
+    package manager, which is called a **super-build**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Super-builds are mostly used to make a project self-sufficient dependency-wise,
+    which means the project is able to satisfy its very own dependencies without the
+    intervention of the user. Having such an ability is very convenient for all consumers.
+    To demonstrate this technique, we will start with an example of such a scenario.
+    Let’s begin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recommended way to create super-builds – FetchContent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We will be following `Chapter 10``, Example 01` for this part. Let’s start
+    by inspecting `Chapter 10``, Example 01`’s `CMakeLists.txt` file, as usual. The
+    first seven lines are left out for simplicity:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As we can see, it is a simple `CMakeLists.txt` file that defines two targets,
+    named `ch10_ex01_tests` and `ch10_ex01_benchmarks`. These targets depend on the
+    Google Test and Google Benchmark libraries, respectively. These libraries are
+    found and defined by either the super-build or the `find_package(…)` calls, depending
+    on the `CH10_EX01_USE_SUPERBUILD` variable. The `find_package(…)` path is the
+    way we have followed until now. Let’s inspect the super-build file, `superbuild.cmake`,
+    together:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the first line, the `FetchContent` CMake module is included, since we are
+    going to utilize it for the dependencies. In the following six lines, the `FetchContent_Declare`
+    function is used to declare two external targets, `benchmark` and `GTest`, which
+    are instructed to be fetched via Git. Consequently, the `FetchContent_MakeAvailable(…)`
+    function is called to make the declared targets available. Lastly, an `add_library(…)`
+    call is made to define an alias target named `GTest::Main` for the `gtest_main`
+    target. This is done to keep the compatibility between `find_package(…)` and super-build
+    target names. There is no alias target defined for `benchmark`, since its `find_package(…)`
+    and super-build target names are already compatible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s configure and build the example by invoking the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the first two lines, we are going into the `example10/ex01` folder and configuring
+    the project. Note that we are setting the `CH10_EX01_USE_SUPERBUILD` variable
+    to `ON` in order to enable the super-build code. In the last line, we are building
+    the project with *N* parallel jobs, where *N* is the result of the `nproc` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thanks to the alternate `find_package(...)` path, the build will also work fine
+    without enabling the super-build, given that `google test >= 1.10.0` and `google
+    benchmark >= 1.6.1` are available in the environment. This will allow package
+    maintainers to change dependency versions without patching the project. Small
+    customization points such as this are important for portability and reproducibility.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Up next, we’ll be taking a look at a super-build example that uses the `ExternalProject`
+    module instead of the `FetchContent` module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The legacy way – ExternalProject_Add
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before `FetchContent` was a thing, most people implemented the super-build approach
+    by utilizing the `ExternalProject_Add` CMake function. This function is provided
+    by the `ExternalProject` CMake module. In this section, we will see a super-build
+    example with `ExternalProject_Add` to see how it differs from using the `FetchContent`
+    module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at the `CMakeLists.txt` file in `Chapter 10``, Example 02`
+    together (comments and the project directive are omitted):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Again, the project is a unit-test project containing a single C++ source file,
+    but this time it is with `catch2` instead of Google Test. The `CMakeLists.txt`
+    file includes the `superbuild.cmake` file directly, defines an executable target,
+    and links the `Catch2` library to the target. You may have noticed that this example
+    does not use `FindPackage(...)` to discover the `Catch2` library. The reason for
+    this is that, unlike `FetchContent`, `ExternalProject` fetches and builds the
+    external dependencies at build time. Since the content of the `Catch2` library
+    is not available at configuration time, we are unable to use `FindPackage(...)`
+    here. `FindPackage(…)` runs at configure time and requires the package files to
+    be present. Let’s take a look at `superbuild.cmake` as well:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `superbuild.cmake` module includes the `ExternalProject` CMake module. The
+    code calls the `ExternalProject_Add` function to declare a target named `catch2_download`
+    with the `GIT_REPOSITORY`, `GIT_TAG`, `INSTALL_COMMAND`, and `CMAKE_ARGS` arguments.
+    As you may recall from previous chapters, the `ExternalProject_Add` function can
+    fetch dependencies from different sources. Our example is trying to fetch the
+    dependency via using Git. The `GIT_REPOSITORY` and `GIT_TAG` arguments are for
+    specifying the target Git repository URL and the tag to be checked out after the
+    `git clone` respectively. Since `Catch2` is a CMake project, the number of parameters
+    we need to supply to the `ExternalProject_Add` function is minimal. The `ExternalProject_Add`
+    function knows how to configure, build, and install a CMake project by default,
+    so no `CONFIGURE_COMMAND` or `BUILD_COMMAND` argument is needed. The empty `INSTALL_COMMAND`
+    argument is for disabling and installing the dependency after the build. The last
+    argument, `CMAKE_ARGS`, is for passing CMake arguments to the external project’s
+    configure step. We use this to suppress a GCC warning (treated as an error) about
+    legacy pragmas in the `Catch2` compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `ExternalProject_Add` command fetches the desired library into a prefix
+    path and builds it. So, to use the fetched content, we have to import it to the
+    project first. Since we cannot utilize `FindPackage(...)` to let CMake deal with
+    the importing of the library, we have some manual work to do. One of them is to
+    define the `include` directory of the `Catch2` target. Since `Catch2` is a header-only
+    library, defining an interface target with the headers will be sufficient. We
+    are declaring the `CATCH2_INCLUDE_DIR` variable to set the directory that will
+    contain the `Catch2` headers. We are using this variable to set the `INTERFACE_INCLUDE_DIRECTORIES`
+    property of the imported target created in this example. Up next, the file (`MAKE_DIRECTORY
+    ${CATCH2_INCLUDE_DIR}`) CMake command is called to create the include directory.
+    The reason for that is, because of how `ExternalProject_Add` works, the `Catch2`
+    content is not present until the build step executes. Setting a target’s `INTERFACE_INCLUDE_DIRECTORIES`
+    requires the given directories to be present, so we’re doing a small hack as a
+    workaround. In the last three lines, we declare an `IMPORTED INTERFACE` library
+    for `Catch2`, making this library dependent on the `catch2_download` target and
+    setting `INTERFACE_INCLUDE_DIRECTORIES` of the imported library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s try to configure and build our example to check whether it works or not:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If everything goes as expected, you should be seeing output similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alright, it seems we have built our test executable successfully. Let’s run
+    it to check whether it works by running the `./``build/ch10_ex02_tests` executable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Up next, we’ll see a simple Qt application using the Qt framework from a super-build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bonus – using the Qt 6 framework with a super-build
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Until now, we have dealt with libraries that have rather small footprints. Let’s
+    try something more complex, such as using a big framework such as the Qt framework
+    in a super-build. For this part, we are going to follow the `Chapter 10``, Example`
+    `03` example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Important note
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you are going to try this example outside of the provided Docker container,
+    you may have to install some additional dependencies required by the Qt runtime.
+    The required packages for Debian-like systems are as follows: `libgl1-mesa-dev
+    libglu1-mesa-dev ''^libxcb.*-dev'' libx11-xcb-dev libglu1-mesa-dev libxrender-dev
+    libxi-dev` `libxkbcommon-dev libxkbcommon-x11-dev`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The example contains a single source file, `main.cpp`, that outputs a simple
+    Qt window application with a message. The implementation is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Our goal is to be able to compile this Qt application without requiring the
+    user to install the Qt framework themselves. The super-build should automatically
+    install the Qt 6 framework, and the application should be able to use that. Let’s
+    take a look at the `CMakeLists.txt` file of the example, as usual:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Like the first example, the `CMakeLists.txt` file includes the `superbuild.cmake`
+    file, depending on an `option` flag. If the user has opted in to use a super-build,
+    for example, it will include the super-build module. Otherwise, the dependency
+    will try to be located in the system via `find_package(...)`. In the last three
+    lines, an executable target is defined, C++ standards for the target are set,
+    and the defined target is linked to the `QT6::Core` and `QT6::Widgets` targets.
+    These targets are either defined by the super-build or the `find_package(...)`
+    call, depending on whether the user opted in to use the super-build or not. Let’s
+    continue by taking a look at the `superbuild.cmake` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `superbuild.cmake` file uses the `FetchContent` module to fetch the Qt
+    dependency. Since the fetching and preparing process for the Qt may be lengthy,
+    some of the unused Qt framework features are disabled. The `FetchContent` message
+    output is enabled for better tracking of the progress. Let’s try to configure
+    and compile the example by running the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If everything goes as expected, you should see similar output to what is shown
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If all goes well, you have succeeded in compiling the example. Let’s check
+    whether it works by running the produced executable with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If everything is alright, a small GUI window should pop up. The window should
+    look similar to the following figure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 10.1 – The simple Qt application window](img/B30947_10_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10.1 – The simple Qt application window
+  prefs: []
+  type: TYPE_NORMAL
+- en: With this sorted out, we have concluded our look at how to use a super-build
+    in a CMake project. Next, we will be taking a look at ensuring version consistency
+    in a super-build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensuring version consistency in a super-build
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Version consistency is an important aspect of all software projects. As you
+    should have learned by now, nothing is set in stone in the software world. Software
+    evolves and changes over time. Such changes often need to be acknowledged in advance,
+    either by running a series of tests against the new version or by making changes
+    to the consuming code itself. Ideally, changes in upstream code should not have
+    an effect on reproducing existing builds, until we want them to do so. A project’s
+    `x.y` version should always be built with the `z.q` dependency version if the
+    software verification and testing have been done against this combination. The
+    reason for this is that the smallest changes in an upstream dependency may affect
+    the behavior of your software, even though there are no API or ABI changes. Your
+    software will not have well-defined behavior if version consistency is not provided.
+    Thus, having a way to provide version consistency is very crucial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensuring version consistency in a super-build depends on the way that the super-build
+    is organized. For repositories fetched over a version control system, it is relatively
+    easy. Instead of cloning a project and using it as is, check out to a specific
+    branch or tag. If there are no such anchor points, check out to a specific commit
+    instead. This will futureproof your super-build. But even this may not be enough.
+    Tags may get overridden, branches may be force-pushed, and history may be rewritten.
+    To mitigate this risk, you may prefer to fork the project and use that as upstream
+    instead. This way, you will have total control over the content that upstream
+    has. But bear in mind that this method comes with a maintenance burden.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The moral of the story is, do not track an upstream blindly. Always keep an
+    eye on recent changes. For third-party dependencies that are consumed as archive
+    files, always check for their hash digest. This way, you will ensure that you
+    are indeed using the intended revision for your project, and if there is a change,
+    you will have to manually acknowledge it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we have briefly introduced the concept of a super-build and
+    how we can utilize super-builds for dependency management. Super-builds are a
+    non-intrusive and powerful way of managing dependencies where there is a lack
+    of package managers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will have a closer look at how to build software for
+    the Apple ecosystem. Because of its closed nature and close integration building
+    and deploying on macOS and iOS, there are some things to consider when targeting
+    these platforms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'After completing this chapter, you should be able to answer the following questions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is a super-build?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In which primary scenario can we use super-builds?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What can be done to achieve version consistency in a super-build?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A super-build is a method of building a software project that spans multiple
+    repositories.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Where we don’t have a package manager and we want to make the project able to
+    satisfy its own dependencies.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use anchor points such as branches, tags, or commit hashes.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

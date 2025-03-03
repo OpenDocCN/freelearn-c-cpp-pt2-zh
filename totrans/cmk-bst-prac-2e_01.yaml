@@ -1,0 +1,34 @@
+- en: Part 1 – The Basics
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In the first chapter, you will learn how to invoke CMake and get a high level
+    overview about the basic concepts of CMake as well as a brief introduction into
+    the CMake language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second chapter will be about using CMake from the command line, as a GUI,
+    or in various IDEs and editors. It will illustrate how to change various configuration
+    options and how to select different compilers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the third chapter, we will cover creating a simple CMake project to build
+    executables and libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This part has the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 1*](B30947_01.xhtml#_idTextAnchor015), *Kickstarting CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 2*](B30947_02.xhtml#_idTextAnchor035), *Accessing CMake in* *the*
+    *Best Ways*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 3*](B30947_03.xhtml#_idTextAnchor054)*, Creating a CMake Project*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

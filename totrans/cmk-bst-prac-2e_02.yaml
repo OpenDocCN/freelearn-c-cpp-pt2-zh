@@ -1,0 +1,1501 @@
+- en: '1'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Kickstarting CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re developing software using C++ or C, you have probably heard about
+    CMake before. Over the last 20 years, CMake has evolved into something that’s
+    an industry standard when it comes to building C++ applications. But CMake is
+    more than just a build system – it is a build system generator, which means it
+    produces instructions for other build systems such as Makefile, Ninja, Visual
+    Studio, QtCreator, Android Studio, and XCode. It does not stop at building software
+    – CMake also includes features that support installing, packaging, and testing
+    software.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a de facto industry standard, CMake is a must-know technology for any C++
+    programmer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this chapter, you will get a high-level overview of what CMake is and learn
+    about the necessary basics to build your first program. We will have a look at
+    CMake’s build process and provide an overview of how to use the CMake language
+    to configure build processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we will cover the following topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake in a nutshell
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The CMake build process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing CMake files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Different toolchains and build configurations
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Single-configuration and multi-configuration generators
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s begin!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To run the examples in this chapter, you will need a recent C++ compiler that
+    understands C++17\. Although the examples are not complex enough to require the
+    functionality of the new standard, the examples have been set up accordingly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We recommend using any of the compilers listed here to run the examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Linux**: GCC 9 or newer, Clang 10 or newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Windows**: MSVC 19 or newer or MinGW 9.0.0 or newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**macOS**: AppleClang 10 or newer'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The complete samples used in this chapter can be found at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: To try out any examples in this book, we have provided a ready-made Docker container
+    that contains all the requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can find it at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake in a nutshell
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake is open source and available on many platforms. It is also compiler-independent,
+    making it a very strong tool when it comes to building and distributing cross-platform
+    software. All these features make it a valuable tool for building software in
+    a modern way – that is, by relying heavily on build automation and built-in quality
+    gates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake consists of three command-line tools:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cmake`: CMake itself, which is used to generate build instructions'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ctest`: CMake’s test utility, which is used to detect and run tests'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`cpack`: CMake’s packaging tool, which is used to pack software into convenient
+    installers, such as DEB, RPM, and self-extracting installers'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are also two interactive tools:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cmake-gui`: A GUI frontend to help with configuring projects'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ccmake`: An interactive terminal UI for configuring CMake'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The `cmake-gui` tool can be used to conveniently configure a CMake build and
+    select the compiler to be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.1 – cmake-gui after configuring a project](img/B30947_01_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 1.1 – cmake-gui after configuring a project
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’re working on the console but still want to have an interactive configuration
+    of CMake, then `ccmake` is the right tool. While not as convenient as `cmake-gui`,
+    it offers the same functionality. This is especially useful when you must configure
+    CMake remotely over an `ssh` shell or similar:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.2 – Configuring a project using ccmake](img/B30947_01_02.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 1.2 – Configuring a project using ccmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advantages of CMake over a regular build system are manyfold. First, there
+    is the cross-platform aspect. With CMake, it is much easier to create build instructions
+    for a variety of compilers and platforms without the need to know the specifics
+    of the respective build system in depth.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, there is CMake’s ability to discover system libraries and dependencies,
+    which lessens the pain of locating the correct libraries for building a piece
+    of software considerably. An additional bonus is that CMake integrates nicely
+    with package managers such as Conan and vcpkg.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is not just the ability to build software for multiple platforms, but also
+    its native support for testing, installing, and packaging software that makes
+    CMake a much better candidate for building software than just a single-build system.
+    Being able to define everything from building and over-testing to packaging at
+    a single point helps tremendously with maintaining projects in the long run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The fact that CMake itself has very few dependencies on the system and can run
+    on the command line without user interaction makes it very suitable for build
+    system automatization in CI/CD pipelines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have briefly covered what CMake can do, let’s learn how to install
+    CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake is freely available to download from [https://cmake.org/download/](https://cmake.org/download/).
+    It is available as either a precompiled binary or as source code. For most use
+    cases, the precompiled binary is fully sufficient, but since CMake itself has
+    very few dependencies, building a version is also possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any major Linux distribution offers CMake over its package repositories. Although
+    the pre-packaged versions of CMake are not usually the latest releases, these
+    installations are often sufficient to use if the system is regularly updated.
+    Another convenient way to install CMake is by using `pip`, the Python package
+    manager.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: The minimum version of CMake to use with the examples in this book is `3.23`.
+    We recommend that you download the appropriate version of CMake manually to ensure
+    that you get the correct version.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building CMake from source
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: CMake is written in C++ and uses Make to build itself. Building CMake from scratch
+    is possible, but for most use cases, using the binary downloads will do just fine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After downloading the source package from [https://cmake.org/download/](https://cmake.org/download/),
+    extract it to a folder and run the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to build `cmake-gui` as well, configure it with the `--qt-gui`
+    option. This requires Qt to be installed. Configuring it will take a while, but
+    once it’s done, CMake can be installed using the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To test whether the installation was successful, you can execute the following
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will print out the version of CMake, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that CMake is installed on your machine, you are ready to build your first
+    project. Let’s go!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building your first project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Now, it’s time to get your hands dirty and see if your installation worked.
+    We have provided an example of a simple `hello world` project that you can download
+    and build right away. Open a console, type in the following, and you’ll be ready
+    to go:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will result in an executable called `ch_simple_executable` that prints
+    out `Welcome to CMake Best Practices` on the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s have a detailed look at what happened here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, the example repository is checked out using Git. The file structure
+    of the example CMake project located in the `chapter01/simple_executable` subfolder
+    will look like this before the build:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Apart from the folder containing the source code, there is a file called `CMakeLists.txt`.
+    This file contains the instructions for CMake on how to create build instructions
+    for the project and how to build it. Every CMake project has a `CmakeLists.txt`
+    file at the root of the project, but there might be many files with that name
+    in various subfolders.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After cloning the repository, the build process is started with `cmake –S .
+    -B build`. This tells CMake to use the current directory as a source directory
+    and a directory called `build` to place the build artifacts in. We will look a
+    bit closer at the concept of source and build folders later in this chapter. CMake’s
+    build process is a two-stage process. The first step, which is usually called
+    *configuration*, reads the `CMakeLists.txt` file and generates an instruction
+    for the native build toolchain of the system. In the second step, these build
+    instructions are executed, and the executables or libraries are built.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: During the configuration step, the build requirements are checked, the dependencies
+    are resolved, and the build instructions are generated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring a project also creates a file called `CMakeCache.txt` that contains
+    all the information that’s needed to create the build instructions. The next call
+    to `cmake --build ./build` executes the build by internally calling CMake; if
+    you are on Windows, it does so by invoking the Visual Studio compiler. This is
+    the actual step for compiling the binaries. If everything went well, there should
+    be an executable named `ch1_simple_executable` in the `build` folder.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'In the preceding example, we specified the source and build folder explicitly
+    by passing the `-S` and `-B` command-line option. This is generally the recommended
+    way to work with CMake. There is a shorter way to work with CMake using relative
+    paths that are also often seen on online tutorials:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, we first created the build folder, then *cd’d* into it and used `cmake`
+    with relative paths. By default, CMake will assume that it is started in the folder
+    where the binaries and build artifacts are to be created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Explicitly passing the build and source directory often comes in handy when
+    using CMake in a continuous integration environment since being explicit helps
+    with maintainability. It is also helpful if you want to create different build
+    directories for different configurations, such as when you’re building cross-platform
+    software.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now, how does CMake know which files to compile and which binary artifacts to
+    create? For this, it uses text files containing the build instructions, commonly
+    called `CMakeLists.txt`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A minimal CMakeLists.txt file
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For a very simple `hello world` example, the `CMakeLists.txt` file only consists
+    of a few lines of instructions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s understand these instructions in a bit more detail:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first line defines the minimum version of CMake that’s required to build
+    this project. Every `CmakeLists.txt` file starts with this directive. This is
+    used to warn the user if the project uses features of CMake that are only available
+    from a certain version upward. Generally, we recommend setting the version to
+    the lowest version that supports the features used in the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next directive is the name, version, and description of the project to be
+    built, followed by the programming languages that are used in the project. Here,
+    we use `CXX` to mark this as a C++ project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `add_executable` directive tells CMake that we want to build an executable
+    (as opposed to a library or a custom artifact, which we will cover later in this
+    book).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `target_sources` statement tells CMake where to look for the sources for
+    the executable called `ch1_simple_executable` and that the visibility of the sources
+    is limited to the executable. We will go into the specifics of the single commands
+    later in this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Congratulations – you are now able to create software programs with CMake. But
+    to understand what is going on behind the commands, let’s look at the CMake build
+    process in detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding the CMake build process
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'CMake’s build process works in two steps, as shown in the following diagram.
+    First, if it’s invoked without any special flags, CMake scans the system for any
+    usable toolchains during the configuration process and then decides what its output
+    should be. The second step, which is when `cmake --build` is invoked, is the actual
+    compilation and building process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.3 – CMake’s two-stage build process](img/B30947_01_03.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 1.3 – CMake’s two-stage build process
+  prefs: []
+  type: TYPE_NORMAL
+- en: The standard output is Unix Makefiles unless the only detected compiler is Microsoft
+    Visual Studio, in which case a Visual Studio solution (`.sln`) will be created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To change the generator, you can pass the `-G` option to CMake, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will generate files to be used with Ninja ([https://ninja-build.org/](https://ninja-build.org/)),
+    an alternative build generator. Many generators are available for CMake. A list
+    of the ones that are supported natively can be found on CMake’s website: [https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two main types of generators – the ones where there are many Makefile
+    flavors and Ninja generators, which are generally used from the command line,
+    and the ones that create build files for an IDE such as Visual Studio or Xcode.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake differentiates between *single-configuration generators* and *multi-configuration
+    generators*. When using single-configuration generators, the build files have
+    to be rewritten each time the configuration is changed; multi-configuration build
+    systems can manage different configurations without the need to regenerate. Although
+    the examples in this book use single-configuration generators, they would also
+    work on multi-configuration generators. For most of the examples, the chosen generator
+    is irrelevant; otherwise, it will be mentioned:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Generator** | **Multi-Configuration** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Makefiles (all flavors) | No |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Ninja | No |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Ninja-Multi | Yes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Xcode | Yes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Visual Studio | Yes |'
+  prefs: []
+  type: TYPE_TB
+- en: In addition, there are extra generators that use a normal generator but also
+    produce project information for an editor or IDE, such as Sublime Text 2, Kate
+    Editor, CodeBlocks, or Eclipse. For each, you can select whether the editor should
+    use Make or Ninja to internally build the application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After the call, CMake will create a lot of files in the `build` folder, with
+    the most notable being the `CMakeCache.txt` file. This is where all the detected
+    configurations are stored. The main benefit of caching the configuration is that
+    subsequent runs of CMake run faster. Note that when you’re using `cmake-gui`,
+    the first step is split into configuring the project and generating the build
+    file. However, when it’s run from the command line, the steps are merged into
+    one. Once configured, all the build commands are executed from the `build` folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Source folders and build folders
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In CMake, two logical folders exist. One is the `source` folder, which contains
+    a hierarchical set of projects, while the other is a `build` folder, which contains
+    the build instructions, cache, and all the generated binaries and artifacts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The root of the `source` folder is wherever the top `CMakeLists.txt` file is
+    located. The `build` folder can be placed inside the `source` folder, but some
+    people prefer to have it in another location. Both are fine; note that for the
+    examples in this book, we decided to keep the `build` folder inside the `source`
+    folder. The `build` folder is often called just `build`, but it can take any name,
+    including prefixes and suffixes for different platforms. When using a `build`
+    folder inside the source tree, it is a good idea to add it to `.gitignore` so
+    that it does not get checked in accidentally.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When configuring a CMake project, the project and folder structure of the `source`
+    folder are recreated inside the `build` folder so that all the build artifacts
+    are in the same position. In each mapped folder, there is a subfolder called `CMakeFiles`
+    that contains all the information that’s generated by CMake’s configuration step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following code shows an example structure for a CMake project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When you execute the CMake configuration, the file structure of the CMake project
+    is mapped into the `build` folder. Each folder containing a `CMakeLists.txt` file
+    will be mapped, and a subfolder called `CMakeFiles` will be created, which contains
+    the internal information that’s used by CMake for building:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: When it comes to handling build folders and build configurations, an important
+    distinction is between single-configuration generators and multi-configuration
+    generators.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Single-configuration and multi-configuration generators
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In CMake, generators are responsible for creating native build systems (e.g.,
+    Makefiles, Visual Studio solutions) based on the platform for which a project
+    is built and often also on the developer’s preferences. The two main types of
+    generators in CMake are single-configuration and multi-configuration generators.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The main difference is that single-configuration generators generate build-system
+    information, where each build configuration, such as debug or release, corresponds
+    to a single build directory. There will be more details about the different build
+    types later in the chapter. If the build configuration is switched (e.g. from
+    a debug to a release build), the user either has to choose a different build directory
+    or the previous information will be overwritten.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For multi-configuration generators, one build directory can contain multiple
+    configurations, and which one to choose is only passed on the build step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Whether to choose a single- or multi-configuration generator often boils down
+    to personal preference or the convenient availability of the tools for a certain
+    operating system. As a rule of thumb, one can say that single-configuration generators
+    are slightly easier to use from the command line and in CI environments, where
+    multi-configuration generators might have better integration into IDEs. So far,
+    we have used the existing `CMakeLists.txt` to learn about the CMake build process.
+    We learned about the configuration and the build step, as well as generators,
+    and that we need `CMakeLists.txt` files to pass the necessary information to CMake.
+    So, let’s go a step further and see what the `CMakeLists.txt` files look like
+    and how the CMake language works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing CMake files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When you’re writing CMake files, there are a few core concepts and language
+    features that you need to know about. We won’t cover every detail of the language
+    here as CMake’s documentation does a pretty good job at this – especially when
+    it comes to being comprehensive. In the following sections, we will provide an
+    overview of the core concepts and language features. Further chapters will dive
+    into the details of different aspects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The full documentation for the language can be found at [https://cmake.org/cmake/help/latest/manual/cmake-language.7.html](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The CMake language – a 10,000-foot overview
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: CMake uses configuration files called `CMakeLists.txt` files to determine build
+    specifications. These files are written in a scripting language, often called
+    CMake as well. The language itself is simple and supports variables, string functions,
+    macros, function definitions, and importing other CMake files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Apart from lists, there is no support for data structures such as structs or
+    classes. But it is this relative simplicity that makes the CMake project inherently
+    maintainable if done properly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The syntax is based on keywords and whitespace-separated arguments. For example,
+    the following command tells CMake which files are to be added to a library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `PUBLIC` and `PRIVATE` keywords denote the visibility of the files when
+    they’re linked against this library and serve as delimiters between the lists
+    of files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, the CMake language supports so-called “generator expressions,”
+    which are evaluated during build system generation. These are commonly used to
+    specify special information for each build configuration that is generated during
+    the configuration phase of the project. They will be covered later in this chapter,
+    in the *Generator* *expressions* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Projects
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: CMake organizes the various build artifacts, such as libraries, executables,
+    tests, and documentation, into projects. There is always exactly one root project,
+    although the projects can be encapsulated into each other. As a rule, there should
+    only be one project per `CMakeLists.txt` file, which means that each project has
+    to have a separate folder in the source directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Projects are described like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: The current project that’s being parsed is stored in the `PROJECT_NAME` variable.
+    For the root project, this is also stored in `CMAKE_PROJECT_NAME`, which is useful
+    for determining whether a project is standalone or encapsulated in another. Since
+    version `3.21`, there’s also a `PROJECT_IS_TOP_LEVEL` variable to directly determine
+    whether the current project is a top-level project. Additionally, with `<PROJECT-NAME>_IS_TOP_LEVEL`,
+    you can detect whether a specific project is a top-level project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following are some additional variables regarding the projects. All of
+    them can be prefixed with `CMAKE_` for the root project. If they’re not defined
+    in the `project()` directive, the strings are empty:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PROJECT_DESCRIPTION`: The description string of the project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_HOMEPAGE_URL`: The URL string for the project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_VERSION`: The full version that’s given to the project'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_VERSION_MAJOR`: The first number of the version string'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_VERSION_MINOR`: The second number of the version string'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_VERSION_PATCH`: The third number of the version string'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PROJECT_VERSION_TWEAK`: The fourth number of the version string'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Each project has a source and binary directory, and they may be encapsulated
+    in each other. Let’s assume that each of the `CMakeFiles.txt` files in the following
+    example defines a project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: When parsing the `CMakeLists.txt` file in the root folder, `PROJECT_NAME` and
+    `CMAKE_PROJECT_NAME` will both be `CMakeBestPractices`. When you’re parsing `chapter_1/CMakeLists.txt`,
+    the `PROJECT_NAME` variable will change to `"Chapter_1"` but `CMAKE_PROJECT_NAME`
+    will stay as `CMakeBestPractices`, as set in the file in the root folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although projects can be nested, it is good practice to write them in a way
+    that they can work standalone. While they may depend on other projects that are
+    lower in the file hierarchy, there should be no need for a project to live as
+    a child of another. It is possible to put multiple calls to `project()` in the
+    same `CMakeLists.txt` file, but we discourage this practice as it tends to make
+    projects confusing and hard to maintain. In general, it is better to create a
+    `CmakeLists.txt` file for each project and organize the structure with subfolders.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This book’s GitHub repository, which contains the examples in this book, is
+    organized in a hierarchical way, where each chapter is a separate project that
+    may contain even more projects for different sections and examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While each example can be built on its own, you can also build this whole book
+    from the root of the repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Variables are a core part of the CMake language. Variables can be set using
+    the `set` command and deleted using `unset`. Variable names are case-sensitive.
+    The following example shows how to set a variable named `MYVAR` and assign a value
+    of `1234` to it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To delete the `MYVAR` variable, we can use `unset`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: The general code convention is to write variables in all caps. Internally, variables
+    are always represented as strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can access the value of a variable with the `$` sign and curly brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Variable references can even be nested and are evaluated inside out:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Variables might be scoped in the following way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Function scope**: Variables that are set inside a function are only visible
+    inside the function.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Directory scope**: Each of the subdirectories in a source tree binds variables
+    and includes any variable bindings from the parent directory.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Persistent cache**: Cached variables can be either system- or user-defined.
+    These persist their values over multiple runs.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Passing the `PARENT_SCOPE` option to `set()` makes the variable visible in the
+    parent scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake comes with a wide variety of predefined variables. These are prefixed
+    with `CMAKE_`. A full list is available at [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lists
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Even though CMake stores variables as strings internally, it is possible to
+    work with lists in CMake by splitting values with a semicolon. Lists can be created
+    by either passing multiple *unquoted* variables to `set()` or directly as a semicolon-separated
+    string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Manipulating lists by modifying their contents, reordering, or finding things
+    can be done using the `list` command. The following code will query `MYLIST` for
+    the index of the `abc` value and then retrieve the value and store it in the variable
+    called `ABC`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To append a value to a list, we can use the `APPEND` keyword. Here, the `xyz`
+    value is appended to `MYLIST`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Cached variables and options
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: CMake caches some variables so that they run faster in subsequent builds. The
+    variables are stored in `CMakeCache.txt` files. Usually, you don’t have to edit
+    them manually, but they are great for debugging builds that do not behave as expected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All the variables that are used to configure the build are cached. To cache
+    a custom variable called `ch1_MYVAR` with the `foo` value, you can use the `set`
+    command, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that cached variables must have a type and a documentation string that
+    provides a quick summary of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Most of the cached variables that are automatically generated are marked as
+    advanced, which means they are hidden from the user in `cmake-gui` and `ccmake`
+    by default. To make them visible, they have to be toggled explicitly. If additional
+    cache variables are generated by a `CMakeLists.txt` file, they can also be hidden
+    by calling the `mark_as_advanced(MYVAR)` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.4 – Left – cmake-gui does not show variables marked as advanced.
+    Right – Marking the Advanced checkbox displays all the variables marked as advanced](img/B30947_01_04.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 1.4 – Left – cmake-gui does not show variables marked as advanced. Right
+    – Marking the Advanced checkbox displays all the variables marked as advanced
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a rule of thumb, any option or variable that the user should not change should
+    be marked as advanced. A common case for marking variables as advanced is when
+    writing CMake modules or when searching for dependencies, as we will see in [*Chapter
+    5*](B30947_05.xhtml#_idTextAnchor084), *Integrating Third-Party Libraries and
+    Dependency Management*, and [*Chapter 13*](B30947_13.xhtml#_idTextAnchor198),
+    *Reusing* *CMake Code*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For simple boolean cache variables, CMake also provides the `option` keywordwhich
+    has a default value of `OFF` unless specified otherwise. These variables can also
+    depend on each other via the `CMakeDependentOption` module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Options are often a convenient way to specify simple project configurations.
+    They are cache variables of the `bool` type. If a variable with the same name
+    as the option already exists, a call to `option` does nothing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Properties
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Properties in CMake are values that are attached to a specific object or scope
+    of CMake, such as a file, target, directory, or test case. Properties can be set
+    or changed by using the `set_property` function. To read the value of a property,
+    you can use the `get_property` function, which follows a similar pattern. By default,
+    `set_property` overwrites the values that are already stored inside a property.
+    Values can be added to the current value by passing `APPEND` or `APPEND_STRING`
+    to `set_property`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The full signature is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The scope specifier may have the following values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GLOBAL`: Global properties that affect the whole build process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DIRECTORY <dir>`: Properties that are bound to the current directory or the
+    directories specified in `<dir>`. These can also be set directly using the `set_directory_properties`
+    command.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TARGET <targets>`: Properties of specific targets. They can also be set using
+    the `set_target_properties` function.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SOURCE <files>`: Applies a property to a list of source files. They can also
+    be set directly using `set_source_files_properties`. Additionally, there are the
+    `SOURCE DIRECTORY` and `SOURCE TARGET_DIRECTORY` extended options:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DIRECTORY <dirs>`: This sets the property for the source files in the directory’s
+    scope. The directory must already be parsed by CMake by either being the current
+    directory or by being added with `add_subdirectory`.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TARGET_DIRECTORY <targets>`: This sets the property to the directory where
+    the specified targets are created. Again, the targets must already exist at the
+    point where the property is set.'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INSTALL <files>`: This sets the properties for installed files. These can
+    be used to control the behavior of `cpack`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TEST <tests>`: This sets the properties for tests. They can also be set directly
+    using `set_test_properties`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CACHE <entry>`: This sets the properties for cached variables. The most common
+    ones include setting variables as advanced or adding documentation strings to
+    them.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The full list of supported properties, sorted by their different entities, can
+    be found at [https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is good practice to use direct functions such as `set_target_properties`
+    and `set_test_properties` when modifying properties instead of the more general
+    `set_property` command. Using explicit commands avoids making mistakes and confusion
+    between the property names and is generally more readable. There’s also the `define_property`
+    function, which creates a property without setting the value. We advise that you
+    don’t use this as properties should always have a sane default value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loops and conditions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Like any programming language, CMake supports conditional and loop blocks. Conditional
+    blocks are in between `if()`, `elseif()`, `else()`, and `endif()` statements.
+    Conditions are expressed using various keywords.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unary keywords are prefixed before the value, as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The unary keywords to be used in conditions are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`COMMAND`: True if the supplied value is a command'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DEFINED`: True if the value is a defined *variable*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Additionally, there are unary filesystem conditions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`EXISTS`: True if the passed file or directory exits'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_DIRECTORY`: Checks whether the supplied path is a directory'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_SYMLINK`: True if the supplied path is a symbolic link'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_ABSOULTE`: Checks whether a supplied path is an absolute path'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Binary tests compare two values and are placed between the values to be compared,
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The binary operators are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`LESS`, `GREATER`, `EQUAL`, `LESS_EQUAL`, and `GREATER_EQUAL`: These compare
+    numeric values.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`STRLESS`, `STREQUAL`, `STRGREATER`, `STRLESS_EQUAL`, and `STRGREATER_EQUAL`:
+    These lexicographically compare strings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`VERSION_LESS`, `VERSION_EQUAL`, `VERSION_GREATER`, `VERSION_LESS_EQUAL`, and
+    `VERSION_GREATER_EQUAL`: These compare version strings.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`MATCHES`: These compare against a regular expression.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`IS_NEWER_THAN`: Checks which of the two files that passed has been modified
+    recently. Unfortunately, this is not very precise because if both files have the
+    same timestamp, it also returns true. There is also more confusion because if
+    either of the files is missing, the result is also true.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Finally, there are the Boolean `OR`, `AND`, and `NOT` operators.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loops are either achieved by `while()` and `endwhile()` or `foreach()` and `endforeach()`.
+    Loops can be terminated using `break()`; `continue()` aborts the current iteration
+    and starts the next one immediately.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`while` loops take the same conditions as an `if` statement. The following
+    example loops as long as `MYVAR` is less than `5`. Note that to increase the variable,
+    we are using the `math()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In addition to `while` loops, CMake also has loops for iterating over lists
+    or ranges:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`for` loops over a specific range can be created by using the `RANGE` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Although the `RANGE` version of `foreach()` could work with only a `stop` variable,
+    it is good practice to always specify both the start and end values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Functions are defined by `function()`/`endfunction()`. Functions open a new
+    scope for variables, so all the variables that are defined inside are not accessible
+    from the outside unless the `PARENT_SCOPE` option is passed to `set()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Functions are case-insensitive and are invoked by calling the name of `function`,
+    followed by parentheses:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Functions are a great way to make parts of your CMake reusable and often come
+    in handy when you’re working on larger projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Macros
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: CMake macros are defined using the `macro()`/`endmacro()` commands. They are
+    a bit like functions, with the difference that in functions, the arguments are
+    true variables, whereas in macros, they are string replacements. This means that
+    all the arguments of a macro must be accessed using curly brackets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another difference is that by calling a function, control is transferred to
+    the functions. Macros are executed as if the macro’s body was pasted into the
+    calling state’s place. This means that macros do not create scopes regarding variables
+    and control flow. Consequently, it is highly recommended to avoid calling `return()`
+    in macros as this would stop the scope from executing where the macro is called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Targets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The build system of CMake is organized as a set of logical targets that correspond
+    to an executable, library, or custom command or artifact, such as documentation
+    or similar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are three major ways to create a target in CMake – `add_executable`, `add_library`,
+    and `add_custom_target`. The first two are used to create executables and static
+    or shared libraries, while the third can contain almost any custom command to
+    be executed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Targets can be made dependent on each other so that one target has to be built
+    before another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is good practice to work with targets instead of global variables when you’re
+    setting properties for build configurations or compiler options. Some of the target
+    properties have visibility modifiers such as `PRIVATE`, `PUBLIC`, or `INTERFACE`
+    to denote which requirements are transitive – that is, which properties have to
+    be “inherited” by a dependent target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generator expressions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Generator expressions are small statements evaluated during the build’s configuration
+    phase. Most functions allow generator expressions to be used, with a few exceptions.
+    They take the form of `$<OPERATOR:VALUE>`, where `OPERATOR` is applied or compared
+    to `VALUE`. You can think of generator expressions as small inline `if-statements`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the following example, a generator expression is being used to set different
+    compile definitions for `my_target` depending on whether the build configuration
+    is debug or release:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This example tells CMake to evaluate the `CONFIG` variable to either `Debug`
+    or `Release` and if it matches either, define either `MY_DEBUG_FLAG` or `MY_RELEASE_FLAG`
+    for the `my_target` target. Generator expressions come in very handy for writing
+    platform- and compiler-independent CMake files. In addition to querying values,
+    generator expressions can be used to transform strings and lists:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will output `cmake`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can learn more about generator expressions at [https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most CMake commands can handle generator expressions, but there are a few notable
+    exceptions such as the `file()` command for file operations and the `execute_process()`
+    command to call third-party programs during the configuration step.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another thing to keep an eye out for is which generator expressions are available
+    at which stage of the configuration or generation step. For multi-configuration
+    generators, for instance, the `$<CONFIG:...>` might not be set during the configuration
+    step as the build configuration is usually only passed during the build step.
+    In the next section, we will learn how CMake can be told which toolchain to use
+    and how to configure the different build types, such as debug or release.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake policies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For the top-level `CMakeLists.txt` file, `cmake_minimum_required` must be called
+    before any call to the project as it also sets which internal policies for CMake
+    are used to build the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Policies are used to maintain backward compatibility across multiple CMake releases.
+    They can be configured to use the `OLD` behavior, which means that `cmake` behaves
+    backward compatible, or as `NEW`, which means the new policy is in effect. As
+    each new version will introduce new rules and features, policies will be used
+    to warn you of backward compatibility issues. Policies can be disabled or enabled
+    using the `cmake_policy` call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the following example, the `CMP0121` policy has been set to a backward-compatible
+    value. `CMP0121` was introduced in CMake version 3.21 and checks whether index
+    variables for the `list()` commands are in a valid format – that is, whether they
+    are integers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: By setting `cmake_policy(SET CMP0121 OLD)`, backward compatibility is enabled
+    and the preceding code will not produce a warning, despite the access to `MYLIST`
+    with the `"any"` index, which is not an integer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Setting the policy to `NEW` will throw an error – `[build] list index: any
+    is not a valid index` – during the configuration step of CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Avoid setting single policies except when you’re including legacy projects
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generally, policies should be controlled by setting the `cmake_minimum_required`
+    command and not by changing individual policies. The most common use case for
+    changing single policies is when you’re including legacy projects as subfolders.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So far, we have covered the basic concepts behind the CMake language, which
+    is used to configure build systems. CMake is used to generate build instructions
+    for different kinds of builds and languages. In the next section, we will learn
+    how to specify the compiler to use and how builds can be configured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Different toolchains and build types
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The power of CMake comes from the fact that you can use the same build specification
+    – that is, `CMakeLists.``txt` – for various compiler toolchains without the need
+    to rewrite anything. A toolchain typically consists of a series of programs that
+    can compile and link binaries, as well as create archives and similar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake supports a variety of languages that the toolchains can be configured
+    for. In this book, we will focus on C++. Configuring the toolchain for different
+    programming languages is done by replacing the `CXX` part of the following variables
+    with the respective language tag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: C
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CXX – C++
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CUDA
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: OBJC – Objective C
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: OBJCXX – Objective C++
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fortran
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: HIP – HIP C++ runtime API for NVIDIA and AMD GPUs
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ISPC – C-Based SPMD programming language
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: ASM – Assembler
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If a project does not specify its language, it’s assumed that C and CXX are
+    being used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake will automatically detect the toolchain to use by inspecting the system,
+    but if needed, this can be configured by environment variables or, in the case
+    of cross-compiling, by providing a toolchain file. This toolchain is stored in
+    the cache, so if the toolchain changes, the cache must be deleted and rebuilt.
+    If multiple compilers are installed, you can specify a non-default compiler by
+    either setting the environment variables as `CC` for C or `CXX` for a C++ compiler
+    before calling CMake. Here, we’re using the CXX environment variable to overwrite
+    the default compiler to be used in CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternatively, you can overwrite the C++ compiler to use by passing the respective
+    `cmake` variable using `-D`, as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Both methods ensure that CMake is using GCC version 7 to build instead of whatever
+    default compiler is available in the system. Avoid setting the compiler toolchain
+    inside the `CMakeLists.txt` files as this clashes with the paradigm that states
+    that CMake files should be platform- and compiler-agnostic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, the linker is automatically selected by the chosen compiler, but
+    it is possible to select a different one by passing the path to the linker executable
+    with the `CMAKE_CXX_LINKER` variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you’re building C++ applications, it is quite common to have various build
+    types, such as a debug build that contains all debug symbols and release builds
+    that are optimized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake natively provides four build types:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Debug`: This is non-optimized and contains all the debug symbols. Here, all
+    the asserts are enabled. This is the same as setting `-O0 -g` for GCC and Clang.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Release`: This is optimized for speed without debugging symbols and asserts
+    disabled. Usually, this is the build type that is shipped. This is the same as
+    `-``O3 -DNDEBUG`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`RelWithDebInfo`: This provides optimized code and includes debug symbols but
+    disabled asserts, which is the same as `-O2 -``g -DNDEBUG`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`MinSizeRel`: This is the same as `Release` but optimized for a small binary
+    size instead of speed, which would be `-Os -DNDEBUG`. Note that this configuration
+    is not supported for all generators on all platforms.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that the build types must be passed during the configuration state for
+    single-configuration generators such as CMake or Ninja. For multi-target generators
+    such as MSVC, they are not used during the configuration step but are specified
+    during the build step. It is possible to create custom build types, which can
+    be a convenient way, for instance, to specify a build to generate code coverage,
+    but they usually do not work for every compiler, so there is a bit of caution
+    needed. An example of a custom build type can be found in [*Chapter 7*](B30947_07.xhtml#_idTextAnchor113),
+    *Seamlessly Integrating Code Quality Tools with CMake*. Since CMake supports such
+    a wide variety of toolchains, generators, and languages, a frequent question is
+    how to find and maintain working combinations of these options. Here, presets
+    can help.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Maintaining good build configurations with presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'A common problem when building software with CMake is how to share good or
+    working configurations to build a project. Often, people and teams have a preferred
+    way of where the build artifacts should go, which generator to use on which platform,
+    or just the desire that the CI environment should use the same settings to build
+    as they do locally. Since CMake 3.19 came out in December 2020, this information
+    can be stored in `CMakePresets.json` files, which are placed in the root directory
+    of a project. Additionally, each user can superimpose their configuration with
+    a `CMakeUserPresets.json` file. The basic presets are usually placed under version
+    control, but the user presets are not checked into the version system. Both files
+    follow the same JSON format, with the top-level outline being as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first line, `"version": 6`, denotes the schema version of the JSON file.
+    CMake 3.23 supports up to version six, but it is expected that new releases will
+    bring new versions of the schema.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, `cmakeMinimumRequired{...}` specifies which version of CMake to use. Although
+    this is optional, it is good practice to put this in here and match the version
+    with the one specified in the `CMakeLists.txt` file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After that, the various presets for the different build stages can be added
+    with `configurePresets`, `buildPresets`, and `testPresets`. As the name suggests,
+    `configurePresets` applies to the configure stage of CMake’s build process, while
+    the other two are used for the build and test stages. The build and test presets
+    may inherit one or more configure presets. If no inheritance is specified, they
+    apply to all the previous steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To see what presets have been configured in a project, run `cmake --list-presets`
+    to see a list of available presets. To build using a preset, run `cmake --build
+    --``preset name`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To see the full specification of the JSON schema, go to [https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html](https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Presets are a good way to share knowledge about how to build a project in a
+    very explicit way. At the time of writing, more and more IDEs and editors are
+    adding support for CMake presets natively, especially for handling cross-compilation
+    with toolchains. Here, we’re only giving you the briefest overview of CMake presets;
+    they will be covered in more depth in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146),
+    *Creating Reproducible* *Build* *Environments*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we provided you with a brief overview of CMake. First, you
+    learned how to install and run a simple build. Then, you learned about the two-stage
+    build process of CMake and single-configuration and multi-configuration generators.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By now, you should be able to build the examples provided in this book’s GitHub
+    repository at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
+    You learned about the core features of the CMake language, such as variables,
+    targets, and policies. We briefly covered functions and macros, as well as conditional
+    statements and loops for flow control. As you continue reading this book, you
+    will use what you have learned so far to discover further good practices and techniques
+    to move from simple one-target projects to complex software projects that keep
+    being maintainable through a good CMake setup.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will learn how some of the most common tasks in CMake
+    can be performed and how CMake works together with various IDEs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To learn more about the topics that were covered in this chapter, take a look
+    at the following resources:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The official CMake documentation: [https://cmake.org/cmake/help/latest/](https://cmake.org/cmake/help/latest/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The official CMake tutorial: [https://cmake.org/cmake/help/latest/guide/tutorial/index.html](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Answer the following questions to test your knowledge of this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How do you start the configure step of CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between single-configuration and multi-configuration
+    generators?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you start the build step of CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which executable from CMake can be used to run tests?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which executable from CMake is used for packaging?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are targets in CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between properties and variables?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are CMake presets used for?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The following are the answers to the preceding questions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can start the configure step of CMake with the following command:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`cmake -S /path/to/source -``B /path/to/build`'
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Single-configuration generators will only generate build files for one type
+    of build, such as debug or release builds. Multi-configuration generators will
+    generate build instructions for all available build types in one go.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'You can start the build step of CMake using:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'The following executable from CMake can be used to run tests:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'The following executable from CMake is used for packaging:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: Targets in CMake are logical units around which CMake organizes a build. They
+    can be executables, libraries, or contain custom commands.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Unlike variables, properties are attached to a specific object or scope.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: CMake presets are used to share working configurations for a build.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

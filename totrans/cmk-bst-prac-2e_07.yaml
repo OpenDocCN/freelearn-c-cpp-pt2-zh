@@ -1,0 +1,1923 @@
+- en: '5'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Integrating Third-Party Libraries and Dependency Management
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: So far in this book, we have covered how to build and install our own code with
+    **CMake**. In this chapter, we will look at how to use files, libraries, and programs
+    that are not part of a CMake project. The first part of the chapter will be about
+    how to find those things in general, while the latter part will focus on how to
+    manage dependencies to build your CMake project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the biggest advantages of using CMake is that it has built-in dependency
+    management for the discovery of many third-party libraries. In this chapter, we
+    will look at how to integrate libraries that are installed on your system and
+    locally downloaded dependencies. Additionally, you will learn how third-party
+    libraries can be downloaded and used as binaries and, alternatively, how they
+    can be built from source directly out of a CMake project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will look at how to write instructions for CMake to reliably find almost
+    any library on your system. Finally, we will take a look at how to use package
+    managers such as Conan and vcpkg with CMake. The practices for dependency management,
+    as covered in this chapter, will help you to create stable and portable builds
+    with CMake. It doesn’t matter if you are using precompiled binaries or compiling
+    them in place from scratch, setting up CMake to handle dependencies in a structured
+    and consistent way will reduce the time spent fixing broken builds in the future.
+    Here’s the list of main topics that we’ll cover in this chapter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding files, programs, and paths with CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using third-party libraries in your CMake project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using package managers with CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Getting the dependencies as source code
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Dependency providers – a new way of getting dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As with the previous chapters, all the examples are tested with CMake 3.24
+    and run on any of the following compilers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: GCC 9 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Clang 12 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MSVC 19 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Additionally, some examples will need OpenSSL 3 installed to be able to compile.
+    Some examples pull dependencies from various online locations, so an internet
+    connection is also required. All of the examples and source code are available
+    from the GitHub repository for this book, which can be found at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The examples for the external package managers require Conan (version 1.40
+    or newer) and vcpkg installed on your system to run. You can get the software
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Conan**: [https://conan.io/](https://conan.io/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Vcpkg**: [https://github.com/microsoft/vcpkg](https://github.com/microsoft/vcpkg)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Finding files, programs, and paths with CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Most projects quickly grow to a size and complexity where they depend on files,
+    libraries, and perhaps even programs that are managed outside the project. CMake
+    provides built-in commands to find these things. At first glance, the process
+    of searching and finding things appears to be quite simple. However, on closer
+    analysis, there are quite a few things to consider. First, we must handle the
+    search order of where to find the files or programs we are looking for. Then,
+    we might want to add more locations where the file might be, and finally, we must
+    account for the differences between different operating systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On an abstraction level higher than the individual files, CMake can find whole
+    packages that define targets, include paths, and package-specific variables. Refer
+    to the *Using third-party libraries in your CMake project* section for more detail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are five `find_...` commands that share very similar options and behaviors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find_file`: This locates a single file'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_path`: This finds a directory containing a specific file'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_library`: This finds library files'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_program`: This finds executable programs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_package`: This finds complete sets of packages'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All of these commands work similarly, but there are some small but important
+    differences when it comes to where they look for things. In particular, `find_package`
+    does more than just locate files; it not only looks for packages but makes the
+    file content available for easy use in the CMake project. In this chapter, first,
+    we will look at the simpler `find` functions before we cover how to find complex
+    packages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding files and paths
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The most low-level and basic things to find are files and paths. The `find_file`
+    and `find_path` functions share the same signature. The only difference between
+    them is that `find_path` stores the directory in which a file is found in the
+    result, while `find_file` stores the full path including the filename. The signature
+    of the `find_file` command is shown as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding command either searches for a single file, if the name has been
+    passed directly, or for a list of likely names if the `NAMES` option has been
+    used. The resulting path is stored in the variable passed as `<VAR>`. If the file
+    cannot be found, the variable will contain `<VARIABLENAME>-NOTFOUND`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing a list of names is useful if the files being searched for have variations
+    in their names such as different capitalizations or naming conventions that may
+    or may not include version numbers and so on. When passing a list of names, the
+    names should be ordered in a preferred way, as the search stops once the first
+    file has been found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching for files containing version numbers
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is recommended that you search for filenames without version numbers before
+    searching for those that contain some form of version numbering. This is so that
+    locally built files are preferred to the ones installed by the operating system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `HINTS` and `PATHS` options contain additional locations to the default
+    locations where the file is searched for. `PATH_SUFFIXES` could contain several
+    subdirectories that are searched below each of the other locations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `find_…` commands search for things in defined places and within a defined
+    order. The `NO_..._PATH` arguments of the commands can be used to skip the respective
+    location. The following table shows the order of the search locations and the
+    options for skipping a location:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Location** | **The skip option in** **the command** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Package root variables | `NO_PACKAGE_ROOT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CMake-specific cache variables | `NO_CMAKE_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CMake-specific environment variables | `NO_CMAKE_ENVIRONMENT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Paths from the `HINTS` option |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| System-specific environment variables | `NO_SYSTEM_ENVIRONMENT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| System-specific cache variables | `NO_CMAKE_SYSTEM_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Paths from the `PATHS` option |  |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Let’s look at the search order more closely along with what the different locations
+    mean:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find_file` is used as part of the `find_package` command. Please refer to
+    the *Using third-party libraries in your CMake project* section for an in-depth
+    discussion.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PREFIX_PATH`, `CMAKE_INLCUDE_PATH`, and `CMAKE_FRAMEWORK_PATH` cache
+    variables for macOS. Generally, setting the `CMAKE_PREFIX_PATH` cache variable
+    is preferred over the other two types, as this is used for all of the `find_`
+    commands. The prefix path is the base point for any searches under which the common
+    file structures such as `bin`, `lib`, `include`, and more are located. `CMAKE_PREFIX_PATH`
+    is a list of paths, and for each entry, `find_file` will search `<prefix>/include`
+    or `<prefix>/include/${CMAKE_LIBRARY_ARCHITECTURE}` if the respective variable
+    has been set. Generally, Cmake sets the variables automatically, and they should
+    not be changed by the developers. Architecture-specific paths take precedence
+    over generic paths.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `CMAKE_INCLUDE_PATH` and `CMAKE_FRAMEWORK_PATH` cache variables should only
+    be used if the standard directory structure is not applicable. They do not add
+    additional `include` suffixes to the paths.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Searching these paths can be skipped by passing the `NO_CMAKE_PATH` option to
+    the command or, globally, by setting the `CMAKE_FIND_USE_PATH` variable to `false`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PREFIX_PATH`, `CMAKE_INCLUDE_PATH`, and `CMAKE_FRAMEWORK_PATH` system
+    environment variables. The variables work in the same way as the cache variables,
+    but they are usually set from outside the call to CMake.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note that, on Unix platforms, the lists are separated by colons (`:`) instead
+    of semicolons (`;`)to conform to the platform-specific environment variables.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Paths from the `HINTS` option are the additional search locations that are manually
+    specified. They could be constructed from other values such as property values,
+    or they could depend on a previously found file or path.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INCLUDE` and `PATH` environment variables could each contain a list of directories
+    to be searched. Again, on Unix platforms, the list is separated by colons (`:`)
+    instead of semicolons (`;`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: On Windows, the `PATHS` entries are handled in a more complex manner. For each
+    entry, a base path is extracted by dropping any trailing `bin` or `sbin` directory.
+    If `CMAKE_LIBRARY_ARCHITECTURE` is set, the `include/${CMAKE_LIBRARY_ARCHITECTURE}`
+    subdirectory is added as the priority for each path. After that, `include` (without
+    a postfix) is searched. Only then, the original path, which might or might not
+    end in `bin` or `sbin`, is searched. Passing either the `NO_SYSTEM_ENVIRONMENT_PATH`
+    variable or setting the `CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` variable to `false`
+    will skip the locations in the environment variables.
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Assuming that the `PATH` option contains `C:\myfolder\bin;C:\yourfolder`, and
+    `CMAKE_LIBRARY_ARCHITECTURE` is set to `x86_64`, the search order will be as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`C:\myfolder\include\x86_64`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`C:\myfolder\include\`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`C:\myfolder\bin`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`C:\yourfolder\include\x86_64`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`C:\yourfolder\include\`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`C:\yourfolder\`'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSTEM_PREFIX_PATH` and `CMAKE_SYSTEM_FRAMEWORK_PATH` variables work
+    similarly to the CMake-specific cache variables. These variables are not supposed
+    to be changed by the developer but are configured when CMake sets up the platform
+    toolchain. One exception here is if a toolchain file is provided, such as when
+    using sysroot or cross-compiling, as explained in [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182),
+    *Cross-Platform Compiling and* *Custom Toolchains*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In addition to the `NO_CMAKE_SYSTEM_PATH` option, the `CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
+    variable can be set to `false` to skip searching in locations provided by the
+    system-specific cache variables.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In the same way as the `HINTS` option, paths specified in the `PATHS` option
+    are additional search locations that are manually provided. Although not technically
+    prevented, it is the convention that the `PATHS` variables should be fixed paths
+    and not depend on other values.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If only the locations provided by `HINTS` or `PATHS` are to be searched, adding
+    the `NO_DEFAULT_PATH` option skips all the other locations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Occasionally, you might want to ignore particular paths for searching. In such
+    cases, a list of paths might be specified in `CMAKE_IGNORE_PATH` or `CMAKE_SYSTEM_IGNORE_PATH`.
+    Both of these variables were designed with cross-compiling scenarios in mind and
+    are rarely used in other circumstances.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching for files when cross-compiling
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When cross-compiling, the process of searching for files is often different
+    because cross-compilation toolchains are collected under their own self-contained
+    directory structure, which does not mix with the system toolchain. Generally,
+    first, you will want to look inside the toolchain’s directory for files. By setting
+    the `CMAKE_FIND_ROOT` variable, the origin for all searches can be changed to
+    a new location.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, the `CMAKE_SYSROOT`, `CMAKE_SYSROOT_COMPILE`, and `CMAKE_SYSROOT_LINK`
+    variables affect the search locations, but they should only be set in a toolchain
+    file, not by a project itself. If any of the regular search locations are already
+    under the sysroot or the location specified by `CMAKE_FIND_ROOT`, they will not
+    be changed. Any path that starts with a tilde (`~`), and is passed to the `find_`
+    commands, will not be changed to avoid skipping directories that are under the
+    user’s home directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, first, CMake searches in the locations provided by any of the variables
+    from the preceding paragraph and then continues to search the host system. This
+    behavior can be changed globally by setting the `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`
+    variable to either `BOTH`, `NEVER`, or `ONLY`. Alternatively, you can set the
+    `CMAKE_FIND_ROOT_PATH_BOTH` option, the `ONLY_CMAKE_FIND_ROOT_PATH` option, or
+    the `NO_CMAKE_FIND_ROOT_PATH` option to `find_file`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following table shows the search order when setting either of the options
+    or the variables in the different search modes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Mode** | **Option** | **Search order** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `BOTH` | `CMAKE_FIND_ROOT_PATH_BOTH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '`CMAKE_FIND_ROOT_PATH`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT_COMPILE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT_LINK`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All regular search locations
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| `NEVER` | `NO_CMAKE_FIND_ROOT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: All regular search locations
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| `ONLY` | `ONLY_CMAKE_FIND_ROOT_PATH` | `CMAKE_FIND_ROOT_PATH`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT_COMPILE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT_LINK`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_SYSROOT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Any regular paths, one of the other locations, or under `CMAKE_STAGING_PREFIX`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `CMAKE_STAGING_PREFIX` variable is used to provide installation paths for
+    cross-compiling. `CMAKE_SYSROOT` should not be changed by installing things into
+    it. Setting up cross-compilation toolchains will be covered in detail in [*Chapter
+    12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform Compiling and Custom Toolchains*,
+    where we talk about cross-compiling.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding programs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Finding executables is very similar to finding files and paths, and the `find_program`
+    command has almost the same signature as `find_file`. Additionally, `find_program`
+    has the `NAMES_PER_DIR` option, which tells the command to search one directory
+    at a time and search for all provided filenames in each directory instead of searching
+    through each directory for each file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On Windows, the `.exe` and `.com` file extensions are automatically added to
+    the filenames provided, but not `.bat` or `.cmd`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The cache variables used by `find_program` are slightly different from the
+    ones used by `find_file`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find_program` automatically adds `bin` and `sbin` to the search locations
+    provided by `CMAKE_PREFIX_PATH`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Values in `CMAKE_LIBRARY_ARCHITECTURE` are ignored and have no effect
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PROGRAM_PATH` is used instead of `CMAKE_INCLUDE_PATH`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_APPBUNDLE_PATH` is used instead of `CMAKE_FRAMEWORK_PATH`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_FIND_ROOT_PATH_MODE_PROGRAM` is used to change the mode for searching
+    programs'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As with the other `find` commands, `find_program` will set the `<varname>-NOTFOUND`
+    variable if CMake is unable to find the program. This is often handy to determine
+    whether a custom build step that depends on a certain external program should
+    be enabled or not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding libraries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Finding libraries is a special case of finding files, so the `find_library`
+    command supports the same set of options as `find_file`. Also, similar to the
+    `find_program` command, it has the additional `NAMES_PER_DIR` option that checks
+    for all filenames first, before moving to the next directory. The difference between
+    finding regular files and finding libraries is that `find_library` automatically
+    applies platform-specific naming conventions to the filenames. On Unix platforms,
+    the names will be prefixed with `lib`, while on Windows, the `.dll` or `.lib`
+    extensions will be added.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Again, the cache variables are slightly different from the ones used in `find_file`
+    and `find_program`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find_library` adds `lib` to the search locations by `CMAKE_PREFIX_PATH`, and
+    it uses `CMAKE_LIBRARY_PATH` instead of `CMAKE_INCLUDE_PATH` to find libraries.
+    The `CMAKE_FRAMEWORK_PATH` variable is used similarly to `find_file`. The `CMAKE_LIBRARY_ARCHITECTURE`
+    variable works the same as in `find_file`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This is done by appending the respective folders to the search paths. `find_library`
+    searches the locations in the `PATH` environment variable in the same way as `find_file`,
+    but it appends `lib` to each prefix. Also, it uses the `LIB` environment variable
+    if this has been set instead of the `INCLUDE` variable.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_FIND_ROOT_PATH_MODE_LIBRARY` is used to change the mode for searching
+    libraries.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CMake is generally aware of conventions regarding 32-bit and 64-bit search locations
+    such as platforms using the `lib32` and `lib64` folders for different libraries
+    of the same name. The behavior is controlled by the `FIND_LIBRARY_USE_LIB[32|64|X32]_PATHS`
+    variables, which control what should be searched first. Additionally, projects
+    can define their own suffix using the `CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX` variable,
+    which overrides the behavior of the other variables. However, the need to do this
+    is very rare, and tampering with the search order inside a `CMakeLists.txt` file
+    quickly makes projects hard to maintain and heavily impacts the portability between
+    systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding static or shared libraries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'In most cases, simply passing the base name of a library to CMake works well
+    enough, but sometimes, the behavior has to be overridden. One reason for this
+    is that on some platforms, the static version of a library should be preferred
+    over the shared one or vice versa. The best way to do this is to split up the
+    `find_library` call into two calls instead of trying to achieve this in a single
+    call. It is more robust if the static library is in a different directory from
+    the dynamic one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: On Windows, this approach cannot be used, as static libraries and import libraries
+    for DLLs do have the same `.lib` suffix, so they are not distinguishable by name.
+    The `find_file`, `find_path`, `find_program`, and `find_library` commands are
+    often handy when looking for specific things. On the other hand, finding dependencies
+    happens on a higher level. This is where CMake excels by providing the `find_package`
+    methods. With `find_package`, we do not need to, first, search for all the `include`
+    files, followed by all the library files, and then add them manually to each target
+    and, in the end, account for all platform-specific behaviors. Let’s dive into
+    the process of how to find dependencies next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using third-party libraries in your CMake project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re writing software in earnest, sooner or later, you will hit the point
+    where your project will rely on libraries from outside your project. Instead of
+    looking for individual library files or header files, the recommended way to integrate
+    third-party code into CMake-projects is to use the `find_package` command to use
+    CMake packages. Packages provide a set of information about dependencies for CMake
+    and the generated build systems. They can be integrated into a project in two
+    forms, either by their configuration details (also called *config packages*),
+    or as so-called `find` module packages. Config packages are usually provided by
+    the upstream project, while packages using `find` modules are usually defined
+    either by CMake itself or by the project using the package. Both types can be
+    found by using `find_package`, and the result is a set of imported targets and/or
+    a set of variables containing information that is relevant to the build system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `findPkgConfig` module, which uses the `pkg-config` tool provided by [freedesktop.org](https://www.freedesktop.org/wiki/)
+    to find the relevant meta-information for a dependency, also provides indirect
+    support for packages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Typically, `find` modules are used for locating dependencies, for instance,
+    when the upstream does not provide the necessary information for package configuration.
+    They are not to be confused with CMake utility modules, which are used with `include()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use packages provided from upstream over find modules
+  prefs: []
+  type: TYPE_NORMAL
+- en: Whenever possible, use a package provided by the upstream source instead of
+    creating a `find` module. If the upstream project lacks the necessary information,
+    try to fix it at the source rather than writing a new `find` module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that the `find_package` command has two signatures: a basic or short signature
+    and a full or long signature. In almost all scenarios, using the short signature
+    is sufficient for finding the packages we’re looking for, and it should be preferred
+    because it is easier to maintain. The short form supports both the module and
+    config packages, but the long form only supports configuration mode.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The signature of the short mode is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s suppose we want to write a program that converts a string into a SHA-256
+    hash by using the appropriate functionality of the OpenSSL library. To compile
+    and link this example, we have to inform CMake that this project needs the OpenSSL
+    library and then attach it to the target. For the moment, let’s assume that the
+    necessary libraries have been installed at a default location on your system;
+    for example, by using a regular package manager such as apt, RPM, or similar for
+    Linux, Chocolatey for Windows, or brew for macOS.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A sample `CMakeLists.txt` file might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding example does the following things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the first line in the example, there is a `find_package(OpenSSL REQUIRED
+    COMPONENTS SSL)` call. This tells CMake that we’re looking for a set of libraries
+    and header files for OpenSSL. Specifically, we’re looking for the *SSL* component
+    and ignoring any other components provided by the OpenSSL package. The `REQUIRED`
+    keyword tells CMake that finding this package is required to build this project.
+    If the package is not found, CMake will fail with an error.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Once the package has been found, we tell CMake to link the library to the target
+    using `target_link_libary`. Specifically, we tell CMake to link the `OpenSSL::SSL`
+    target provided by the package OpenSSL.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'If a dependency has to be of a certain version, it can be specified either
+    as a single version of the `major[.minor[.patch[.tweak]]]` format or as a version
+    range with the `versionMin..[<]versionMax` format. For version ranges, both `versionMin`
+    and `versionMax` should have the same format, and by specifying `<`, the upper
+    version will be excluded. In this case, the `find_package` call will look something
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will tell CMake to look for any version 3.0.x of OpenSSL. In this case,
+    the number of the patch level will be ignored to match the version number. If
+    the version should match exactly, the `EXACT` keyword can be specified, however,
+    this is rarely used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unfortunately, as of May 2024, CMake cannot query the modules for the available
+    components. So, we have to rely on the documentation of the modules or library
+    providers to find out which components are available. The available modules can
+    be queried with the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: A list of modules shipped with CMake can be found at [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding individual libraries and files
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is possible to look for individual libraries and files, but the preferred
+    way is to use packages. Finding individual files and making them available to
+    CMake will be covered in the *Writing your own find* *module* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When run in module mode, the `find_package` command searches for files called
+    `Find<PackageName>.cmake`; this occurs, first, in the paths specified by `CMAKE_MODULE_PATH`
+    and then among the `find` modules provided by the CMake installation. If you wish
+    to learn how to create CMake packages, head over to [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071),
+    *Packaging, Deploying, and Installing a* *CMake Project*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When run in config mode, `find_package` searches for files called after any
+    of the following patterns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<``lowercasePackageName>-config.cmake`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<``PackageName>Config.cmake`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<lowercasePackageName>-config-version.cmake` (if the version details were
+    specified)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<PackageName>ConfigVersion.cmake` (if the version details were specified)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'All searches will be conducted over a set of locations in a well-defined order;
+    if needed, some of the locations can be skipped by passing the respective option
+    to CMake. `find_package` contains a few more options than the other `find_` commands.
+    The following table shows the search order from a high level:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Location** | **Skip option in** **the command** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Package root variables | `NO_PACKAGE_ROOT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CMake-specific cache variables | `NO_CMAKE_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CMake-specific environment variables | `NO_CMAKE_ENVIRONMENT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Paths specified in the `HINTS` option |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| System-specific environment variables | `NO_SYSTEM_ENVIRONMENT_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| User package registry | `NO_CMAKE_PACKAGE_REGISTRY` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| System-specific cache variables | `NO_CMAKE_SYSTEM_PATH` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| System package registry | `NO_CMAKE_SYSTEM_PACKAGE_REGISTRY` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Paths specified in the `PATHS` option |  |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Let’s look at the search order and search locations more closely:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find_package` call is stored in a variable called `<PackageName>_ROOT`. They
+    are the priority for searching files belonging to a package. The package root
+    variables work in the same way as `CMAKE_PREFIX_PATH`, not just for the call to
+    `find_package` but for all other `find_` calls that might happen inside the `find`
+    module belonging to the package.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PREFIX_PATH`. For macOS, the `CMAKE_FRAMEWORK_PATH` variable is also
+    considered a search location.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: By setting the `CMAKE_FIND_USE_CMAKE_PATH` variable to `false`, the locations
+    from the CMake-specific cache variables will be skipped.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PREFIX_PATH` and `CMAKE_FRAMEWORK_PATH` as cache variables, CMake will
+    also consider them if they are set as environment variables.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting the `CMAKE_FIND_USE_ENVIRONMENT_PATH` variable to `false` will disable
+    this behavior.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HINTS` from `find_package` is an optional path passed to `find_package`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PATH` environment variable is used to look for packages and files and the
+    trailing `bin` and `sbin` directories are removed. The default locations for each
+    system, such as `/usr`, `/lib`, and similar locations, are usually searched at
+    this point.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMAKE_PREFIX_PATH` option. Package registries are another way to tell CMake
+    where to look for dependencies. Package registries are special locations where
+    collections of packages reside. The user registry is valid for the current user
+    account, while the system package registry is valid system-wide. On Windows, the
+    location for the user package registry is stored in the Windows registry under
+    the following:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<packageName>\`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'On the Unix platform, it is stored in the user’s home directory as follows:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`~/.``cmake/packages/<PackageName>`'
+  prefs:
+  - PREF_IND
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_package`, the platform-specific `CMAKE_SYSTEM_PREFIX_PATH`, `CMAKE_SYSTEM_FRAMEWORK_PATH`,
+    and `CMAKE_SYSTEM_APPBUNDLE_PATH` cache variables work similarly to the other
+    find calls. They are set by CMake itself and should not be changed by the project.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<packageName>\`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Unix systems do not provide a system package registry.*   `PATHS` from `find_package`
+    is an optional path that is passed to `find_package`. Usually, the `HINTS` options
+    are computed from other values or depend on variables, whereas the `PATHS` options
+    are fixed paths.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Specifically, when looking for packages in config mode, CMake will look for
+    the following file structure under the various prefixes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On macOS platforms, the following folders are also searched:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can find out more about packages in the official CMake documentation at
+    [https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In terms of modules, so far, we’ve only covered how to find existing modules.
+    But what happens if we want to look for dependencies that are neither integrated
+    into CMake, nor in the standard places, or they do not provide configuration instructions
+    for CMake? Well, let’s find out about that in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing your own find module
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: While CMake is almost an industry standard, there are still lots of libraries
+    out there that are not managed with CMake or that are managed with CMake but do
+    not export a CMake package. If they can be installed in the default location of
+    a system or when using a package manager, finding these libraries is usually not
+    a problem. Unfortunately, this is not always possible. A common case is when using
+    a proprietary third-party library that is only needed for a certain project or
+    that uses a different version of a library to build from the one that is installed
+    by the systems package manager or if the package is not available in that package
+    manager.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re developing multiple projects side by side, you might want to handle
+    the dependencies locally for each project. Either way, it is good practice to
+    set up your project in a way so that dependencies are managed locally and do not
+    depend too much on what is installed on the system. For this reason, using package
+    managers such as Conan or vcpkg as described in the *Using package managers with
+    CMake* section is preferred over writing your own `find` modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating fully reproducible builds is described in [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182),
+    *Cross-Platform Compiling and Custom Toolchains*; however, knowing how to write
+    your own `find` module is handy and gives good insights into how CMake’s packages
+    work. If no module and no configuration file exist for a dependency, often, writing
+    your so-called `find` module is the quickest solution. The goal is to provide
+    enough information so that, later, we can use any package by using `find_package`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find` modules are instructions for CMake on how to find the necessary header
+    and binary files for a library and which create imported targets for CMake to
+    use. As described earlier in this chapter, when invoking `find_package` in module
+    mode, CMake searches for files called `Find<PackageName>.cmake` in `CMAKE_MODULE_PATH`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s assume that we’re building a project where the dependencies have already
+    been downloaded or built and have been placed into a folder called `dep` before
+    we use them. For this example, let’s assume we use a library called `obscure`;
+    in this case, the `find` module would be called `FindObscure.cmake`. So, the project
+    structure might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first thing we have to do is to add the `cmake` folder to the `CMAKE_MODULE_PATH`,
+    which is a list. So, first, we add the following line to the `CMakeLists.txt`
+    file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This tells CMake that it should look for `find` modules in the `cmake` folder.
+    Typically, a `find` module does things in the following order:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It looks for files belonging to the package.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: It sets up variables containing the `include` and `library` directories for
+    the packages.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: It sets up targets for the imported package.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: It sets properties for the targets.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'A simple `FindModules.cmake` for a library called `obscure` might look like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When looking at the example, we can observe that the following things happen:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, the actual `library` file belonging to the dependency is searched for
+    using the `find_library` command. If found, the path to it, including the actual
+    filename, is stored in the `OBSCURE_LIBRARY` variable. It is a common practice
+    to name the `<PACKAGENAME>_LIBRARY` variable. The `NAMES` argument is a list of
+    possible names for the library. The names are automatically extended with common
+    prefixes and extensions. So, although, in the preceding example, we look for a
+    file named `obscure`, a file named `libobscure.so` or `obscure.dll` will be found.
+    More details about the search order, hints, and paths will be covered later in
+    this section.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Next, the `find` module attempts to locate the `include` path. This is done
+    by finding a known path pattern of the library, usually one of the public header
+    files. The result is stored in the `OBSCURE_INCLUDE_DIR` variable. Again, the
+    common practice is to name this variable `<PACKAGENAME>_INCLUDE_DIR`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Since handling all the requirements for a `find` module can be tedious and
+    is often very repetitive, CMake provides the `FindPackageHandleStandardArgs` module,
+    which provides a handy function to handle all the common cases. It provides the
+    `find_package_handle_standard_args` function, which handles `REQUIRED`, `QUIET`,
+    and the version-related arguments of `find_package`. `find_package_handle_standard_args`
+    has a short signature and a long signature. In the example, the short signature
+    is used:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '[PRE12]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '[PRE13]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '[PRE14]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: For most cases, the short form of `find_package_handle_standard_args` is sufficient.
+    In the short form, the `find_package_handle_standard_args` function takes the
+    package name as the first argument and a list of variables that are required for
+    the package. The `DEFAULT_MSG` argument tells it to print default messages on
+    success or failure, depending on whether `find_package` was invoked with `REQUIRED`
+    or `QUIET`. The message can be customized, but we recommend that you stick to
+    the default messages whenever possible. That way, the messages are consistent
+    for all the `find_package` commands. In the preceding example, `find_package_handle_standard_args`
+    checks whether the `OBSCURE_LIBRARY` and `OBSCURE_INCLUDE_DIR` variables that
+    have been passed are valid. If that is the case, the `<PACKAGENAME>_FOUND` variable
+    is set.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If all goes well, the `find` module defines the target. Before we do this, it
+    is helpful to check whether the target we are trying to create does not already
+    exist (to avoid overwriting it in the case that we have multiple calls to `find_package`
+    for the same dependency). Creating the target is done with `add_library`. Since
+    we cannot be sure whether it is a static or dynamic library, the type is `UNKNOWN`
+    and the `IMPORTED` flag is set.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finally, the properties for the library are set. The minimum setting that we
+    recommend is the `IMPORTED_LOCATION` property and the location of the `include`
+    files in `INTERFACE_INCLUDE_DIR`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'If everything works as expected, the library can then be used like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: So, now we understand how other libraries are added to your projects if they
+    are already available for use. But how do we get the libraries into our system
+    in the first place? Let’s find that out in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using package managers with CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The easiest way to get dependencies into your project is to regularly install
+    them using `apt-get`, brew, or Chocolatey. The downside of installing everything
+    is that you can pollute your system with many different versions of libraries
+    and the version you are looking for might not be available at all. This is especially
+    true if you are working on multiple projects with different requirements regarding
+    the dependencies side by side. Often, a developer downloads the dependencies locally
+    for each project so that each project can work independently. A very good way
+    to handle dependencies is by using package managers such as Conan or vcpkg.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a dedicated package manager has many advantages when it comes to dependency
+    management. Two of the more popular ones for handling C++ dependencies are Conan
+    and vcpkg. Both can handle complex build systems and mastering them would require
+    whole books on their own, so we will only cover the bare necessities to start
+    working with them here. In this book, we will focus on using packages that are
+    already available in your CMake project, rather than on creating your own packages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since version 3.24, CMake has supported a concept called `find_package` or `FetchContent_MakeAvailable`
+    to call external programs or scripts to locate or install the dependency. Dependency
+    providers must be set before the first call to the project function with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES`,
+    which typically should happen over the command line or by using a CMake preset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although the concept is relatively new to CMake at the time of writing, it looks
+    very promising. Conan 2.0 has experimental support for dependency providers, while
+    vcpkg does not yet have it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Conan to get dependencies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Over the last few years, the Conan package manager gained much popularity, and
+    it integrates very well with CMake. **Conan** is a decentralized package manager
+    that has been built on a client/server architecture. This means that the local
+    client fetches or uploads packages to one or more remote servers. In February
+    2023, the team behind Conan released Conan 2, which is no longer compatible with
+    Conan 1\. If you are using Conan 1, we recommend that you migrate to Conan 2 as
+    it introduces several improvements and changes over Conan 1.x, including better
+    integration with CMake, improved package creation and management, and enhanced
+    user experience.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the most powerful features of Conan is that it can create and manage
+    binary packages for multiple platforms, configurations, and versions. When creating
+    packages, they are described with a `conanfile.py` file that lists all dependencies,
+    sources, and build instructions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The packages are built and uploaded to the remote server with the Conan client.
+    This has an additional benefit that if no binary package that fits your local
+    configuration can be found, the package can be built locally from its sources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A basic workflow of using Conan with CMake works like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a `conanfile.txt` in your project that contains the list of dependencies
+    and settings.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Install the dependencies using Conan and use the generators provided by Conan
+    to create the files that CMake can use to find and link the dependencies.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Run CMake and integrate the information generated by Conan to build the project.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: There are two important core concepts of Conan. The first one is `conanfile`.
+    Profiles are usually located in the user’s home directory, there can be several
+    different profiles but most often one uses the default profile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create a new profile, you can use the `conan profile` `new` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will create a new profile from the standard compiler detected on your
+    system. If the `--name` argument is omitted, the default profile will be created.
+    The resulting profile file might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: For different compiler settings, the profiles can be customized as needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The other core concept of Conan is `CMakeDeps` and `CMakeToolchain`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMakeDeps` generates information to be used with `find_package` and offers
+    more flexibility, and `CMakeToolchain` is somewhat more convenient to use but
+    has some limitations regarding configuration.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `CMakeToolchain` generator works well for small, standalone projects. For
+    bigger projects, or if cross-compilation toolchains are involved, we recommend
+    using the`CMakeDeps` generator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two main ways to use Conan with CMake. One is to call Conan on its
+    own and let it generate package information to be consumed by CMake or insert
+    it as a CMake dependency provider. Which way works best depends on personal preference
+    and the project setup. While calling Conan on its own gives you the maximum amount
+    of freedom regarding the configuration of Conan, it might limit some options regarding
+    toolchains and presets on the CMake side. Using Conan as a dependency provider
+    is more convenient and gives you access to the full range of CMake features, but
+    it limits the number of Conan configurations available. From a CMake perspective,
+    one upside of using Conan as a dependency provider is that one does not need to
+    specify all the Conan profiles for all the different build configurations up front,
+    but that we can use the normal CMake definitions to create them on the fly. Let’s
+    first look at how to use Conan as a dependency provider.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Conan as a dependency provider
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To use Conan as a dependency provider, we need two things:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`conanfile.txt` to list the dependencies'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The dependency provider definition for Conan
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'First, `conanfile.txt` is placed next to the `CMakeLists.txt`, resulting in
+    a project structure something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Inside `conanfile.txt`, we list the dependencies we want to use and tell Conan
+    to use the `CMakeDeps` generator to generate package information for the dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: First, the `[requires]` section describes which packages are to be imported;
+    in this case, the `fmt` version *10.2.1* package is imported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `[generators]` section describes which generators may be used. For using
+    Conan as a dependency provider, the `CMakeDeps` generator is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use the dependency in CMake, we can use the `find_package` command as illustrated
+    earlier, so a `CMakeLists.txt` might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that using Conan packages is no different than using “normal” CMake packages
+    and no Conan-specific code needs to be added to `CMakeLists.txt`, which helps
+    keep it portable between different systems
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With that, we are almost ready. The next thing is to tell CMake to use Conan
+    as a dependency provider. For this, the definition files for the CMake dependency
+    provider for Conan can be obtained from here: [https://github.com/conan-io/cmake-conan](https://github.com/conan-io/cmake-conan)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inside this repository, there is a `conan_provider.cmake` file, which can either
+    be downloaded manually or the Git repository can be used as a submodule, whichever
+    is preferable to you. In the GitHub repository containing the examples, the file
+    is included as a submodule. You can get it by cloning the repository and then
+    calling `git submodule update --``init --recursive`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With this file, we have everything we need to start building. By passing this
+    file as `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` to CMake, the dependency provider is
+    automatically installed and any call to `find_package()` is routed through Conan
+    first to see whether the dependency is listed in `conanfile.txt`. The resulting
+    call to CMake might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, the Conan dependency provider will autodetect any profile information
+    and pass it to Conan. If no default profile exists, it will create one. If the
+    binary package is not available in the Conan repository for the chosen build configuration
+    or compiler, Conan will try to build the package locally, which might take some
+    time, depending on the package size.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although using Conan as a dependency provider is the recommended way, some people
+    might like to have more control over Conan and use Conan on its own with CMake.
+    Let’s look at how this might work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Conan with CMake
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To use Conan with CMake effectively, we can leverage the `CMakeDeps` and `CMakeToolchain`
+    generators. These generators help bridge the gap between Conan’s dependency management
+    and CMake’s build system configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If Conan is used on its own, a Conan profile has to be created for each build
+    configuration that is usable for CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, let’s install the dependencies and have Conan create the necessary files
+    for using it with CMake. The library and header files will be installed into the
+    Conan cache in the users’ home directory, but we can tell Conan where to install
+    the package definition for CMake. This can be any directory, but in practice,
+    it is often convenient to have this generated into the build directory of CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will install all the dependencies listed in the `conanfile.txt` and create
+    a bunch of files in the build folder. We also pass the `build=missing` flag. If
+    the binary package is not available in the Conan repository, Conan will try to
+    build the package locally. We also pass the build type for which we want to install
+    the package here. If that is omitted, only the configuration in the default profile
+    will be installed, which might make package detection fail for other configurations.
+    It is generally a good idea to specify the build types explicitly by using `-DCMAKE_BUILD_TYPE=Debug`,
+    but with Conan, this becomes mandatory to avoid headaches because the dependencies
+    are not found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we’re only using the `CMakeDeps` generator from Conan, this will create
+    the necessary files to be used with `find_package()` in the build folder. The
+    preferred way is setting this by passing the build folder to `CMAKE_PREFIX_PATH`
+    either over the command line or a prefix like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternatively, it can also be appended inside `CMakeLists.txt` like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: With that, the CMake project can be built, and the dependency can be used. In
+    most cases, the `CMakeDeps` generator is what you want to use, as it provides
+    a good compromise of using the benefits of CMake when it comes to cross-compiling
+    while having the convenience of package handling from Conan.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to hand over the build configuration entirely to Conan, the `CMakeToolchain`
+    generator for Conan can be used. This generator will not just create the package
+    information, but also generate a CMake toolchain definition and presets for using
+    them. CMake toolchains are covered in detail in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146),
+    *Creating Reproducible* *Build Environments*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Again, installing the Conan packages happens with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Using the `CMakeToolchain` generator will create a toolchain file in the build
+    folder that contains all the information to resolve the dependencies. Additionally,
+    `CMakeUserPresets.json` will be created containing a preset to use the resulting
+    toolchain. After running Conan, the preset can be used with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will configure the CMake project with the toolchain generated from Conan.
+    While this appears very convenient to use, it has the downside that all the configurations
+    of the build environment have to be done over Conan profiles or flags on the `conan
+    install` command. Using existing configuration options from CMake becomes much
+    harder. Notably, if a project or a developer has already defined their own presets,
+    they get overwritten by the presets generated from Conan. Because of this, using
+    the `CMakeToolchain` generator is only recommended for small standalone projects
+    that have relatively simple requirements regarding the build environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While Conan is a very powerful package manager that offers a very good integration
+    with CMake, it is not the only one. Another frequently used package manager is
+    vcpkg from Microsoft. Let’s have a closer look at it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using vcpkg for dependency management
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Another popular open-source package manager is **vcpkg** from Microsoft. It
+    works similarly to Conan in the way that it is set up as a client/server architecture.
+    It was originally built to work with the Visual Studio compiler environment, and
+    CMake was added later. Packages can either be installed manually, by calling vcpkg
+    in the so-called **classic mode**, or directly out of CMake in the so-called **manifest
+    mode**. The command to install packages with vcpkg in the classic mode is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When run in manifest mode, the dependencies of a project are defined in a `vcpkg.json`
+    file in the root of the project. The manifest mode has a big advantage in that
+    it integrates better with CMake, so whenever possible, use manifest mode. A vcpkg
+    manifest might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For CMake to find the packages, a vcpkg toolchain file must be passed to CMake,
+    so the call to CMake will be as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: If they are run in manifest mode, the packages specified in the `vcpkg.json`
+    file will be automatically downloaded and installed locally. If they are run in
+    classic mode, the packages have to be manually installed before running CMake.
+    When passing the vcpkg toolchain file, the installed packages can be used, as
+    usual, by using `find_package` and `target_link_libraries`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Microsoft recommends that you install vcpkg as a submodule in the repository
+    at the same level as the CMake root project, but it can be installed almost everywhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Setting the toolchain file might cause problems when cross-compiling, as `CMAKE_TOOLCHAIN_FILE`
+    might point to a different file already. In this case, a second toolchain file
+    can be passed with the `VCPKG_CHAINLOAD_TOOLCHAIN_FILE` variable. Then, the call
+    to CMake would look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Conan and vcpkg are just two package managers for C++ and CMake that are popular.
+    Of course, there are many more, but it would require a separate book to describe
+    them all. Especially when projects get more complex, we highly advise that you
+    use package managers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Which package manager you choose will depend on the context a project is being
+    developed and your personal preference. Conan has a slight advantage over vcpkg
+    in that it is supported on more platforms as it runs everywhere Python runs. In
+    terms of features and ability for cross-compiling, both are roughly equal. Overall,
+    Conan offers more advanced configuration options and control over the packages,
+    which comes at the price of more complex handling. Another way to work with local
+    dependencies is to create fully isolated environments by using containers, sysroot,
+    and more. This will be covered in [*Chapter 9*](B30947_09.xhtml#_idTextAnchor146),
+    *Creating Reproducible Build* *Environments*. For the moment, let’s assume we’re
+    running CMake with your standard system installation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using package managers for dependency management is the recommended thing to
+    do when working with project-specific dependencies. However, sometimes, package
+    managers are not an option. This might be because of mysterious company policies
+    or some other reason. In these cases, CMake also supports downloading dependencies
+    as the source and integrating them into the project as external targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Getting the dependencies as source code
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are several ways to get dependencies as sources into your project. A relatively
+    straightforward but dangerous way is to manually download or clone them into a
+    subfolder inside your project and then add this folder with `add_subdirectory`.
+    While this works and is fast, it quickly becomes tedious and hard to maintain.
+    So, this should be automated as soon as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The practice of downloading and integrating a copy of third-party software directly
+    into a product is called **vendoring**. While it has the advantage that it often
+    makes building software easy, it creates issues with packaging libraries. Vendoring
+    is avoided by either using a package manager or by installing third-party software
+    into a location on your system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading dependencies as the source using pure CMake
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: At the base of getting external content is the CMake `ExternalProject` module
+    and the more sophisticated `FetchContent` module, which is built on `ExternalProject`.
+    While `ExternalProject` offers more flexibility, `FetchContent` is often more
+    convenient to use, especially if the downloaded project is also built using CMake.
+    Both of them download projects as source files and can be used to build them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using FetchContent
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: For external projects that use CMake to build, using the `FetchContent` module
+    is the best way to add source dependencies. For binary dependencies, using `find_package`
+    and `find` modules is still the preferred way. One of the main differences between
+    `ExternalProject` and `FetchContent` is that `FetchContent` downloads and configures
+    external projects during configuration time, while `ExternalProject` does everything
+    during the build step. The drawback to this is that the source and its configuration
+    are not available during configuration time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before `FetchContent`, you would have used Git submodules to manually download
+    the dependencies and then add them using `add_subdirectory`. This works in some
+    cases, but it can be rather inconvenient and cumbersome to maintain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FetchContent` provides a list of functions to pull in source dependencies,
+    mainly `FetchContent_Declare`, which defines the parameters for downloading and
+    building `FetchContent_MakeAvailable`, which populates the targets of the dependency
+    and makes them available for the build. In the following example, the `bertrand`
+    library for design by contract is pulled from Git using GitHub and made available
+    for use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: When fetching dependencies as sources, the sequence of `FetchContent_Declare`
+    followed by `FetchContent_MakeAvailable` should be used whenever possible because
+    it makes code bases very maintainable due to their simplicity. `FetchContent`
+    can download sources from HTTP/S, Git, SVN, Mercurial, and CVS, and the same best
+    practices, such as specifying MD5 hashes for the downloaded content or using Git
+    hashes, apply.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FetchContent_MakeAvailable` is the recommended way to make external CMake-based
+    projects available, but if you want to have more control over your external projects,
+    it is also possible to populate the projects manually. The following example does
+    the same as the previous example but in a more verbose way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`FetchContent_Populate` has additional options to be specified to control the
+    build more closely. The signature is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s look at the `FetchContent_Populate` options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`QUIET`: This can be specified to suppress the output of the population if
+    it succeeds. If the command fails, the output will be shown even if the option
+    is specified to allow for debugging.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SUBBUILD_DIR`: This specifies where the external project will be located.
+    The default is `${CMAKE_CURRENT_BINARY_DIR}/<name>-subbuild`. Generally, this
+    option should be left as it is.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SOURCE_DIR` and `BINARY_DIR` change where the source and build directories
+    of the external project are located. The default settings are `${CMAKE_CURRENT_BINARY_DIR}/<lcName>-src`
+    for `SOURCE_DIR` and `${CMAKE_CURRENT_BINARY_DIR}/<lcName>-build` for `BINARY_DIR`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Under the hood, `FetchContent` is using the older `ExternalProject` module,
+    which is described in the next section. Any additional parameters added will be
+    passed on to the underlying `ExternalProject_Add`. However, `FetchContent` prohibits
+    you from editing the commands for the different steps, so attempts to tamper with
+    `CONFIGURE_COMMAND`, `BUILD_COMMAND`, `INSTALL_COMMAND`, and `TEST_COMMAND` will
+    cause `FetchContent_Populate` to fail with an error.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you find yourself in a situation where you need to pass options to the underlying
+    `ExternalProject_Add`, consider using `ExternalProject` directly instead of first
+    going through `FetchContent`. More details on how to use `ExternalProject` can
+    be found in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Information about the source and build directories, along with whether a project
+    has been populated, can be retrieved either by reading the `<name>_SOURCE_DIR`,
+    `<name>_BINARY_DIR`, and `<name>_POPULATED` variables or by calling `FetchContent_GetProperties`.
+    Note that `<name>` will always be available in all caps and all lowercase. This
+    is so that CMake can identify the packages despite different capitalizations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another big advantage of `FetchContent` is that it can handle cases where external
+    projects share common dependencies and prevent them from being downloaded and
+    built multiple times. The first time a dependency is defined over `FetchContent`,
+    the details are cached, and any further definitions will be silently ignored.
+    The benefit of this is that a parent project can overrule the dependencies of
+    the child projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s assume we have a top project called `MyProject` that fetches two external
+    projects, `Project_A` and `Project_B`, with each depending on a third external
+    project called `AwesomeLib`, but on a different minor version. In most cases,
+    we do not want to download and use two versions of `AwesomeLib` but only one to
+    avoid conflicts. The following diagram shows what the dependency graph might look
+    like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 5.1 – Both Project_A and Project_B depend on different versions of
+    AwesomeLib](img/B30947_05_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 5.1 – Both Project_A and Project_B depend on different versions of AwesomeLib
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To resolve this, we can specify which version of `AwesomeLib` to pull by placing
+    a `FetchContent_Declare` call for `AwesomeLib` in the top-level `CMakeLists.txt`
+    file. The order of the declaration inside the `CMakeLists.txt` file is not relevant
+    here, only the level on which it is declared. Since both `Project_A` and `Project_B`
+    contain the code to populate `AwesomeLib`, the top-level project does not need
+    to use `FetchContent_MakeAvailable` or `FetchContent_Populate`. The resulting
+    top-level `CMakeLists.txt` file might appear as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will force `AwesomeLib` to be pinned to version 1.2 for all projects.
+    Of course, this only works if the interface between the versions required by `Project_A`
+    and `Project_B` are compatible, resulting in a dependency graph, as illustrated
+    in the following diagram:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 5.2 – The corrected dependency graph after MyProject declares the
+    version of AwesomeLib](img/B30947_05_02.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 5.2 – The corrected dependency graph after MyProject declares the version
+    of AwesomeLib
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding dependencies as sources has some advantages, but it comes with major
+    drawbacks in that it increases configuration and build time considerably. In [*Chapter
+    10*](B30947_10.xhtml#_idTextAnchor158),*Handling Distributed Repositories and
+    Dependencies in a Super-Build*, we will tackle superbuilds with distributed repositories
+    and provide more information about how to handle source dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the beginning of the chapter, we looked at `find_package`, which can be used
+    to include binary dependencies, but we did not talk about how to conveniently
+    download local binary dependencies using CMake. While `FetchContent` can be used
+    for that, it is not its purpose. Instead, dedicated package managers such as Conan
+    and vcpkg will be better suited. Internally, `FetchContent` is using the older
+    and more complicated `ExternalProject` module. While `ExternalProject` offers
+    more control, it is also harder to use. Let’s have a look at how to use it next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using ExternalProject
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `ExternalProject` module is used to download and build external projects
+    that are not fully integrated into the main project. When building an external
+    project, the build is fully isolated, meaning that it will not automatically take
+    over any settings regarding architecture or platforms. This isolation can come
+    in handy to avoid clashes in the naming of targets or components. The external
+    project creates a primary target and several child targets that contain the following
+    isolated build steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ExternalProject` can download content in several ways such as through pure
+    HTTPS downloads or by accessing versioning systems such as Git, Subversion, Mercurial,
+    and CVS. If the contents are archived, the download step will also unpack them.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Updating and patching**: The downloaded source code can either be patched
+    or updated to the newest version if the content is pulled from **source code**
+    **management** (**SCM**).'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Configure**: If the downloaded source uses CMake, the configure step is executed
+    on it. For non-CMake projects, a custom command that does the configuration can
+    be provided.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Build**: By default, the same build tool that is used in the main project
+    is used to build the dependency, but a custom command can be provided if this
+    is not desired. If a custom build command is supplied, it is up to the user to
+    ensure that the necessary compiler flags are passed on so that the results are
+    ABI compatible.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Install**: The isolated build can be installed locally, usually somewhere
+    in the build tree of the main project.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '**Test**: If the external content comes with a set of tests, the main project
+    might choose to run them. By default, the tests are not run.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: All the steps, including downloading, run at build time. So, depending on the
+    external project, this can increase the build time quite significantly. CMake
+    caches the downloads and builds, so unless the external project has been changed,
+    the overhead is primarily for the first run. The possibility of adding more steps
+    to the external build does exist, but for most projects, the default steps are
+    sufficient. The steps can be customized or omitted, as we will discover later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the following example, the `bertrand` library for using the design by contract
+    is downloaded over HTTPS and locally installed in the current `build` directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the `ExternalProject` module is not available by default and has to
+    be included in the first line with `include(ExternalProject)`. As the external
+    library is installed in the local build directory, the `INSTALL_DIR` option is
+    specified. Since `bertrand` itself is a CMake project, the installation directory
+    is passed as `<INSTALL_DIR>` by using the `CMAKE_INSTALL_PREFIX` variable to build
+    the project. `<INSTALL_DIR>` is a placeholder that points back to the `INSTALL_DIR`
+    option. `ExternalProject` knows placeholders for the various directories such
+    as `<SOURCE_DIR>`, `<BINARY_DIR>`, and `<DOWNLOAD_DIR>`. For a complete list,
+    please consult the module documentation at [https://cmake.org/cmake/help/latest/module/ExternalProject.html](https://cmake.org/cmake/help/latest/module/ExternalProject.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Verify your downloads
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is highly recommended that you add the download hash to any URL, as this
+    sends you a notification if the contents of an artifact change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For this to work, any target that depends on `bertrand` has to be built after
+    the external dependency. As `bertrand` is a header-only library, we want to add
+    the `include` path to a target. Using the external project for another target
+    in CMake could look similar to the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the first line, the installation directory is retrieved with `ExternalProject_Get_Property`
+    and stored in the `INSTALL_DIR` variable. Unfortunately, the variable name is
+    always the same as the property, so it is recommended that you store it immediately
+    after retrieval in a variable with a unique name that expresses its use better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, the target we want to build is created and made dependent on the target
+    created by `ExternalProject_Add`. This is necessary to enforce the correct build
+    order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, the path to the local installation is added to the target with `target_include_directories`.
+    Additionally, we could import the CMake targets provided by the external library,
+    but the purpose of this is to illustrate how this could work if the external project
+    is not built by CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Downloading from SCM systems happens with the respective options. For Git,
+    this usually looks like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that `GIT_TAG` can be any valid revision number for Git, including tag
+    names and long and short hashes. If `GIT_TAG` is omitted, the latest version of
+    the default branch—usually called main or master—is downloaded. We highly recommend
+    that you always specify the version to download. The most robust way is to define
+    a commit hash, as tags can be moved around, although they rarely are in practice.
+    Downloading from SVN is similar to downloading from Git. For additional details,
+    please consult the official documentation for `ExternalProject`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using non-CMake projects and cross-compiling
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'A common use case for `ExternalProject` is to build dependencies that are not
+    handled by CMake but by Autotools or Automake instead. In that case, you would
+    need to specify the configuration and build commands as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that the first `find_program` command is used to find a version of `make`
+    and store it in the `MAKE_EXECUTABLE` variable. A common issue with external projects
+    is that you have to closely control where the dependencies are installed. Most
+    projects want to install to a default system location, which often requires root
+    privileges and could accidentally pollute a system. So, passing the necessary
+    options to the configuration or a build step is often necessary. Another way to
+    handle this is to avoid the installation process entirely by replacing `INSTALL_COMMAND`
+    with an empty string as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: One problem with using non-CMake projects such as this is that they do not define
+    the necessary targets for using the dependency directly. So, to use an externally
+    built library in another target, you often have to add the full library name to
+    the `target_link_libraries` calls. The major drawback of this is that you have
+    to manually maintain the different names and locations of the files for the various
+    platforms. The `find_library` or `find_file` calls are of little use because they
+    happen at configuration time, while `ExternalProject` only creates the necessary
+    files at build time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another common use case is to use `ExternalProject` to build the contents of
+    an existing source directory for a different target platform. In this case, the
+    parameter that handles the downloading is simply omitted. If the external project
+    is using CMake to build, the toolchain file can be passed as a CMake option to
+    the external project. More information about toolchain files is available in [*Chapter
+    12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform Compiling and Custom Toolchains*.
+    A very common pitfall here is that `ExternalProject` will not recognize any changes
+    to the sources of the external projects, so CMake might not rebuild them. For
+    this reason, the `BUILD_ALWAYS` option should be passed, which has the downside
+    of often making the build time considerably longer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Managing the steps in ExternalProject
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'As mentioned in the preceding section, the steps of `ExternalProject` can be
+    configured further and used in a more granular way. `ExternalProject` can be told
+    to create regular targets for each step either by passing the `STEP_TARGETS` option
+    or by calling `ExternalProject_Add_StepsTargets`. The following calls expose both
+    the configure step and the build step of an external project as targets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The targets are named after `<mainName>-step`. In the preceding example, two
+    additional targets, `MyProject-configure` and `MyProject-build`, will be created.
+    Creating step targets has two main uses: you can create custom steps that are
+    sorted in the order of the download, configure, build, install, and test sequence,
+    or you can make the steps dependent on other targets. These can either be regular
+    targets, created by `add_executable`, `add_library`, or `add_custom_target`, or
+    targets from other add executables. A common case is when external projects depend
+    on each other, so the configuration step of one has to depend on the other. In
+    the next example, the configuration step of `ProjectB` will depend on the completion
+    of `ProjectA`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, we can also create custom steps to be interjected into an external
+    project. The process of adding steps is done with the `ExternalProject_Add_Step`
+    command. Custom steps cannot be named the same as any of the predefined steps
+    (such as `mkdir`, `download`, `update`, `patch`, `configure`, `build`, `install`,
+    or `test`). The following example will create a step that adds the license information
+    of an external project to a specific `tar` file after building:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: All in all, `ExternalProject` is a very powerful tool; however, it can become
+    very complex to manage. Often, it is that flexibility that also makes `ExternalProject`
+    hard to use. While it can help isolate builds, it often forces the project maintainer
+    to manually expose any information from the inner workings of the external project
+    to CMake, which, ironically, is what CMake is supposed to help with in the first
+    place.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we covered a general approach to finding files, libraries,
+    and programs, along with the more complex search for CMake packages. You learned
+    how to create an imported package definition if it cannot be found automatically
+    by providing your own `find` module. We looked at source-code-based dependencies
+    with `ExternalProject` and `FetchContent` and how even non-CMake projects can
+    be built using CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, if you want to become even more sophisticated with your dependency
+    management, we introduced Conan and vcpkg as two package handlers that integrate
+    very well with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dependency management is a tough topic to cover and can be tedious at times.
+    Nevertheless, it pays off to take the time to set it up correctly with the techniques
+    described in this chapter. The versatility of CMake and its various ways of finding
+    dependencies are its greatest strengths but also its greatest weaknesses. By using
+    the various `find_` commands, `FetchContent`, `ExternalProject`, or integrating
+    any of the available package managers with CMake, almost any dependency can be
+    integrated into a project. However, with so many methods to choose from, finding
+    the best one can be tough. Nevertheless, we recommend using `find_package` whenever
+    possible. The more popular CMake becomes, the better the chances are that other
+    projects can be seamlessly integrated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, you will learn how to automatically generate and package
+    documentation for your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Which `find_` programs exist in CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which properties should be set for targets imported by a `find` module?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When finding things, which option takes precedence, `HINTS` or `PATHS`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the order of preference of techniques to use for dependency management?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: At what stage does `ExternalProject` download the external content?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: At what stage does `FetchContent` download the external content?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The answer is `find_file`, `find_path`, `find_library`, `find_program`, and
+    `find_package`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `IMPORTED_LOCATION` and `INTERFACE_INCLUDE_DIRECTORIES` properties.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`HINTS` takes precedence over `PATHS`.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Package managers as dependency providers are the most recommended way to handle
+    dependencies, then using standalone package managers, then `FetchContent`, and
+    then, only if all else fails, `ExternalProject` should be used.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`ExternalProject` downloads external content at build time.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`FetchContent` downloads external content at configuration time.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

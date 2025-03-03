@@ -1,0 +1,693 @@
+- en: '1'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Getting Started
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The objective of *Minimal CMake* is to walk you through the development process
+    of taking an application from its humble beginnings (starting with a simple console
+    application) to a complete windowed application you can demo to friends and use
+    as a template for future projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll see how CMake can help throughout the entire process. Perhaps the greatest
+    benefit CMake provides is how easy it is to integrate existing open source software
+    to improve the functionality of your app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before we can start using CMake to create our application, we need to ensure
+    that we have our development environment set up and ready to go. The setup will
+    vary depending on which platform you’ve decided to use (Windows, macOS, or Linux).
+    We’ll cover each system here. This will provide a good starting point to build
+    on as we introduce CMake and begin assembling the core of our application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing CMake on Windows
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing CMake on macOS
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing CMake on Linux (Ubuntu)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing Git
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Visual Studio Code setup (optional)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To get the most out of this book, we recommend that you run the examples locally.
+    To do this you will need the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake version
+  prefs: []
+  type: TYPE_NORMAL
+- en: All examples in this book have been tested with CMake 3.28.1\. Earlier versions
+    are not guaranteed to work. Later versions should be safe to upgrade to, though
+    it’s possible that there may be differences. If in doubt, use CMake 3.28.1 when
+    running the examples from this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing CMake on Windows
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this section, we’ll cover how to install everything you’ll need to start
+    building applications with CMake on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To begin with, you will need a C/C++ compiler. If you don’t already have a compiler
+    installed, a good choice to go with is Visual Studio (Visual Studio 2022 Community
+    Edition can be downloaded from [https://visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio is an integrated development environment that comes with Microsoft’s
+    C++ compiler for Windows (`cl.exe`). We won’t be covering Visual Studio directly,
+    though you are more than welcome to use it if you prefer (see [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228)*,
+    Supporting Tools and Next Steps* for a brief summary). We’ll cover how to generate
+    Visual Studio solution files and invoke MSBuild to build our project. To keep
+    things as consistent as possible, we’ll use Visual Studio Code for most of the
+    examples. This is more for convenience than anything else, and if you’re more
+    comfortable with another tool, by all means use it. As CMake has grown in popularity,
+    Visual Studio has expanded support for CMake considerably, which is worth investigating
+    if you’re predominantly going to be developing on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio versus Visual Studio Code
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although they sound similar, Visual Studio and Visual Studio Code are two hugely
+    different applications. Visual Studio is an integrated development environment
+    from Microsoft that runs predominantly on Windows (there is also, confusingly,
+    a version of Visual Studio for macOS which is quite different to the Windows application).
+    Visual Studio is used for building Windows applications in C++ or .NET (C#, F#,
+    and Visual Basic). Visual Studio Code on the other hand is a cross-platform code
+    editor that runs on Windows, macOS, and Linux. It has an extensive extension library
+    that allows it to be used with many different programming languages. It’s popular
+    for web development, having excellent support for TypeScript and JavaScript, though
+    it also has robust support for C++ through the C/C++ extension from Microsoft.
+    Visual Studio Code is what we’ll use throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open the Visual Studio installer and select **Visual Studio Community 2022**
+    (if there’s a later version available when you’re reading this, feel free to grab
+    that instead).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.1: Visual Studio Installer version selector](img/B21152_01_1.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.1: Visual Studio Installer version selector'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After selecting **Visual Studio Community 2022**, a new panel will appear. The
+    **Workloads** tab lets you select an option to include a set of sensible defaults.
+    Scroll down and select **Desktop development** **with C++**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.2: Visual Studio Installer workload selector](img/B21152_01_2.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.2: Visual Studio Installer workload selector'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several optional components selected by default on the right. It won’t
+    hurt to leave them selected. You can remove certain features such as **Image and
+    3D model editors** and **Test Adapter for Boost/Google.Test** if you prefer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After confirming your selection, click on **Install** in the bottom-right corner
+    of the window.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once the installation is complete, go to the Windows Start menu and follow
+    these steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.3: Windows 11 Taskbar Search Box](img/B21152_01_3.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.3: Windows 11 Taskbar Search Box'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Search for **Terminal**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.4: Windows 11 application search results](img/B21152_01_4.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.4: Windows 11 application search results'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open the Terminal app. Then, from the top bar, click the dropdown and select
+    **Developer Command Prompt for** **VS 2022**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.5: Microsoft Terminal new tab selector](img/B21152_01_5.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.5: Microsoft Terminal new tab selector'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customizing Command Prompt
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It is possible to modify the default `VsDevCmd.bat` when it’s launched with
+    the host and target architectures specified. To do this, go to `profiles` section,
+    find the `Command Prompt` entry under `list` and change the `commandLine` property
+    to include the path to `VsDevCmd.bat` and the required architectures (e.g., `"commandline":
+    "%SystemRoot%\\System32\\cmd.exe /k \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\"
+    -arch=x64 -host_arch=x64"`). It’s also possible to call `VsDevCmd.bat` when opening
+    Git Bash from Windows Terminal (see the *Installing Git* section if you don’t
+    already have it installed). To do this, find `"commandLine": "\"C:\\Program Files\\Microsoft
+    Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" -arch=x64 -host_arch=x64
+    && \"%PROGRAMFILES%/Git/bin/bash.exe\" -``i -l"`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To verify that the Microsoft compiler is working as expected, run `cl.exe`.
+    You should then see the following printed (the architecture will vary depending
+    on the machine you’re using):'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.6: Running cl.exe from Developer Command Prompt](img/B21152_01_6.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.6: Running cl.exe from Developer Command Prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake and Visual Studio
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio comes bundled with its own version of CMake, which you can rely
+    on and skip the following two steps. It is located in `C:\Program Files\Microsoft
+    Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`.
+    Running `cmake --version` will show `cmake version <version>-msvc1`, which indicates
+    that the version is distinct from normal CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you do not currently have CMake installed on your system (or have a fairly
+    old version of CMake installed), head to [https://cmake.org/download/](https://cmake.org/download/)
+    to get the latest release (at the time of writing, this is `3.28.1`).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The simplest option is to grab the Windows x64 installer (cmake-3.28.1-windows-x86_64.msi)
+    and follow the standard installation instructions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '![Figure 1.7: CMake Windows installer](img/B21152_01_7.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.7: CMake Windows installer'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensure that you select **Add CMake to the system PATH for the** **current user**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.8: CMake installer PATH options](img/B21152_01_8.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.8: CMake installer PATH options'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Follow the remaining installation instructions and wait for CMake to install.
+    Once this is completed, close and open Terminal and return to `cmake` and `cmake
+    --version` and you should see the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.9: Running cmake.exe from Developer Command Prompt](img/B21152_01_9.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.9: Running cmake.exe from Developer Command Prompt'
+  prefs: []
+  type: TYPE_NORMAL
+- en: And with that, we’re ready to start building with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing CMake on macOS
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this section, we’ll cover how to install everything you’ll need to start
+    building the application on macOS.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To begin, you will need a C/C++ compiler. If you don’t already have a compiler
+    installed, the safest bet is to go with Xcode, which can be downloaded from the
+    App Store:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Go to **Spotlight Search** by clicking the magnifying glass on the macOS menu
+    bar.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.10: Spotlight Search option on macOS menu bar](img/B21152_01_10.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.10: Spotlight Search option on macOS menu bar'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Search for **App Store**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.11: Searching for App Store from Spotlight Search](img/B21152_01_11.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.11: Searching for App Store from Spotlight Search'
+  prefs: []
+  type: TYPE_NORMAL
+- en: From **App Store**, search for **Xcode**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.12: Xcode search results from the App Store](img/B21152_01_12.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.12: Xcode search results from the App Store'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Click the **Get** and then **Install** buttons.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.13: Xcode application install](img/B21152_01_13.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.13: Xcode application install'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It is also possible to install **Command Line Tools** for **Xcode** from [https://developer.apple.com](https://developer.apple.com),
+    specifically [https://developer.apple.com/download/all/](https://developer.apple.com/download/all/),
+    which also includes the core tools we’ll need to work with CMake. To access the
+    Apple Developer website, an Apple Developer account is needed (you can learn more
+    here: [https://developer.apple.com/account](https://developer.apple.com/account)).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once either `Terminal` again) and enter the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You should see a message resembling the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This confirms that we have a working compiler and can now install CMake to work
+    with it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you do not currently have CMake installed on your system (or have a fairly
+    old version of CMake installed), head to [https://cmake.org/download/](https://cmake.org/download/)
+    to get the latest release (at the time of writing this is 3.28.1).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The simplest option is to grab the macOS 10.13 or later disk image (`.dmg`)
+    (cmake-3.28.1-macos-universal.dmg) and follow the standard installation instructions.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '![Figure 1.14: CMake macOS installation](img/B21152_01_14.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.14: CMake macOS installation'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Drag **CMake** to your **Applications** folder.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The CMake GUI will now be available on your system but CMake won’t yet be available
+    from Terminal.
+  prefs:
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To be able to run CMake commands from Terminal, open **CMake** from the **Applications**
+    folder, ignore the UI that appears for now, and go to the CMake macOS menu bar
+    and click **Tools**| **How to install For Command** **Line Use**.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.15: CMake command-line install options from macOS menu bar](img/B21152_01_15.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.15: CMake command-line install options from macOS menu bar'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After clicking this, a popup will appear with several options. The least invasive
+    is likely the first option, though the second is also a fine choice.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.16: CMake command-line install options panel](img/B21152_01_16.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.16: CMake command-line install options panel'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To have the path option persist, we need to update our `.zshrc` file. Copy
+    the following line:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: From Terminal, ensure you are in the home directory (`cd ~`) and then open your
+    `.zshrc` file (feel free to do this in your favorite text editor or type `nano
+    .zshrc` from Terminal).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.17: Opening .zshrc with nano from Terminal](img/B21152_01_17.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.17: Opening .zshrc with nano from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Paste the earlier command and save the file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.18: Modifying .zshrc from nano inside Terminal](img/B21152_01_18.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.18: Modifying .zshrc from nano inside Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To reload the Zsh config file and update the `PATH` variable, run `source .zshrc`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.19: Refresh the Terminal environment by executing .zshrc again](img/B21152_01_19.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.19: Refresh the Terminal environment by executing .zshrc again'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, run `cmake` from Terminal to verify that it can be found.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.20: Running cmake from Terminal](img/B21152_01_20.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.20: Running cmake from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also use `where cmake` and `cmake --version` to verify that you have
+    the correct version installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With that, we’re ready to start building with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing CMake on Linux (Ubuntu)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this section, we’ll cover how to get everything you’ll need to start building
+    the application on Linux (Ubuntu).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To begin with, you will need a C/C++ compiler. If you don’t already have a
+    compiler installed, an excellent choice is to go with GCC. This can be installed
+    by using the standard Ubuntu package manager, `apt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open **Terminal** by using **Show Applications** from the desktop.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.21: Ubuntu Show Applications menu option](img/B21152_01_21.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.21: Ubuntu Show Applications menu option'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Run `sudo apt update` and then `sudo apt install build-essential` (it is possible
+    that your version of Ubuntu already comes with this installed, but it’s good to
+    check).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.22: Installing build-essential from Terminal](img/B21152_01_22.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.22: Installing build-essential from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Run `gcc --version` to verify that the compiler can be found and is working
+    as expected. You should see output resembling the following:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Figure 1.23: Running gcc --version from Terminal](img/B21152_01_23.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.23: Running gcc --version from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we need to install CMake. This can be done via a package manager (e.g.,
+    `apt`), but we’ll do so directly here to specify the precise version. Go to [https://cmake.org/download/](https://cmake.org/download/)
+    and scroll down to find the binary distributions section. Grab Linux x86_64 (Intel)
+    (`cmake-3.28.1-linux-x86_64.tar.gz`) or Linux aarch64 (ARM) (`cmake-3.28.1-linux-aarch64.tar.gz`)
+    depending on your architecture.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Run this command from the folder you downloaded CMake to extract and install
+    CMake to your `/``opt` folder:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: (It’s perfectly reasonable to extract the files to a local folder and update
+    your `PATH` variable to point to the bin folder. Installing to `/opt` is one common
+    approach).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can alternatively just double-click the `tar.gz` file and use the **Archive
+    Manager** **Extract** option:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Click the **Extract** option and then go to **Other Locations** | **Computer**
+    and select the **opt** folder.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then click **Extract** again in the top-right corner.
+  prefs:
+  - PREF_IND
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.24: Ubuntu Archive Manager Extract dialog](img/B21152_01_24.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.24: Ubuntu Archive Manager Extract dialog'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Go to your home directory (`cd ~`) and enter `nano .bashrc`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.25: Opening .bashrc with nano from Terminal](img/B21152_01_25.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.25: Opening .bashrc with nano from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Add the `bin` subfolder in the directory you extracted in your `/opt` folder
+    to your `PATH` variable with the following line:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '![Figure 1.26: Modifying .bashrc from nano inside Terminal](img/B21152_01_26.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.26: Modifying .bashrc from nano inside Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With that, save the file and close nano (`Ctrl+O, Ctrl+X`). Then run `source
+    .bashrc` to reload the `.bashrc` file and update the `PATH` variable in the current
+    Terminal session.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Finally, type `cmake` and hit return to confirm that things are working as
+    expected. You should see the following printed:'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![Figure 1.27: Running cmake from Terminal](img/B21152_01_27.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.27: Running cmake from Terminal'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a last step, run `sudo apt-get install libgles2-mesa-dev` to ensure you have
+    the dependencies needed to run some of the later examples in the book.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: With that, we’re ready to start building with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Git
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To follow the examples provided in each chapter and retrieve the accompanying
+    source code for this book (available from the book’s website [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)),
+    it is recommended to have Git installed on your system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The easiest way to do this is to go to [https://git-scm.com/downloads](https://git-scm.com/downloads)
+    and download Git for your chosen platform if you do not already have it installed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On macOS, Git is installed as part of the Xcode installation we walked through
+    in *Installing CMake on macOS*. On Windows, download the 64-bit installer and
+    run the installation. On Linux (Ubuntu), run `sudo apt-get install git` from the
+    terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Type `git` from the command line to verify that the tool is available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Visual Studio Code setup (optional)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To ensure a consistent experience throughout the book, Visual Studio Code will
+    be used along with the native terminal to walk through code examples, be that
+    on Windows, macOS, or Linux. The following section outlines how to get set up
+    with Visual Studio Code and configure your development environment. If you would
+    prefer to use a different editor, that’s fine. All that is needed to follow along
+    is a C/C++ compiler and CMake. Visual Studio Code is simply used as a cross-platform
+    editor (it also comes with some excellent CMake support that is covered in [*Chapter
+    11*](B21152_11.xhtml#_idTextAnchor228)*, Supporting Tools and* *Next Steps*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To install Visual Studio Code, go to [https://code.visualstudio.com/Download](https://code.visualstudio.com/Download).
+    There are links for Windows, Linux, and macOS there. Follow the installation instructions
+    for your platform of choice. On Windows, choose **User Installer** and follow
+    the setup instructions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On Linux, either download the `.deb` package and use the `code-stable-...tar.gz`
+    file and extract it to `/opt` similarly to how we extracted CMake (e.g., `sudo
+    tar -C /opt -xzf code-stable-arm64-1702460949.tar.gz`). After extracting it, add
+    `/opt/VSCode-linux-<arch>/bin` to your path by updating your `.bashrc` file again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On Mac, download the `.zip` file, extract it, and then drag and drop the **Visual
+    Studio Code** application into your **Applications** folder (this can be done
+    from **Finder**).
+  prefs: []
+  type: TYPE_NORMAL
+- en: One point to mention is that it’s helpful to ensure that Visual Studio Code
+    is added to your `PATH` so it can be opened easily from the command line (using
+    `code .` from your project or workspace folder). This can be done as part of the
+    installation wizard on Windows or by updating `.bashrc` on Linux. On macOS, there
+    is a way to do this from within Visual Studio Code. Open Visual Studio Code and
+    press either *F1*, *Shift* + *Cmd* +*P* (macOS) or press *Shift* + *Ctrl* + *P*
+    for Windows or Linux. Alternatively, from the menu bar, you can click `shell`.
+    The action `code`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once Visual Studio Code is installed and up and running, navigate to the `C/C++`
+    `extension pack`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 1.28: Extensions view in Visual Studio Code](img/B21152_01_28.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 1.28: Extensions view in Visual Studio Code'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The **C/C++ Extension Pack** extension comes with the C/C++ extension, which
+    supplies IntelliSense and debugging features. The extension pack also includes
+    CMake language support and CMake Tools, a CMake integration for Visual Studio
+    Code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have Visual Studio Code installed, we can guarantee a consistent
+    experience when developing across all platforms. Using Visual Studio Code is completely
+    optional, but it is highly recommended. In [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228)*,
+    Supporting Tools and Next Steps*, we’ll show you how CMake and Visual Studio Code
+    complement one another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we walked through everything you need to begin development
+    with CMake. We installed a C/C++ compiler on Windows, macOS, and Linux and installed
+    CMake on each platform. We saw how to install Git and walked through how to install
+    Visual Studio Code and enable several useful extensions. Having our environment
+    configured correctly is important to ensure that the later examples we’ll work
+    through behave as expected. We now have everything we need to start using CMake
+    and can start developing our project to understand how CMake can accelerate how
+    we build software.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will introduce CMake and look at the commands you will
+    commonly run from the terminal. We’ll also look at some of the core commands that
+    make up a CMake script. We’ll get a basic application up and running and learn
+    about generators, build types, and more.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,354 @@
+- en: Preface
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The software world and the tooling we use to create software are evolving every
+    single day. CMake is no exception; over the past twenty years, it has continually
+    evolved and is now considered an industry standard for building C++ applications.
+    Despite CMake’s extensive features and comprehensive documentation, real-world
+    examples and guidelines on how to effectively use these features together are
+    rare. This is where CMake Best Practices steps in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than delving into every detail and feature of CMake, this book provides
+    examples to illustrate how CMake can be used effectively for various tasks in
+    building software, without covering every single edge case—other books serve that
+    purpose. The aim of this book is to keep things as simple as possible while covering
+    the recommended best practices for getting things done. The rationale behind this
+    approach is that you don’t need to know all of CMake’s capabilities to accomplish
+    your everyday tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We tried to illustrate all concepts with concrete examples, that you can try
+    out yourself. Since the audience of this book is primarily engineers, we have
+    tailored the content accordingly. While writing this book, we are software engineers
+    first and authors second. As a result, the content is more practical than theoretical.
+    It is a compendium of carefully selected proven techniques that you can use in
+    your everyday CMake workflow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: From engineers to engineers, we hope you enjoy this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s new in the second edition?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this second edition, we have made several significant additions and improvements
+    based on reader feedback and the latest advancements in CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**A New Chapter on Building Software for Apple Products**: We have included
+    comprehensive coverage on how to build software specifically for Apple platforms,
+    addressing some of the unique ways how software is handled on Apples closed ecosystem.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**In-Depth Coverage of CMake Presets**: This edition includes a more detailed
+    discussion on CMake presets than the previous edition. This will help you to streamline
+    your development process.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Reworked Chapter on Dependency Handling**: The chapter on dependency handling
+    has been largely reworked to include a hands-on guide on using the new CMake dependency
+    providers and using Conan version 2, making it easier to manage dependencies in
+    your projects.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Corrections of Errata and Reader Feedback**: We have thoroughly revised the
+    content to correct any errors and incorporated valuable feedback from our readers
+    to enhance the clarity and usefulness of the book.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We believe these updates will make the second edition of *CMake Best Practices*
+    even more valuable you, providing up-to-date techniques and insights to improve
+    your software building experience with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Who this book is for
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This book is for software engineers and buildsystem maintainers working with
+    C or C++ on a regular basis and trying to use CMake to better their everyday tasks.
+    Basic C++ and general programming knowledge will help you to better understand
+    the examples covered in the book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What this book covers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '[*Chapter 1*](B30947_01.xhtml#_idTextAnchor015), *Kickstarting CMake*, explains
+    what CMake is in a nutshell, then jumps right into installing CMake and building
+    something with CMake. You learn how to install the latest stable version manually,
+    even if not provided by your package manager. You’ll also learn about the basic
+    concepts behind CMake and why it is a build system generator and not a build system
+    itself. Learn how it fits into modern software development with C++ (And C).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 2*](B30947_02.xhtml#_idTextAnchor035), *Accessing CMake in* *the*
+    *Best Ways*, shows how to best use CMake from the command line, with a GUI and
+    how CMake integrates into some of the common IDEs and Editors.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 3*](B30947_03.xhtml#_idTextAnchor054), *Creating a CMake* *P**roject*,
+    takes you through setting up a project for building an executable, a library,
+    and linking the two together.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging, Deploying, and
+    Installing a CMake Project,* will show you how to create a distributable version
+    of your software project. You will learn how to add installation instructions
+    and package the project using CMake and CPack (CMakes packaging program).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating Third-Party Libraries
+    and Dependency Management*, explains how to integrate existing 3rd-party libraries
+    into your project. It also shows you how to add libraries already installed in
+    your system, external CMake projects and non-CMake projects. This chapter covers
+    CMakes depedency providers and gives a brief insight into using external package
+    managers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B30947_06.xhtml#_idTextAnchor101), *Automatically Generating
+    Documentation*, explores how to generate documentation from your code with CMake
+    as part of the build process with doxygen, dot (graphviz), and plantuml.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B30947_07.xhtml#_idTextAnchor113), *Seamlessly Integrating Code
+    Quality Tools with CMake*, will show you how to integrate unit testing, code sanitizers,
+    static code analysis and code coverage tools into your project. It will show you
+    how CMake can help to discover and execute tests.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B30947_08.xhtml#_idTextAnchor132), *Executing Custom Tasks with
+    CMake*, will explain how you can integrate almost any tool into your build process.
+    You will learn how to wrap external programs into custom targets or hook into
+    the build process to execute them. We will cover how custom tasks can be used
+    to generate files and how they can consume files produced by other targets. You
+    will also learn how to execute system commands during the configuration of the
+    CMake build and how to create platform-agnostic commands using the CMake cscript
+    mode.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B30947_09.xhtml#_idTextAnchor146), *Creating Reproducible Build
+    Environments*, shows how you can build a portable environment between various
+    machines including CI/CD pipelines. How to work with docker, sysroots, and CMake
+    presets to make your build work “out of the box” everywhere.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B30947_10.xhtml#_idTextAnchor158), *Handling Distributed Repositories
+    and Dependencies in a Super-Build*, simplifies managing projects that are distributed
+    across multiple git repositories with CMake. You will learn how to create a super-build
+    that allows you to build specific versions as well as the latest nightly builds.
+    Explore what prerequisites it needs and how to combine them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B30947_11.xhtml#_idTextAnchor170),*Creating Software for Apple
+    Systems**,* Because of the closed ecosystem, Apple platforms have some unique
+    build characteristics, especially for applications with a graphical user interface
+    and more complex library frameworks. For those cases Apple uses specific formats
+    called app bundles and frameworks. In this chapter you will learn how to create
+    these Apple-specific build artifacts and how to sign them for use in the App Store.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform Compiling
+    and Custom Toolchains*, demonstrates how you can use a predefined cross-platform
+    toolchains. You will also learn how to write your own toolchain definitions and
+    conveniently use different toolchains with CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 13*](B30947_13.xhtml#_idTextAnchor198), *Reus**ing* *CMake Code*,
+    explains CMake Modules and how you can generalize your cmake files. You will learn
+    how to write broadly used modules, which you can ship individually from your project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 14*](B30947_14.xhtml#_idTextAnchor211), *Optimizing and Maintaining
+    CMake Projects*, hints about how to get faster build times and tips and tricks
+    for keeping a CMake project neat and tidy over a long period of time.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 15*](B30947_15.xhtml#_idTextAnchor223), *Migrating to CMake*, explains
+    a high-level strategy on how to migrate a large existing codebase to CMake without
+    the need to completely stop your development.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Appendix*](B30947_16.xhtml#_idTextAnchor233), *Contributing to CMake and
+    Further Reading Material*, hints about where to go if you want to contribute,
+    what is looked for, and basic contributing guidelines. It will also guide you
+    on where to find additional in-depth information or more specific literature.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get the most out of this book
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '| **Software/hardware covered in** **the book** | **Operating** **system requirements**
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| CMake 3.25 or newer | Linux, Windows, macOS |'
+  prefs: []
+  type: TYPE_TB
+- en: '| GCC, Clang or MSVC | Linux, Windows, macOS |'
+  prefs: []
+  type: TYPE_TB
+- en: '| git | Linux, Windows, macOS |'
+  prefs: []
+  type: TYPE_TB
+- en: '**If you are using the digital version of this book, we advise you to type
+    the code yourself or access the code from the book’s GitHub repository (a link
+    is available in the next section). Doing so will help you avoid any potential
+    errors related to the copying and pasting** **of code.**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download the example code files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can download the example code files for this book from GitHub at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
+    If there’s an update to the code, it will be updated in the GitHub repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also have other code bundles from our rich catalog of books and videos available
+    at [https://github.com/PacktPublishing/](https://github.com/PacktPublishing/).
+    Check them out!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conventions used
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are a number of text conventions used throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Code in text`: Indicates code words in text, database table names, folder
+    names, filenames, file extensions, pathnames, dummy URLs, user input, and Twitter
+    handles. Here is an example: “Mount the downloaded `WebStorm-10*.dmg` disk image
+    file as another disk in your system.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A block of code is set as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When we wish to draw your attention to a particular part of a code block, the
+    relevant lines or items are set in bold:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Any command-line input or output is written as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Bold**: Indicates a new term, an important word, or words that you see onscreen.
+    For instance, words in menus or dialog boxes appear in **bold**. Here is an example:
+    "Although CMake is quite well integrated into many IDEs and editors, it is essentially
+    a **command-line** tool, so learning how to use CMake in the **command-line interface**
+    (**CLI**) is essential to use it to its full potential".'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tips or important notes
+  prefs: []
+  type: TYPE_NORMAL
+- en: Appear like this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get in touch
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Feedback from our readers is always welcome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**General feedback**: If you have questions about any aspect of this book,
+    email us at [customercare@packtpub.com](mailto:customercare@packtpub.com) and
+    mention the book title in the subject of your message.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Errata**: Although we have taken every care to ensure the accuracy of our
+    content, mistakes do happen. If you have found a mistake in this book, we would
+    be grateful if you would report this to us. Please visit [www.packtpub.com/support/errata](http://www.packtpub.com/support/errata)
+    and fill in the form.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Piracy**: If you come across any illegal copies of our works in any form
+    on the internet, we would be grateful if you would provide us with the location
+    address or website name. Please contact us at [copyright@packt.com](mailto:copyright@packt.com)
+    with a link to the material.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**If you are interested in becoming an author**: If there is a topic that you
+    have expertise in and you are interested in either writing or contributing to
+    a book, please visit [authors.packtpub.com](http://authors.packtpub.com).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Share Your Thoughts
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Once you’ve read *CMake Best Practices*, we’d love to hear your thoughts! Please
+    [click here to go straight to the Amazon review page](https://packt.link/r/1835880657)
+    for this book and share your feedback.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your review is important to us and the tech community and will help us make
+    sure we’re delivering excellent quality content.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download a free PDF copy of this book
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Thanks for purchasing this book!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do you like to read on the go but are unable to carry your print books everywhere?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Is your eBook purchase not compatible with the device of your choice?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t worry, now with every Packt book you get a DRM-free PDF version of that
+    book at no cost.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Read anywhere, any place, on any device. Search, copy, and paste code from your
+    favorite technical books directly into your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The perks don’t stop there, you can get exclusive access to discounts, newsletters,
+    and great free content in your inbox daily
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Follow these simple steps to get the benefits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scan the QR code or visit the link below
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![](img/B30947_QR_Free_PDF.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[https://packt.link/free-ebook/978-1-83588-064-7](https://packt.link/free-ebook/978-1-83588-064-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Submit your proof of purchase
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: That’s it! We’ll send your free PDF and other benefits to your email directly
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

@@ -1,0 +1,943 @@
+- en: '9'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Creating Reproducible Build Environments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Building software can be complex, especially when dependencies or special tools
+    are involved. What compiles on one machine might not work on another because a
+    crucial piece of software is missing. Relying on the correctness of the documentation
+    of a software project to figure out all the build requirements is often not enough,
+    and consequently, programmers spend a significant amount of time combing through
+    various error messages to figure out why a build fails.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are countless stories out there of people avoiding upgrading anything
+    in a build or **Continuous Integration** (**CI**) environment because they fear
+    that every change might break the ability to build the software. This goes as
+    far as companies refusing to upgrade the compiler toolchains they are using for
+    fear of no longer being able to ship products. Creating robust and portable information
+    about build environments is an absolute game-changer. With presets, CMake provides
+    the possibility to define common ways to configure a project. When combined with
+    toolchain files, Docker containers, and **System Roots** (**sysroots**), creating
+    a build environment that is recreated on different machines becomes much easier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, you will learn how to define CMake presets for configuring,
+    building, and testing a CMake project, as well as how to define and use a toolchain
+    file. We will briefly describe how to use a container to build your software and
+    learn how to use a sysroot toolchain file to create an isolated build environment.
+    The main topics of this chapter are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CMake presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Best practices for organizing presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using build containers with CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using sysroots to isolate build environments
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: So, let’s buckle down and get started!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As in the previous chapters, the examples are tested with CMake 3.25 and are
+    run on any of the following compilers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: GCC 9 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Clang 12 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: MSVC 19 or newer
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: For the examples that use build containers, Docker is needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All examples and source code are available on the GitHub repository for this
+    book. For this chapter, the examples for the CMake presets and build container
+    are in the root folder of the repository. If any of the software is missing, the
+    corresponding examples will be excluded from the build. The repository can be
+    found here: [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CMake presets
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'While building software on a multitude of configurations, compilers, and platforms
+    is CMake’s greatest strength, it is also one of its greatest weaknesses as this
+    often makes it hard for a programmer to figure out the build setups that are actually
+    tested and working for a given piece of software. Since version 3.19, CMake has
+    had a feature called **presets**. This feature is a great tool to handle these
+    scenarios in a reliable and convenient way. Before presets, developers had to
+    rely on documentation and fuzzy conventions to figure out the preferred configuration
+    of a CMake project. Presets can specify the build directory, generators, target
+    architecture, host toolchain, cache variables, and environment variables to use
+    with a project. Since CMake 3.19, presets have evolved quite a bit with the addition
+    of build, test, and package presets, as well as the latest addition: workflow
+    presets.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For using presets, the top directory of a project must contain a file named
+    either `CMakePresets.json` or `CMakeUserPresets.json`. If both files are present,
+    they will be internally combined by parsing `CMakePresets.json` first and then
+    `CMakeUserPresets.json`. Both files have the same format but serve slightly different
+    use cases:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMakePresets.json` should be provided by the project itself and handle project-specific
+    tasks, such as running CI builds or knowing which toolchains to use for cross-compilation
+    if they are provided with the project itself. As `CMakePresets.json` is project-specific,
+    it should not refer to any files or paths outside the project structure. Since
+    these presets are closely tied to the project, they are usually also kept under
+    version control.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`CMakeUserPresets.json`, on the other hand, is usually defined by the developer
+    for use on their own machine or build environment. `CMakeUserPresets.json` can
+    be as specific as needed and may contain paths outside the project or ones that
+    are unique to a particular system setup. As such, projects should not provide
+    this file and also not put it under version control.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Presets are a great way of moving cache variables, compiler flags, and so on
+    out of `CMakeLists.txt` files while still keeping the information available in
+    a way that can be used with CMake and thus improve the portability of projects.
+    If presets are available, they can be listed from the source directory by calling
+    the following `cmake --list-presets`, which will produce an output like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will list the name of the preset in quotes, as well as the `displayName`
+    property if set. To use properties from the command line, the name in quotes is
+    used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The CMake GUI will show all available presets in a source directory like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 9.1 – Listing available presets in the CMake GUI](img/B30947_09_01.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 9.1 – Listing available presets in the CMake GUI
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As of version 3.21 of CMake, the `ccmake` command-line configuration tool does
+    not support presets. **Configure** presets can be selected from the top-level
+    directory by calling the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The overall structure of `CMakePresets.json` and `CMakeUserPresets.json` is
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `version` field specifies the JSON schema to use. Version 1 was the first
+    release from CMake 3.19 and only supported `configurePresets`. Subsequent releases
+    added `buildPresets`, `testPresets`, `packagePresets`, and `workflowPresets`.
+    At the time of writing this book, the latest version is version 9, which was released
+    with CMake 3.30.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The optional `cmakeMinimumRequired` field may be used to define the minimum
+    version of CMake needed to build this project. As the minimum requirement is usually
+    also stated in the `CMakeLists.txt` files, this is often omitted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The four lists, `configurePresets`, `buildPresets`, `testPresets`, and `packagePresets`,
+    each contain a list of configurations for configuring, building, testing, and
+    packaging the project. The presets for building, testing, and packaging require
+    the presence of at least one configuration preset, as we will see later in this
+    section. The `workflowPresets` are a special case as they describe a typical workflow
+    consisting of the other presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `vendor` field contains an optional map of vendor- or IDE-specific information.
+    CMake does not interpret the contents of this field except to verify the JSON
+    format. The keys for the map should be the vendor-specific domain separated by
+    slashes. In the previous example, the key for the vendor presets is `microsoft.com/VisualStudioSettings/CMake/1.9`.
+    The values inside the vendor fields can be of any valid JSON format. All preset
+    files have to contain at least one configure preset, so let’s have a closer look
+    there.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configure presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To use presets, at least one configure preset that defines an environment for
+    CMake to configure the build system has to be present. They should at least specify
+    the build path and the generator to use when configuring. Often, a configure preset
+    also sets common cache variables such as `CMAKE_BUILD_TYPE` for single-configuration
+    generators. A preset containing a configure preset to build a project with the
+    Ninja generator in debug mode might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: All presets must have a name that is unique within the preset block. As some
+    GUI applications only show presets that have a `displayName` field assigned, setting
+    this field is highly recommended.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Naming conventions for presets
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is good practice to name presets that are defined by the project in a `CMakePresets.json`
+    file such that they do not clash with names the developer might define in `CMakeUserPresets.json`.
+    A common convention is to prefix project-defined presets with `ci-` to mark them
+    as being used by the CI environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In versions 1 and 2 of the presets, the `binaryDir` and `generator` fields were
+    mandatory; with version 3, they became optional. If either of the fields is not
+    set, the behavior in this regard is the same as when CMake is used without presets.
+    The command-line options for the CMake command will override the values specified
+    in the presets where relevant. So, if `binaryDir` is set, it is automatically
+    created when `cmake --preset=` is called, although its value will be overridden
+    if the `-B` option is passed to CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Cache variables can either be defined as `key:value` pairs, as shown in the
+    preceding example, or as a JSON object, which allows specifying the variable type.
+    A file path could be specified like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: If used in the `key:value` form, the type is treated as `STRING` unless it is
+    `true` or `false` (without quotes), in which case it is interpreted as `BOOL`.
+    Note `${sourceDir}` in the example, which is a macro that is expanded when the
+    preset is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following macros are known:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`${sourceDir}`: This points to the project source directory and `${sourceParentDir}`
+    points to the parent directory of the source directory. The directory name without
+    the path of the source directory can be obtained with `${sourceDirName}`. For
+    example, if `${sourceDir}` is `/home/sandy/MyProject`, then `${sourceDirName}`
+    would be `MyProject` and `${sourceParentDir}` would be `/home/sandy/`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${generator}`: This contains the generator as specified by the current preset
+    used. For build and test presets, this contains the generator of the configure
+    preset used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${hostSystemName}`: This is the system name of the host operating system,
+    which is the same as the `CMAKE_HOST_SYSTEM` variable. The value is either the
+    result of `uname -s` or Linux, Windows, or Darwin (for macOS).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$env{<variable-name>}`: This contains the environment variable with the `<variable-name>`
+    name. If the variable is defined in the preset with the environment field, this
+    value is used instead of the value from the parent or system environment. Using
+    `$penv{<variable-name>}` works similarly, but the value is always taken from the
+    parent environment and not from the environment field, even if it is defined.
+    This allows prepending or appending values to existing environment variables.
+    Appending or prepending variables is not possible with `$env{...}` because it
+    does not allow circular references. Note that while in a Windows environment,
+    variables are case-insensitive, variables used in the presets are still case-sensitive.
+    Because of this, it is recommended to keep the casing of environment variables
+    consistent.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$vendor{<macro-name>}`: This is an extension point for vendors of IDEs to
+    insert their own macros. Since CMake is not able to interpret these macros, presets
+    using `$vendor{…}` macros will be ignored.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`${dollar}`: This is a placeholder for the literal dollar sign, `$`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Modifying the environment for a preset works similarly to setting cache variables:
+    by setting the `environment` field, which contains a map of `key:value` pairs.
+    Environment variables are always set, even when the value is empty or `null`.
+    Environment variables may reference each other as long as they do not contain
+    circular references. Consider the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, the `PATH` environment variable is modified by prepending a
+    path from inside the project structure. Using the `$penv{PATH}` macro ensures
+    that the value is taken from outside the preset. The `LOCAL_PATH` variable then
+    references the modified `PATH` environment variable by using the `$env{PATH}`
+    macro. This reference is fine as long as the `PATH` environment variable does
+    not contain `$env{LOCAL_PATH}`, which would create a circular reference. The `EMPTY`
+    environment variable is unset by passing `null`. Note that `null` is not in quote
+    marks. Unless a build preset or a test preset is used, the environment is *not*
+    forwarded to the respective steps. If a build preset or a test preset is used,
+    but the environment from the configure preset should not be applied, this can
+    be explicitly stated when the `inheritConfigureEnvironment` field is set to `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inheriting from presets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Presets may inherit from other presets of the same type with the `inherits`
+    field, which may contain either a single preset or a list of presets. When inheriting
+    fields from the parent, a preset can be overridden or additional fields added.
+    This is useful to avoid duplicating code for common building blocks. In combination
+    with the `hidden` field, this can make a `CMakePreset.json` file smaller. Consider
+    the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the example, the `ci-ninja-debug` and `ci-ninja-release` presets both inherit
+    from the hidden `ci-ninja` `build` preset and additionally set the `CMAKE_BUILD_TYPE`
+    cache variable to the respective configuration. Hidden presets can still be used
+    but will not show up when `cmake --list-presets` is invoked. Presets defined in
+    `CMakeUserPreset.json` may inherit from `CMakePreset.json` but not the other way
+    around.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the preceding example, the preset inherits from a single parent, but presets
+    can also inherit from multiple parents. The following example shows how `CMakeUserPreset.json`
+    working with `CMakePreset.json` from the previous example might look:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, the user supplies a preset that explicitly selects GCC 11 as a compiler
+    named `gcc-11`. Later, the `ninja-debug-gcc` preset inherits the values from the
+    `ci-ninja-debug` preset that is defined in `CMakePreset.json` supplied by the
+    project and combines it with the user-supplied `gcc-11` preset. If two parent
+    presets define different values for the same field, the value from the one that
+    appears first in the `inherits` list takes precedence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditions for presets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sometimes, presets only make sense under certain conditions, such as for a
+    certain build platform. For instance, a configure preset that uses the Visual
+    Studio generator would only be useful in a Windows environment. For these cases,
+    presets can be disabled if the conditions are not met with the `condition` option.
+    Any conditions defined in a parent preset are inherited. Conditions can be constants,
+    string comparisons, or a check of whether a list contains a value. They are available
+    from version 3 of the presets onward. The following configure preset would only
+    be enabled if you are working on Windows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the preceding example, the build preset is enabled if the name of the host
+    system is retrieved using the `${hostSystemName}` macro and then compared to the
+    `Windows` string. If `${hostSystemName}` matches, then the preset is enabled;
+    otherwise, it is disabled and trying to use it will result in an error. When comparing
+    strings, casing matters: for case-insensitive tests, the `matches` or `notMatches`
+    type, which takes a regex, could be used.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For more complex conditions, support nesting with Boolean logic with the `allOf`,
+    `anyOf`, and `not` operators. For example, if a configure preset should only be
+    enabled for Windows and Linux but not for macOS, the preset and the condition
+    could look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Each of the conditions could also contain further nested conditions if needed,
+    although doing so will quickly increase the complexity of the presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So far, we have only seen configure presets in the examples, but as mentioned
+    at the beginning of the chapter, there are also build presets and test presets.
+    The syntax for build and test presets is very similar to configure presets and
+    a lot of fields, such as `name`, `displayName`, and `inherit`, and conditions
+    work the same as with configure presets. Once the configure preset has been specified,
+    we can start specifying build-, test- and packaging presets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build-, test- and package presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Build presets have to specify a configure preset in the `configurePreset` field
+    or inherit from another build preset that specifies the configure preset. The
+    build directory is determined by the configure preset and the environment from
+    the configure preset is inherited unless the `inheritConfigureEnvironment` field
+    is set to `false`. Build presets are mostly used for multi-config generators,
+    but they can also be used for single-configuration generators if needed. Optionally,
+    build presets can specify a list of targets to build. An example of a build preset
+    could look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the preceding example, three build presets are defined. The first two, called
+    `ci-msvc-debug` and `ci-msvc-release` respectively, are used to specify the build
+    configuration for Visual Studio and do not specify any targets. The third build
+    preset is called `ci-documentation` and lists the `api-doc` and `doc` targets
+    as part of the documentation build. Invoking any of the `ci-msvc` build presets
+    will build the `"all"` target, while the `ci-documentation` will only build the
+    listed targets. The list of available build presets can be retrieved with `cmake
+    --``build --list-presets`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Test presets work very similarly to build presets, except that they are used
+    with CTest. Similarly, a call to `ctest --list-presets` on the project root will
+    list the available test presets. Test presets are a very handy tool to select
+    or exclude certain tests, specify fixture options, or control the output of the
+    tests. Most of the options for tests described in [*Chapter 7*](B30947_07.xhtml#_idTextAnchor113),
+    *Seamlessly Integrating Code Quality Tools with CMake*, can be controlled from
+    the test presets. An example of test presets could look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In the preceding example, a test preset is added that filters the tests for
+    any that include `feature-X` but excludes any tests that were labeled as `integration`.
+    This is equivalent to invoking the following command from the build directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Package presets again work very similarly to the build and test presets, and
+    they also require a configuration preset to be set. An example package preset
+    might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: This package preset will build a package using the TGZ generator and place the
+    resulting package into the `dist` directory. As packaging depends on the generators,
+    and CPack requires quite extensive configuration, the presets are mostly used
+    to place packages at a predefined location and together with workflow presets,
+    as we will see in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Workflow presets
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Workflow presets are – as the name suggests – a way to define full workflows
+    from configuration to build, test, and package. If any of the steps in between
+    fail, the workflow is interrupted, and the subsequent steps are not executed.
+    Workflow presets are primarily intended to be used in automated build systems,
+    but they can, of course, also be used locally.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The syntax to list workflow presets is like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To invoke a workflow preset, the following command is used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will execute the full `ci-ninja-debug-workflow` workflow. Workflows are
+    defined as a series of steps like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command defines a workflow that configures, builds, tests, and packages
+    the project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All workflow steps must use the same configuration preset
+  prefs: []
+  type: TYPE_NORMAL
+- en: One noteworthy thing is that all steps have to define the same configuration
+    step, or else the workflow will not be correct and CMake will fail.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While they lack the sophistication to define full build pipelines like GitHub
+    Actions, Jenkins, and Azure DevOps do, they offer the advantage of making it very
+    easy for developers to follow a defined workflow. Workflow presets are an attempt
+    to handle the “combinatorial explosion” problem of CMake if there are a lot of
+    presets used. While they can help with the problem to some extent, they also require
+    that all intermediate steps are explicitly defined and explicitly use the same
+    configuration presets. This in turn might force developers to add even more presets
+    that are somewhat “same-same-but-different” in flavor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is no silver bullet for the problem yet, but if presets are well organized
+    and set up with some discipline, a lot can be gained.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Best practices for organizing presets
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As projects grow – especially when they are targeted at multiple platforms –
+    the number of CMake presets can grow quickly as well. This can make it hard to
+    keep track of them and find the right one. Setting up workflow presets can help
+    but it is only half of the game, and the downside is often that using workflow
+    presets creates even more presets for all the intermediate steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first part of organizing the presets is finding a good naming scheme. This
+    makes it easy to figure out what a preset does and also has the benefit of letting
+    devs guess what a desired preset might be named if it exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A good scheme is one that contains the following information for building:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `ci` or `dev`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The **generator** to be used
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The **toolchain** such as the compiler and the target platform to be used
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The **build type** such as debug or release
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: By using this, we end up with a scheme such as `<env>-<generator>-<toolchain>-<buildType>`,
+    so a preset to build for Linux x86_64 might be named `ci-ninja-linux-x86_64-clang-debug`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The naming scheme fits all kinds of presets, but is most useful for configure
+    presets. The `env` here is either `ci` or `dev`, depending on whether the preset
+    is used in CI or locally. A good rule of thumb is to put all `ci` presets into
+    the `CMakePresets.json` and to put them under version control, while the `dev`
+    presets are placed in the `CMakeUserPresets.json` and are not checked in. The
+    generator part can be any of the generators that are supported by CMake such as
+    Makefiles, Ninja, or MSVC for Microsoft Visual Studio. The toolchain is a combination
+    of the target platform, compiler, and operating system to be used, often called
+    a target triplet or target quadruplet, such as `linux-armv7-clang12`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The build type is one of the common build types such as debug, release, relWithDebInfo,
+    or minSizeRel but it can also be a custom build type if the projects configure
+    any of them. For multi-config generators such as ninja-multi, the build type can
+    be omitted in the configure preset and used in the build preset. To aggregate
+    the presets, use inheritance and hidden presets. So, which preset goes into which
+    part?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 9.2 – Grouping  presets by types to assemble usable presets](img/B30947_09_02.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 9.2 – Grouping presets by types to assemble usable presets
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s have a closer look at the different types of presets used to assemble
+    a usable preset:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ci` presets should use the same or at least a similar set of these presets.
+    Typically, this category contains multiple presets for the different aspects,
+    such as one preset to set up Ccache, and one to point to the clang-tidy.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Generator presets**: They define the CMake generator to be used. For package
+    presets, this can also be the package generator. They are hidden by default. Typically,
+    only the generators actually used in either CI or locally should be present.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`hidden`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Build type presets**: These define the build type such as release, debug,
+    RelWithDebInfo, or MinSizeRel.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '**Combining the presets**: These are the presets that combine all the previous
+    presets into usable presets through the inherit keyword. They are set to visible
+    and have a build directory specified either directly or through one of the previous
+    presets.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting up the presets in such a way helps keep them organized. CMake presets
+    support including different files, so placing the categories into different files
+    might help keep them organized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake presets are arguably one of the few features that have changed how CMake
+    is used the most since the introduction of targets. They are a good compromise
+    to deliver common configuration and build options together with the projects while
+    keeping the `CMakeLists.txt` file platform-agnostic. In the end, there is no way
+    around the problem that CMake supports a vast number of tools and platforms, or
+    that C++ software can be built in various ways. Accommodating for this flexibility
+    comes at the price of needing to maintain all of these configurations; presets
+    are definitively a good option. However, sometimes, providing the necessary settings
+    is not enough and you also want to share a build environment in which you are
+    sure that the software compiles. One option to do this is by defining a build
+    container that contains CMake and the necessary libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using build containers with CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Containerization brings the benefit that developers can control the build environment
+    to some extent. Containerized build environments are also a tremendous help for
+    setting up CI environments. There are quite a few container runtimes out there,
+    with Docker being the most popular. It would exceed the scope of this book to
+    look at containerization in depth, so we will use Docker for the examples in this
+    book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A build container contains a fully defined build system including CMake and
+    any tools and libraries needed to build a certain software. By providing the container
+    definition (for example, the Dockerfile), along with the project, or over a publicly
+    accessible container registry, anyone can use the container to build the software.
+    The huge advantage is that developers do not need to install and possibly pollute
+    their host machine by installing additional libraries or tools except the software
+    needed to run the containers. The downside is that building might take longer
+    and not all IDEs and tools support working with containers in a convenient way.
+    Notably, Visual Studio Code has very good support for working in containers. You
+    can visit [https://code.visualstudio.com/docs/remote/containers](https://code.visualstudio.com/docs/remote/containers)
+    for more details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'At a very high level, the workflow for using a build container is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Define the container and build it.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Mount a local copy of the source code into the build container.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Run any commands for building inside the container.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'A very simple Docker definition for building a simple C++ application could
+    look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will define a small container based on the Alpine Linux 3.15 and install
+    `cmake`, `ninja`, `bash`, `make`, and `git`. Any real-life container will probably
+    have additional tools and libraries installed inside to work conveniently; however,
+    just to illustrate how building software with a container works, having such a
+    minimal container is enough. The following Docker command builds the container
+    image and tags it with the `builder_minimal` name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the container is a clone of the local, the source is mounted inside the
+    container and all CMake commands are executed inside the container. Assuming that
+    the user is executing the Docker command from the `source` directory, the commands
+    to configure a CMake build project might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will start up the container we created and execute the CMake commands within.
+    The local directory is mounted inside the container as `/workspace` with the `-v`
+    option. Since our Docker containers use *root* as the default user, the user ID
+    and group to use are passed with the `--user` option. On Unix-like operating systems,
+    this should match the user ID of the host, so any files created can also be edited
+    from outside the container. The `--rm` flag tells Docker to remove the image once
+    it is done with it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An alternative way to work with the container is to run it in interactive mode
+    by passing the `-ti` flag to the `docker` `run` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will start a shell inside the container where the `build` command can be
+    invoked without the need to restart the container every time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several strategies for how editors or IDEs and build containers can
+    work together. The most convenient way is, of course, if the IDE supports it natively
+    or through a convenient extension like Visual Studio Code does. If this is not
+    the case, packing a suitable editor inside the container and executing it from
+    within can be a viable strategy to develop software conveniently. Another way
+    is to run the editor on the host system and reconfigure it so it doesn’t invoke
+    CMake directly but starts the container and executes CMake within.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What we have shown here is the bare minimum for working with containers as build
+    environments, but we hope it serves as a very first stepping stone to working
+    with containers. As more and more IDEs start to support working with containerized
+    build environments, using them will become much easier. Containers make build
+    environments very portable between various machines and can help to ensure that
+    all developers of a project are using the same build environment. It is also a
+    good idea to put container definition files under version control so that necessary
+    changes to the build environment are tracked together with the code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Containers are a good and portable way of creating isolated build environments.
+    However, if this is not an option for any reason, another way to create an isolated
+    and portable build environment is using sysroots.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using sysroots to isolate build environments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In a nutshell, a sysroot is a directory that a build system considers to be
+    the root directory from which to locate headers and libraries. In brief, they
+    contain a stripped-down version of the root filesystem for the platform for which
+    software is being compiled. They are often used when cross-compiling software
+    for other platforms, as described in [*Chapter 12*](B30947_12.xhtml#_idTextAnchor182),
+    *Cross-Platform Compiling and Custom Toolchains*. If containers for shipping whole
+    build environments are not an option, sysroots can be an alternative to provide
+    a defined build environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To use a sysroot with CMake, a toolchain file is needed. As the name suggests,
+    these files define the tools to use to compile and link the software as well as
+    indicating where to find any libraries. In a normal build, CMake automatically
+    detects the toolchain by introspecting the system. Toolchain files are passed
+    to CMake with the `CMAKE_TOOLCHAIN_FILE` variable like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since version 3.21, CMake additionally supports the `--toolchain` option to
+    pass toolchain files, which is equivalent to passing the `CMAKE_TOOLCHAIN_FILE`
+    cache variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Alternatively, the toolchain file can be passed as a cache variable with a
+    CMake preset. At a minimum, a toolchain file to use with a sysroot will define
+    the `CMAKE_SYSROOT` variable to point to the sysroot and the `CMAKE_<LANG>_COMPILER`
+    variable to point to a compiler that is compatible with the libraries in the sysroot.
+    To avoid mixing dependencies from outside the sysroot with the files installed
+    on the host system, the variables for controlling where the `find_` commands look
+    for stuff are usually also set. A minimal toolchain file might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s see what happens here in detail:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, the system name of the target system is set by setting the `CMAKE_SYSTEM_NAME`
+    variable. This is the system for which the files are compiled inside the sysroot.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then, the path to the sysroot itself is set by setting the `CMAKE_SYSROOT` variable.
+    `CMAKE_STAGING_PREFIX` is optional and is used to specify a location on the host
+    machine to install any artifacts of the project. Specifying a staging prefix helps
+    keep the sysroot and the host filesystem clean, as without it, any installation
+    of the artifacts will happen on the host filesystem.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Next, the compilers are set to the compilers binaries delivered with the sysroot
+    by setting the `CMAKE_C_COMPILER` and `CMAKE_CXX_COMPILER` variables.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Lastly, the search behavior of any `find_` command in CMake is set. The `CMAKE_FIND_ROOT_PATH_MODE_*`
+    variables take any of the values of `ONLY`, `NEVER`, and `BOTH`. If they are set
+    to `ONLY`, CMake will only search the type of file inside the sysroot; if they
+    are set to `NEVER`, searches will only consider the host file structure. If they
+    are set to `BOTH`, then the host system path and the sysroot path will be searched.
+    Note that `CMAKE_STAGING_PREFIX` is considered a system path, so in order to search
+    the sysroot and the staging directory, `BOTH` must be selected. In the example,
+    this is configured such that all header files and libraries are restricted to
+    the sysroot, while any call for `find_program` will look only on the host system
+    and `find_package` will look in both places.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Setting the `CMAKE_SYSROOT` variable will not automatically set the place where
+    build artifacts are installed. For situations where the resulting binaries are
+    compatible with the host system, this might be the intended behavior. In a lot
+    of cases, such as when cross-compiling, this is not what is wanted, so setting
+    `CMAKE_STAGING_PREFIX` is often recommended. Setting the staging directory has
+    two effects: first, it will cause any artifacts to be installed in the staging
+    directory, and second, the staging directory will be added to the search prefix
+    for the `find_` commands. One caveat is that the staging directory will be added
+    to `CMAKE_SYSTEM_PREFIX_PATH`, which has the downside that the `CMAKE_FIND_ROOT_PATH_MODE_XXX`
+    variables from the preceding example have to be set to `BOTH` so the packages,
+    libraries, and programs installed in the staging area are found.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_STAGING_PREFIX and CMAKE_INSTALL_PREFIX
+  prefs: []
+  type: TYPE_NORMAL
+- en: If both `CMAKE_STAGING_PREFIX` and `CMAKE_INSTALL_PREFIX` are set, the staging
+    prefix will take precedence. So, as a rule of thumb, whenever the toolchain is
+    compatible with the host system, the staging might be omitted, or it tends to
+    be defined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One downside of sysroots compared to containers is that they cannot be started
+    and used to execute commands within just like that. So, if the toolchain and the
+    sysroot are not compatible with the host platform, any files produced will not
+    be executable without either moving to the target platform or using an emulator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we learned that one of the main strengths of CMake is its versatility
+    for building software using a variety of toolchains for a large number of platforms.
+    The downside of this is that it sometimes can be hard for developers to find a
+    working configuration for software. However, by supplying CMake presets, containers,
+    and sysroots, it often gets easier to get started with a CMake project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this chapter, we looked in detail into how to define CMake presets to define
+    working configuration setups, along with creating build and test definitions.
+    Then, we briefly covered how to create a Docker container and how to invoke CMake
+    commands within before closing the chapter with a brief look into sysroots and
+    toolchain files. More about toolchains and sysroots will be covered in [*Chapter
+    12*](B30947_12.xhtml#_idTextAnchor182), *Cross-Platform Compiling and* *Custom
+    Toolchains*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, you will learn how to work with big, distributed projects
+    as super builds. There, you will learn how to handle different versions and how
+    to assemble projects from multiple repositories in a manageable way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What is the difference between `CMakePresets.json` and `CMakeUserPresets.json`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How are presets used on the command line?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which three types of presets exist and how do they depend on each other?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the minimum a configure preset should define?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When inheriting from multiple presets, which one takes precedence if a value
+    is specified multiple times?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which strategies for working with build containers are common?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What do toolchain files that are to be used with sysroots usually define?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '`CMakePresets.json` is usually maintained and delivered together with the project,
+    while `CMakeUserPresets.json` is maintained by the user. Regarding the syntax
+    and the contents, there is no difference.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This can be done by calling `cmake --preset=presetName`, `cmake --build --preset=presetName`,
+    or `ctest --preset=presetName`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: There are configure, build, package, test, and workflow presets. Build, test,
+    and package presets depend on a configure preset to determine the `build` directory.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: A configure preset should define a name, the generator, and the build directory
+    to be used.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The first preset to set a value takes precedence.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This can be done by either using the native support of an editor for build containers,
+    running the editor from within the container, or starting the container each time
+    to invoke single commands inside.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: They define the system name, the location of the sysroot, the compilers to use,
+    and how the `find_` commands behave.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

@@ -1,0 +1,35 @@
+- en: 'Part 1: Starting Up'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The first part of this book begins by ensuring you have everything you need
+    to get started with CMake, whether you’re on Windows, macOS, or Linux. Once your
+    environment is up and running, we’ll introduce CMake itself, starting with the
+    foundations of our project, which will evolve throughout the course of this book.
+    With our simple application operational, we’ll turn our attention to how to use
+    other people’s code with the help of CMake by showing how easy it can be to bring
+    in third-party dependencies in a clean and succinct way. Before moving on to *Part
+    2* of the book, we’ll show how to extract part of our application into a reusable
+    library that itself can be shared with others and used by our main application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This part has the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello, CMake!*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External
+    Dependencies*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B21152_04.xhtml#_idTextAnchor086), *Creating Libraries for FetchContent*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

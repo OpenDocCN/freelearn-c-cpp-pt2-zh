@@ -1,0 +1,1183 @@
+- en: '8'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Using Super Builds to Simplify Onboarding
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we’re going to return to simplifying and streamlining our project
+    setup. There is a natural push/pull relationship during development between adding
+    functionality and taming the added complexity. In [*Chapter 7*](B21152_07.xhtml#_idTextAnchor170),
+    *Adding Install Support for Your Libraries*, we spent a lot of time changing directories
+    and running CMake commands. To build our application, we need to navigate through
+    at least five folders (`third-party`, `array`, `draw`, `gol`, and `app`), running
+    a myriad of CMake commands along the way. This is a fantastic way to learn CMake,
+    but not much fun when you want to get stuff done. It can also prevent unaccustomed
+    users from accessing or contributing to your project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s now time to address this. The skills you’ll learn in this chapter will
+    help reduce the number of manual steps needed to get up and running with your
+    project. This chapter will show you how to remove platform-specific scripts and
+    automate more of the build process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using `ExternalProject_Add` with your own libraries
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring a super build
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Automating scripts with CMake
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Setting options in nested files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Installing an application
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **Operating** **System**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using ExternalProject_Add with your own libraries
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In the previous chapter, we stuck largely to manual CMake build and install
+    commands (along with a bit of help from CMake presets) to increase our familiarity
+    with CMake, and to work at a slightly lower level of abstraction to understand
+    what CMake is doing behind the scenes. Now that we’re a bit more comfortable with
+    these concepts, it’s time to remove the tedium of navigating to each individual
+    library folder and running the familiar CMake commands that follow:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can start updating our project to take advantage of the more useful features
+    that CMake provides. To start with, we’re going to update our existing third-party
+    `CMakeLists.txt` file to bring in not only SDL 2 and bgfx but also the libraries
+    we created and depend on. This will remove the need for us to manually install
+    them and allow us to run a single pair of CMake commands (configure and build/install)
+    to retrieve all the dependencies we need for our *Game of* *Life* application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start by looking at `ch8/part-1/third-party/CMakeLists.txt`. The file
+    is largely the same as before, only underneath our existing `ExternalProject_Add`
+    commands, we’ve added references to our libraries found in `ch8/part-1/lib`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here is an example of the `mc-array` library:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The command should look remarkably similar to those we covered in [*Chapter
+    6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and ExternalProject_Add*.
+    The only real difference is the reference to `SOURCE_DIR`. Given the slightly
+    unconventional layout of this book’s repository, we can reference the source folder
+    directly, as the library source code is stored in the same repository:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: mc-array
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/PacktPublishing/Minimal-CMake.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG 18535c9d140e828895c57dbb39b97a3307f846ab
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_SUBDIR ch8/part-1/lib/array
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfxt
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_REPOSITORY https://github.com/bkaradzic/bgfx.cmake.git
+  prefs: []
+  type: TYPE_NORMAL
+- en: GIT_TAG v1.127.8710-464
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Get_Property(bgfxt SOURCE_DIR)
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: bgfx
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL "file://${SOURCE_DIR}"
+  prefs: []
+  type: TYPE_NORMAL
+- en: DEPENDS bgfxt
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -G "Ninja Multi-Config"
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --preset multi-ninja
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build/multi-ninja --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./compile-shader-<platform>.sh/bat
+  prefs: []
+  type: TYPE_NORMAL
+- en: ./build/multi-ninja/Release/minimal-cmake_game-of-life_window
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: .
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── app
+  prefs: []
+  type: TYPE_NORMAL
+- en: │   └── third-party
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: .
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── app
+  prefs: []
+  type: TYPE_NORMAL
+- en: ├── third-party
+  prefs: []
+  type: TYPE_NORMAL
+- en: └── lib
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: option(SUPERBUILD "Perform a superbuild (or not)" OFF)
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(SUPERBUILD)
+  prefs: []
+  type: TYPE_NORMAL
+- en: add_subdirectory(third-party)
+  prefs: []
+  type: TYPE_NORMAL
+- en: return()
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(SUPERBUILD AND NOT PROJECT_IS_TOP_LEVEL)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(PREFIX_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build)
+  prefs: []
+  type: TYPE_NORMAL
+- en: else()
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(PREFIX_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(THIRD_PARTY_BINARY_DIR
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${CMAKE_SOURCE_DIR}/build-third-party"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CACHE STRING "Third-party build folder")
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(NOT IS_ABSOLUTE ${THIRD_PARTY_BINARY_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(THIRD_PARTY_BINARY_DIR
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${CMAKE_SOURCE_DIR}/${THIRD_PARTY_BINARY_DIR}")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(PREFIX_DIR ${THIRD_PARTY_BINARY_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: <name>
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PREFIX ${PREFIX_DIR}/<name>
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR ${PREFIX_DIR}/<name>/build/${build_type_dir}
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: if(SUPERBUILD AND NOT PROJECT_IS_TOP_LEVEL)
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject_Add(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_PROJECT_NAME}_superbuild
+  prefs: []
+  type: TYPE_NORMAL
+- en: DEPENDS SDL2 bgfx mc-gol mc-draw
+  prefs: []
+  type: TYPE_NORMAL
+- en: SOURCE_DIR ${CMAKE_SOURCE_DIR}
+  prefs: []
+  type: TYPE_NORMAL
+- en: BINARY_DIR ${CMAKE_BINARY_DIR}
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMAKE_ARGS -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+  prefs: []
+  type: TYPE_NORMAL
+- en: -DSUPERBUILD=OFF ${build_type_arg}
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_COMMAND "")
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '"name": "super",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"hidden": true,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"cacheVariables": {'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"SUPERBUILD": "ON"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '"name": "multi-ninja-super",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"inherits": ["multi-ninja", "super"]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --preset multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build/multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: build preset
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"configurePreset": "multi-ninja-super"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: workflow preset
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"steps": ['
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "configure",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "build",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ']'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --workflow --preset multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: ./compile-shaders-<platform>.sh/bat
+  prefs: []
+  type: TYPE_NORMAL
+- en: ./build/multi-ninja-super/Release/minimal-cmake_game-of-life_window
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'build/multi-ninja-super # super build'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'build/multi-ninja # regular build'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: defaults to Debug
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: cmake --preset multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: builds everything as Debug
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: cmake --build build/multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: only builds application in Release
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: cmake --build build/multi-ninja-super --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: must rerun configure first
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: cmake --preset multi-ninja-super
+  prefs: []
+  type: TYPE_NORMAL
+- en: now builds everything as Release
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: cmake --build build/multi-ninja-super --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: app/build
+  prefs: []
+  type: TYPE_NORMAL
+- en: app/build-third-party
+  prefs: []
+  type: TYPE_NORMAL
+- en: app/third-party/install
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: hello-world.cmake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: message(STATUS "Hello, World!")
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: -- Hello, World!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -DA_USEFUL_SETTING=ON -P cmake-script.cmake
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake_path(
+  prefs: []
+  type: TYPE_NORMAL
+- en: GET CMAKE_SCRIPT_MODE_FILE PARENT_PATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMPILE_SHADER_DIR)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake_path(
+  prefs: []
+  type: TYPE_NORMAL
+- en: GET COMPILE_SHADER_DIR PARENT_PATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMPILE_SHADER_WORKING_DIR)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: file(
+  prefs: []
+  type: TYPE_NORMAL
+- en: MAKE_DIRECTORY
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${COMPILE_SHADER_WORKING_DIR}/shader/build)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: execute_process(
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: third-party/install/bin/shaderc
+  prefs: []
+  type: TYPE_NORMAL
+- en: -f shader/vs_vertcol.sc
+  prefs: []
+  type: TYPE_NORMAL
+- en: -o shader/build/vs_vertcol.bin
+  prefs: []
+  type: TYPE_NORMAL
+- en: --platform osx --type vertex
+  prefs: []
+  type: TYPE_NORMAL
+- en: -i ./ -p metal --verbose
+  prefs: []
+  type: TYPE_NORMAL
+- en: WORKING_DIRECTORY ${COMPILE_SHADER_WORKING_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: option(
+  prefs: []
+  type: TYPE_NORMAL
+- en: USE_VERBOSE_SHADER_OUTPUT
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"Show output from shader compilation" OFF)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: if(USE_VERBOSE_SHADER_OUTPUT)
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(VERBOSE_SHADER_OUTPUT --verbose)
+  prefs: []
+  type: TYPE_NORMAL
+- en: endif()
+  prefs: []
+  type: TYPE_NORMAL
+- en: execute_process(
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${VERBOSE_SHADER_OUTPUT}
+  prefs: []
+  type: TYPE_NORMAL
+- en: WORKING_DIRECTORY ${COMPILE_SHADER_WORKING_DIR})
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --verbose, shaderc still outputs some information to the terminal, which
+    can clutter the normal CMake build output. To hide this as well, we can introduce
+    one more CMake variable called QUIET_SHADER_OUTPUT, and then set it to ERROR_QUIET
+    (or OUTPUT_QUIET on Linux) to suppress all output from the execute_process command
+    (OUTPUT_QUIET and ERROR_QUIET map to standard output and error output, e.g., fprintf,
+    stdout and stderr in C and std::cout and std::cerr in C++).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Our final code looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: This does mean that we can’t currently have non-verbose output; it’s all or
+    nothing, but this is usually sufficient for how we would want to invoke these
+    scripts. The changes across all `compile-shader-<platform>.cmake` files are nearly
+    identical and we’re now ready to look at how to invoke these scripts from our
+    app’s `CMakeLists.txt` file.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Invoking the CMake script from CMakeLists.txt
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Our script is now ready to be invoked from our `CMakeLists.txt` file. The first
+    thing we need to do is refer to the right file depending on the platform we’re
+    building for. We can do this with a simple conditional check:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can now reference `COMPILE_SHADER_SCRIPT` to get the correct file for our
+    platform. There are then two different options to automatically invoke our scripts.
+    One possibility is to use `include` to bring the script directly into our `CMakeLists.txt`
+    file:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Unfortunately, our existing `compile-shader-<platform>.cmake` files won’t work
+    as-is with this approach. We need to update how we populate `COMPILE_SHADER_WORKING_DIR`.
+    We can achieve this with the following check:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`CMAKE_SCRIPT_MODE_FILE` will not be set (also called populated) when a CMake
+    script is invoked as part of a `CMakeLists.txt` file, and `CMAKE_PARENT_LIST_FILE`
+    is the full path to the CMake file that included it. By using these two checks
+    we can ensure the first branch will only be taken when the file is run in script
+    mode and when it is not included by another file. If we know that the file is
+    being invoked from a `CMakeLists.txt` file, we can simply set `COMPILE_SHADER_WORKING_DIR`
+    to `CMAKE_SOURCE_DIR` (which will be the folder containing our root `CMakeLists.txt`
+    file), and things will work as expected.'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With this approach, the shaders will be built every time we configure. There
+    is an alternative approach that can be used instead of using `include`, and that
+    is using a CMake command we’ve come across before, `add_custom_command`. With
+    `add_custom_command`, we can specify a target and the time the command should
+    be run (in the example that follows, we use `POST_BUILD` to invoke the command
+    after our application is built). The full command is as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command is very convenient for our users and ensures that the shaders are
+    compiled before the application is run. The downside is that right now, the command
+    will likely run more often than is strictly necessary, which may become a problem
+    in the future if the command grows and starts to take longer to run.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: There is an alternative version of `add_custom_command`, which, instead of accepting
+    a target (`TARGET`), takes an output file (`OUTPUT`). It’s possible to list dependencies
+    with the `DEPENDS` argument to have the command only run when the output files
+    need updating. This can be very efficient but unfortunately is a little more complex
+    to set up, and as the preceding command in its current form is fast to run, the
+    simpler version is used instead (to learn more about `add_custom_command`, see
+    [https://cmake.org/cmake/help/latest/command/add_custom_command.html](https://cmake.org/cmake/help/latest/command/add_custom_command.html)).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With our new command added, we have everything we need to build our entire
+    application and accompanying resources (shaders) with one command. From `ch8/part-3/app`,
+    run the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the build completes, all that’s left is to run the application itself:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is, of course, also possible to configure and build separately as we’ve done
+    before using CMake’s `--preset` and `--build` arguments. Taking advantage of `--workflow`
+    is particularly convenient here, though.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Review the `ch8/part-3/app/CMakeLists.txt` and `ch8/part-3/app/cmake/compile-shader-<platform>.cmake`
+    files to see everything in context. One small change you may notice is a simplified
+    check at the top of every `compile-shader-<platform>.cmake` file to ensure they
+    must be run in script mode:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: As a reminder, the `ch8/part-2/app` and `ch8/part-3/app`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Setting options in nested files
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The steps we’ve taken to streamline and simplify building our application have
+    made a world of difference and will save time and mental energy in the future.
+    We have unfortunately lost one thing in the process though, and that’s the ability
+    to adjust how our dependencies are built. Previously, when we were using `FetchContent`
+    and were building the dependencies directly, we could pass through the various
+    build options to set whether to build a particular library as static or shared.
+    In [*Chapter 7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for
+    Your Libraries*, when we looked at building our libraries separately and installing
+    them manually, we could also decide how to build them. Unfortunately, with our
+    use of `ExternalProject_Add`, we’ve lost some of that flexibility as it’s not
+    possible to pass through options directly to an `ExternalProject_Add` command
+    without a little extra scaffolding.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Fortunately, the loss of flexibility is not too difficult to restore. All that’s
+    needed is to create our own CMake options, and then forward them to the internal
+    `ExternalProject_Add` command as part of the `CMAKE_ARGS` argument.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'For example, if we look at `ch8/part-4/app/third-party/CMakeLists.txt`, we
+    can see, at the top of the file, that we’ve added two new options:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ve used the same names that exist in the libraries themselves for consistency,
+    but we’re free to adjust the naming if we choose to group the variables with the
+    application we’re building. We then pass these new values to `ExternalProject_Add`,
+    which looks like this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: This allows us to decide whether to build our dependencies as static or shared
+    even when using `ExternalProject_Add` to bring them in. Any other options exposed
+    by the library we do not wish to change can be hardcoded.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'We also need to do the same thing for our `compile-shader-<platform>.cmake`
+    scripts. The `USE_VERBOSE_SHADER_OUTPUT` setting won’t be automatically detected
+    because of the way we’re calling the script from our `CMakeLists.txt` file (if
+    we’d used `include`, it would have been picked up and added to the main project’s
+    `CMakeCache.txt` file). To work around this, we simply need to add the setting
+    to our `CMakeLists.txt` file and then send it to the invocation of the script:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: See `ch8/part-4/app/CMakeLists.txt` for the complete example.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The need for this kind of variable forwarding predominantly comes up with `ExternalProject_Add`.
+    When using super builds, we need to remember to follow the same approach to pass
+    through options to our nested application. This is why sometimes, having a normal
+    non-super build project can be useful (see the `multi-ninja` and `multi-ninja-super`
+    CMake presets in `ch8/part-4/app/CMakePresets.json` for an example). The number
+    of options to configure for an application will usually be small, and you can
+    set the remaining options that aren’t expected to change directly in the `ExternalProject_Add`
+    calls themselves, but it’s useful to sometimes offer a way to change these if
+    needed.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Installing an application
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Rounding out this chapter, we’re going to look at one final addition, and that’s
+    how to add install support to our application. This is to help prepare for packaging
+    and ensure that our application is portable.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The first change we’ll make is to add a `CMAKE_INSTALL_PREFIX` variable to
+    our app’s `CMakePresets.json` file to ensure that our application is installed
+    in a location relative to our project:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: The following changes are then reserved exclusively for `ch8/part-5/app/CMakeLists.txt`.
+    We first need to include `GNUInstallDirs` as we did for our libraries to gain
+    access to standard CMake install locations (in this example, we only really care
+    about `CMAKE_INSTALL_BINDIR`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The high-level goal we want to achieve is to have a relocatable folder containing
+    the executable of our application, shared libraries that need to be loaded by
+    the app, and resources needed at runtime (our compiled shader files). We can achieve
+    this with the following CMake install commands.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The first is simple; it copies the application executable to the `install`
+    folder:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: We provide the target to copy and the `RUNTIME` type to refer to executables,
+    along with the destination to copy the file to (this will more than likely be
+    `bin` and will be relative to the `CMAKE_INSTALL_PREFIX` variable we provided
+    in our `CMakePresets.json` file).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Next, we need to copy the shared library files that our application will need
+    to load when it starts. As we’re developing a cross-platform application, for
+    simplicity, we’re going to copy all shared library files (`.dll` on Windows, `.dylib`
+    on macOS, and `.so` on Linux) to the same folder as our application. This is remarkably
+    like what we were doing before on Windows, but we’re now going to do the same
+    for all platforms for consistency. An abridged install command to copy these files
+    looks like the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: As our *Game of Life* and *Draw* libraries can be compiled as either static
+    or shared (dynamic) libraries, we need to check that the target is the right type
+    before copying it, otherwise, we’d wind up copying the `.lib`/`.a` static library
+    files unnecessarily.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'We can do this with the generator expression shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME}
+  prefs: []
+  type: TYPE_NORMAL
+- en: PROPERTIES
+  prefs: []
+  type: TYPE_NORMAL
+- en: INSTALL_RPATH
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"$<$<PLATFORM_ID:Linux>:$ORIGIN>$<$<PLATFORM_ID:Darwin>:@loader_path>"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: BUILD_RPATH property, we update the INSTALL_RPATH property to resolve to $ORIGIN
+    on Linux, and @loader_path on macOS (this is to cause the executable to search
+    for shared libraries in the same folder as itself). Since we want the same behavior
+    for the normally built targets and installed targets, we also set BUILD_WITH_INSTALL_RPATH
+    to TRUE, which is roughly equivalent to passing the same generator expression
+    to BUILD_RPATH as we did before (we’re saying that BUILD_RPATH should be the same
+    as INSTALL_RPATH).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll now get the same behavior between built and installed targets as we’re
+    copying the shared libraries to the build and install folders, respectively. We
+    can safely remove the installed dependencies (the installed library files in `app/third-party/install`)
+    after building and continue to run the application (this will, however, break
+    our ability to compile and build again without first restoring the third-party
+    dependencies by generating a new super build or configuring and building from
+    the `third-party` folder).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '`RPATH` handling is a complex topic, and the solution presented here is only
+    one way to handle installing shared libraries. To learn more, please refer to
+    `RPATH`-related variables on the CMake properties documentation page ([https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html))
+    and the `RPATH` handling section on the CMake community wiki ([https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling)).'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To ensure full cross-platform compatibility, there’s one more addition needed
+    to correctly handle installing the SDL 2 dependency for our application on Linux.
+    When SDL 2 is built on Linux, it provides several files as part of the shared
+    library. These are related to `libSDL2-2.0.so.0.3000.2`, but this isn’t the file
+    the dynamic linker looks for. The `libSDL2-2.0.so.0` file is a symbolic link to
+    `libSDL2-2.0.so.0.3000.2` and is what is used by the dynamic linker when looking
+    for the SDL 2 library. It’s important that we install both files; otherwise, our
+    application will not be able to find the shared library at runtime.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'To support this, we just need to add one more rule to our `add_custom_command`
+    and `install` calls, and that is to install `TARGET_NAME_SOFILE` in addition to
+    `TARGET_FILE`, as shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: We also add a conditional generator expression to only evaluate this if we’re
+    on Linux as it is not needed on other platforms.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Finally, there’s one last set of files we need to install and that’s our compiled
+    shaders. We install them to the same relative location as when we launch from
+    the `app` folder. The CMake `install` command to achieve this is as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: We copy the `build` directory under `shader` to the same folder we’ve installed
+    our executable and shared library files into. This is so it appears at the same
+    relative position when running our application from `ch8/part-5/app/install/bin`
+    as when we ran it from `ch8/part-5/app` before.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With that final change, we have everything we need to install our application.
+    We now just need to run the following command to build and install our application
+    from the `ch8/part-5/app` folder:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: When building from the super build directory (`multi-ninja-super`), because
+    we’re using `ExternalProject_Add` to wrap our project (`${CMAKE_PROJECT_NAME}_superbuild`
+    at the end of `app/third-party/CMakeLists.txt`), the install operation will happen
+    automatically when running `cmake --build build/multi-ninja-super` (like when
+    we build our third-party dependencies directly from the `third-party` folder).
+    The first time we build after configuring, there is no need to pass `--target
+    install` (attempting to pass it will, in fact, cause an error, as the install
+    target won’t be found). Subsequent builds or builds from a normal build folder
+    (e.g., `build/multi-ninja`) will need the `--target install` argument, as the
+    install target will be available. Lastly, running the configure command again
+    (e.g., `cmake --preset multi-ninja-super`) will reset this behavior for the following
+    build.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'If we’d previously built our application with the `--workflow` preset, we could
+    also use the CMake `--install` command instead:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: To launch the application, after installing, change directory to `ch8/part-5/app/install/bin`
+    and run `./minimal-cmake_game-of-life_window`. Feel free to explore the contents
+    of `ch8/part-5/app` to see everything in context and experiment by running the
+    different CMake commands we’ve covered so far (starting with `cmake --preset list`
+    and then running `cmake --preset <preset>` is a good place to start). Also, try
+    copying or moving the `app/install/bin` folder to a new location (or machine,
+    with a matching OS and architecture) to verify that the application still launches
+    and runs successfully.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: It’s time to take another well-deserved breather and let everything we’ve covered
+    sink in. We touched on some advanced CMake features, so don’t fret if your head
+    is spinning. The more you practice and experiment with these concepts, the more
+    things will click.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In this chapter, we moved from installing our own libraries manually to leveraging
+    `ExternalProject_Add` to automate the installation process. This takes a lot of
+    the tedium out of setting up our project and is a useful strategy to apply to
+    future projects. We then looked at setting up a super build for our project to
+    offer a way to build everything with a single command without losing any of the
+    flexibility we’ve come to expect. This technique further streamlines project configuration
+    and is a fantastic default to provide users with when creating applications.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Afterward, we saw how CMake can be used to replace cross-platform scripts and
+    automate external processes such as shader compilation to make them part of the
+    core build, and not an afterthought. This can save a lot of overhead when it comes
+    to creating and supporting custom per-platform scripts. We next spent some time
+    understanding how to expose customization points in our nested dependencies to
+    continue to give users control over how they build their libraries. Without this,
+    users may have to resort to editing `CMakeLists.txt` files in place, causing yet
+    another maintenance headache. Finally, we walked through installing our application
+    to make sharing it a breeze. This gets us one step closer to a fully distributable
+    application and away from relying on the project layout to run the code.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In the next chapter, we’re going to cover a companion tool that comes bundled
+    with CMake called CTest. CTest is an incredibly useful tool that helps streamline
+    running many kinds of tests. We’ll look at adding tests to our libraries and applications
+    and see how to share test results using another CMake tool called CDash.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE

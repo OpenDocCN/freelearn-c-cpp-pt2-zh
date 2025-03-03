@@ -1,0 +1,931 @@
+- en: '10'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Packaging the Project for Sharing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we’re going to cover the last major topic of *Minimal CMake*,
+    which is packaging. This is the process by which we turn the software we’ve built
+    into something that can be shared. Of course, it’s possible to share your software
+    without a packaging step, but doing so tends to be quite a manual process. It
+    can also be error-prone and not in keeping with the expected platform conventions
+    – for example, a Windows GUI installer, macOS disk image (`.dmg`), or Linux (Ubuntu)
+    Debian package (`.deb`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re going to see how to use CPack to package our application for macOS, Windows,
+    and Linux. We’ll cover the changes we need to make to our `CMakeLists.txt` file
+    and the commands needed to create the package. The good news is we’ve already
+    done most of the hard work to reach this point, and many of the changes tend to
+    be needed to handle platform-specific differences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding CPack
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Loading resources relative to the executable
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Integrating CPack
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Building a macOS bundle
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding CPack presets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other uses for CPack
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, ensure that you meet the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found at this link: [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Understanding CPack
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '`cpack` from the Terminal. The best way to think of CPack is a tool to create
+    a wrapper around CMake install commands. In [*Chapter 8*](B21152_08.xhtml#_idTextAnchor183),
+    *Using Super Builds to Simplify Onboarding*, we followed the process of creating
+    install commands for our application, meaning we’ve already done the work necessary
+    to make packaging our application possible. What CPack does is handle platform-specific
+    conventions when it comes to installing software, and it does a respectable job
+    of abstracting things so that you don’t have to worry about them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advantage of packaging things at all is to save our users from having to
+    build our software themselves. The topics we’ve previously covered relating to
+    running an application from the install tree (the `app/install/bin` folder), copying
+    DLLs to the right folder on Windows, and library search paths (the `RPATH` handling
+    we performed on Linux/macOS) have prepared us for this, making the packaging step
+    much simpler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPack provides multiple package generators, specified similarly to the build
+    system generators we pass to CMake using the `-G` command-line option. Some of
+    these are platform-specific (for example **Bundle** and **DragNDrop** on macOS),
+    and others require additional software to be installed (e.g., **Nullsoft Scriptable
+    Install System** (**NSIS**) on Windows); we’ll walk through at least one generator
+    for each platform and show you which CPack commands are needed in each case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Loading resources relative to the executable
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before we look at adding any CPack commands to our `CMakeLists.txt` file, there
+    is one final topic we need to cover that we’ve glossed over so far, and that’s
+    how to ensure that the resource files we load can be found relative to the executable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Throughout *Minimal CMake*, we’ve almost exclusively been launching our application
+    from the terminal, but we’ve had to be careful exactly where we launch the application
+    from. Running the application from the `app` folder works (e.g., `./build/multi-ninja/Release/minimal-cmake_game-of-life_window`),
+    and changing the directory to the `install/bin` folder and launching the application
+    from there also works (this is because we ensure that we copy the shaders to the
+    correct relative location in the `install` folder). The problem is that if we
+    try and launch the application from another folder (e.g., our home directory),
+    the shaders will not load.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You will be presented with this error message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Chances are you have built the shaders (especially after we added the custom
+    command to do this for us automatically in [*Chapter 8*](B21152_08.xhtml#_idTextAnchor183),
+    *Using Super Builds to Simplify Onboarding*); the problem is that when running
+    from our home directory, our application looks for the shaders in `~/shaders/build`,
+    not `path/to/app/install/bin/shaders/build`. The situation is a bit more complicated
+    on macOS and Linux than on Windows. When launching an application on Windows from
+    the GUI, the working directory will default to the folder containing the executable,
+    but on macOS and Linux, it will be the user’s home directory (`~/` or `$HOME`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To fix this, we need to update our application to load resource files relative
+    to the executable, not the current working directory. To achieve this, we need
+    to query what the current directory of our application is at runtime. There are
+    several ways to do this, each different depending on the platform you’re using
+    (there’s `_NSGetExecutablePath` on macOS, `readlink` on Linux, and `GetModuleFileName`
+    on Windows, as well as other alternatives). Fortunately for us, as we’re using
+    SDL 2, we can use a utility function called `SDL_GetBasePath` (see [https://wiki.libsdl.org/SDL2/SDL_GetBasePath](https://wiki.libsdl.org/SDL2/SDL_GetBasePath)
+    for more information) to handle all these cross-platform cases for us (it also
+    handles differences with macOS-specific bundles too).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re going to make a couple of minor changes to our `CMakeLists.txt` file and
+    `main.cpp` file to support this. Starting with our `CMakeLists.txt` file in `ch10/part-1/app`,
+    we’re going to copy the shaders from their original location to our `build` folder
+    to ensure that launching the executable from there works as expected. To make
+    things a bit clearer, we’ll drop the `shader/build` folder and just install the
+    compiled `bin` files to a folder called `shader`, next to our application (we’ll
+    update our `main.cpp` file accordingly shortly).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Afterwards, the folder structure will look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To achieve this, we need to update the `add_custom_command` call we’re using
+    to copy our shared library files (`.dylib`/`.so`/`.dll`) to the build folder,
+    by including a step to copy the shader files. This looks as follows (with the
+    existing file `copy` commands omitted):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We will use the `copy_directory` command to copy the contents of the `shader/build`
+    folder to the location of our target, inside a subfolder called `shader`. An edge
+    case to be aware of is that the custom command to copy the shaders doesn’t explicitly
+    depend on the previous custom command to compile the shaders. This could mean
+    that if compiling the shaders fails, this command will still run and have no effect
+    (or fail). As discussed in [*Chapter 8*](B21152_08.xhtml#_idTextAnchor183), *Using
+    Super Builds to Simplify Onboarding*, we could instead use the `OUTPUT` variant
+    of `add_custom_command` for both, using the `DEPENDS` argument to ensure that
+    the second `add_custom_command` runs only after the first succeeds. As the `TARGET`
+    version is simpler, we’ll continue using it for the remainder of the examples,
+    but there are cases where the `OUTPUT` version can be very useful (see [https://cmake.org/cmake/help/latest/command/add_custom_command.html](https://cmake.org/cmake/help/latest/command/add_custom_command.html)
+    for more details).To keep things consistent with the install layout, we also need
+    to make a slight change to the install command that we created earlier to copy
+    our shaders to the install tree. Instead of copying the whole `shader/build` folder,
+    we just want to copy the contents to a new folder called `shader`. We can achieve
+    this with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: char* base_path = SDL_GetBasePath();
+  prefs: []
+  type: TYPE_NORMAL
+- en: std::string vs_shader_full_path;
+  prefs: []
+  type: TYPE_NORMAL
+- en: vs_shader_full_path.append(base_path);
+  prefs: []
+  type: TYPE_NORMAL
+- en: vs_shader_full_path.append("shader/vs_vertcol.bin");
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: std::vector<char> vs_shader =
+  prefs: []
+  type: TYPE_NORMAL
+- en: read_file(vs_shader_full_path.c_str());
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: SDL_free(base_path);
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: file INSTALL cannot find
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"path/to/build/multi-ninja-super/Release/minimal-cmake_game-of-life_window":'
+  prefs: []
+  type: TYPE_NORMAL
+- en: No such file or directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja-super/--config to provide the path to the CPackConfig.cmake
+    file, and then -B to create a new folder called package to store the packaged
+    files. Invoking CPack will produce different results per platform in a comparable
+    way to CMake, as each platform will have its own default generator (in this case,
+    a package generator instead of a build system generator). We can use -G just as
+    with CMake to specify the kind of generator to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The real complexity with CPack (once the core `install` logic is out of the
+    way) comes from configuring the specific generators you care about (running `cpack
+    --help` will list all available generators for the platform you’re on). To limit
+    the scope of all the various kinds of generators, we’re going to pick one per
+    platform that best fits with the expected way that applications are installed
+    on that platform. A full working example is presented in `ch10/part-2/app/CMakeLists.txt`,
+    along with a new `packaging` folder with package-specific assets and files. We’ll
+    first cover the common `CPACK_` variables to set, and then we’ll walk through
+    each platform in turn.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: CPack common properties
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In addition to the `include(CPack)` command, there are many CPack variables
+    that can be set to configure various settings for a packaged project. There are
+    variables common to all CPack generators (a complete list can be found at [https://cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators](https://cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators))
+    and variables specific to a generator – for example, the CPack Bundle generator
+    on macOS begins with `CPACK_BUNDLE_` (a complete list of its variables can be
+    found at [https://cmake.org/cmake/help/latest/cpack_gen/bundle.html](https://cmake.org/cmake/help/latest/cpack_gen/bundle.html)).
+    It’s not necessarily the case that common CPack variables work with every generator,
+    but they will work with more than one (for example, `CPACK_PACKAGE_EXECUTABLES`
+    is used by the NSIS, WiX, and Inno Setup generators).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'We’ll start with the minimum needed common variables (there are many more that
+    are omitted; feel free to experiment with these and add them to your own projects
+    in the future). The first we will specify is `CPACK_PACKAGE_NAME`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is important and is used by pretty much all CPack generators. If this is
+    omitted, the target name will be used for the package name. In our case, we set
+    it to `"minimal-cmake_game-of-life"` (it’s important there are no spaces in this
+    name, as installation may fail on certain platforms/generators if there are).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The next common variable we will use (which is only needed for our Windows
+    NSIS installer) is `CPACK_PACKAGE_EXECUTABLES`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja/CPackConfig.cmake -G package. Running the installer
+    will walk us through a set of steps and then copy the install files to C:\Program
+    Files\minimal-cmake_game-of-life 0.1.1. Start menu shortcuts are also added to
+    C:\ProgramData\Microsoft\Windows\Start Menu\Programs\minimal-cmake_game-of-life
+    0.1.1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The two initial `CPACK_NSIS_` variables we set are to give the installer’s
+    welcome screen a friendly title and ensure that things look crisp on high-DPI
+    displays:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: One important thing that we’re missing to make our application look professional
+    is an icon (unfortunately, this is what we’ll spend most of our time on in the
+    following sections, as icon handling is different per platform).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: We first need to create an icon in the format expected by Windows. A great tool
+    to perform this is `.ico` file in `ch10/part-2/app/packaging/windows`, called
+    `mc_icon.ico`, but it’s helpful to know how to do this for your own icons in the
+    future.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'Once this icon file is available, we need to add an NSIS CPack-specific variable
+    to refer to it. This CPack option is `CPACK_NSIS_MUI_ICON`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will associate the icon we created with the NSIS installer, so when running
+    through the installer, we’ll see the icon in the top-left corner of the window
+    and the Windows taskbar for the installer. However, this won’t create an icon
+    for the application after it’s installed. For that, we need to venture outside
+    of CPack briefly and add a small update to our `CMakeLists.txt` file. We must
+    also add one more file needed by Windows.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The file we need to add is called a resource-definition script, ending with
+    the `.rc` extension (to learn more about resource files on Windows, go to [https://learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files](https://learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files)).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The file has the following contents:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This links the resource-definition script to our generated icon file. The `icon.rc`
+    file then needs to be compiled into our executable, which can be achieved by adding
+    `icon.rc` to `target_sources`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this change, we’ll see the icon used for our application’s start menu and
+    desktop shortcut. There are more CPack NSIS options to further customize the installer
+    experience, which we’ll skip for now; for a full list, go to [https://cmake.org/cmake/help/latest/cpack_gen/nsis.html](https://cmake.org/cmake/help/latest/cpack_gen/nsis.html).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: One other small detail to note, which again is slightly outside the scope of
+    CPack but falls into the category of getting our application ready for shipping,
+    is about hiding the console window that appears when launching our application.
+    This is something that might not have been as obvious so far, as we’ve been launching
+    the application from the terminal for the most part. One thing you might have
+    noticed is that when running from the Windows GUI, a console window will appear
+    in the background with the debug console output we’ve added. This can be useful
+    during development, but for `Release` builds, it would be better to hide it. This
+    can be achieved by passing the `WIN32_EXECUTABLE` property to `set_target_properties`
+    and ensuring that this is only set when the CMake configuration is set to `Release`.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'This can be done by adding the following to our `CMakeLists.txt` file:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(
+  prefs: []
+  type: TYPE_NORMAL
+- en: CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"CreateShortCut ''$DESKTOP\\\\Minimal CMake - Game of Life.lnk'' ''$INSTDIR\\\\bin\\\\${PROJECT_NAME}.exe''")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja/CPackConfig.cmake -G NSIS64 -B package
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(CPACK_BUNDLE_NAME "Minimal CMake - Game of Life")
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(CPACK_BUNDLE_PLIST
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${CMAKE_SOURCE_DIR}/packaging/macos/info.plist")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(CPACK_BUNDLE_ICON
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${CMAKE_SOURCE_DIR}/packaging/macos/gol.icns")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: set(CPACK_BUNDLE_STARTUP_COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"${CMAKE_SOURCE_DIR}/packaging/macos/bundle-run.sh")'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: cd "$(dirname "$0")"
+  prefs: []
+  type: TYPE_NORMAL
+- en: ../Resources/bin/minimal-cmake_game-of-life_window
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja/CPackConfig.cmake -B package -G .dmg file)
+    that can be opened, and then the bundled application can be dragged to the Applications
+    folder to install it on the system (simply move the application from the Applications
+    folder to the macOS Bin to uninstall it).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Figure 10.2: A macOS disk image](img/B21152_10_2.jpg)'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_IMG
+- en: 'Figure 10.2: A macOS disk image'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: There are further ways to customize the appearance of the mounted disk image,
+    such as creating a custom `.DS_Store` file and using the `CPACK_DMG_DS_STORE`
+    variable to refer to it. See `ch10/part-4/app/CMakeLists.txt` and `ch10/part-4/app/packaging/macos/custom_DS_Store`
+    for an example of this.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: The CPack Linux Debian package
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: We’re now going to review the changes to our `CMakeLists.txt` file in `ch10/part-2/app`
+    to understand what additions have been made to support a Debian (`.deb`) installer
+    on Linux.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The good news is that the changes are limited. The first change is a lot like
+    what we had to do on Windows to ensure that we get an icon to appear for our application
+    after installing it. This time, we need to add two additional `install` commands
+    to copy a Linux `.desktop` file (responsible for our application appearing in
+    the Linux GUI) and an associated `.png` image to the install location:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first command takes our `.desktop` file and copies it to the data root directory,
+    relative to our chosen install folder (by default, this will be `<install-folder>/share`).
+    By convention, `.desktop` files can be expected to be found in the `applications`
+    folder under `share`, so we append `applications` to `CMAKE_INSTALL_DATAROOTDIR`.
+    The icon itself is searched for in `share/icons`, so we need to ensure that we
+    copy it there as well.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In this example, we’re using the Debian package generator; when we install the
+    package, the files will be copied to the platform standard locations (`/usr/share/icons`,
+    `/usr/share/applications`, `/usr/bin`, etc.). The good thing about this is we
+    don’t need to hardcode absolute paths in our `.desktop` file, as the executable
+    and icon can be found in the expected places.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'For completeness, the contents of the `.desktop` file are as follows:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: As we’re creating a windowed app, we set `Terminal` to `false` and add some
+    additional metadata that helps describe the kind of application we built (for
+    more information about `.desktop` files, see [https://wiki.archlinux.org/title/Desktop_entries](https://wiki.archlinux.org/title/Desktop_entries)
+    for a helpful overview). Note that we do not include the extension when specifying
+    the icon; we only need to provide the name.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The only remaining code change we need to make to support a Debian package
+    on Linux is to provide a name for the package maintainer. This can be achieved
+    with the following command:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is a useful way for users to be able to contact package owners/maintainers
+    if they encounter an issue or have feedback they wish to pass on. This field must
+    be provided; otherwise, CPack will return an error and not produce the Debian
+    package.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'With these changes applied to our `CMakeLists.txt` file, we can now run CPack
+    and provide the DEB package generator. After building a release configuration
+    of the project (e.g., `cmake --build build/multi-ninja --config Release`), simply
+    run the following command from `ch10/part-2/app`:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: sudo dpkg -i package/minimal-cmake_game-of-life-0.1.1-Linux.deb
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: sudo dpkg -P minimal-cmake_game-of-life
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: set_target_properties(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME} PROPERTIES Minimal CMake - Game of Life.app in the build/<preset>/<config>
+    folder, instead of the executable file and collection of loose files, including
+    libraries and resources, that we’ve seen so far. The truth is that the .app file
+    is just a folder holding all these files; the only difference is that it’s presented
+    in a slightly neater package. From Finder, if you right-click the .app file and
+    click CMakeLists.txt file (see ch10/part-3/app/CMakeLists.txt for the full example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The executable itself ends up in a folder called `MacOS`, and our shared libraries
+    (`.dylib` files) are added to a folder called `Frameworks`. Finally, our shaders
+    (and `.icns` file) are added to a folder called `Resources`. This layout is standard
+    for macOS applications, and CMake makes it relatively easy to support. A change
+    worth mentioning is a small update to the `set_target_properties` `INSTALL_RPATH`
+    command, to include `Frameworks` in the search path:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: add_custom_target(
+  prefs: []
+  type: TYPE_NORMAL
+- en: create_frameworks_directory ALL
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMAND
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${CMAKE_COMMAND} -E make_directory
+  prefs: []
+  type: TYPE_NORMAL
+- en: $<TARGET_FILE_DIR:${PROJECT_NAME}>/../Frameworks
+  prefs: []
+  type: TYPE_NORMAL
+- en: COMMENT "Creating Frameworks directory")
+  prefs: []
+  type: TYPE_NORMAL
+- en: add_dependencies(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME} create_frameworks_directory)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: install(TARGETS ${PROJECT_NAME} if(APPLE) block. We use the CMake set_source_files_properties
+    command to set the package location for various files (this includes our shader
+    files, vs_vertcol.bin and fs_vertcol.bin, and a new gol.icns file). These are
+    copied to the Resources/shader folder and the Resources folder inside the bundle’s
+    Contents folder (.app file).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following snippet shows how this is achieved:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_sources(
+  prefs: []
+  type: TYPE_NORMAL
+- en: ${PROJECT_NAME} PRIVATE shader/build/vs_vertcol.bin
+  prefs: []
+  type: TYPE_NORMAL
+- en: MACOSX_BUNDLE to TRUE), instead of creating our own Info.plist, CMake will use
+    an Info.plist template file called MacOSXBundleInfo.plist.in, located in /Applications/CMake.app/Contents/share/cmake-3.28/Modules,
+    (the CMAKE_MODULE_PATH). It’s then possible to use set_target_properties to provide
+    several MACOSX_BUNDLE_ properties to override these values (for a complete list,
+    see https://cmake.org/cmake/help/latest/prop_tgt/MACOSX_BUNDLE_INFO_PLIST.html).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In our case, we set a handful of properties that are generally useful; for
+    our purposes, `MACOSX_BUNDLE_ICON_FILE` is the most notable, which ensures that
+    our application receives a distinctive appearance. A subset of the command is
+    shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: It’s also possible to override the template by providing a custom `Info.plist`
+    file and using `MACOSX_BUNDLE_INFO_PLIST` to refer to it from our `CMakeLists.txt`
+    file.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The only remaining change is the removal of our `set(CPACK_BUNDLE_...` calls
+    from our `CMakeLists.txt` file, as they’re no longer required. With these changes,
+    we can build our application as a macOS bundle, and when we come to package our
+    application, instead of using the `Bundle` generator as we did before, we can
+    use the `DragNDrop` generator. An example is shown here:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja/CPackConfig.cmake -B package -G Bundle
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack –preset macos
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: '"packagePresets": ['
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "base",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"configurePreset": "multi-ninja-super",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"packageDirectory": "${sourceDir}/package",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"hidden": true'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "macos",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"condition": {'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "equals",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"lhs": "${hostSystemName}",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"rhs": "Darwin"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"generators": ["Bundle"],'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"inherits": ["base"]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '...'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super-package-linux",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"steps": ['
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "configure",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "build",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "multi-ninja-super"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '},'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"type": "package",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "linux"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ']'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --workflow --preset \
+  prefs: []
+  type: TYPE_NORMAL
+- en: multi-ninja-super-package-linux
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: set(CPACK_SOURCE_IGNORE_FILES
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"build.*\/"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"package.*\/"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"install\/"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"\.git\/"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"\.gitignore"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"\.vscode"'
+  prefs: []
+  type: TYPE_NORMAL
+- en: )
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: cpack --config build/multi-ninja-super/CPackSourceConfig.cmake -G TGZ -B package-source
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: '{'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"name": "source",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"generators": ["ZIP"],'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"packageDirectory": "${sourceDir}/package-source",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"configFile": "CPackSourceConfig.cmake",'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '"inherits": ["base"]'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '}'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE

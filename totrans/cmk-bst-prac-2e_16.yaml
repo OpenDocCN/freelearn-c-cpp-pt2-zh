@@ -1,0 +1,565 @@
+- en: '13'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Reusing CMake Code
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Writing build system code for a project is no easy task. Project maintainers
+    and developers spend a lot of effort writing CMake code for configuring compiler
+    flags, project build variants, third-party libraries, and tool integrations. Writing
+    CMake code for project-agnostic details from scratch may start to incur a significant
+    burden when dealing with multiple CMake projects. Most of the CMake code written
+    for a project to configure these details could be reused between projects. With
+    that in mind, it is for our benefit to develop a strategy to make our CMake code
+    reuse-friendly. The straightforward way to approach this problem is to treat CMake
+    code as regular code and apply some of the most basic coding principles: the **Don’t
+    Repeat Yourself** (**DRY**) principle and the **single responsibility** **principle**
+    (**SRP**).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'CMake code can be easily reused if structured with reusability in mind. Achieving
+    essential reusability is pretty straightforward: separate CMake code into modules
+    and functions. You may have realized that the way to make CMake code reusable
+    is no different from making software code reusable. Remember – CMake itself is
+    a scripting language, after all. So, it is natural to treat CMake code as regular
+    code and apply software design principles while dealing with it. As with any functional
+    scripting language, CMake has the following basic abilities for reusability:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ability to include other CMake files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Functions/macros
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Portability
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In this chapter, we will learn ways of writing CMake code for a project with
+    reusability in mind and reusing CMake code in CMake projects. We will also discuss
+    ways of versioning and sharing common CMake code between projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To understand the skills shared in this chapter, we’ll cover the following
+    main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is a CMake module?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fundamental building blocks of modules – functions and macros
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Writing your first very own CMake module
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s begin with technical requirements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before you dive further into this chapter, it is recommended to take a look
+    at [*Chapter 1*](B30947_01.xhtml#_idTextAnchor015), *Kickstarting CMake*. This
+    chapter follows the teaching-over-example approach, so it is recommended to obtain
+    this chapter’s example content from here: [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter13](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter13).
+    For all the examples, assume that you will be using the container provided by
+    this project: [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start by learning some basics about reusability in CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What is a CMake module?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'A `Find*.cmake` modules). A list of the modules that CMake provides by default
+    is available at [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html).
+    The official CMake documentation categorizes modules in the following two main
+    categories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Utility modules
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Find modules
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: As their name suggests, utility modules provide utility, whereas find modules
+    are designed to search for third-party software in a system. As you will recall,
+    we covered find modules thoroughly in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071),
+    *Packaging, Deploying, and Installing a CMake Project*, and [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084),
+    *Integrating Third-Party Libraries* *and Dependency Management*. Therefore, we
+    will exclusively focus on utility modules in this chapter. You will recall we
+    have been using some CMake-provided utility modules in previous chapters. Some
+    of the modules we used were `GNUInstallDirs`, `CPack`, `FetchContent`, and `ExternalProject`.
+    These modules are located under the `CMake` installation folder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To better understand the concept of a utility module, let’s start by investigating
+    a simple utility module that CMake provides. For this purpose, we will look into
+    the `ProcessorCount` utility module. You can find the source file for this module
+    at [https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake](https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake).
+    The `ProcessorCount` module is a module that allows retrieving the CPU core count
+    of a system in CMake code. The `ProcessorCount.cmake` file defines a CMake function
+    named `ProcessorCount`, which takes a single parameter named `var`. The implementation
+    of the function is roughly as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `ProcessorCount` function attempts several different approaches to retrieve
+    the CPU core count of the host machine. The usage of the `ProcessorCount` module
+    is simple, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see in the preceding example, using a CMake module is as easy as
+    including the module in the required CMake file. The `include()` function is transitive,
+    so the code after the `include` line can consume all CMake definitions contained
+    in the module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We now have a rough idea of what a utility module looks like. Let’s continue
+    by learning more about the fundamental building blocks of a utility module: functions
+    and macros.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fundamental building blocks of modules – functions and macros
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It is clear that we need some basic building blocks to create utility modules.
+    The most fundamental building blocks for utility modules are functions and macros,
+    so it is essential to learn their working principles well. Let’s start by learning
+    about functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s remember what we learned in [*Chapter 1*](B30947_01.xhtml#_idTextAnchor015),
+    *Kickstarting CMake*, about functions. A `function(…)`, has a body that contains
+    CMake commands, and ends with the `endfunction()` CMake command. The `function()`
+    command needs a name as the first argument and optional function argument names,
+    shown as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: A function defines a new variable scope, so changes made on CMake variables
+    are only visible in the function’s body. Separate scoping is the most crucial
+    property of a function. Having a new scope means we can’t accidentally leak variables
+    to the caller or modify the caller’s variables *unless we want to*. Most of the
+    time, we will want to contain changes in the function’s scope and only reflect
+    the function’s result to the caller. As CMake has no notion of return values,
+    we will take the *defining a variable in the caller’s scope* approach to return
+    function results to the caller.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To illustrate this approach, let’s define a simple function that retrieves
+    the current Git branch name together:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `git_get_branch_name` function takes a single argument named `result_var_name`.
+    This argument is the name of the variable that will be defined in the caller’s
+    scope to return the Git branch name to the caller. Alternatively, we can use a
+    constant variable name, such as `GIT_CURRENT_BRANCH_NAME`, and get rid of the
+    `result_var_name` argument, but this may cause issues if the project already uses
+    the `GIT_CURRENT_BRANCH_NAME` name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The rule of thumb here is to leave the naming to the caller since it allows
+    maximum flexibility and portability. To retrieve the current Git branch name,
+    we have invoked the `git symbolic-ref -q --short HEAD` command with `execute_process()`.
+    The result of the command is stored in the `git_current_branch_name` variable
+    in the function’s scope. The variable being in the function’s scope means the
+    caller cannot see the `git_current_branch_name` variable. Thus, we have used `set(${result_var_name}
+    ${git_current_branch_name} PARENT_SCOPE)` to define a variable using the value
+    of `result_var_name` in the caller’s scope with the value of the local `git_current_branch_name`
+    variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `PARENT_SCOPE` argument alters the scoping of the `set(…)` command, so
+    it defines the variable in the caller’s scope instead of the function’s scope.
+    The usage of the `git_get_branch_name` function is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s look at macros next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Macros
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If the function’s scoping is a deal-breaker for your use case, you might consider
+    using a macro instead. Macros start with `macro(…)` and end with `endmacro()`.
+    Functions and macros behave similarly in every aspect but one: macros do not define
+    a new variable scope. Returning to our Git branch example, considering `execute_process(…)`
+    already has the `OUTPUT_VARIABLE` parameter, it is more convenient to define `git_get_branch_name`
+    as a macro instead of a function to get rid of `set(… PARENT_SCOPE)` at the end:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The usage of the `git_get_branch_name_m` macro is the same as the `git_get_branch_name()`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have learned how we can define a function or macro when needed. Up next,
+    we will define our first CMake module together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing your first very own CMake module
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In the previous section, we learned about how to use functions and macros to
+    provide useful utility in CMake projects. Now, we can learn about how we can move
+    these functions and macros to a separate CMake module.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creating and using a basic CMake module file is extremely simple:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a `<module_name>.cmake` file under your project.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Define any macros/functions in the `<``module_name>.cmake` file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Include `<module_name>.cmake` in the desired file.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Alright – let’s follow these steps and create a module together. As a follow-up
+    to our previous Git branch name example, let’s extend the scope and write a CMake
+    module that provides the ability to retrieve the branch name, head commit hash,
+    current author name, and current author email information by using the `git` command.
+    For this part, we will follow the `chapter13/ex01_git_utility` example. The example
+    folder contains a `CMakeLists.txt` file and a `git.cmake` file under the `.cmake`
+    folder. Let’s start by taking a look at the `.cmake/git.cmake` file. The contents
+    of the file are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `git.cmake` file is a CMake utility module file that contains three macros
+    named `git_get_branch_name`, `git_get_head_commit_hash`, and `git_get_config_value`
+    respectively. Additionally, there is an `include_guard(DIRECTORY)` line at the
+    top of the file. This is analogous to the `#pragma once` preprocessor directive
+    in C/C++ and prevents the file from being included more than once. The `DIRECTORY`
+    parameter denotes that `include_guard` is defined at the directory scope, and
+    this file can be included once at most within the current directory and below.
+    Alternatively, the `GLOBAL` parameter can be specified instead of `DIRECTORY`
+    to limit the inclusion of the file once, regardless of the scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To see how we can use the `git.cmake` module file, let’s investigate the `CMakeLists.txt`
+    file of `chapter13/ex01_git_utility` together:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `CMakeLists.txt` file includes the `git.cmake` file by specifying the full
+    relative path to the module file. The `git_get_branch_name`, `git_get_head_commit_hash`,
+    and `git_get_config_value` macros provided by the module are used to retrieve
+    the branch name, commit hash, author name, and email to the `current_branch_name`,
+    `current_head`, `current_user_name`, and `current_user_email` variables respectively.
+    Lastly, these variables are printed on the screen by the `message(…)` command.
+    Let’s configure the example project to see whether the Git module we’ve just written
+    works as expected:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output of the command should look similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: As we can see, we have succeeded in retrieving the information from the `git`
+    command. Our first CMake module works as expected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Case study – dealing with project metadata files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s continue with another example. Assume that we have an environment file
+    that contains key-value pairs per line. It is not unusual to have external files
+    in a project that contain some metadata about the project (for example, project
+    version and dependencies). The file may be in different formats, such as JSON
+    or newline-separated key-value pairs, as we have in this example. The task at
+    hand is to create a utility module that reads the environment variable file and
+    defines a CMake variable per key-value pair in the file. The contents of the file
+    will look similar to this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For this section, we will follow the `chapter13/ex02_envfile_utility` example.
+    Let’s begin by examining the contents of `.cmake/envfile-utils.cmake`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `envfile-utils.cmake` utility module contains a single function, `read_environment_file`,
+    which reads an environment file in the format of a list of key-value pairs. This
+    function reads all the lines in the file to the `KVP_LIST` variable and then iterates
+    through all lines. Each individual line is split by the (`=`) equals token, then
+    the left side of the equals token is used as the variable name, whereas the right
+    side is used as the variable value to define each key-value pair as a CMake variable.
+    Empty lines and comments lines are skipped. As for the usage of the module, let’s
+    have a look at the `chapter13/ex02_envfile_utility/CMakeLists.txt` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You may have noticed that the `.cmake` folder is added to the `CMAKE_MODULE_PATH`
+    variable. The `CMAKE_MODULE_PATH` variable is the collection of paths that the
+    `include(…)` directive will search in. By default, it is empty. This allows us
+    to include the `envfile-utils` module directly by name in the current and the
+    children `CMakeLists.txt` files. Lastly, let’s take a look at the `chapter13/ex02_envfile_utility/test-executable/CMakeLists.txt`
+    file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, the `envfile-utils` environment file reader module is included
+    by name. This is because the folder that contains the `envfile-utils.cmake` file
+    was appended to the `CMAKE_MODULE_PATH` variable before. The `read_environment_file()`
+    function is called to read the `variables.env` file in the same folder. The `variables.env`
+    file contains the following key-value pairs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So, after calling the `read_environment_file()` function, we expect the `TEST_PROJECT_VERSION`
+    and `TEST_PROJECT_AUTHOR` variables to get defined in the current CMake scope,
+    with their respective values specified in the file. To verify that, an executable
+    target named `ch13_ex02_envfile_utility_test` is defined, and the `TEST_PROJECT_VERSION`
+    and `TEST_PROJECT_AUTHOR` variables are passed into the target as macro definitions.
+    Lastly, the target’s source file, `test.cpp`, prints the `TEST_PROJECT_VERSION`
+    and `TEST_PROJECT_AUTHOR` macro definitions to the console:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alright – let’s compile and run the application to see whether this works or
+    not:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: As we can see, we have successfully read a key-value pair formatted file from
+    our source tree, defined each key-value pair as CMake variables, and then exposed
+    these variables as macro definitions to our application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Although writing CMake modules is very straightforward, there are a few extra
+    recommendations to consider:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Always use unique names for your functions/macros
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use a common prefix for all module functions/macros
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Avoid using constant names for non-function scope variables
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use `include_guard()` for your module
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If your module prints messages, provide a quiet mode for your module
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Do not expose your module’s internals
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use macros for simple command wrappers and functions for everything else
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: With that said, we conclude this part of the chapter. Next, we will take a look
+    at ways of sharing CMake modules between projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recommendations for sharing CMake modules between projects
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The recommended way of sharing CMake modules is by maintaining a separate project
+    for CMake modules and then incorporating the project as an external resource,
+    either directly by Git submodules/subtrees or CMake’s `FetchContent`, as described
+    in [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084), *Integrating Third-Party Libraries
+    and Dependency Management*. When using `FetchContent`, external modules can be
+    integrated easily by setting the `SOURCE_DIR` property and by setting the `CMAKE_MODULE_PATH`
+    to the path specified. This way, all reusable CMake utilities can be maintained
+    under a single project and can be propagated to all downstream projects. Putting
+    CMake modules into a repository in an online Git hosting platform (such as GitHub
+    or GitLab) will make using the module convenient for most people. Since CMake
+    supports fetching content directly from Git, it will be straightforward to use
+    the shared modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To demonstrate how we can use an external CMake module project, we will use
+    an open source CMake utility module project named `hadouken` ([https://github.com/mustafakemalgilor/hadouken](https://github.com/mustafakemalgilor/hadouken)).
+    This project contains CMake utility modules for tool integrations, target creation,
+    and feature checks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For this part, we will follow the `chapter13/ex03_external_cmake_module` example.
+    This example will fetch `hadouken`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the preceding example, we used `FetchContent_Declare` and `FetchContent_MakeAvailable`
+    to retrieve `hadouken` into our project and place it in the build directory in
+    the `.hadouken` folder. Then, the `hadouken` project’s module directory was appended
+    into `CMAKE_MODULE_PATH` to use the `hadouken` project’s CMake utility modules
+    via the `include(…)` directive. With this, we can access the `make_target()` macro
+    provided by the imported CMake module. We have reached another chapter’s end together.
+    Up next, we’ll summarize what we have learned in this chapter and what we will
+    learn in the upcoming chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In this chapter, we learned how to structure a CMake project to support reusability.
+    We learned how to implement CMake utility modules, how to share them, and how
+    to use utility modules written by others. Having the ability to leverage CMake
+    modules enables us to better organize our projects and better collaborate with
+    our team members in unison. CMake projects will be much easier to maintain with
+    this knowledge on hand. Common, reusable code between CMake projects will grow
+    into an extensive collection of useful modules that make writing projects with
+    CMake easier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I want to remind you that CMake is a scripting language and should be treated
+    as such. Use software design principles and patterns to make CMake code more maintainable.
+    Organize your CMake code into functions and modules. Reuse and share CMake code
+    as much as possible. Please do not neglect your build system code, or you may
+    have to write it from scratch.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we will be learning about ways of optimizing and maintaining
+    CMake projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See you soon in the next chapter!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'After completing this chapter, you should be able to answer the following questions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are the most fundamental building blocks of reusability in CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is a CMake module?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can a CMake module be used?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the `CMAKE_MODULE_PATH` variable used for?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Name one way to share CMake modules between projects.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the principal difference between a function and a macro in CMake?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Answers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Functions and macros.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: A CMake module is a logical entity that contains CMake code, functions, and
+    macros to serve a particular purpose.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: By including it in the required scope.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: To add extra paths to the `include(…)` directive’s search path.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: By using Git submodules/subtrees or CMake’s `FetchContent`/`ExternalProject`
+    modules.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Functions define a new variable scope; macros do not.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

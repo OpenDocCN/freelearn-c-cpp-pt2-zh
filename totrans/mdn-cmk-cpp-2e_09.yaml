@@ -1,0 +1,1570 @@
+- en: '9'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Managing Dependencies in CMake
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'It doesn’t really matter if your solution is large or small; as it grows, you’ll
+    likely choose to rely on other projects. Avoiding the effort of creating and maintaining
+    boilerplate code is crucial. This frees up your time for what truly matters: the
+    business logic. External dependencies serve multiple purposes. They offer frameworks
+    and features, solve complex issues, and play a key role in building and ensuring
+    code quality. These dependencies can vary, ranging from specialized compilers
+    like **Protocol Buffers** (**Protobuf**) to testing frameworks like Google Test.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When working with open-source projects or in-house code, managing external dependencies
+    efficiently is essential. Doing this manually would require a lot of setup time
+    and ongoing support. Luckily, CMake excels at handling various approaches to dependency
+    management while staying current with industry standards.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We will first learn how to identify and utilize dependencies already present
+    on the host system, thereby avoiding unnecessary downloads and extended compilation
+    times. This task is relatively straightforward, as many packages are either CMake-compatible
+    or supported by CMake right out of the box. We’ll also explore how to instruct
+    CMake to locate and include dependencies that lack this native support. For legacy
+    packages, an alternative approach can be beneficial in specific situations: we
+    can employ the once-popular `pkg-config` tool to handle the more cumbersome tasks.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Additionally, we will delve into managing dependencies that are available online
+    but not yet installed on the system. We’ll examine how to fetch these from HTTP
+    servers, Git, and other types of repositories. We will also discuss how to choose
+    the optimal approach: first, searching within the system and then resorting to
+    fetching if the package is not found. Finally, we’ll review an older technique
+    for downloading external projects that may be applicable in special cases.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using already installed dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Using dependencies not present in the system
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this book, always use the recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace the `<build tree>` and `<source tree>` placeholders with
+    appropriate paths. As a reminder: **build tree** is the path to the target/output
+    directory and **source tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using already installed dependencies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When our project depends on a popular library, it’s likely that the operating
+    system already has the right package installed. We just have to connect it to
+    our project’s build process. How do we do that? We need to find out where the
+    package is on the system so CMake can use its files. Doing this by hand is possible,
+    but every environment is a little different. A path that works on one system might
+    not work on another. So, we should automatically find these paths when building.
+    There are different ways to do this, but the best method is usually CMake’s built-in
+    `find_package()` command, which knows how to find many commonly used packages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If our package isn’t supported, we have two options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can write a small plugin called a `find-module` to help `find_package()`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We can use an older method called `pkg-config`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Let’s start with the recommended option first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finding packages with CMake’s find_package()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s start by looking at the following scenario: you want to improve the way
+    you’re doing network communication or data storage. Simple plain-text files or
+    open-text formats like JSON and XML are too verbose in terms of size. Using a
+    binary format would help things, and a well-known library like Google’s Protobuf
+    looks like the answer.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ve read the instructions and installed what you need on your system. Now
+    what? How do you get CMake’s `find_package()` to find and use this new library?
+  prefs: []
+  type: TYPE_NORMAL
+- en: To execute this example, we have to install the dependencies we want to use
+    because the `find_package()` command only looks for packages that are already
+    on your system. It assumes you’ve got everything installed, or that users know
+    how to install what’s needed if they’re told to. If you want to handle other situations,
+    you’ll need a backup plan. You can find more about this in the *Using dependencies
+    not present in the system* section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the case of Protobuf, the situation is fairly straightforward: you can either
+    download, compile, and install the library yourself from the official repository
+    ([https://github.com/protocolbuffers/protobuf](https://github.com/protocolbuffers/protobuf))
+    or use the package manager in your operating system. If you’re following these
+    examples using the Docker image mentioned in *Chapter 1*, *First Steps with CMake*,
+    your dependencies are already installed and you don’t need to do anything. However,
+    if you’d like to try installing by yourself, the commands to install the Protobuf
+    library and compiler for Debian Linux are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Many projects these days choose to support CMake. They do this by creating a
+    **config file** and putting it in the appropriate system directory during installation.
+    Config files are an inherent part of projects opting in to support CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to use a library that doesn’t have a config file, don’t worry. CMake
+    supports an external mechanism to find such libraries called **find modules**.
+    Unlike config files, find modules are not part of the project they’re helping
+    to locate. In fact, CMake itself often comes with these find modules for many
+    popular libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’re stuck and without either a config file or a find module, you have
+    other choices:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Write your own find modules for the specific package and include them in your
+    project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use a FindPkgConfig module to leverage legacy Unix package definition files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Write a config file and ask package maintainers to include it
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You might think that you’re not quite ready to create such merge requests yourself.
+    That’s okay because you most likely won’t have to. CMake comes with over 150 find
+    modules that can find libraries such as Boost, bzip2, curl, curses, GIF, GTK,
+    iconv, ImageMagick, JPEG, Lua, OpenGL, OpenSSL, PNG, PostgreSQL, Qt, SDL, Threads,
+    XML-RPC, X11, and zlib, as well as the Protobuf file that we’re going to use in
+    this example. A full list is available in the CMake documentation (see the *Further
+    reading* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Both find modules and config files can be used with CMake’s `find_package()`
+    command. CMake starts by checking its built-in find modules. If it doesn’t find
+    what it needs, it moves on to checking the config files provided by different
+    packages. CMake scans paths where packages are usually installed (depending on
+    the operating system). It looks for files that match these patterns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<CamelCasePackageName>Config.cmake`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<kebab-case-package-name>-config.cmake`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you want to add external find modules to your project, set the `CMAKE_MODULE_PATH`
+    variable. CMake will scan this directory first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Going back to our example, the goal is simple: I want to show that I can build
+    a project that uses Protobuf effectively. Don’t worry, you don’t need to know
+    Protobuf to understand what happens. In basic terms, Protobuf is a library that
+    saves data in a specific binary format. This makes it easy to write and read C++
+    objects to and from files or over a network. To set this up, we use a `.proto`
+    file to give Protobuf the data structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/01-find-package-variables/message.proto**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code is a simple schema definition that includes a single 32-bit integer.
+    The Protobuf package comes with a binary that will compile these `.proto` files
+    into C++ sources and headers that our application can use. We’ll need to add this
+    compilation step to our build process, but we’ll get back to that later. For now,
+    let’s see how our `main.cpp` file uses the output generated by Protobuf:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/01-find-package-variables/main.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: I’ve included a `message.pb.h` header that I expect Protobuf to generate. This
+    header will have the definition for the `Message` object, as configured in `message.proto`.
+    In the `main()` function, I’m creating a simple `Message` object. I set its `id`
+    field to `123` as a random example and then print its debug information to the
+    standard output. Next, a binary version of this object is written to the file
+    stream. This is the most basic use case for a serialization library like Protobuf.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `message.pb.h` header has to be generated before `main.cpp` is compiled.
+    This is done by `protoc`, the Protobuf compiler, which takes `message.proto` as
+    input. Managing this process sounds complicated, but it’s really not!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is where the CMake magic happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/01-find-package-variables/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s break this down:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first two lines are straightforward: they set up the project and specify
+    that it will use the C++ language.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`find_package(Protobuf REQUIRED)` tells CMake to find the Protobuf library
+    (by executing the bundled `FindProtobuf.cmake` find module) and prepare it for
+    use in our project. If it can’t find the library, the build will stop because
+    we used the `REQUIRED` keyword.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`protobuf_generate_cpp` is a custom function defined in the Protobuf find module.
+    It automates the process of invoking the `protoc` compiler. After successful compilation,
+    it will store paths to the generated sources in variables provided as the first
+    two arguments: `GENERATED_SRC` and `GENERATED_HEADER`. All subsequent arguments
+    will be treated as a list of files to compile (`message.proto`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`add_executable` creates our executable using `main.cpp` and Protobuf-generated
+    files.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_link_libraries` tells CMake to link the Protobuf libraries to our executable.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`target_include_directories()` adds to `include` paths the necessary `INCLUDE_DIRS`
+    provided by the package and `CMAKE_CURRENT_BINARY_DIR`. The latter tells the compiler
+    where to find the `message.pb.h` header.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The Protobuf find module provides the following functionalities:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It finds the Protobuf library and its compiler.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It provides helper functions to compile the `.proto` files.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It sets variables with paths for inclusion and linking.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'While not every module comes with convenient helper functions like Protobuf,
+    most modules do set up a few key variables for you. These are useful for managing
+    the dependency in your project. Whether you’re using a built-in find module or
+    a config file, after the package is successfully found, you can expect some or
+    all of the following variables to be set:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`<PKG_NAME>_FOUND`: This indicates whether the package was successfully found.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<PKG_NAME>_INCLUDE_DIRS` or `<PKG_NAME>_INCLUDES`: This points to the directories
+    where the package’s header files are located.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<PKG_NAME>_LIBRARIES` or `<PKG_NAME>_LIBS`: These are lists of libraries that
+    you’ll need to link against.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`<PKG_NAME>_DEFINITIONS`: This contains any compiler definitions needed for
+    the package.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: After running `find_package()`, you can immediately check the `<PKG_NAME>_FOUND`
+    variable to see whether CMake was successful in locating the package.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a package module is written for CMake 3.10 or newer, it will also likely
+    provide target definitions. These targets will be designated as `IMPORTED` targets
+    to distinguish them as originating from an external dependency.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Protobuf is a great example to explore when learning about dependencies in
+    CMake, as it defines module-specific variables and `IMPORTED` targets. Such targets
+    allow us to write even more concise code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/02-find-package-targets/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Look at how the highlighted code compares with the previous version of this
+    example: instead of using variables that listfiles and directories, it’s a good
+    idea to use `IMPORTED` targets. This approach simplifies the listfile. It also
+    automatically takes care of transient usage requirements, or propagated properties,
+    as illustrated here with `protobuf::libprotobuf` target.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to know exactly what a specific find module provides, your best
+    resource is its online documentation. For example, you can find detailed information
+    for Protobuf on the CMake official website at this link: [https://cmake.org/cmake/help/latest/module/FindProtobuf.html](https://cmake.org/cmake/help/latest/module/FindProtobuf.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To keep things simple, examples in this section will simply fail if the Protobuf
+    library is not found in the user’s system. But a really robust solution should
+    verify the `Protobuf_FOUND` variable, and present a clear diagnostic message for
+    the user (so they can install it) or perform the installation automatically. We’ll
+    learn how to do this later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `find_package()` command has several arguments you can use. While there’s
+    a longer list of them, we’ll focus on the key ones here. The basic format of the
+    command is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s break down what each of these optional arguments means:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`[version]` This specifies the minimum version of the package you need in the
+    `major.minor.patch.tweak` format (such as `1.22`). You can also specify a range,
+    like `1.22...1.40.1`, using three dots as a separator.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`EXACT`: Use this with a non-range `[version]` to tell CMake you want an exact
+    version and not a newer one.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`QUIET`: This suppresses all messages about whether the package was found or
+    not.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`REQUIRED`: This will stop the build if a package is not found and a diagnostic
+    message will be shown even if `QUIET` is used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'If you’re pretty sure that a package should be on your system but `find_package()`
+    isn’t locating it, there’s a way to dig deeper. Starting with CMake 3.24, you
+    can run the configure stage in `debug` mode to get more information. Use the following
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Be cautious with this command. Make sure you type the package name exactly as
+    it is because it’s case-sensitive.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'More information on the `find_package()` command can be found on the documentation
+    page here: [https://cmake.org/cmake/help/latest/command/find_package.html](https://cmake.org/cmake/help/latest/command/find_package.html).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Find modules are meant as a very convenient way of providing CMake with information
+    on installed dependencies. Most popular libraries are widely supported by CMake
+    on all major platforms. What can we do, though, when we want to use a third-party
+    library that doesn’t have a dedicated find module yet?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing your own find modules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: On a rare occasion, the library that you really want to use in your project
+    doesn’t provide a config file and there’s no find module readily available in
+    CMake yet. You can then write a custom find module for that library and ship it
+    with your project. This situation is not ideal, but in the interest of taking
+    care of the users of your project, it has to be done.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can try writing a custom find module for the `libpqxx` library, a client
+    for the PostgreSQL database. `libpqxx` is preinstalled in the Docker image for
+    this book, so there’s no need to worry if you’re using that. Debian users can
+    install it using the `libpqxx-dev` package (other operating systems may require
+    different commands):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ll begin by writing a new file named `FindPQXX.cmake` and storing it in
+    the `cmake/module` directory within our project’s source tree. To ensure that
+    CMake discovers this find module when `find_package()` is called, we’ll add its
+    path to the `CMAKE_MODULE_PATH` variable in our `CMakeLists.txt` using `list(APPEND)`.
+    Just a quick reminder: CMake will first check the directories listed in `CMAKE_MODULE_PATH`
+    to find the find modules before searching in other locations. Your complete listfile
+    should look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With that in place, let’s move on to writing the actual find module. If the
+    `FindPQXX.cmake` file is empty, CMake won’t raise any errors, even if you use
+    `find_package()` with `REQUIRED`. It’s the responsibility of the find module’s
+    author to set the correct variables and follow best practices (like raising errors).
+    According to CMake’s guidelines, here are some key points to note:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When `find_package(<PKG_NAME> REQUIRED)` is called, CMake sets a `<PKG_NAME>_FIND_REQUIRED`
+    variable to `1`. The find module should then use `message(FATAL_ERROR)` if the
+    library isn’t found.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When `find_package(<PKG_NAME> QUIET)` is used, CMake sets `<PKG_NAME>_FIND_QUIETLY`
+    to `1`. The find module should avoid displaying any extra messages.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CMake sets a `<PKG_NAME>_FIND_VERSION` variable to the version specified in
+    the listfiles. If the find module can’t locate the right version, it should trigger
+    a `FATAL_ERROR`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Of course, it’s best to follow the preceding rules for consistency with other
+    find modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create an elegant find module for `PQXX`, let’s follow these steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the paths to the library and headers are already known (supplied by the user
+    or retrieved from the cache of a previous run), use these paths to create an `IMPORTED`
+    target. If this is done, you can stop here.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If the paths are not known, begin by finding the library and headers for the
+    underlying dependency, which, in this case, is PostgreSQL.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Next, search the well-known paths to locate the binary version of the PostgreSQL
+    client library.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Similarly, scan the known paths to find the PostgreSQL client’s `include` headers.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finally, confirm whether both the library and include headers are located. If
+    they are, create an `IMPORTED` target.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: To create a robust find module for `PQXX`, let’s focus on a couple of important
+    tasks. First, the creation of an `IMPORTED` target can happen in two scenarios
+    – either the user specifies the library’s paths or the paths are automatically
+    detected. To keep our code clean and avoid duplication, we’ll write a function
+    that manages the outcome of our search process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining IMPORTED targets
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: To set up an `IMPORTED` target, all we really need is a library defined with
+    the `IMPORTED` keyword. This will enable us to use the `target_link_libraries()`
+    command in the calling `CMakeLists.txt` listfile. We need to specify the type
+    of the library, and for simplicity, we’ll mark it as `UNKNOWN`. This means we’re
+    not concerned about whether the library is static or dynamic; we just want to
+    pass an argument to the linker.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, we set the essential properties for our target – namely, `IMPORTED_LOCATION`
+    and `INTERFACE_INCLUDE_DIRECTORIES`. We use the arguments provided to the function
+    for these settings. It’s possible to specify additional properties like `COMPILE_DEFINITIONS`,
+    but they are not needed for `PQXX`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After that, to make our find module more efficient, we’ll store the found paths
+    in cache variables. This way, we won’t have to repeat the search in future runs.
+    It’s worth noting that we explicitly set `PQXX_FOUND` in the cache, making it
+    globally accessible and allowing the user’s `CMakeLists.txt` to reference it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, we mark these cache variables as `advanced`, hiding them in the CMake
+    GUI unless the `advanced` option is activated. This is a common best practice
+    that we’ll also adopt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s how the code looks for these operations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, we’ll discuss how to use custom or previously stored paths for quicker
+    setup.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accepting user-provided paths and reusing cached values
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Let’s address the situation where a user has installed `PQXX` in a non-standard
+    location and provides the needed paths via command-line arguments using `-D`.
+    If that’s the case, we immediately call the function we defined earlier and stop
+    the search by using `return()`. We assume that the user has provided accurate
+    paths to both the library and its dependencies, like PostgreSQL:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: This condition will hold true if a configuration was carried out previously,
+    as the variables `PQXX_LIBRARIES` and `PQXX_INCLUDES` are stored in the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s time to see how to handle finding the additional libraries that `PQXX`
+    relies on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching for nested dependencies
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To utilize `PQXX`, the host system must also have PostgreSQL installed. While
+    it’s perfectly fine to use another find module within our current find module,
+    we should pass along the `REQUIRED` and `QUIET` flags to ensure consistent behavior
+    between the nested search and the main search. To do so, we’ll set two helper
+    variables to store the keywords we need to pass and fill them according to arguments
+    received from CMake: `PQXX_FIND_QUIETLY` and `PQXX_FIND_REQUIRED`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Having this done, we’ll dive into the specifics of pinpointing where the `PQXX`
+    library resides in the operating system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching for library files
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'CMake offers the `find_library()` command to help find library files. This
+    command will accept the filenames to look for and a list of possible paths, formatted
+    in CMake’s path style:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: <VAR_NAME>will serve as the name for variables that store the command’s output.
+    If a matching file is found, its path will be stored in the `<VAR_NAME>` variable.
+    Otherwise, the `<VAR_NAME>-NOTFOUND` variable will be set to `1`. We’ll use `PQXX_LIBRARY_PATH`
+    as our `VAR_NAME`, so we’ll end up with either a path in `PQXX_LIBRARY_PATH` or
+    `1` in `PQXX_LIBRARY_PATH-NOTFOUND`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `PQXX` library often exports its location to an `$ENV{PQXX_DIR}` environment
+    variable, meaning the system may already know its whereabouts. We can include
+    this path in our search by first formatting it using `file(TO_CMAKE_PATH)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `NO_DEFAULT_PATH` keyword instructs CMake to bypass its standard list of
+    search paths. While you generally wouldn’t want to do this (since the default
+    paths are often correct), using `NO_DEFAULT_PATH` allows you to explicitly specify
+    your own search locations if needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s move on to finding the required header files that can be included by users
+    of the library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching for header files
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: To search for all known header files, we’ll use the `find_path()` command, which
+    works very similarly to `find_library()`. The main difference is that `find_library()`
+    automatically appends system-specific extensions for libraries, whereas with `find_path()`,
+    we need to specify exact names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Also, don’t get confused here with `pqxx/pqxx`. It’s an actual header file,
+    but its extension was intentionally left off by the library creators to align
+    with C++ `#include` directives. This allows it to be used with angle brackets,
+    like so: `#include <pqxx/pqxx>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s the snippet:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, we’ll look at how to finalize the search process, handle any missing paths,
+    and call the function defining `imported` targets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning the final results
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Now, it’s time to check whether we have any `PQXX_LIBRARY_PATH-NOTFOUND` or
+    `PQXX_HEADER_PATH-NOTFOUND` variables set. We can either manually print diagnostic
+    messages and halt the build, or we can use the `find_package_handle_standard_args()`
+    helper function from CMake. This function sets the `<PKG_NAME>_FOUND` variable
+    to `1` if the path variables are correctly filled. It also provides appropriate
+    diagnostic messages (it will respect the `QUIET` keyword) and will halt execution
+    with a `FATAL_ERROR` if a `REQUIRED` keyword is provided in the `find_package()`
+    invocation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If a library is found, we’ll call the function we wrote earlier to define the
+    `IMPORTED` targets and store the paths in the cache:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake (continued)**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s it! This find module will find `PQXX` and create the appropriate `PQXX::PQXX`
+    targets. The complete file is available in the book’s `examples` repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For libraries that are well supported and likely already installed, this method
+    is very effective. But what if you’re dealing with older, less-supported packages?
+    Unix-like systems have a tool called `pkg-config`, and CMake has a useful wrapper
+    module to support it as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discovering legacy packages with FindPkgConfig
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Managing dependencies and figuring out the necessary compile flags is a challenge
+    as old as C++ libraries themselves. Various tools have been developed to tackle
+    this issue, from simple mechanisms to comprehensive solutions integrated into
+    buildsystems and IDEs. PkgConfig ([freedesktop.org/wiki/Software/pkg-config](http://freedesktop.org/wiki/Software/pkg-config))
+    is one such tool, once very popular and commonly found on Unix-like systems, although
+    it’s also available on macOS and Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, PkgConfig is gradually being replaced by more modern solutions. So,
+    should you still consider supporting it? Chances are, you probably don’t need
+    to. Here’s why:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If your library doesn’t provide the `.pc` PkgConfig files, there’s little value
+    in writing definition files for an aging tool; opt for newer alternatives instead
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you can pick a newer version of the library that supports CMake (we’ll discuss
+    how to download dependencies from the internet later in this chapter)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the package is widely used, the latest version of CMake might already include
+    a find module for it
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If a community-created find module is available online and its license allows
+    you to use it, that’s another good option
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you can write and maintain a find module yourself
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use PkgConfig only if you’re working with a library version that already provides
+    a PkgConfig `.pc` file, and no config module or find module is available. Also,
+    there should be a strong reason why creating a find module yourself isn’t a viable
+    option. If you’re convinced that you don’t need PkgConfig, go ahead and skip this
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Sadly, not all environments can be quickly updated to the latest versions of
+    a library. Many companies are still using legacy systems in production, which
+    are no longer receiving the latest packages. If you have a `.pc` file for a specific
+    library in your system, it will look something like the one for `foobar` shown
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: The format of PkgConfig is simple, and many developers familiar with this tool
+    prefer using it out of habit over learning more advanced systems like CMake. Despite
+    its simplicity, PkgConfig can check whether a specific library and its version
+    are available, and it can also get linking flags and directory information for
+    the library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use it with CMake, you need to find the `pkg-config` tool on your system,
+    run specific commands, and then store the results for later use by the compiler.
+    Doing all these steps each time you use PkgConfig can feel like a lot of work.
+    Luckily, CMake provides a FindPkgConfig find module. If PkgConfig is found, `PKG_CONFIG_FOUND`
+    will be set. We can then use `pkg_check_modules()` to look for the package we
+    need.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We have already become familiar with `libpqxx` in the previous section, and
+    since it offers a `.pc` file, let’s try and find it using PkgConfig. To put this
+    in action, let’s write a simple `main.cpp` file, which utilizes a placeholder
+    connection class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/04-find-pkg-config/main.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: In a typical listfile, we usually start with the `find_package()` function and
+    switch to PkgConfig if the library isn’t detected. This approach is useful when
+    the environment gets updated, as we can keep using the `main` method without altering
+    the code. We’ll skip this part for this example to keep it short.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/04-find-pkg-config/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s break down what happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `find_package()` command is used to locate PkgConfig. If `pkg-config` is
+    missing, the process stops due to the `REQUIRED` keyword.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `pkg_check_modules()` custom macro from the `FindPkgConfig` find module
+    sets up a new `IMPORTED` target named `PQXX`. The find module looks for a `libpqxx`
+    dependency and will fail if it’s not there, again because of the `REQUIRED` keyword.
+    The `IMPORTED_TARGET` keyword is crucial; otherwise, we’d need to define the target
+    manually.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We validate the setup with a `message()` function, displaying `PQXX_FOUND`.
+    If we hadn’t used `REQUIRED` earlier, this is where we could check whether the
+    variable was set, maybe to activate other fallbacks.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The `main` executable is declared with `add_executable()`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finally, we use `target_link_libraries()` to link the `PkgConfig::PQXX` target,
+    imported by `pkg_check_modules()`. Note that `PkgConfig::` is a fixed prefix and
+    `PQXX` is derived from the first argument we passed to the macro.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Using this option is faster than creating a find module for dependencies that
+    don’t have CMake support. However, it does come with some downsides. One issue
+    is that it relies on the older `pkg-config` tool, which may not be available in
+    the operating system that builds the project. Additionally, this approach creates
+    a special case that needs to be maintained differently from other methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ve discussed how to work with dependencies that are already installed on
+    your computer. However, that’s only part of the story. Many times, your project
+    will go to users who might not have all the required dependencies on their systems.
+    Let’s see how to handle this situation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using dependencies not present in the system
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'CMake excels at managing dependencies, particularly when they’re not already
+    installed on the system. There are several approaches you can take. If you’re
+    using CMake version 3.14 or newer, the `FetchContent` module is your best choice
+    for managing dependencies. Essentially, `FetchContent` is a user-friendly wrapper
+    around another module called `ExternalProject`. It not only simplifies the process
+    but also adds some extra features. We’ll dive deeper into `ExternalProject` later
+    in this chapter. For now, just know that the main difference between the two is
+    the order of execution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`FetchContent` brings dependencies in during the *configuration stage*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ExternalProject` brings dependencies in during the *build stage*.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: This order is significant, as targets defined by `FetchContent` during the configuration
+    stage will be in the same namespace, and as such can be easily used by our project.
+    We can link them with other targets, just as if we had defined them ourselves.
+    There are rare cases when this is not desirable, and that’s when `ExternalProject`
+    is the necessary choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s see how to deal with the majority of the cases first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: FetchContent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `FetchContent` module is extremely useful; it offers the following features:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Management of directory structure for an external project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Downloading of sources from a URL (and extracting from archives if needed)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Support for Git, Subversion, Mercurial, and CVS (Concurrent Versions System)
+    repositories
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Fetching updates if needed
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Configuring and building the project with CMake, Make, or with a user-specified
+    tool
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Providing nested dependencies on other targets
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The usage of the `FetchContent` module involves three main steps:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Add the module to your project with `include(FetchContent)`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Configure the dependencies with the `FetchContent_Declare()` command. This will
+    instruct FetchContent where the dependencies are and which version should be used.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Complete the dependency setup using the `FetchContent_MakeAvailable()` command.
+    This will download, build, install, and add the listfiles to your main project
+    for parsing.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'You might wonder why *steps 2* and *3* are separate. The reason is to allow
+    for **configuration overrides** in multi-layered projects. For example, consider
+    a project that depends on external libraries, A and B. Library A also depends
+    on B, but its authors are using an older version that differs from the parent
+    project’s version (*Figure 9.1*):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_09_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 9.1: The hierarchical project'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If configuration and download were to occur in the same command, the parent
+    project wouldn’t be able to use a newer version, even if it’s backward compatible,
+    because the dependency has already configured the *imported targets* for the older
+    version introducing conflicts to target names and files of the library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To specify what version is needed, the top-most project has to call the `FetchContent_Declare()`
+    command and provide overridden configuration for B, before library A is fully
+    set up. The subsequent call to `FetchContent_Declare()` in A will be ignored,
+    as the B dependency was already configured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at the signature of the `FetchContent_Declare()` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `depName` is a unique identifier of the dependency and will be later used
+    by the `FetchContent_MakeAvailable()` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `contentOptions` provides a detailed configuration of the dependency, which
+    can get quite complex. It’s important to realize that, under the hood, `FetchContent_Declare()`
+    uses the older `ExternalProject_Add()` command. As a matter of fact, many arguments
+    provided to `FetchContent_Declare` are directly forwarded to that internal call.
+    Before explaining all the arguments in detail, let’s see a working example that
+    downloads a dependency from GitHub.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic example with a YAML reader
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: I’ve written a tiny program that reads a username from a YAML file and prints
+    it out in a welcome message. YAML is a great, simple format to store human-readable
+    configuration, but it’s quite complex to parse by machines. I’ve found a neat,
+    small project that solves this problem called `yaml-cpp` by Jesse Beder ([https://github.com/jbeder/yaml-cpp](https://github.com/jbeder/yaml-cpp)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The example is fairly straightforward. It’s a greeting program that prints
+    a `Welcome <name>` message. The default value of `name` will be `Guest`, but we
+    can specify a different name in a YAML configuration file. Here’s the C++ code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/05-fetch-content/main.cpp**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The configuration file for this example is just a single line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/05-fetch-content/config.yaml**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ll reuse this example in other sections, so take a second to understand
+    how it works. Now that we have the code ready, let’s see how we can build it and
+    get the dependency in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/05-fetch-content/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can explicitly access the targets created by the `yaml-cpp` library. To
+    prove it, we’ll use a `CMakePrintHelpers` helper module:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When we build such a project, the configuration stage will print the following
+    output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: This tells us that the target defined by the `external-yaml-cpp` dependency
+    exists; it’s a static library, and its source directory resides inside the build
+    tree. This printout isn’t necessary for real-life projects, but it helps to debug
+    things if you’re not sure how to correctly include an imported target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Since we already copied the `.yaml` file to the output with the `configure_file()`
+    command, we can run the program:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Everything works like a charm! With hardly any work, we have introduced an external
+    dependency and used it in our project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we need more than one dependency, we should write multiple calls to the
+    `FetchContent_Declare()` command, each time selecting a unique identifier. But
+    there’s no need to call `FetchContent_MakeAvailable()` more than once because
+    it supports multiple identifiers (these are case-insensitive):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, we’ll learn how to write declarations of dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading the dependencies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `FetchContent_Declare()` command offers a wide range of options, which
+    come from the `ExternalProject` module. Essentially, you can perform three main
+    actions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Updating dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Patching dependencies
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Let’s begin by looking at the most common scenario: fetching files from the
+    internet. There are many download sources supported by CMake:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTTP Server (URL)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Git
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subversion
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Mercurial
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CVS
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Going from the top of the list, we’ll first explore how to download dependencies
+    from URLs and customize the process to fit our needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading from a URL
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: We can provide a list of URLs to be scanned in sequence until a download succeeds.
+    CMake will recognize whether the downloaded file is an archive and will unpack
+    it by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Basic declaration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here are some additional options to further customize this method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`URL_HASH <algo>=<hashValue>`: This checks whether a downloaded file’s checksum
+    generated by `<algo>` matches the provided `<hashValue>`. It is recommended to
+    guarantee the integrity of downloads. The following algorithms are supported:
+    `MD5`, `SHA1`, `SHA224`, `SHA256`, `SHA384`, `SHA512`, `SHA3_224`, `SHA3_256`,
+    `SHA3_384`, and `SHA3_512`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOWNLOAD_NO_EXTRACT <bool>`: This explicitly disables extraction after downloading.
+    We may consume the filename of downloaded files in the follow-up steps by accessing
+    the `<DOWNLOADED_FILE>` variable.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DOWNLOAD_NO_PROGRESS <bool>`: This explicitly disables logging of the download
+    progress.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TIMEOUT <seconds>` and `INACTIVITY_TIMEOUT <seconds>`: These set timeouts
+    to terminate the download after a fixed total time or period of inactivity.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HTTP_USERNAME <username>` and `HTTP_PASSWORD <password>`: These configure
+    HTTP authentication. Be cautious not to hardcode credentials.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HTTP_HEADER <header1> [<header2>...]`: This adds extra headers to your HTTP
+    request, which is useful for AWS or custom tokens.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TLS_VERIFY <bool>`: This verifies the SSL certificate. If this is not set,
+    CMake will read this setting from the `CMAKE_TLS_VERIFY` variable, which is set
+    to `false` by default. Skipping TLS verification is an unsafe, bad practice and
+    should be avoided, especially in production environments.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TLS_CAINFO <file>`: This provides a path to the authority file; if it isn’t
+    specified, CMake will read this setting from the `CMAKE_TLS_CAINFO` variable.
+    It is useful if your company is issuing self-signed SSL certificates.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The majority of programmers will refer to online repositories like GitHub to
+    grab the latest versions of libraries. Here’s how.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading from Git
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To download dependencies from Git, ensure that the host system has Git version
+    1.6.5 or later. The following options are essential for cloning the project from
+    Git:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Both `<url>` and `<tag>` should be compatible with the `git` command. In a production
+    environment, it’s advisable to use a specific `git` hash (rather than tag) to
+    ensure traceability of the produced binaries and to avoid unnecessary `git` `fetch`
+    operations. If you prefer using a branch, stick to remote names such as `origin/main`.
+    This ensures the proper synchronization of the local clone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Additional options include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GIT_REMOTE_NAME <name>`: This sets the remote name (`origin` is the default).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`GIT_SUBMODULES <module>...`: This specifies which submodules to update; since
+    3.16, this value defaults to `none` (previously, all submodules were updated).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`GIT_SUBMODULES_RECURSE 1`: This enables the recursive updating of submodules.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`GIT_SHALLOW 1`: This performs a shallow clone, which is faster as it skips
+    downloading historical commits.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TLS_VERIFY <bool>`: This verifies the SSL certificate. If this is not set,
+    CMake will read this setting from the `CMAKE_TLS_VERIFY` variable, which is set
+    to `false` by default; skipping TLS verification is an unsafe, bad practice and
+    should be avoided, especially in production environments.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If your dependency is stored in Subversion, you can also fetch it with CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading from Subversion
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To download from Subversion, we should specify the following options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Additionally, we may provide the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SVN_USERNAME <user>` and `SVN_PASSWORD <password>`: These provide credentials
+    for checkout and update. Avoid hardcoding these in your projects.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SVN_TRUST_CERT <bool>`: This skips the verification of the Subversion server
+    site certificate. Use this option only if the network path to the server and its
+    integrity are trustworthy.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Subversion is very easy to use with CMake. So is Mercurial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading from Mercurial
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'This mode is very straightforward. We need to provide two arguments and we’re
+    done:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lastly, we can use CVS to provide dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Downloading from CVS
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To check out modules from CVS, we need to provide the following three arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: With that, we covered all the download options for `FetchContent_Declare()`.
+    CMake supports additional steps that can be executed after a successful download.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updating and patching
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'By default, the `update` step will re-download the external project’s files
+    if the download method supports updates, for example, if we configure the Git
+    dependency pointing to the `main` or `master` branch. We can override this behavior
+    in two ways:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Provide a custom command to be executed during the update with `UPDATE_COMMAND
+    <cmd>`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Completely disable the `update` step (to allow building with a disconnected
+    network) – `UPDATE_DISCONNECTED <bool>`. Do note that dependency will still be
+    downloaded during the first build.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Patch`, on the other hand, is an optional step that will execute after the
+    update is fetched. To enable it, we need to specify the exact command we want
+    to execute with `PATCH_COMMAND <cmd>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake documentation warns that some patches may be more “sticky” than others.
+    For example, in Git, changed files don’t get restored to the original state during
+    the update, and we need to be careful to avoid incorrectly patching the file twice.
+    Ideally, the `patch` command should be robust and idempotent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can chain `update` and `patch` commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Downloading dependencies is helpful when they’re not already on the system.
+    But what if they are? How can we use the local version instead?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the installed dependency where possible
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Starting with version 3.24, CMake introduced a feature that allows `FetchContent`
+    to skip downloading if the dependencies are already available locally. To enable
+    this, simply add the `FIND_PACKAGE_ARGS` keyword to your declaration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can guess, this keyword instructs the `FetchContent` module to use the
+    `find_package()` function before initiating any downloads. If the package is found
+    locally, it will be used, and no download or build will occur. Note that this
+    keyword should be the last one in the command, as it will consume all subsequent
+    arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s how to update the previous example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch09/06-fetch-content-find-package/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We made two key changes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We added `FIND_PACKAGE_ARGS` with the `NAMES` keyword to specify that we’re
+    looking for the `yaml-cpp` package. Without `NAMES`, CMake would default to using
+    the `dependency-id`, which, in this case, is `external-yaml-cpp`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We added `INTERFACE_INCLUDE_DIRECTORIES` in the printed properties. This is
+    a one-off check so we can manually verify whether we’re using the installed package
+    or if a new one was downloaded.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Before testing, make sure the package is actually installed on your system.
+    If it’s not, you can install it using the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this setup, we can now build our project. If all goes well, you should
+    see debug output from the `cmake_print_properties()` command. This will indicate
+    that we’re using the local version, as shown in the `INTERFACE_INCLUDE_DIRECTORIES`
+    property. Keep in mind that this output is specific to your environment, your
+    mileage may vary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re not using CMake 3.24, or if you want to support users with older
+    versions, you might consider running the `find_package()` command manually. This
+    way, you’ll only download packages that aren’t already installed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Whichever method you choose, trying to use the local version first and downloading
+    only if the dependency isn’t found is a thoughtful approach that offers the best
+    user experience.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before the introduction of `FetchContent`, CMake had a simpler module called
+    `ExternalProject`. Although `FetchContent` is the recommended choice for most
+    situations, `ExternalProject` still has its own set of advantages and can be useful
+    in certain cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ExternalProject
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As mentioned, before `FetchContent` was introduced to CMake, another module
+    was serving a similar purpose: `ExternalProject` (added in 3.0.0). As you can
+    guess, it was used to fetch external projects from online repositories. Over the
+    years, the module was gradually extended for different needs, resulting in quite
+    a complicated command: `ExternalProject_Add()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `ExternalProject` module populates the dependencies during the build stage.
+    That’s quite different from `FetchContent`, which executes in the configuration
+    stage. Because of this difference, `ExternalProject` cannot import targets into
+    the project like `FetchContent` does. On the other hand, `ExternalProject` can
+    install dependencies directly into the system, execute their tests, and do other
+    interesting things, like overriding the commands used for configuration and the
+    build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is a small set of use cases where this may be necessary. Since there’s
+    a lot of overhead needed to use this legacy module effectively, treat it as a
+    curiosity. We’re mostly introducing it here to show how the current method evolved
+    from it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ExternalProject` offers an `ExternalProject_Add` command that configures the
+    dependency. Here’s an example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As mentioned, it closely resembles the `FetchContent_Declare` from `FetchContent`.
+    You’ll notice that there are two additional keywords in the example: `INSTALL_COMMAND`
+    and `TEST_COMMAND`. In this case, they are used to suppress the installation and
+    tests of the dependency, as they would normally execute during the build. `ExternalProject`
+    executes many steps that are deeply configurable, and they execute in the following
+    order:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`mkdir`: Create a subdirectory for the external project.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`download`: Download the project files from a repository or URL.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`update`: Download updates if supported by the `fetch` method.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`patch` : Execute a `patch` command that alters downloaded files.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`configure`: Execute the configure stage.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`build`: Perform the build stage for CMake projects.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`install`: Install CMake projects.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '`test`: Execute the tests.'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: For each of the steps, excluding `mkdir`, you can override the default behavior
+    by adding a `<STEP>_COMMAND` keyword. There are plenty of other options – please
+    refer to the online documentation for the full reference. If, for some reason,
+    you’d like to use this method over the recommended `FetchContent`, there’s an
+    ugly hack that can be applied to import the targets anyway by executing CMake
+    within CMake. For more details, check out the `ch09/05-external-project` code
+    example in the repository for this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Typically, we would rely on the library being available in the system. If it’s
+    not, we’d resort to `FetchContent`, an approach that is particularly suitable
+    for dependencies that are small and quick to compile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, for more substantial libraries like Qt, this method could be time consuming.
+    In such cases, package managers offering precompiled libraries tailored to the
+    user’s environment become advisable. While tools like Apt or Conan provide solutions,
+    they are either too system-specific or complex to be covered in this book. The
+    good news is that most users can install the dependencies your project may require,
+    as long as clear installation instructions are provided.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This chapter has equipped you with the knowledge to identify system-installed
+    packages using CMake’s find modules and how to utilize the config files that come
+    with the library. For older libraries that don’t support CMake but include `.pc`
+    files, the PkgConfig tool and CMake’s bundled `FindPkgConfig` find module can
+    be used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also explored the capabilities of the `FetchContent` module. This module
+    allows us to download dependencies from various sources while configuring CMake
+    to first scan the system, thereby avoiding unnecessary downloads. We touched upon
+    the historical context of these modules and discussed the option of using the
+    `ExternalProject` module for special cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake is designed to automatically generate build targets when a library is
+    located through most of the methods we’ve discussed. This adds a layer of convenience
+    and elegance to the process. With this foundation in place, you’re ready to incorporate
+    standard libraries into your projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we’ll learn how to provide reusable code on a smaller scale
+    with C++20 modules.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake documentation – provided find modules:[https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find
+    modules](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#findmodules)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CMake documentation – *Using Dependencies Guide*:[https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*CMake and using git-submodule for dependence projects*:[https://stackoverflow.com/questions/43761594/](https://stackoverflow.com/questions/43761594/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Piggybacking on PkgConfig:[https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: How to use ExternalProject:[https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html](https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*CMake FetchContent vs. ExternalProject*:[https://www.scivision.dev/cmake-fetchcontent-vs-external-project/](https://www.scivision.dev/cmake-fetchcontent-vs-external-project/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Using CMake with External Projects*:[http://www.saoe.net/blog/using-cmake-with-external-projects/](http://www.saoe.net/blog/using-cmake-with-external-projects/)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Join our community on Discord
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Join our community’s Discord space for discussions with the author and other
+    readers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/QR_Code94081075213645359.png)'
+  prefs: []
+  type: TYPE_IMG

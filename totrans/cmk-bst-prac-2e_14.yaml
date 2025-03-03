@@ -1,0 +1,33 @@
+- en: Part 3 – Mastering the Details
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In this part, you will be able to use CMake on cross-platform projects, reuse
+    CMake code, optimize and maintain existing projects, and migrate non-CMake projects
+    to CMake. You will also learn about the ways of contributing to the CMake project
+    and the recommended further reading materials:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 12*](B30947_12.xhtml#_idTextAnchor182)*,* *Cross-Platform-Compiling
+    Custom Toolchains*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 13*](B30947_13.xhtml#_idTextAnchor198)*,* *Reusing* *C**M**ake Code*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 14*](B30947_14.xhtml#_idTextAnchor211)*, Optimizing and Maintaining
+    CMake Projects*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 15*](B30947_15.xhtml#_idTextAnchor223)*, Migrating to CMake*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Appendix*](B30947_16.xhtml#_idTextAnchor233)*, Contributing to CMake and
+    Further Reading Material*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL

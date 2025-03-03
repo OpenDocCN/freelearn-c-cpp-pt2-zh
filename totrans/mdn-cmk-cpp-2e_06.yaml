@@ -1,0 +1,1314 @@
+- en: '6'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Using Generator Expressions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Many CMake users don’t encounter generator expressions in their private explorations
+    as they are quite advanced concepts. However, they are crucial for projects that
+    are preparing for the general availability stage, or first release to the wider
+    audience, as they play an important role in exporting, installing, and packaging.
+    If you’re trying to just learn the basics of CMake quickly and focus on the C++
+    aspect, feel free to skip this chapter for now and return to it later. On the
+    other hand, we discuss generator expressions at this time, because the following
+    chapters will reference this knowledge when explaining the more in-depth aspects
+    of CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ll start by introducing the subject of generator expressions: what they
+    are, what their uses are, and how they are formed and expanded. This will be followed
+    by a short presentation of the nesting mechanism and a more thorough description
+    of the conditional expansion, which allows the use of Boolean logic, comparison
+    operations, and queries. Of course, we’ll do a deep dive into the vastness of
+    the available expressions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But first, we’ll study the transformations of strings, lists, and paths, as
+    it’s good to get the basics out of the way before focusing on the main subject.
+    Ultimately, generator expressions are used in practice to fetch the information
+    available in later stages of building and present it in the appropriate context.
+    Determining that context is a huge part of their value. We’ll discover how to
+    parametrize our build process based on the build configuration selected by the
+    user, the platform at hand, and the current toolchain. That is, what compiler
+    is being used, what its version is, and which capabilities it has, that’s not
+    all: we’ll figure out how to query the properties of build targets and their related
+    information.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make sure we can fully appreciate the value of the generator expressions,
+    I have included a few interesting examples of use as the final part of this chapter.
+    Oh, and there’s a quick explanation of how to see the output of generator expressions
+    as this is a bit tricky. Don’t worry though, generator expressions aren’t as complex
+    as they might seem, and you will be using them in no time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following main topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are generator expressions?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Learning the basic rules of general expression syntax
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Conditional expansion
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Querying and transforming
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Trying out examples
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build the examples provided in this book, always use the recommended commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Be sure to replace the `<build tree>` and `<source tree>` placeholders with
+    appropriate paths. As a reminder: **build tree** is the path to the target/output
+    directory and **source tree** is the path at which your source code is located.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What are generator expressions?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'CMake is building the solution in three stages: configuration, generation,
+    and running the build tool. Generally, all the required data is available during
+    the configuration stage. However, occasionally, we encounter a situation similar
+    to the “chicken and the egg” paradox. Take an example from the *Using a custom
+    command as a target hook* section in *Chapter 5*, *Working with Targets* – where
+    a target needs to know the path of a binary artifact of another target. Unfortunately,
+    this information becomes available only after all the listfiles are parsed and
+    the configuration stage is complete.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, how do we tackle such a problem? One solution could be to create a placeholder
+    for the information and delay its evaluation until the next stage – the **generation
+    stage**.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is precisely what generator expressions (also referred to as “genexes”)
+    do. They are built around target properties such as `LINK_LIBRARIES`, `INCLUDE_DIRECTORIES`,
+    `COMPILE_DEFINITIONS`, and propagated properties, although not all. They follow
+    rules similar to the conditional statements and variable evaluation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generator expressions will be evaluated at the generation stage (when the configuration
+    is complete and the buildsystem is created), which means that capturing their
+    output into a variable and printing it to the console is not straightforward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There’s a significant number of generator expressions, and in a way, they constitute
+    their own, domain-specific language – language that supports conditional expressions,
+    logical operations, comparisons, transformations, queries, and ordering. Utilizing
+    generator expressions enables manipulation and queries of strings, lists, version
+    numbers, shell paths, configurations, and build targets. In this chapter, we will
+    provide brief overviews of these concepts, focusing on the essentials since they
+    are less necessary in most cases. Our primary focus will be on the main application
+    of generator expressions, which involves gathering information from the generated
+    configuration of targets and the state of the build environment. For full reference,
+    it’s best to read the official CMake manual online (see the *Further reading*
+    section for the URL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Everything is better explained with an example, so let’s jump right into it,
+    and describe the syntax of generator expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Learning the basic rules of general expression syntax
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To use generator expressions, we’ll need to add them to a CMake listfile through
+    a command that supports generator expression evaluation. Most of the target-specific
+    commands do, and there are plenty of others (review the official documentation
+    of a particular command to learn more). A command that is often used with generator
+    exception is `target_compile_definitions()`. To use a generator expression, we’ll
+    need to provide it as a command argument like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command adds a `-D` definition flag to the compiler’s arguments (ignore
+    `PUBLIC` for now) that sets the `BAR` preprocessor definition to *the path* at
+    which the **binary artifact** of the `foo` target will be produced. This works
+    because the generator expression is stored in the current form in a variable.
+    The expansion is effectively postponed until the generation stage when many things
+    are fully configured and known.
+  prefs: []
+  type: TYPE_NORMAL
+- en: How is the generator expression formed?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/B19844_06_01.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 6.1: The syntax of a generator expression'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can see in *Figure 6.1*, the structure seems fairly simple and readable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open with a dollar and a bracket (`$<`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Add the `EXPRESSION` name.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If an expression requires arguments, add a colon (`:`) and provide the `arg1`,
+    `arg2` … `argN` values, separated with a comma (`,`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Close the expression with `>`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There are expressions that do not require any arguments, such as `$<PLATFORM_ID>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to note that unless explicitly stated otherwise, expressions
+    are typically evaluated in the context of the target using the expression. This
+    association is inferred from the command in which the expression is used. In the
+    previous example, we saw how `target_compile_definitions()` provides `foo` as
+    the target it operates on. The target-specific generator expressions used in that
+    command will therefore implicitly use `foo`. Do note, however, that the generator
+    expression used in the example, `$<TARGET_FILE>`, requires the target attribute
+    as the context to operate on. There are other generator expressions that don’t
+    accept targets as arguments (like `$<COMPILE_LANGUAGE>`), and will implicitly
+    use the target of the enclosing command. These will be discussed in more detail
+    later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generator expressions can quickly become very confusing and complicated when
+    using their more advanced features, so it’s important to understand their specifics
+    beforehand.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nesting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s start with the ability to pass a generator expression as an argument
+    to another generator expression or, in other words, generator expression nesting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: This isn’t a very complex example, but it’s easy to imagine what happens when
+    we increase nesting levels and work with commands using multiple arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To complicate matters even further, it’s possible to add a regular variable
+    expansion to the mix:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `my_variable` variable will be expanded first, at the configuration stage.
+    Subsequently, the generation expression will be expanded at the generation stage.
+    There are some rare uses for this feature, but I strongly recommend avoiding it:
+    generator expressions provide virtually all necessary functions. Mixing regular
+    variables into these expressions adds a layer of indirection that is hard to debug.
+    Additionally, information collected in the config stage will often be outdated,
+    as users will override values used in generator expressions through command-line
+    parameters at the build or installation stage.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having covered the syntax, let’s move on to discuss the fundamental mechanisms
+    available in generator expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditional expansion
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Determining whether an expression should be expanded is supported with Boolean
+    logic in generator expressions. While this is a great feature, its syntax can
+    be inconsistent and difficult to read due to legacy reasons. It’s available in
+    two forms. The first form supports both happy and sad paths:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `IF` expression relies on nesting to be useful: you can replace any of
+    the arguments with another expression and produce quite complex evaluations (you
+    can even nest one `IF` condition in another). This form requires exactly three
+    arguments, so we can’t omit anything. Our best option to skip a value in case
+    of an unmet condition is the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There’s a shorthand version that allows you to skip the `IF` keyword and the
+    comma:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, it breaks the convention of providing the `EXPRESSION` name
+    as the first token. I assume that the intention here was to shorten the expression
+    and avoid typing those precious few characters, but the outcome can be really
+    hard to rationalize. Here’s one example from the CMake documentation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: This expression returns `COMPILING_CXX_WITH_CLANG` only for C++ code compiled
+    with one of the Clang compilers. (it returns an empty string in all other cases).
+    I wish the syntax was aligned with conditions for the regular `IF` command, but
+    sadly that’s not the case. Now, you can recognize the second form if you see it
+    somewhere, but you should avoid it in your own projects for the sake of readability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluating to Boolean
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Generator expressions are evaluated to one of two types – Boolean or string.
+    Boolean is represented by `1` (true) and `0` (false). There are no dedicated numerical
+    types; everything that isn’t a Boolean is just a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to remember that nested expressions passed as conditions in conditional
+    expressions are explicitly required to evaluate to Boolean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Boolean types can be converted to strings implicitly, but you’ll need to use
+    an explicit `BOOL` operator (explained ahead) to do the opposite.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three categories of expressions that get evaluated to Boolean: logical
+    operators, comparison expressions, and queries. Let’s take a quick look at these
+    types.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logical operators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are four logical operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<NOT:arg>`: This negates the Boolean argument.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<AND:arg1,arg2,arg3...>`: This returns true if all the arguments are true.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<OR:arg1,arg2,arg3...>`: This returns true if any of the arguments is true.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<BOOL:string_arg>`: This converts arguments from a string to a Boolean type.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'String conversion with `$<BOOL>` will evaluate to Boolean true (`1`) if none
+    of these conditions are met:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The string is empty.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The string is a case-insensitive equivalent of `0`, `FALSE`, `OFF`, `N`, `NO`,
+    `IGNORE`, or `NOTFOUND`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The string ends in the `-NOTFOUND` suffix (case-sensitive).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Comparisons
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Comparisons will evaluate to `1` if their condition is met and `0` otherwise.
+    Here are a few of the most common operations that you might find useful:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<STREQUAL:arg1,arg2>`: This compares strings in a case-sensitive fashion.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<EQUAL:arg1,arg2>`: This converts a string to a number and compares equality.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<IN_LIST:arg,list>`: This checks whether the `arg` element is in the `list`
+    list (case sensitive).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<VERSION_EQUAL:v1,v2>`, `$<VERSION_LESS:v1,v2>`, `$<VERSION_GREATER:v1,v2>`,
+    `$<VERSION_LESS_EQUAL:v1,v2>`, and `$<VERSION_GREATER_EQUAL:v1,v2>` compare versions
+    in a component-wise fashion.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH_EQUAL:path1,path2>`: This compares the lexical representations of two
+    paths without any normalization (since CMake 3.24).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Queries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Queries simply return the Boolean value directly from a variable, or as a result
+    of an operation. One of the simplest queries is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you might guess, it returns true if the target was defined in the configuration
+    stage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now, you know how to apply conditional expansion, use logical operators, comparison,
+    and basic queries to evaluate to Boolean. That is useful on its own, but generator
+    expressions have much more to offer, especially in the context of queries: they
+    can be used in the `IF` conditional expansion, or on their own as arguments to
+    commands. It’s time to introduce them in an appropriate context.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying and transforming
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Many generator expressions are available, but to avoid getting lost in the weeds,
+    let’s focus on the most common ones. We’ll start with some basic transformations
+    of the available data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dealing with strings, lists, and paths
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Generator expressions provide only the bare minimum of operations to transform
+    and query data structures. Working with strings in the generator stage is possible
+    with the following expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<LOWER_CASE:string>`, `$<UPPER_CASE:string>`: This converts to `string` to
+    the required case.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'List operations were fairly limited until recently. Since CMake 3.15, the following
+    operations have been available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<IN_LIST:string,list>`: This returns true if `list` contains a `string` value.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<JOIN:list,d>`: This joins a semicolon-separated `list` using a `d` delimiter.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<REMOVE_DUPLICATES:list>`: This deduplicates `list` (without sorting).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<FILTER:list,INCLUDE|EXCLUDE,regex>`: This includes/excludes items from `list`
+    using a `regex`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Since 3.27, the `$<LIST:OPERATION>` generator expressions were added, where
+    `OPERATION` is one of:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`LENGTH`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`GET`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SUBLIST`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`FIND`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`JOIN`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`APPEND`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`PREPEND`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`INSERT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POP_BACK`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`POP_FRONT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`REMOVE_ITEM`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`REMOVE_AT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`REMOVE_DUPLICATES`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`FILTER`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TRANSFORM`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`REVERSE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SORT`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: It’s rather rare to work with lists in generator expressions, so we’re only
+    indicating what’s possible. If you find yourself in one of these cases, see the
+    online manual for instructions on how to use these operations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, we can query and transform the system paths. It’s a useful addition
+    because of its portability across different operating systems. The following simple
+    queries have been available since CMake 3.24:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_ROOT_NAME,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_ROOT_DIRECTORY,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_ROOT_PATH,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_FILENAME,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_EXTENSION,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_STEM,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_RELATIVE_PART,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:HAS_PARENT_PATH,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:IS_ABSOLUTE,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:IS_RELATIVE,path>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:IS_PREFIX[,NORMALIZE],prefix,path`>: This returns true if prefix is
+    the prefix of path'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Analogically, we can retrieve all the path components we were able to check
+    for (since CMake 3.27, it’s been possible to provide a list of paths rather than
+    just one path):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_ROOT_NAME,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_ROOT_DIRECTORY,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_ROOT_PATH,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_FILENAME,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_EXTENSION[,LAST_ONLY],path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_STEM[,LAST_ONLY],path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_RELATIVE_PART,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:GET_PARENT_PATH,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Additionally, some transform operations were introduced in 3.24; we’ll just
+    list them for completeness:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<PATH:CMAKE_PATH[,NORMALIZE],path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:APPEND,path...,input,...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:REMOVE_FILENAME,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:REPLACE_FILENAME,path...,input>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:REMOVE_EXTENSION[,LAST_ONLY],path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:REPLACE_EXTENSION[,LAST_ONLY],path...,input>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:NORMAL_PATH,path...>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:RELATIVE_PATH,path...,base_directory>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There’s one more path operation, which formats the provided path to the style
+    supported by the shell of the host: `$<SHELL_PATH:path...>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Again, previous expressions are introduced for later reference, not as information
+    that you need to memorize right now. The bulk of the recommended practical knowledge
+    is detailed in the subsequent sections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parametrizing the build configuration and platform
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'One of the key pieces of information that CMake users will provide when building
+    a project is the desired build configuration. In most cases, it will be `Debug`
+    or `Release`. We can use the generator expressions to access these values through
+    the following statements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<CONFIG>`: This returns the current build configuration as a string: `Debug`,
+    `Release`, or another.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<CONFIG:configs>`: This returns true if `configs` contains the current build
+    configuration (case-insensitive comparison).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'We discussed the platform in the *Chapter 4*, *Setting Up Your First CMake
+    Project* in the *Understanding the build environment* section. We can read related
+    information the same way as with configuration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<PLATFORM_ID>`: This returns the current platform ID as a string: `Linux`,
+    `Windows`, or `Darwin` for macOS.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<PLATFORM_ID:platform>` is true if `platform` contains the current platform
+    ID.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Such configuration or platform-specific parametrization is a powerful addition
+    to our toolbelt. We can use it in conjunction with the conditional expansion we
+    discussed earlier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example, we may apply one compilation flag when building test binaries,
+    and another for production:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: But this is just the beginning. There are plenty of other circumstances we can
+    address with generator expressions. Of course, the next important aspect is the
+    tooling present in the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tuning for toolchain
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Toolchains, toolkits, or, simply, compilers and linkers luckily (sadly?) aren’t
+    consistent across vendors. This has all sorts of consequences. Some of them are
+    great (better performance in special cases), others not so much (varied configuration
+    flavors, discrepancies in flag naming, and more).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generator expressions help here by providing sets of queries that can be utilized
+    to alleviate problems and opportunistically improve user experience where possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with the build configurations and platform, there are multiple expressions
+    that return information about the toolchain, both as string and Boolean. However,
+    we’re required to specify which language we’re interested in (replace `#LNG` with
+    one of `C`, `CXX`, `CUDA`, `OBJC`, `OBJCXX`, `Fortran`, `HIP`, or `ISPC`). Support
+    for `HIP` was added in 3.21.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<#LNG_COMPILER_ID>`: This returns CMake’s compiler ID of the `#LNG` compiler
+    used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<#LNG_COMPILER_VERSION>`: This returns CMake’s compiler version of the `#LNG`
+    compiler used.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To check which compiler will execute for C++, we should use the `$<CXX_COMPILER_ID>`
+    generator expression. The returned value, the CMake’s compiler ID, is a constant
+    defined for every supported compiler. You may encounter values like `AppleClang`,
+    `ARMCC`, `Clang`, `GNU`, `Intel`, and `MSVC`. For the full list, check the official
+    documentation (URL in the *Further reading* section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Similarly to the previous section, we can also utilize the toolchain information
+    in conditional expressions. There are multiple queries that return `true` if any
+    of the provided arguments matches a specific value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<#LNG_COMPILER_ID:ids>`: This returns true if `ids` contains CMake’s #`LNG`
+    compiler ID.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<#LNG_COMPILER_VERSION:vers>`: This returns true if `vers` contains the CMake’s
+    #`LNG` compiler version.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_FEATURES:features>`: This returns true if all features provided
+    in `features` are supported by the compiler for this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Inside commands requiring a target argument, like `target_compile_definitions()`,
+    we can use one of the target-specific expressions to get a string value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANGUAGE>`: This returns the language of source files at the compilation
+    step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LINK_LANGUAGE>`: This returns the language of source files at the link step.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'To evaluate a simple Boolean query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANGUAGE:langs>`: This returns true if `langs` contains a language
+    used for the compilation of this target. This can be used to provide language-specific
+    flags to the compiler. For example, to compile C++ sources of the target with
+    the `-fno-exceptions` flag:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: '`$<LINK_LANGUAGE:langs>` – It follows the same rules as `COMPILE_LANGUAGE`
+    and returns true if `langs` contains a language used for linking of this target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Or, to query more complex scenarios:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<COMPILE_LANG_AND_ID:lang,compiler_ids...>`: This returns true if the `lang`
+    language is used for this target, and one of the compilers in the `compiler_ids`
+    list will be used for this compilation. This expression is useful to specify compile
+    definitions for specific compilers:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: In this example, for C++ sources (`CXX)` compiled with `AppleClang` or `Clang`,
+    the `-DCXX_CLANG` definition will be set. For the C++ sources compiled with the
+    `Intel` compiler, the `-DCXX_INTEL` definition flag will be set. Lastly, for the
+    C sources (`C`) compiled with the `Clang` compiler, we’ll set a `-DC_CLANG` definition.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<LINK_LANG_AND_ID:lang,compiler_ids...>`: This works like `COMPILE_LANG_AND_ID`,
+    but checks the language used for the link step instead. Use this expression to
+    specify link libraries, link options, link directories, and link dependencies
+    of a particular language and a linker combination in a target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: An important note to make here is that a single target can be combined from
+    sources of multiple languages. For example, it’s possible to link C artifacts
+    with C++ (but we should declare both languages in the `project()` command). Therefore,
+    generator expressions referencing a specific language will be used for some source
+    files, but not for others.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s move on to the next important category: target-related generator expressions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying target-related information
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are plenty of generator expressions that query target properties and check
+    target-related information. Note that until CMake 3.19, many target expressions
+    referencing another target were used to automatically create a dependency between
+    them. This no longer happens in the latest versions of CMake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some generator expressions will infer the target from the command being called;
+    the most commonly used is the basic query that returns the target’s property value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Less known, but useful in the `target_link_libraries()` command, is the `$<LINK_ONLY:deps>`
+    generator expression. It allows us to store the `PRIVATE` link dependencies, which
+    won’t be propagated through transitive usage requirements; these are used in interface
+    libraries, which we discussed in *Chapter 5*, *Working with Targets*, in the *Understanding
+    the transitive usage requirements* section.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There also is a set of install and export-related expressions, which infer
+    their targets from the context they’re being used. We’ll discuss them in depth
+    in *Chapter 14*, *Installing and Packaging*, so we can just have a quick introduction
+    for now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<INSTALL_PREFIX>`: This returns the install prefix when the target is exported
+    with `install(EXPORT)` or when evaluated in `INSTALL_NAME_DIR`; otherwise, it
+    is empty.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<INSTALL_INTERFACE:string>`: This returns `string` when the expression is
+    exported with `install(EXPORT)`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<BUILD_INTERFACE:string>`: This returns `string` when the expression is exported
+    with the `export()` command or by another target in the same buildsystem.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<BUILD_LOCAL_INTERFACE:string>`: This returns `string` when the expression
+    is exported by another target in the same buildsystem.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'However, most queries require the target name to be explicitly provided as
+    the first argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_EXISTS:target>`: This returns true if the target exists.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_NAME_IF_EXISTS:target>`: This returns the `target` name if the target
+    exists and an empty string otherwise.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_PROPERTY:target,prop>`: This returns the `prop` property value for
+    the target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_OBJECTS:target>`: This returns a list of *object files* for an *object
+    library* target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'You can query the path of the target artifact:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE:target>`: This returns the full path.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_NAME:target>`: This returns just the filename.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_BASE_NAME:target>`: This returns the base name.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_NAME:target>`: This returns the base name without the prefix
+    or suffix (for `libmylib.so` the base name would be `mylib`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_PREFIX:target>`: This returns just the prefix (for example,
+    `lib`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_SUFFIX:target>`: This returns just the suffix (for example,
+    `.so` or `.exe`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_FILE_DIR:target>`: This returns the directory.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'There are families of expressions that offer similar functionality as the regular
+    `TARGET_FILE` expression (each expression also accepts the `_NAME`, `_BASE_NAME`
+    or `_DIR` suffix):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`TARGET_LINKER_FILE`: This queries the path of the file used when linking to
+    the target. Usually, it is the library produced by the target (`.a`, `.lib`, `.so`).
+    However, on platforms with **Dynamic-Link Libraries** (**DLLs**), it will be a
+    `.lib` import library associated with the target’s DLL.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`TARGET_PDB_FILE`: This queries the path of the linker-generated program database
+    file (`.pdb`).'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Managing libraries is a complex topic, and CMake offers a lot of generator expressions
+    to help. However, we’ll postpone introducing them until they become relevant in
+    *Chapter 8*, *Linking Executables and Libraries*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, there are some Apple package-specific expressions as well:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<TARGET_BUNDLE_DIR:target>`: This is the full path to the bundle directory
+    (`my.app`, `my.framework`, or `my.bundle`) for the target.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<TARGET_BUNDLE_CONTENT_DIR:target>`: This is the full path to the bundle
+    content directory for the target. On macOS, it’s `my.app/Contents`, `my.framework`,
+    or `my.bundle/Contents`. Other **Software Development Kits** (**SDKs**) (such
+    as iOS) have a flat bundle structure – `my.app`, `my.framework`, or `my.bundle`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These are the main generator expressions for dealing with targets. It’s worth
+    knowing, there’s plenty more. I recommend referring to the official documentation
+    for a complete list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Escaping
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'On a rare occasion, you may need to pass a character to a generator expression
+    that has a special meaning. To escape this behavior, use the following expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$<ANGLE-R>`: This a literal `>` symbol'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<COMMA>`: This a literal `,` symbol'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$<SEMICOLON>`: This a literal `;` symbol'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The last expression can be useful to prevent list expansion when an argument
+    containing `;` is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we have introduced all the queries and transformations, we can see
+    how they work in practice. Let’s go through some examples of applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Trying out examples
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Everything is easier to grasp when there’s a good practical example to support
+    the theory. Obviously, we’d like to write some CMake code and try it out. However,
+    since generator expressions aren’t evaluated until after the configuration is
+    complete, we cannot use any configuration-time commands like `message()` to experiment.
+    We need to use some special tricks instead. To debug generator expressions, you
+    can use either of these methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Write it to a file (this particular version of the `file()` command supports
+    generator expressions): `file(GENERATE OUTPUT filename CONTENT "$<...>")`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Add a custom target and build it explicitly from the command line: `add_custom_target(gendbg
+    COMMAND ${CMAKE_COMMAND} -E echo "$<...>")`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: I recommend the first option for simpler practice. Remember, though, that we
+    won’t be able to use all the expressions in these commands, as some are target
+    specific. Having covered this, let’s look at some of the uses for generator expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Build configurations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In *Chapter 1*, *First Steps with CMake*, we discussed the build type, specifying
+    which configuration we are building – `Debug`, `Release`, and so on. There may
+    be cases where you’d like to act differently based on what kind of build you’re
+    making. A simple and easy way to do so is by utilizing the `$<CONFIG>` generator
+    expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding example checks whether the config equals `DEBUG`; if that’s the
+    case, the nested expression is evaluated to `1`. The outer shorthand `if` expression
+    then becomes `true`, and our `-ginline-points` debug flag gets added to the options.
+    It’s important to know this form, so you’ll be able to understand such expressions
+    in other projects, but I’d recommend using the more verbose `$<IF:...>` for better
+    readability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: System-specific one liners
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Generator expressions can also be used to compact verbose `if` commands into
+    neat one liners. Let’s suppose we have the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It tells the compiler to add `-DLINUX=1` to the arguments if this is the target
+    system. While this isn’t terribly long, it could be replaced with a fairly simple
+    expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Such code works well, but there’s a limit to how much you can pack into a generator
+    expression until it becomes too hard to read. On top of that, many CMake users
+    postpone learning about generator expressions and have trouble following what
+    happens. Luckily, we won’t have such problems after completing this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interface libraries with compiler-specific flags
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Interface libraries, as we discussed in *Chapter 5*, *Working with Targets*,
+    can be used to provide flags to match the compiler:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Even in such a simple example, we can already see how difficult an expression
+    is to understand when we nest too many generator expressions. Unfortunately, sometimes
+    this is the only way to achieve the desired effect. Here’s the explanation of
+    the example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We check whether `COMPILER_ID` is `GNU`; if that’s the case, we evaluate `OR`
+    to `1`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If it’s not, we check whether `COMPILER_ID` is `Clang`, and evaluate `OR` to
+    `1`. Otherwise, evaluate `OR` to `0`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `OR` is evaluated to `1`, add `-rtti` to the `enable_rtti` **compile options**.
+    Otherwise, do nothing.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Next, we can link our libraries and executables with the `enable_rtti` interface
+    library. CMake will add the `-rtti` flag if a compiler supports it. Side note:
+    **RTTI** stands for **run-time type information** and is used in C++ with keywords
+    like `typeid` to determine the class of an object at run time; unless your code
+    is using this feature, the flag doesn’t need to be enabled.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Nested generator expressions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sometimes, it’s not obvious what happens when we try to nest elements in a generator
+    expression. We can debug the expressions by generating a test output to a debug
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s try out a few things and see what happens:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch06/01-nesting/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'After building this project as described in the *Technical requirements* section
+    of this chapter, we can read the produced `nesting` file using the Unix `cat`
+    command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is how each line works:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `PLATFORM_ID` output value is `LINUX`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The output from the nested value will get transformed correctly to uppercase
+    `LINUX`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We can transform plain strings.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We can transform the content of configuration-stage variables.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Variables will be interpolated first, and closing angle brackets (`>`) will
+    be interpreted as part of the genex, in that only part of the string will get
+    capitalized.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In other words, be aware that the content of variables may affect the behavior
+    of your genex expansions. If you need an angle bracket in a variable, use `$<ANGLE-R>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The difference between a conditional expression and the evaluation of a BOOL
+    operator
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Generator expressions can be a little confusing when it comes to evaluating
+    Boolean types to strings. It is important to understand how they differ from regular
+    conditional expressions, starting with an explicit `IF` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**ch06/02-boolean/CMakeLists.txt**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s read the produced file using the Linux `cat` command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s examine the output for each line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a Boolean expansion, where `BOOL` is `0`; therefore, the `TRUE` string
+    isn’t written.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is a typical mistake – the author intended to print `TRUE` or `FALSE` depending
+    on the `BOOL` value, but since it is a Boolean `false` expansion as well, two
+    arguments are treated as one and not printed.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is the same mistake for a reversed value – it is a Boolean `true` expansion
+    that has both arguments written in a single line.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is a proper conditional expression starting with `IF` – it prints `FALSE`
+    because the first argument is `0`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is the correct usage of a conditional expression, however, when we don’t
+    need to provide values for Boolean `false`, we should use the form used in the
+    first line.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Generator expressions are notorious for their convoluted syntax. The differences
+    mentioned in this example can confuse even experienced builders. If in doubt,
+    copy such an expression to another file and analyze it by adding indentation and
+    whitespace to understand it better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Seeing examples of how generator expressions work has prepared us to use them
+    in practice. Upcoming chapters will discuss many topics, where generator expressions
+    will be relevant. In time, we’ll cover even more of their applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This chapter was all about unpacking the ins and outs of generator expressions,
+    or “genexes.” We started with the basics of forming and expanding generator expressions
+    and looked at their nesting mechanism. We dove into the power of conditional expansion,
+    which taps into Boolean logic, comparison operations, and queries. This aspect
+    of generator expressions shines when adapting our build process based on factors
+    like user-chosen build configuration, platform, and the current toolchain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We have also covered the basic but essential transformations of strings, lists,
+    and paths. A major highlight was using genexes to query the information gathered
+    at the later build stages and present it when the context matches the requirements.
+    We also now know how to check our compiler’s ID, version, and capabilities. We
+    explored querying the build target properties and extracting the related information
+    using generator expressions. The chapter is wrapped up with practical examples
+    and guidance on viewing the output where possible. With this, you’re now ready
+    to use the generator expressions in your projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter, we’ll learn how to compile programs with CMake. Specifically,
+    we’ll talk about how to configure and optimize this process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further reading
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'For more information on the topics covered in this chapter, you can refer to
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Generator expressions in the official documentation: [https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Supported compiler IDs: [https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html](https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Mixing languages in Cmake: [https://stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake](https://stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake
+    )'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Leave a review!
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Enjoying this book? Help readers like you by leaving an Amazon review. Scan
+    the QR code below to get a free eBook of your choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](img/Review_Copy.png)'
+  prefs: []
+  type: TYPE_IMG

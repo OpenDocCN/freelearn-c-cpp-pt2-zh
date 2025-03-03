@@ -1,0 +1,425 @@
+- en: Preface
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We are thrilled you’ve decided to pick up *Minimal CMake* to either get introduced
+    to CMake or to expand your knowledge of what is possible with it today. If you
+    are interested in learning about how CMake can help you create libraries and applications,
+    integrate with world-class open source software, or how it can be used to share
+    your creations with others, you’re in the right place.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The title of this book is a little tongue-in-cheek, but the idea is to get to
+    the good bits of CMake as fast as possible, skipping over some areas and avoiding
+    others entirely. CMake is at its best when it does what you need it to do, and
+    then gets out of your way. You don’t need to be a CMake expert to wield it effectively,
+    and whether you’re new to CMake or have been away a while and are returning to
+    see what’s changed, this book will have something for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An important aspect of this book is its focus on practical examples. It will
+    take you step by step from a simple console application, all the way through to
+    a full windowed app that runs on macOS, Windows, and Linux. Each chapter builds
+    on the last, and every chapter is accompanied by source code split into multiple
+    parts, each incrementally building on what came before. You will witness step
+    by step how the journey unfolds and the reasoning and trade-offs behind every
+    change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In *Part 1*, we’ll make sure everyone has the tools they need to get CMake set
+    up on their system of choice. We’ll then walk through some simple CMake scripts
+    to get familiar with the most fundamental CMake commands. Next, we’ll turn our
+    attention to a relatively new and incredibly powerful addition to CMake that makes
+    integrating external libraries trivial. As well as showing how to integrate external
+    code, we’ll show you how to make your own code sharable by creating a reusable
+    library ourselves.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Part 2* builds on the foundations laid by *Part 1*. We’ll start by introducing
+    some incredibly useful quality-of-life improvements that have been added to CMake
+    in recent years. These eliminate a lot of tedious commands while keeping our CMake
+    scripts clean and simple. We’ll also start to introduce larger dependencies and
+    understand strategies for how to handle them, as well as how to create them ourselves.
+    We’ll wrap things up by showing how to create a unified build that can configure
+    and build our application, libraries, and dependencies all with a single command.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In *Part 3*, we’ll cover some other important areas where CMake can help us
+    build and share better software. We’ll see how to add many kinds of tests to both
+    our libraries and applications, as well as how to tie them together with the help
+    of the companion tool, CTest. We’ll also gain an appreciation for how CMake can
+    help us package our application, so it runs not just on our machine, but anywhere.
+    We’ll wrap things up by reviewing what other great tools are available that can
+    make working with CMake easier, and where to go next to continue building your
+    CMake knowledge.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why CMake?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: CMake is one of those tools that unfortunately (though, not necessarily undeservedly)
+    has a bit of a bad reputation. There are many developers out there who’ve been
+    burned by CMake. They may have been forced to interact with it in a legacy code
+    base, having had to deal with significant complexity, reams of CMake scripts,
+    and questionable practices. Alternatively, they may have tried to use it for a
+    new project, only to get stuck and frustrated trying to get things to work. As
+    CMake has been around for a long time, there are many outdated examples and resources
+    referencing old versions of CMake without all the latest features (and the benefit
+    of hindsight about what works, and what not to do). As with any successful framework
+    or language, CMake also comes with a certain amount of baggage, which is unfortunately
+    unavoidable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With all that being said, the good news is that over the last few years, there
+    has been somewhat of a renaissance in CMake, and from version 3.0 (technically
+    2.8 for the diehards) onward, the new functionality to compose complex projects
+    from targets has made an enormous difference, and it has been slowly gaining in
+    popularity since.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the reasons for CMake’s growing popularity is a crucial detail that cannot
+    be overstated. If you describe your build using CMake, you’ll by default have
+    a project that you can build on Windows, Linux, and macOS. If you instead start
+    a project with Visual Studio on Windows, Xcode on macOS, or Make files on Linux,
+    it’s harder to migrate to other platforms, and harder for others working on different
+    platforms to contribute. Having your build settings and options stored in versioned,
+    human-readable scripts is incredibly useful (no more searching through nested
+    tabs and windows in IDEs to find the right value to change).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The other interesting development is with this increasing popularity, CMake
+    is now the lingua franca of build systems in C and C++. If a C or C++ project
+    lives on GitHub, chances are it’s using CMake, and even if it’s not, with a minimal
+    amount of effort, it’s possible to write a simple integration or wrapper to make
+    that library consumable from CMake. This unlocks a vast wealth of potential, as
+    adding a dependency to provide improvements to your project suddenly becomes a
+    few lines of code, instead of an agonizing, laborious, and time-consuming process,
+    usually requiring either embedding code from other libraries in your project or
+    downloading and writing the code to build those libraries yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CMake to build your projects and knowing enough CMake to get by (you most
+    certainly do not need to be an expert) will make writing your applications faster,
+    more maintainable, and more collaborative. It will also make working with C or
+    C++ more fun (we promise), and not only C and C++, as there’s CMake support for
+    C#, Fortran, CUDA, Objective-C, and Swift at the time of publication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake is by no means perfect, but today, it is ubiquitous across the C and C++
+    landscape, and it is constantly evolving and improving thanks to the excellent
+    work of the developers at Kitware and the many impactful open source contributors.
+    We’re convinced, that whether you’re a professional C++ developer with years of
+    experience, or a student or hobbyist just starting out, picking up, or getting
+    reacquainted with CMake, will make you a happier, more productive developer. The
+    experience you’ll gain when it comes to things such as dependency management and
+    project structure will also serve you well in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s now turn our attention toward which group you feel most aligned with to
+    help get the most out of this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Who this book is for
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We appreciate that there is a broad spectrum of people who may be interested
+    in reading this book, and so we’d like to provide some specific details for each
+    type of reader to help better prepare you for the material.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Students
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you are a computer science or software engineering student, then this book
+    may be of interest to you to help introduce you not only to CMake, but also to
+    cross-platform development, static versus shared libraries, code structure, and
+    testing. The information within will provide a solid foundation for making your
+    own desktop applications, be they games, tools, or simulations. Some topics may
+    be unfamiliar, but by studying the code and following the recommended links, you’ll
+    quickly pick up the content.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Experienced C/C++ developers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re coming to this book with a lot of existing experience building C/C++
+    libraries and/or applications, a lot of the fundamental topics may be familiar,
+    but the ways in which you can use CMake to configure and set things up efficiently
+    will be of interest (e.g., topics relating to dynamic library loading and RPATH
+    handling for example). The example project also makes use of some interesting
+    libraries (in particular, the graphics library, `bgfx`, and user interface library,
+    Dear ImGui), which may be of interest, as well as their handling in CMake. How
+    CMake handles installing and packaging is likely to also be relevant (particularly
+    how to correctly configure installers/disk images correctly using CMake).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Experienced developers (other languages)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re an experienced developer familiar with other languages (such as JavaScript/TypeScript,
+    Java, C#, Python, Rust) then you’ll be certain to be able to follow the content
+    with ease. Hopefully, the parallels between CMake and the build system you use
+    in your existing language/framework should make picking up the concepts simpler
+    (especially when it comes to dependency management). The examples should also
+    act as a refresher for C/C++ if you’re new to (or estranged from) the language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hobbyists
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re a hobbyist developer looking to build your first game or tool to share
+    with friends, family, or coworkers, then this book should give you everything
+    you need to get started. If you want to build a windowed application or stick
+    with something that can be run from the terminal, we’ve got you covered. The information
+    showing how to integrate third-party libraries should be particularly useful in
+    helping you become as productive as possible in a short space of time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What this book covers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '[*Chapter 1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*, covers
+    everything you’ll need to get up and running with CMake whether you’re on Windows,
+    macOS, or Linux.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello, CMake!*, takes you
+    on a whistle-stop tour of CMake, introducing some of the most fundamental concepts
+    and the heart of the application we’ll be building over the course of the book.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External
+    Dependencies*, shows you how to bring in our first external dependency to enhance
+    our application with minimal effort.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 4*](B21152_04.xhtml#_idTextAnchor086), *Creating Libraries for FetchContent*,
+    swaps things around, and shows you how to create a library that can then be consumed
+    by `FetchContent`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B21152_05.xhtml#_idTextAnchor141), *Streamlining CMake Configuration*,
+    switches gears to focus on how to set up CMake to work as efficiently as possible
+    and eliminate verbose commands.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and
+    ExternalProject_Add*, builds on [*Chapter 5*](B21152_05.xhtml#_idTextAnchor141)
+    and shows you how best to handle larger dependencies in your project.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for
+    Your Libraries*, walks through how to make your library installable so it can
+    be used in the same way as the dependencies we explored in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B21152_08.xhtml#_idTextAnchor183), *Using Super Builds to Simplify
+    Onboarding*, is a return to streamlining the project, with a demonstration of
+    how to build your project and multiple external dependencies with one command.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 9*](B21152_09.xhtml#_idTextAnchor195), *Writing Tests for the Project*,
+    explores the importance of testing and outlines where CTest can help consolidate
+    many kinds of tests.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 10*](B21152_10.xhtml#_idTextAnchor214), *Packaging the Project for
+    Sharing*, covers the final piece of the puzzle when it comes to getting your project
+    ready to share with others.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 11*](B21152_11.xhtml#_idTextAnchor228), *Supporting Tools and Next
+    Steps*, looks at the wider CMake ecosystem and describes a host of tools that
+    complement CMake itself, as well as sharing ideas about topics and resources that
+    will help you learn more about CMake in the future.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get the most out of this book
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Following along will be a bit easier if you have some limited experience in
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic knowledge of C/C++ (or a similar procedural language such as Java or C#)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Familiarity with the terminal/command line
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Experience working with a code editor (e.g., Visual Studio Code)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Awareness of basic graphics programming concepts (a bonus; this is to understand
+    some of the later examples, but is not required)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We hope this book gives you an understanding and appreciation for what CMake
+    can do to make building applications easier. It will give you a strong foundation
+    on which to build and structure new projects that will make using other’s code,
+    as well as sharing your own, straightforward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| **Software/hardware covered in** **the book** | **Operating** **system requirements**
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| C, C++, CMake, CTest, CPack, Visual Studio Code | Windows, macOS, Linux |'
+  prefs: []
+  type: TYPE_TB
+- en: We recommend you clone the accompanying repository that comes with this book
+    to read through the code and run the examples to gain a deeper understanding of
+    how things work. We also recommend using a text comparison tool (a diff tool)
+    to compare chapter parts as the libraries and applications evolve over time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download the example code files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can download the example code files for this book from [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake).
+    If there’s an update to the code, it will be updated in the GitHub repository.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also have other code bundles from our rich catalog of books and videos available
+    at [https://github.com/PacktPublishing/](https://github.com/PacktPublishing/).
+    Check them out!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conventions used
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are a number of text conventions used throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Code in text`: Indicates code words in text, database table names, folder
+    names, filenames, file extensions, pathnames, dummy URLs, user input, and Twitter
+    handles. Here is an example: “We’ll cover the changes we need to make to our `CMakeLists.txt`
+    file and the commands needed to create the package.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A block of code is set as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Any command-line input or output is written as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '**Bold**: Indicates a new term, an important word, or words that you see onscreen.
+    For instance, words in menus or dialog boxes appear in bold. Here is an example:
+    “Once this is completed, close and open Terminal and return to **Developer Command
+    Prompt for** **VS 2022**.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tips or important notes
+  prefs: []
+  type: TYPE_NORMAL
+- en: Appear like this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get in touch
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Feedback from our readers is always welcome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'General feedback: If you have questions about any aspect of this book, email
+    us at `customercare@packtpub.com` and mention the book title in the subject of
+    your message.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Errata**: Although we have taken every care to ensure the accuracy of our
+    content, mistakes do happen. If you have found a mistake in this book, we would
+    be grateful if you would report this to us. Please visit [www.packtpub.com/support/errata](http://www.packtpub.com/support/errata)
+    and fill in the form.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**Piracy**: If you come across any illegal copies of our works in any form
+    on the internet, we would be grateful if you would provide us with the location
+    address or website name. Please contact us at [copyright@packtpub.com](mailto:copyright@packtpub.com)
+    with a link to the material.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you are interested in becoming an author: If there is a topic that you have
+    expertise in and you are interested in either writing or contributing to a book,
+    please visit [authors.packtpub.com](http://authors.packtpub.com).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Share Your Thoughts
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Once you’ve read *Minimal Cmake*, we’d love to hear your thoughts! Please [click
+    here to go straight to the Amazon review page](https://packt.link/r/1835087310)
+    for this book and share your feedback.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your review is important to us and the tech community and will help us make
+    sure we’re delivering excellent quality content.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Download a free PDF copy of this book
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Thanks for purchasing this book!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Do you like to read on the go but are unable to carry your print books everywhere?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Is your eBook purchase not compatible with the device of your choice?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t worry, now with every Packt book you get a DRM-free PDF version of that
+    book at no cost.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Read anywhere, any place, on any device. Search, copy, and paste code from your
+    favorite technical books directly into your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The perks don’t stop there, you can get exclusive access to discounts, newsletters,
+    and great free content in your inbox daily
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Follow these simple steps to get the benefits:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scan the QR code or visit the link below
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '![](img/B21152_QR_Free_PDF.jpg)'
+  prefs: []
+  type: TYPE_IMG
+- en: '[https://packt.link/free-ebook/9781835087312](https://packt.link/free-ebook/9781835087312)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Submit your proof of purchase
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: That’s it! We’ll send your free PDF and other benefits to your email directly
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL

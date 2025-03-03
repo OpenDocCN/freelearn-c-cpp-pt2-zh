@@ -1,0 +1,843 @@
+- en: '2'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Hello, CMake!
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’re now going to start using CMake. We’ll first introduce the commands we
+    run frequently from the terminal and then those we write in our CMake scripts.
+    We’ll do this by starting with a *Hello, CMake!* application (a throwback to everyone’s
+    favorite *Hello, World!* program) bootstrapped with a minimal CMake script, examining
+    each CMake command we use in depth. These commands will soon become second nature
+    and make building your code effortless.
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake has a rich feature set, but luckily there’s a pretty small amount to learn
+    to start becoming productive. There are lots of options to handle complex use
+    cases; most of which we fortunately don’t need to worry about for the moment.
+    It’s good to know they’re there, but don’t feel you need to learn all there is
+    to know about the commands or CMake language at the outset. There’s plenty of
+    time for that as your project matures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this chapter, we’re going to cover the following topics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CMake from the command line
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Examining our first `CMakeLists.txt` file
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: CMake generators
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Project next steps
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding another file
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Technical requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To follow along, please ensure you have met the requirements outlined in [*Chapter
+    1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*. These include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Windows, Mac, or Linux machine with an up-to-date **operating** **system**
+    (**OS**)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A working C/C++ compiler (a system default is recommended for each platform
+    if you don’t already have this)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The code examples in this chapter can be found by following this link: [https://github.com/PacktPublishing/Minimal-](https://github.com/PacktPublishing/Minimal-CMake)CMake.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using CMake from the command line
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before delving into the contents of our first CMake script, let’s clone the
+    repository holding the code examples from the book. This can be performed by opening
+    a terminal session and running the following commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Linux/macOS
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Run these commands if you’re working on Linux/macOS:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’re now set up to explore the book repository on macOS or Linux.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Windows
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Run these commands is you’re working on Windows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’re now set up to explore the book repository on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exploring the repository
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the repository cloned, navigate to the first code example of [*Chapter
+    2*](B21152_02.xhtml#_idTextAnchor032):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'From here, type `ls` (if you’re on Windows and not using Git Bash or equivalent,
+    substitute `ls` with `dir`). The contents of the folder displayed are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `CMakeLists.txt` file shows we’re at the root of the CMake project. All
+    CMake projects have this file at their root, and it’s from here that we can ask
+    CMake to generate build files for our platform.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Invoking CMake
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s run our first CMake command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is one of the most important CMake commands you’ll come to know and love.
+    It is often the first command you’ll run after cloning a repository that’s using
+    CMake. When running this command, you should see output resembling the following
+    (macOS output shown below):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s briefly dissect the command we used (`cmake -B build`). The first part
+    of the command (`cmake`) is the CMake executable. If we call this with no arguments,
+    CMake doesn’t have enough information to know what we’d like to do; we’ll just
+    see usage instructions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: In our case, we want CMake to produce build files for our target platform. To
+    achieve this, we use the `-B` option to specify a folder to hold the build files.
+    The name and location of the folder are arbitrary (we could just as easily have
+    written `cmake -B my-built-files` or `cmake -B ../../build-output`), but `build`
+    (located at the root of the project) is an often-used convention.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As we don’t want to commit these files to source control, it’s common to add
+    some variation of `build` to our `.gitignore` file so we don’t accidentally start
+    tracking these files (some projects choose to use `bin` instead; however, this
+    tends to be less common). This approach is a variation of what is known as an
+    `cmake .` from your source folder). Doing this increases the risk of build files
+    being accidentally added to source control and makes managing different build
+    types cumbersome.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Explicitly specify the source directory
+  prefs: []
+  type: TYPE_NORMAL
+- en: If CMake is not invoked from the same folder as the `CMakeLists.txt` file, it’s
+    possible to supply a separate command-line argument, `-S`, and a path to where
+    that file lives (this can be particularly useful when invoking CMake from a build
+    automation script such as GitHub Actions without having to change directory).
+    You can make this explicit when in the same folder by using `cmake -S . -B build`,
+    but it’s technically redundant and omitting it is perfectly fine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both a good and bad thing about CMake is that it’s made quite a lot of guesses
+    and assumptions on our behalf behind the scenes that are not obvious without closer
+    inspection. Later in the chapter, we’ll cover the more important options, but
+    suffice it to say CMake has chosen some sensible defaults, which we might want
+    to adjust later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building with CMake
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'We have now generated some build files (the details of which aren’t important),
+    but we haven’t built anything yet. As far as we need to understand right now,
+    using CMake is a two-step process (the first step *technically* can be decomposed
+    into two further steps, called *configure* and *generate*, but both happen when
+    you run `cmake -B build`, so we can treat them as one for now). The build step
+    requires a new command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding command handles invoking the underlying build system created by
+    CMake in the first step. We use `--build` as the command, and `build` is just
+    the folder we specified in the earlier command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A build system can be thought of as a piece of software that orchestrates several
+    lower-level applications (such as a compiler and linker) to produce an output
+    of some kind on the target platform (usually an application or a library). In
+    the case of macOS and Linux, the default underlying build system will be Make.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`CMakeLists.txt`) and map it to Make commands (as well as a host of other build
+    systems we’ll soon learn about).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Invoking build systems directly
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you know the underlying build system is Make, you could, if you wanted, run
+    `make -C build`, which will have the same effect as `cmake --build build`. Unfortunately,
+    this isn’t portable (it would not work nicely if we had a build script that chose
+    a different build system on another platform). Sticking to CMake commands keeps
+    a consistent level of abstraction and doesn’t risk coupling us to a specific build
+    system in the future.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The situation on Windows is a little different and worth covering now. `cmake
+    -B build` and `cmake --build build` will still generate build files for us, and
+    build our code, but the underlying build system is going to be different. On Windows,
+    the likelihood (especially if you followed the steps described in [*Chapter 1*](B21152_01.xhtml#_idTextAnchor019),
+    *Getting Started*) is Visual Studio/MSBuild project files will have been generated
+    and then built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An obstacle when switching between Windows and macOS/Linux is that the two separate
+    build systems(Make and Visual Studio) have slightly different behavior (this is
+    an unfortunate coincidence). Make is referred to as what is called **single-config**,
+    while Visual Studio is **multi-config**. We haven’t yet touched on what configs
+    are, but let’s see what the observable differences are to start.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On macOS or Linux, after running the two CMake commands (configure and build),
+    we can launch our executable by running the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The reward is a variation on the standard *Hello,* *World!* program:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As alluded to previously, this unfortunately won’t work on Windows. Instead,
+    we must specify the configuration directory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: With this small modification, we’ll see `Hello, CMake!` printed on Windows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We will cover configurations and the difference between single-config and multi-config
+    in more detail later in the chapter, but for now, we know they exist and what
+    the main differences are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One other useful tip is once you’ve run the configure command (`cmake -B build`),
+    you don’t have to run it again, even when making changes to your `CMakeLists.txt`
+    file. Simply running `cmake --build build` will cause CMake to check whether there
+    are any changes and run the configure step again automatically. This saves having
+    to repeatedly run two commands every time a change is made.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Examining our first CMakeLists.txt file
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Now that we’ve used CMake to build our project, let’s take a look at the commands
+    present in the `CMakeLists.txt` file at the root of the project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding code is about the minimum you can get away with when crafting
+    a CMake project. There are a few more optional parameters available for `project`
+    that we’ll cover later, and we might be able to get away with not specifying the
+    specific language version with `target_compile_features` (the downside to this
+    is we’re then dependent on whatever the compiler defaults on our platform are,
+    which might not always be what we want. This also risks making our `CMakeLists.txt`
+    file less portable as we could end up with a different default on another platform/compiler).
+  prefs: []
+  type: TYPE_NORMAL
+- en: UPPERCASE or lowercase commands
+  prefs: []
+  type: TYPE_NORMAL
+- en: Out in the wild it is not uncommon to see CMake commands written in all uppercase
+    (e.g. `ADD_EXECUTABLE` instead of `add_executable`). In early versions of CMake,
+    uppercase commands were required, but today CMake commands are actually case insensitive
+    (`aDD_eXecuTAble` would technically work, but is not something to emulate). The
+    more modern approach prefers using lowercase commands which is the style used
+    throughout this book. It’s worth briefly mentioning that CMake variables (as opposed
+    to commands) are case-sensitive, and by convention are usually uppercase.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s walk through each statement one by one to understand what it does and
+    why it’s needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting a minimum version
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s first look at how to set the minimum (or oldest) version of CMake that
+    can be used with our project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Every `CMakeLists.txt` file must start with the preceding line to indicate
+    to CMake when it runs, what the minimum version of CMake needed is to execute
+    the file. The later the version, the more features will be available (as well
+    as warnings about things that may have been deprecated or removed from earlier
+    versions of CMake). There’s a balance to be struck between specifying a high version,
+    which will have all the latest features, and a slightly older version that more
+    people will likely be using (will have installed on their system). For example,
+    if someone with an older version of CMake attempts to generate our project, they’ll
+    see this error message when attempting to configure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re working on an application that you or a small team will be building,
+    specifying the latest and greatest (no earlier than the version you have installed,
+    in our case `3.28`) is fine, and a good idea. If, on the other hand, you’re creating
+    a library that you’d like to make easy for other projects to adopt, going for
+    something a bit older will likely make usage easier (if you’re able to forgo some
+    of the newer features). For example, in our case, we could easily drop the required
+    version number to `3.5` and have things work just fine (even though we’re actually
+    running `3.28`). If, however, we drop the version number to `2.8`, we’ll see this
+    warning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It’s important to gradually bump up the version number over time to keep `CMakeLists.txt`
+    files compatible with the latest changes and improvements to CMake. One such example
+    was a change made between CMake `3.19` and `3.20`. Up until CMake `3.20`, when
+    listing files in `target_sources`, it was possible to omit the file extension
+    of a referenced file. So, we’d use the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is the same as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If CMake couldn’t find a perfect match, it would attempt to append a list of
+    potential extensions to see whether one would fit. This behavior was error-prone
+    and could lead to potential bugs, so it was fixed. If you attempt to configure
+    a project with a version of CMake greater than or equal to `3.20` when the required
+    version is `3.19` or less, you’ll see the following warning message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: We haven’t covered policies yet, so we’ll skip over the details for now, but
+    essentially they are a way for the CMake maintainers to avoid breaking changes
+    for projects as new versions of CMake are rolled out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you were to update `cmake_minimum_required(VERSION 3.19)` to `cmake_minimum_required(VERSION
+    3.20)` without adding an explicit extension to the `main` file, then attempting
+    to configure would produce a hard error instead:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: This was a bit of a digression, but the idea is to highlight why `cmake_minimum_required`
+    is so important and must be included. In general, it’s always better to be explicit
+    when it comes to CMake, rather than relying on implicit behavior that may change
+    depending on the platform or a future release.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Naming the project
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s next look at how to give our project a name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`project` is the second required command that all `CMakeLists.txt` files must
+    provide. If you omit it, you get this helpful error message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `project` command allows you to give a meaningful name to the top-level
+    project, which may well be a collection of libraries and/or applications. The
+    `project` command provides a host of additional options that can be useful to
+    specify. In our example, we’ve provided `LANGUAGES C` to let CMake know what type
+    of source files the project contains. This is optional but good practice, as it
+    stops CMake from doing unnecessary work. If we hadn’t specified C only in this
+    case, CMake would have searched for both C and C++ compilers (CXX is used to refer
+    to C++ in CMake scripts to avoid ambiguity with the `+` operator in various contexts).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Other `project` options include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`VERSION`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DESCRIPTION`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`HOMEPAGE_URL`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Your mileage may vary on how useful these are. For small, local projects, they’re
+    likely overkill, but if a project is gaining traction and beginning to be used
+    more widely, then adding these can be helpful for new users. To learn more about
+    the CMake `project` command, please refer to [https://cmake.org/cmake/help/latest/command/project.html#options](https://cmake.org/cmake/help/latest/command/project.html#options).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Declaring the application
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the minimum version set and our project named, we can ask CMake to create
+    our first executable file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`add_executable` is important as this is the first line to do something specific
+    for our project. Calling this will create what CMake refers to as a **target**.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A target is usually an executable (shown here) or a library (you can also create
+    special custom target commands). CMake provides commands to get and set values
+    directly on targets without affecting each other, or the global CMake state. Targets
+    are an incredibly useful concept and make it possible to encapsulate a set of
+    properties and behaviors together. Think of targets as an individual unit in a
+    CMake project. They make it easy to have multiple executables or libraries all
+    with unique properties that can depend on one another. We’ll be using targets
+    a lot throughout the rest of this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the preceding `add_executable` example, we’ve used an existing CMake variable
+    that was created for us behind the scenes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two important questions to address:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How did we know to use `PROJECT_NAME`?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Why did we need to use `${}` around `PROJECT_NAME`?
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The answer to the first question can be answered by visiting [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html).
+    This page is a helpful resource that enumerates all current CMake variables. If
+    we scroll down the page, we’ll find **PROJECT_NAME** ([https://cmake.org/cmake/help/latest/variable/PROJECT_NAME.html](https://cmake.org/cmake/help/latest/variable/PROJECT_NAME.html))
+    and see the following description:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the name given to the most recently called `project()` command in the
+    current directory scope or above.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our simple example, this is sufficient to use as the name for the target
+    we’re creating, as the target and project are essentially one and the same. In
+    the future, when creating larger CMake projects that may contain multiple targets,
+    it is a better idea to create a separate variable (e.g., `${MY_EXECUTABLE}`) for
+    the target name, or simply use a literal (e.g., `my_executable`). We’ll cover
+    defining variables shortly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second question we haven’t yet answered is about the slightly strange `${}`
+    syntax. CMake variables follow a similar pattern to system environment variables,
+    which you have likely encountered in some form before. To access the value stored
+    in the variable, we need to surround it with `${}` to effectively dereference
+    or unwrap the value stored within. As a quick example, if we type `echo PATH`
+    from our terminal, we’ll see `PATH` printed. If we, however, type `echo ${PATH}`
+    (or `echo %PATH%` on Windows), we’ll see the contents of the `PATH` variable (on
+    macOS, this is something like `/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin...`).
+    Things are the same in CMake. As a quick test, let’s add a debugging statement
+    to confirm the value of `PROJECT_NAME`. We can do this by adding the following
+    command to the bottom of our `CMakeLists.txt` file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When we run `cmake -B build`, we’ll see `PROJECT_NAME: minimal-cmake` printed
+    to the console.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One small advantage to using `${PROJECT_NAME}` for our target is we’re keeping
+    our `CMakeLists.txt` file short and concise, and not introducing any additional
+    complexity. The other advantage is should we decide to change the name of our
+    project, we only need to make this change in one place (adhering to the generally
+    sound advice `${PROJECT_NAME}` will automatically reflect the new value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding source files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s now understand how to specify the files we’d like to build:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: With a target now defined using `add_executable`, we can refer to that target
+    via the name (in our case `${PROJECT_NAME}`, which unwraps to `minimal-cmake`)
+    in other target-specific commands. These commands are helpfully prefixed with
+    `target_` to make them easier to spot. The huge advantage of these commands compared
+    to earlier CMake commands is they eliminate a host of potential issues and confusion
+    around the scope of CMake commands. In the past, it would be easy for a setting
+    defined in one `CMakeLists.txt` file to leak into another one inadvertently, often
+    with agonizing consequences. By being more disciplined around the use of targets,
+    we can specify properties and settings specific to that target, which then won’t
+    affect any others.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Regarding the `target_sources` command, this is where we specify the source
+    files we would like to build for this target. The argument preceding `main.c`
+    controls the visibility or scope of the source file. In most cases, we want to
+    use `PRIVATE` here so only this target builds the source file. The other scope
+    arguments are `PUBLIC` (used by this target and other targets that depend on it)
+    and `INTERFACE` (used only by dependent targets). We’ll return to these keywords
+    in the future (when we cover libraries) as they appear across all the `target_`
+    commands and have several uses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting language features
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Finally, let’s ensure we’re explicit about the version of the language we’re
+    using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The last command in our `CMakeLists.txt` file is `target_compile_features`.
+    This is a convenient way to specify the language version we’d like to use, which
+    in this case is `C17`. It is possible to be more granular and pick specific language
+    features (e.g., `c_restrict`) but picking a language version is clear and concise.
+    It’s possible to review available modes and features for C here: [https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We could also go the other way and instead use `set(CMAKE_C_STANDARD 17)`. This
+    applies this setting across the entire project. We may want this behavior but,
+    in our case, we’re sticking with a more target-centric approach so only the `minimal-cmake`
+    target is affected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'That more or less covers everything we need as far as CMake is concerned when
+    it comes to building small applications. This on its own is surprisingly useful
+    as we now have a completely portable way to run our code on Windows, macOS, and
+    Linux. This makes code easier to share and collaborate on. If a user or fellow
+    developer on another platform wants to check out our project, so long as they
+    have CMake (and most likely Git) installed, they can do it with a few commands.
+    If, on the other hand, you shared an Xcode, Visual Studio, or even Make project,
+    this would require a lot more work on their part. The great news is even if a
+    user does want to use Visual Studio or Xcode to test or modify the code, they
+    still can. This brings us to the next important part of using CMake: generators.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: CMake generators
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In the *Invoking CMake* section, we glossed over what was happening when we
+    ran `cmake -B build`. When we run `cmake -B build`, we’re asking CMake to generate
+    build files for us, but what build files? CMake will do its best to pick the platform
+    default; this is Visual Studio on Windows and Make on macOS and Linux. A list
+    of all potential generators can be found by visiting [https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+    or by running the `cmake --help` command (the default generator is displayed with
+    an asterisk). To check what generator is being used if you’re unsure, you can
+    open the `CMakeCache.txt` file inside the `build/` folder and search for `CMAKE_GENERATOR`.
+    There you should find a line such as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -G Ninja
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -G <new-generator> --fresh
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake -B build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'cmake -B build -G "Visual Studio 17 2022" # Windows'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The year can be omitted for brevity
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'cmake -B build -G "Visual Studio 17" # Windows'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'cmake -B build -G Xcode # macOS'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'cmake -B build -G "Ninja Multi-Config" # Linux'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: cmake --build build --config Debug
+  prefs: []
+  type: TYPE_NORMAL
+- en: cmake --build build --config Release
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: '****************************************'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*********@******************************'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*******@*@******************************'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '********@@******************************'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '****************************************'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: target_sources(${PROJECT_NAME} PRIVATE main.c cmake --build build again (it
+    is not necessary to reconfigure).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Forgetting to add a file
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'It’s useful to know if we don’t add `array.c` to our `CMakeLists.txt` file,
+    but do add usage code for `array`, and then try and compile (`cmake --build build`).
+    Things will compile, but we’ll hit everyone’s favorite issue: linker errors. The
+    following output illustrates this:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is because the linker can’t find the implementation of the functions listed
+    (e.g., `_array_size`). The output file, `array.c.o` on macOS/Linux and `array.c.obj`
+    or `array.obj` on Windows, won’t have been created (you can see whether these
+    files exist by going to `build/CMakeFiles/minimal-cmake_game-of-life.dir/Debug`
+    if using the Ninja Multi-Config generator, other generators will place it in a
+    similar location).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: This is definitely an early gotcha when using CMake (creating the files but
+    forgetting to add them to `CMakeLists.txt`).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: To GLOB or not to GLOB
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'At this point, it’s worth mentioning a topic that comes up often with CMake,
+    and that is whether to explicitly mention files to build, as in the preceding
+    example, or use a technique to `GLOB` (effectively search) all source files in
+    each folder hierarchy. As with everything in software engineering and computer
+    science, there are trade-offs. There may be a set of circumstances where it’s
+    simpler and quicker to use `GLOB`. This might look something like the following:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: This may work well for you and your environment, but it comes with a set of
+    risks. Before the advent of `CONFIGURE_DEPENDS` (added in CMake `3.12`), there
+    would be problems if you added a source file (for example, by pulling the latest
+    code from a version control system) without configuring. In this case, CMake would
+    fail to build if running `cmake --build build`. Specifying `CONFIGURE_DEPENDS`
+    avoids this, but there are no guarantees it works with all generators, and for
+    larger projects, it may cause performance problems. The maintainers of CMake still
+    recommend explicitly specifying the source files you want to build, which we follow
+    throughout this book. It reduces the risk of inadvertently building a file you
+    don’t want to and the changes to a `CMakeLists.txt` file are useful to track in
+    version control. The linker error mentioned previously is frustrating to begin
+    with, but you quickly adjust, and adding new files will soon become second nature.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: With the new `array.c` file added, we can change our update function to use
+    the new logic and improve the performance of our code (`ch2/part-3` has a slightly
+    more exciting board configuration that’s worth having a look at too).
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Referencing interface files in target_sources
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: 'The last thing worth mentioning is what about `array.h`? As we are including
+    this file relatively in `main.c` (using `#include "array/array.h"` and not `#include
+    <array/array.h>`), we do not need to explicitly mention any include directories
+    in our `CMakeLists.txt` file (this will be more important when we come to libraries).
+    If you are using a generator that produces some kind of project or solution that
+    you can open in a separate tool (for example, an integrated development environment
+    such as Visual Studio or Xcode), then you can you add `array.h` to `target_sources`
+    in the following manner:'
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will cause it to show up in the project view, which might be useful from
+    a maintenance standpoint; however, it’s not strictly required to build the code.
+    As we will be using Visual Studio Code and the folder project view in most examples,
+    we’ll omit header files for brevity. There is one other benefit to specifying
+    header files and that is if a file is deleted accidentally, or can’t be fetched
+    from source control, CMake will fail early at the configure step, instead of when
+    building. The added maintenance cost may be worthwhile, especially on larger teams.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Summary
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: Incredible work getting this far; we’ve covered a lot of ground! We started
+    by getting familiar with using CMake from the terminal (`cmake -B build` and `cmake
+    --build build` should be well and truly etched into your memory). We then walked
+    through a simple `CMakeLists.txt` file, examining the most important commands
+    and why they’re needed. After that, we delved into generators and examined some
+    of the differences between single- and multi-config generators, and how to specify
+    the build type in each case. We finally looked at the seed of our project, an
+    implementation of Conway’s *Game of Life*, and how we can incrementally add more
+    files to an existing project as we expand the functionality.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: In the next chapter, we will look at how we can bring external dependencies
+    into our project. This will allow us to augment and improve the functionality
+    of our application and the maintainability of our code. This is where CMake really
+    shines, helping us integrate with existing libraries without needing to implement
+    everything ourselves from scratch.
+  prefs:
+  - PREF_IND
+  - PREF_IND
+  - PREF_IND
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE

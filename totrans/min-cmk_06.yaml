@@ -1,0 +1,39 @@
+- en: 'Part 2: Scaling Up'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: After getting our application up and running with the help of CMake, and creating
+    our first library, we’ll next focus on making working with CMake easier (a topic
+    we’ll return to throughout the book). This will make day-to-day usage easier and
+    improve the onboarding experience for any new developers wishing to get set up
+    with your project. Returning to our application, we’ll introduce a new command
+    that can better handle larger dependencies, decoupling them from the main build.
+    We’ll then turn the tables and show what is needed to make your own libraries
+    available this way, so both you and others can depend on the useful functionality
+    you’ve built. *Part 2* will close by showing you how to simplify the build to
+    reduce the number of manual steps required and ensure we can produce an executable
+    from multiple dependencies with a single CMake command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This part has the following chapters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Chapter 5*](B21152_05.xhtml#_idTextAnchor141), *Streamlining CMake Configuration*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and
+    ExternalProject_Add*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for
+    Your Libraries*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[*Chapter 8*](B21152_08.xhtml#_idTextAnchor183), *Using Super Builds to Simplify
+    Onboarding*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
