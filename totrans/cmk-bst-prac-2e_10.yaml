@@ -1091,11 +1091,13 @@
   id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 将CMake的脚本模式与在项目的配置或构建阶段执行自定义命令的各种方式结合使用，为您在定义构建过程时提供了很大的自由，甚至适用于不同的平台。然而，需注意的是，向构建过程中添加过多的逻辑可能会使其维护变得比预期更加困难。每当您需要编写脚本或向`CMakeLists.txt`文件中添加自定义命令时，最好先休息一下，考虑一下这一步是否属于构建过程，还是应该留给用户在设置开发环境时处理。
 - en: Summary
   id: totrans-137
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: In this chapter, you learned how to customize a build by executing external
     tasks and programs. We covered how to add custom build actions as targets, how
     to add them to existing targets, and how to execute them during the configuration
@@ -1105,6 +1107,7 @@
   id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，您学习了如何通过执行外部任务和程序来定制构建。我们介绍了如何将自定义构建操作作为目标添加，如何将它们添加到现有目标中，以及如何在配置步骤期间执行它们。我们探讨了如何通过命令生成文件，以及如何使用`configure_file`命令复制和修改文件。最后，我们学习了如何使用CMake命令行工具以平台无关的方式执行任务。
 - en: The ability to customize a CMake build is a very powerful asset, but it also
     tends to make builds more brittle, as their complexity often increases when any
     customized tasks are performed. Although sometimes not avoidable, relying on external
@@ -1117,6 +1120,7 @@
   id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 定制CMake构建的能力是一个非常强大的资产，但它也往往会使构建变得更加脆弱，因为当执行任何自定义任务时，构建的复杂性通常会增加。虽然有时不可避免，但依赖于除编译器和链接器之外的外部程序的安装可能意味着某些软件无法在未安装或不可用这些程序的平台上构建。这意味着，必须特别小心，确保自定义任务在可能的情况下不会假设使用CMake的系统有什么特定的配置。最后，执行自定义任务可能会对构建系统带来性能负担，尤其是当它们在每次构建时进行大量工作时。
 - en: However, if you are careful with custom build steps, they are a great way of
     increasing the cohesion of a build, as many of the build-related tasks can be
     defined where the build definition is. This can make automating tasks such as
@@ -1125,6 +1129,7 @@
   id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，如果您小心处理自定义构建步骤，它们是增加构建凝聚力的一个很好的方式，因为许多与构建相关的任务可以在构建定义的位置进行定义。这可以使自动化任务（如创建构建产物的哈希值或将所有文档打包成一个公共档案）变得更加容易。
 - en: In the next chapter, you will learn how to make the build environment portable
     between different systems. You will learn how to use presets to define common
     ways to configure a CMake project, how to wrap your build environment into a container,
@@ -1133,42 +1138,50 @@
   id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，您将学习如何使构建环境在不同系统之间具有可移植性。您将学习如何使用预设来定义配置CMake项目的常见方式，如何将您的构建环境打包到容器中，以及如何使用`sysroots`来定义工具链和库，以便它们在不同系统之间具有可移植性。
 - en: Questions
   id: totrans-142
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: 'Answer the following questions to test your knowledge of this chapter:'
   id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 请回答以下问题，测试您对本章内容的掌握情况：
 - en: What is the main difference between `add_custom_command` and `execute_process`?
   id: totrans-144
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`add_custom_command`和`execute_process`之间的主要区别是什么？'
 - en: What are the two signatures of `add_custom_command` used for?
   id: totrans-145
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`add_custom_command`的两种签名分别用于什么？'
 - en: What is the problem with the `PRE_BUILD`, `PRE_LINK`, and `POST_BUILD` options
     of `add_custom_command`?
   id: totrans-146
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`add_custom_command`的`PRE_BUILD`、`PRE_LINK`和`POST_BUILD`选项有什么问题？'
 - en: What are the two ways of defining variables so that they can be substituted
     with `configure_file`?
   id: totrans-147
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 有哪两种方式可以定义变量，以便它们可以通过`configure_file`进行替换？
 - en: How can the substitution behavior of `configure_file` be controlled?
   id: totrans-148
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何控制`configure_file`的替换行为？
 - en: What are the two flags for the CMake command-line tool to execute tasks?
   id: totrans-149
   prefs:
