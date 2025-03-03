@@ -1881,6 +1881,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Debug`：未优化，包含所有调试符号，并启用所有断言。与在 GCC 和 Clang 中设置 `-O0 -g` 相同。'
 - en: '`Release`: This is optimized for speed without debugging symbols and asserts
     disabled. Usually, this is the build type that is shipped. This is the same as
     `-``O3 -DNDEBUG`.'
@@ -1888,12 +1889,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`Release`：针对速度进行了优化，不包含调试符号，且禁用断言。通常，这就是发布时使用的构建类型。等同于 `-O3 -DNDEBUG`。'
 - en: '`RelWithDebInfo`: This provides optimized code and includes debug symbols but
     disabled asserts, which is the same as `-O2 -``g -DNDEBUG`.'
   id: totrans-282
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`RelWithDebInfo`：提供优化后的代码，并包含调试符号，但禁用断言，等同于 `-O2 -g -DNDEBUG`。'
 - en: '`MinSizeRel`: This is the same as `Release` but optimized for a small binary
     size instead of speed, which would be `-Os -DNDEBUG`. Note that this configuration
     is not supported for all generators on all platforms.'
@@ -1901,6 +1904,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`MinSizeRel`：与 `Release` 相同，但针对小二进制文件大小进行了优化，而不是优化速度，这通常对应 `-Os -DNDEBUG`。注意，并非所有生成器在所有平台上都支持此配置。'
 - en: Note that the build types must be passed during the configuration state for
     single-configuration generators such as CMake or Ninja. For multi-target generators
     such as MSVC, they are not used during the configuration step but are specified
@@ -1915,11 +1919,14 @@
   id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，构建类型必须在配置阶段传递给单配置生成器，例如 CMake 或 Ninja。对于多目标生成器，如 MSVC，它们不会在配置步骤中使用，而是在构建步骤中指定。也可以创建自定义构建类型，这可以方便地用于指定生成代码覆盖的构建，但通常并非所有编译器都能支持，因此需要一些谨慎。有关自定义构建类型的示例，请参见
+    [*第 7 章*](B30947_07.xhtml#_idTextAnchor113)，*无缝集成代码质量工具与 CMake*。由于 CMake 支持各种各样的工具链、生成器和语言，一个常见的问题是如何找到并维护这些选项的有效组合。在这里，预设可以提供帮助。
 - en: Maintaining good build configurations with presets
   id: totrans-285
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用预设保持良好的构建配置
 - en: 'A common problem when building software with CMake is how to share good or
     working configurations to build a project. Often, people and teams have a preferred
     way of where the build artifacts should go, which generator to use on which platform,
@@ -1933,6 +1940,10 @@
   id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用 CMake 构建软件时，一个常见的问题是如何共享良好的或可用的配置来构建项目。通常，团队和个人都有偏好的构建产物存放位置、使用哪种生成器在某个平台上构建，或者希望
+    CI 环境使用与本地相同的设置进行构建。自 2020 年 12 月 CMake 3.19 发布以来，这些信息可以存储在 `CMakePresets.json`
+    文件中，该文件位于项目的根目录。此外，每个用户还可以通过 `CMakeUserPresets.json` 文件覆盖自己的配置。基本的预设通常会放在版本控制下，但用户的预设不会被提交到版本系统中。两个文件都遵循相同的
+    JSON 格式，顶层结构如下：
 - en: '[PRE35]'
   id: totrans-287
   prefs: []
@@ -1944,12 +1955,15 @@
   id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: '第一行，`"version": 6`，表示 JSON 文件的架构版本。CMake 3.23 支持最多版本六，但预计新的版本发布将带来新的架构版本。'
 - en: Next, `cmakeMinimumRequired{...}` specifies which version of CMake to use. Although
     this is optional, it is good practice to put this in here and match the version
     with the one specified in the `CMakeLists.txt` file.
   id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，`cmakeMinimumRequired{...}` 指定了需要使用的 CMake 版本。虽然这是可选的，但最好将其包含在内，并确保版本与 `CMakeLists.txt`
+    文件中指定的版本匹配。
 - en: After that, the various presets for the different build stages can be added
     with `configurePresets`, `buildPresets`, and `testPresets`. As the name suggests,
     `configurePresets` applies to the configure stage of CMake’s build process, while
@@ -1959,16 +1973,21 @@
   id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: 此后，可以通过 `configurePresets`、`buildPresets` 和 `testPresets` 添加不同构建阶段的各种预设。如其名所示，`configurePresets`
+    适用于 CMake 构建过程的配置阶段，而其他两个则用于构建和测试阶段。构建和测试预设可以继承一个或多个配置预设。如果没有指定继承关系，它们将应用于所有先前的步骤。
 - en: To see what presets have been configured in a project, run `cmake --list-presets`
     to see a list of available presets. To build using a preset, run `cmake --build
     --``preset name`.
   id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看项目中已配置的预设，可以运行 `cmake --list-presets` 查看可用预设的列表。要使用预设进行构建，运行 `cmake --build
+    --``preset name`。
 - en: To see the full specification of the JSON schema, go to [https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html](https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html).
   id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看 JSON 模式的完整规格，请访问 [https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html](https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html)。
 - en: Presets are a good way to share knowledge about how to build a project in a
     very explicit way. At the time of writing, more and more IDEs and editors are
     adding support for CMake presets natively, especially for handling cross-compilation
@@ -1978,17 +1997,22 @@
   id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: 预设是共享如何以非常明确的方式构建项目知识的好方法。撰写本文时，越来越多的 IDE 和编辑器原生支持 CMake 预设，尤其是在处理跨编译和工具链时。在这里，我们只为你提供了
+    CMake 预设的简要概述；它们将在 [*第 9 章*](B30947_09.xhtml#_idTextAnchor146) 中更深入地介绍，*创建可重复的*
+    *构建* *环境*。
 - en: Summary
   id: totrans-294
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: In this chapter, we provided you with a brief overview of CMake. First, you
     learned how to install and run a simple build. Then, you learned about the two-stage
     build process of CMake and single-configuration and multi-configuration generators.
   id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们为你提供了 CMake 的简要概述。首先，你学习了如何安装并运行一个简单的构建。接着，你了解了 CMake 的两阶段构建过程以及单配置生成器和多配置生成器。
 - en: By now, you should be able to build the examples provided in this book’s GitHub
     repository at [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition).
     You learned about the core features of the CMake language, such as variables,
@@ -2000,56 +2024,69 @@
   id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: 到现在为止，你应该能够构建本书 GitHub 仓库中提供的示例：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。你学习了
+    CMake 语言的核心功能，如变量、目标和策略。我们简要介绍了函数和宏，以及用于流程控制的条件语句和循环。随着你继续阅读本书，你将运用到目前为止所学的内容，探索更多好的实践和技巧，将从简单的单目标项目过渡到复杂的软件项目，并通过良好的
+    CMake 配置保持其可维护性。
 - en: In the next chapter, we will learn how some of the most common tasks in CMake
     can be performed and how CMake works together with various IDEs.
   id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，我们将学习如何执行 CMake 中一些最常见的任务，以及 CMake 如何与各种 IDE 配合工作。
 - en: Further reading
   id: totrans-298
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'To learn more about the topics that were covered in this chapter, take a look
     at the following resources:'
   id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于本章中讨论的主题，请参考以下资源：
 - en: 'The official CMake documentation: [https://cmake.org/cmake/help/latest/](https://cmake.org/cmake/help/latest/)'
   id: totrans-300
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '官方 CMake 文档: [https://cmake.org/cmake/help/latest/](https://cmake.org/cmake/help/latest/)'
 - en: 'The official CMake tutorial: [https://cmake.org/cmake/help/latest/guide/tutorial/index.html](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)'
   id: totrans-301
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '官方 CMake 教程: [https://cmake.org/cmake/help/latest/guide/tutorial/index.html](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)'
 - en: Questions
   id: totrans-302
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: 'Answer the following questions to test your knowledge of this chapter:'
   id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: 回答以下问题，以测试你对本章内容的理解：
 - en: How do you start the configure step of CMake?
   id: totrans-304
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何启动 CMake 的配置步骤？
 - en: What is the difference between single-configuration and multi-configuration
     generators?
   id: totrans-305
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 单配置生成器和多配置生成器之间有什么区别？
 - en: How do you start the build step of CMake?
   id: totrans-306
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何启动 CMake 的构建步骤？
 - en: Which executable from CMake can be used to run tests?
   id: totrans-307
   prefs:
