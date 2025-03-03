@@ -1007,6 +1007,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: CMake 会继续进入剩余的嵌套作用域并执行它们的 listfiles，直到所有 `add_subdirectory()` 调用完成。
 - en: CMake returns to the top-level scope and executes the remaining command `add_subdirectory(test)`.
     Each time, CMake enters the new scope and executes commands from the appropriate
     listfile.
@@ -1014,12 +1015,15 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: CMake 返回到顶层作用域并执行剩余的命令 `add_subdirectory(test)`。每次，CMake 都会进入新的作用域并执行适当 listfile
+    中的命令。
 - en: All the targets are collected and checked for their correctness. CMake now has
     all the necessary information to generate a buildsystem.
   id: totrans-145
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 所有的目标都被收集并检查其正确性。CMake 现在拥有生成构建系统所需的所有必要信息。
 - en: It’s important to note that the previous steps occur in the exact order in which
     we wrote the commands in our listfiles. In some cases, this order is significant,
     while in others, it may not be as crucial. We will delve deeper into this topic
@@ -1027,6 +1031,8 @@
   id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要注意的是，前面的步骤是按我们在 listfiles 中编写命令的顺序执行的。在某些情况下，这个顺序非常重要，而在其他情况下，它可能不那么关键。我们将在下一章，*第五章*，*与目标工作*
+    中深入探讨这个问题，理解它的含义。
 - en: So, when is the right time to create the directories to contain all of the elements
     of the project? Should we do it right from the start – create everything needed
     for the future and keep the directories empty – or wait until we actually have
@@ -1037,6 +1043,7 @@
   id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，什么时候是创建包含项目所有元素的目录的合适时机呢？我们应该从一开始就创建所有未来需要的内容并保持目录为空，还是等到我们真正有了需要放入各自类别的文件时再创建？这是一个选择——我们可以遵循**极限编程**（**XP**）规则**YAGNI**（**你不会需要它**），或者我们可以尝试让我们的项目具有未来适应性，为未来的开发者打下良好的基础。
 - en: Try to aim for a good balance between these approaches – if you suspect that
     your project might someday need an `extern` directory, then add it (your version
     control system may require an empty `.keep` file to check a directory into the
@@ -1044,6 +1051,8 @@
   id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 尝试在这些方法之间寻找良好的平衡——如果你怀疑你的项目将来可能需要一个 `extern` 目录，那么就添加它（你的版本控制系统可能需要一个空的 `.keep`
+    文件来将目录检查到仓库中）。
 - en: 'Another effective approach to guide others in placing their external dependencies
     is by creating a `README` file that outlines the recommended structure. This can
     be particularly beneficial for less experienced programmers who will work on the
@@ -1053,17 +1062,20 @@
   id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种有效的方式来引导他人放置外部依赖项是创建一个 `README` 文件，概述推荐的结构。这对于将来将参与项目的经验较少的程序员特别有帮助。你可能自己也观察到过：开发人员往往不愿意创建目录，特别是在项目的根目录下。如果我们提供一个良好的项目结构，其他人会更倾向于遵循它。
 - en: Some projects can be built in almost every environment, while others are quite
     particular about their requirements. The top-level listfile is the perfect place
     to determine the appropriate course of action. Let’s see how to do this.
   id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些项目几乎可以在所有环境中构建，而另一些则对其要求非常特定。顶层的 listfile 是确定适当行动方案的理想位置。让我们看看如何做到这一点。
 - en: Scoping the environment
   id: totrans-151
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 环境作用域
 - en: CMake provides multiple ways of querying the environment with `CMAKE_` variables,
     `ENV` variables, and special commands. For example, collected information can
     be used to support cross-platform scripts. These mechanisms allow us to avoid
@@ -1072,6 +1084,8 @@
   id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 提供了多种方式来查询环境，通过 `CMAKE_` 变量、`ENV` 变量和特殊命令。例如，收集到的信息可以用来支持跨平台脚本。这些机制使我们能够避免使用平台特定的
+    shell 命令，这些命令可能不容易移植，或者在不同环境中有不同的命名。
 - en: For performance-critical applications, it will be useful to know all the features
     of the building platform (for example, instruction sets, CPU core count, and more).
     This information can then be passed to the compiled binaries so that they can
@@ -1080,11 +1094,14 @@
   id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于性能关键型应用，了解构建平台的所有特性（例如，指令集、CPU 核心数等）会非常有用。然后，这些信息可以传递给编译后的二进制文件，以便它们能够优化到最佳状态（我们将在下一章学习如何进行传递）。让我们来探索
+    CMake 提供的本地信息。
 - en: Detecting the operating system
   id: totrans-154
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检测操作系统
 - en: There are many occasions when it is useful to know what the target operating
     system is. Even as mundane a thing as a filesystem differs greatly between Windows
     and Unix in things such as case sensitivity, file path structures, the presence
@@ -1094,12 +1111,15 @@
   id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 有很多情况需要了解目标操作系统是什么。即便是像文件系统这样常见的事情，在 Windows 和 Unix 之间也有很大的不同，例如区分大小写、文件路径结构、扩展名的存在、权限等等。一台系统上可用的大多数命令在另一台系统上都不可用；它们可能会有不同的名称（例如，Unix
+    中是`ifconfig`，而 Windows 中是`ipconfig`），或者输出的内容完全不同。
 - en: 'If you ever need to support multiple target operating systems with a single
     CMake script, just check the `CMAKE_SYSTEM_NAME` variable so that you can act
     accordingly. Here’s a simple example:'
   id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你需要在一个 CMake 脚本中支持多个目标操作系统，只需检查`CMAKE_SYSTEM_NAME`变量，以便可以根据需要采取相应的措施。下面是一个简单的示例：
 - en: '[PRE15]'
   id: totrans-157
   prefs: []
@@ -1113,11 +1133,14 @@
   id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果需要，可以使用一个包含操作系统版本的变量：`CMAKE_SYSTEM_VERSION`。不过，我的建议是尽量使你的解决方案尽可能不依赖于具体系统，并使用内置的
+    CMake 跨平台功能。特别是在文件系统操作方面，你应该使用在*附录*中描述的`file()`命令。
 - en: Cross-compilation – what are host and target systems?
   id: totrans-159
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 交叉编译 —— 主机和目标系统是什么？
 - en: '**Cross-compilation** refers to the process of compiling code on one machine
     to be executed on a different target platform. For example, using the appropriate
     toolset, it is possible to compile applications for Android by running CMake on
@@ -1126,6 +1149,8 @@
   id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: '**交叉编译**是指在一台机器上编译代码，以便在不同的目标平台上执行。例如，使用适当的工具集，您可以通过在 Windows 机器上运行 CMake 来为
+    Android 编译应用程序。尽管交叉编译超出了本书的范围，但了解它如何影响 CMake 的某些部分是很重要的。'
 - en: One of the necessary steps to allow cross-compilation is setting the `CMAKE_SYSTEM_NAME`
     and `CMAKE_SYSTEM_VERSION` variables to the values appropriate for the operating
     system that you’re compiling for (the CMake documentation refers to it as the
@@ -1134,12 +1159,16 @@
   id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 允许交叉编译的必要步骤之一是将`CMAKE_SYSTEM_NAME`和`CMAKE_SYSTEM_VERSION`变量设置为适合你正在编译的操作系统的值（CMake
+    文档称其为**目标系统**）。用于执行构建的操作系统被称为**主机系统**。
 - en: 'Regardless of the configuration, the information on the host system is always
     accessible in variables with the `HOST` keyword in their name: `CMAKE_HOST_SYSTEM`,
     `CMAKE_HOST_SYSTEM_NAME`, `CMAKE_HOST_SYSTEM_PROCESSOR`, and `CMAKE_HOST_SYSTEM_VERSION`.'
   id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论配置如何，主机系统的信息始终可以通过名称中包含`HOST`关键字的变量访问：`CMAKE_HOST_SYSTEM`、`CMAKE_HOST_SYSTEM_NAME`、`CMAKE_HOST_SYSTEM_PROCESSOR`
+    和 `CMAKE_HOST_SYSTEM_VERSION`。
 - en: There are a few more variables with a `HOST` keyword in their name, so just
     keep in mind that they’re explicitly referencing the host system. Otherwise, all
     variables reference the target system (which is normally the host system anyway,
@@ -1147,11 +1176,13 @@
   id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一些包含`HOST`关键字的变量，记住它们明确引用的是主机系统。否则，所有变量引用的都是目标系统（通常情况下，这也是主机系统，除非我们在进行交叉编译）。
 - en: If you’re interested in reading more about cross-compilation, I suggest referencing
     the CMake documentation at [https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html).
   id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你有兴趣深入了解交叉编译，我建议参考 CMake 文档：[https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html)。
 - en: Abbreviated variables
   id: totrans-165
   prefs:
@@ -1370,12 +1401,15 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 该平台是 32 位还是 64 位架构？
 - en: In 64-bit architecture, memory addresses, processor registers, processor instructions,
     address buses, and data buses are 64 bits wide. While this is a simplified definition,
     it gives a rough idea of how 64-bit platforms are different from 32-bit platforms.
   id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 64 位架构中，内存地址、处理器寄存器、处理器指令、地址总线和数据总线都是 64 位宽。虽然这是一个简化的定义，但它大致说明了 64 位平台与 32
+    位平台的区别。
 - en: 'In C++, different architectures mean different bit widths for some fundamental
     data types (`int` and `long`) and pointers. CMake utilizes the pointer size to
     gather information about the target machine. This information is available through
@@ -1384,6 +1418,8 @@
   id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 C++ 中，不同的架构意味着一些基本数据类型（`int` 和 `long`）以及指针的位宽不同。CMake 利用指针的大小来收集目标机器的信息。这些信息通过
+    `CMAKE_SIZEOF_VOID_P` 变量提供，对于 64 位，它的值为 `8`（因为指针宽度为 8 字节），对于 32 位，值为 `4`（4 字节）：
 - en: '[PRE17]'
   id: totrans-207
   prefs: []
@@ -1394,6 +1430,7 @@
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 系统的字节序是什么？
 - en: Architectures can be categorized as either **big-endian** or **little-endian**
     based on the byte order within a word or the natural unit of data for a processor.
     In a **big-endian** system, the most significant byte is stored at the lowest
@@ -1404,6 +1441,8 @@
   id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 架构可以根据处理器的字节顺序（即数据的自然单位）分为 **大端序** 或 **小端序**。在 **大端序** 系统中，最高有效字节存储在最低的内存地址，而最低有效字节存储在最高的内存地址。另一方面，在
+    **小端序** 系统中，字节顺序是反转的，最低有效字节存储在最低内存地址，最高有效字节存储在最高内存地址。
 - en: In most cases, **endianness** doesn’t matter, but when you’re writing bit-wise
     code that needs to be portable, CMake will provide you with a `BIG_ENDIAN` or
     `LITTLE_ENDIAN` value stored in the `CMAKE_<LANG>_BYTE_ORDER` variable, where
@@ -1411,22 +1450,27 @@
   id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 在大多数情况下，**字节序**并不重要，但当你编写需要便于移植的按位代码时，CMake 会为你提供一个存储在 `CMAKE_<LANG>_BYTE_ORDER`
+    变量中的 `BIG_ENDIAN` 或 `LITTLE_ENDIAN` 值，其中 `<LANG>` 可以是 `C`、`CXX`、`OBJC` 或 `CUDA`。
 - en: Now that we know how to query the environment, let’s shift our focus to the
     key settings of the project.
   id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们知道如何查询环境变量，让我们将注意力转向项目的关键设置。
 - en: Configuring the toolchain
   id: totrans-212
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 配置工具链
 - en: For CMake projects, a toolchain consists of all the tools used in building and
     running the application – for example, the working environment, the generator,
     the CMake executable itself, and the compilers.
   id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于 CMake 项目，工具链包含了构建和运行应用程序时使用的所有工具——例如工作环境、生成器、CMake 可执行文件本身以及编译器。
 - en: Imagine what a less-experienced user feels when your build stops with some mysterious
     compilation and syntax errors. They must dig into the source code and try to understand
     what happened. After an hour of debugging, they discover that the correct solution
@@ -1436,17 +1480,20 @@
   id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 想象一下，当你的构建因为一些神秘的编译和语法错误停止时，一个经验较少的用户会有什么感受。他们必须深入源代码并尝试理解发生了什么。经过一个小时的调试，他们发现正确的解决方法是更新他们的编译器。我们能否为用户提供更好的体验，在开始构建之前检查编译器是否具备所有必需的功能？
 - en: Sure! There are ways to specify these requirements. If the toolchain doesn’t
     support all of the required features, CMake will stop early and show a clear message
     of what happened, asking the user to step in.
   id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然！有方法可以指定这些要求。如果工具链不支持所有必需的功能，CMake 会提前停止并显示清晰的错误信息，提示用户介入。
 - en: Setting the C++ standard
   id: totrans-216
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设置 C++ 标准
 - en: One of the initial steps we may consider is specifying the required C++ standard
     that the compiler should support for building our project. For new projects, it
     is recommended to set a minimum of C++14, but preferably C++17 or C++20\. Starting
@@ -1456,12 +1503,15 @@
   id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以考虑的初步步骤之一是指定编译器应该支持的所需 C++ 标准，以构建我们的项目。对于新项目，建议至少设置 C++14，但最好是 C++17 或 C++20。从
+    CMake 3.20 开始，如果编译器支持，可以将所需标准设置为 C++23。此外，从 CMake 3.25 开始，可以将标准设置为 C++26，尽管这目前只是一个占位符。
 - en: It has been over 10 years since the official release of **C++11**, and it is
     no longer considered to be *the modern C++ standard*. It’s not recommended to
     start projects with this version unless your target environment is very old.
   id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 自 **C++11** 官方发布以来已经过去了十多年，它不再被视为 *现代 C++ 标准*。除非你的目标环境非常旧，否则不建议使用这个版本来启动项目。
 - en: Another reason to stick to old standards is if you are building legacy targets
     that are too hard to upgrade. However, the C++ committee works very hard to keep
     C++ backward compatible, and in most cases, you won’t have any problems bumping
@@ -1469,6 +1519,7 @@
   id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 坚持使用旧标准的另一个原因是如果你在构建难以升级的遗留目标。然而，C++ 委员会一直在努力保持 C++ 向后兼容，在大多数情况下，你不会遇到将标准提高到更高版本的任何问题。
 - en: 'CMake supports setting the standard on a target-by-target basis (this is useful
     if parts of your codebase are really old), but it’s better to converge to a single
     standard across the project. This can be done by setting the `CMAKE_CXX_STANDARD`
@@ -1477,6 +1528,8 @@
   id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 支持在每个目标的基础上设置标准（如果你的代码库的某些部分非常旧，这很有用），但最好是让整个项目趋向于一个统一的标准。可以通过将 `CMAKE_CXX_STANDARD`
+    变量设置为以下值之一来完成：`98`、`11`、`14`、`17`、`20`、`23` 或 `26`，方法如下：
 - en: '[PRE18]'
   id: totrans-221
   prefs: []
@@ -1488,6 +1541,7 @@
   id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将成为所有后续定义的目标的默认值（因此最好将其设置在根列表文件的顶部附近）。如果需要，你可以在每个目标的基础上覆盖它，方法如下：
 - en: '[PRE19]'
   id: totrans-223
   prefs: []
@@ -1497,6 +1551,7 @@
   id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者：
 - en: '[PRE20]'
   id: totrans-225
   prefs: []
@@ -1506,11 +1561,13 @@
   id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二个版本允许我们在需要时指定多个目标。
 - en: Insisting on standard support
   id: totrans-227
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 坚持标准支持
 - en: The `CXX_STANDARD` property mentioned in the previous section won’t stop CMake
     from continuing with the build, even if the compiler isn’t supporting the desired
     version – it’s treated as a preference. CMake doesn’t know if our code actually
@@ -1519,12 +1576,14 @@
   id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面提到的 `CXX_STANDARD` 属性不会阻止 CMake 继续构建，即使编译器不支持所需的版本——它被视为一种偏好设置。CMake 并不知道我们的代码是否实际使用了旧编译器中无法使用的新特性，它会尽力在现有的环境中工作。
 - en: 'If we know for certain that this won’t be successful, we can set another variable
     (which is overridable per target in the same manner as the previous one) to explicitly
     require the standard we target:'
   id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们确定这不会成功，可以设置另一个变量（该变量可以像之前的变量一样在每个目标上覆盖）以明确要求我们所需的标准：
 - en: '[PRE21]'
   id: totrans-230
   prefs: []
@@ -1535,6 +1594,7 @@
   id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，如果系统中的编译器不支持所需的标准，用户将看到以下信息，构建将停止：
 - en: '[PRE22]'
   id: totrans-232
   prefs: []
@@ -1546,11 +1606,14 @@
   id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使在现代环境中，要求支持 C++23 可能有些过头。但是，C++20 应该在最新的系统上没有问题，因为自 2021/2022 年以来，**GCC**/**Clang/MSVC**
+    都已经普遍支持它。
 - en: Vendor-specific extensions
   id: totrans-234
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 厂商特定的扩展
 - en: Depending on the policy you implement in your organization, you might be interested
     in allowing or disabling vendor-specific extensions. What are these? Well, let’s
     just say that the C++ standard is moving a bit slow for the needs of some compiler
@@ -1563,6 +1626,8 @@
   id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据你所在组织实施的政策，你可能会对允许或禁用特定供应商扩展感兴趣。这些扩展是什么呢？我们可以这样说，C++标准的进展对于一些编译器生产商的需求来说有点慢，所以他们决定为语言添加自己的增强功能——如果你喜欢的话，叫做*扩展*。例如，C++
+    **技术报告1**（**TR1**）是一个库扩展，它在这些功能普及之前就引入了正则表达式、智能指针、哈希表和随机数生成器。为了支持GNU项目发布的这类插件，CMake会用`-std=gnu++14`替换标准编译器标志（`-std=c++14`）。
 - en: 'On the one hand, this may be desired, as it allows for some convenient functionality.
     On the other hand, your code will lose portability as it will fail to build if
     you switch to a different compiler (or if your users do!). This is also a per-target
@@ -1572,6 +1637,7 @@
   id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 一方面，这可能是期望的，因为它提供了一些方便的功能。另一方面，如果你切换到不同的编译器（或者你的用户这样做了），你的代码将失去可移植性，无法编译通过。这也是一个按目标设置的属性，存在一个默认变量`CMAKE_CXX_EXTENSIONS`。CMake在这里更为宽容，允许使用扩展，除非我们特别告诉它不要使用：
 - en: '[PRE23]'
   id: totrans-237
   prefs: []
@@ -1584,11 +1650,13 @@
   id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果可能的话，我推荐这样做，因为这个选项将坚持使用与供应商无关的代码。这种代码不会给用户带来任何不必要的要求。与之前的选项类似，你可以使用`set_property()`按目标修改这个值。
 - en: Interprocedural optimization
   id: totrans-239
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 跨过程优化
 - en: Usually, compilers optimize the code on the level of a single translation unit,
     which means that your `.cpp` file will be preprocessed, compiled, and then optimized.
     The intermediary files generated during these operations are then passed to the
@@ -1600,6 +1668,8 @@
   id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，编译器会在单一翻译单元的层面上优化代码，这意味着你的`.cpp`文件会被预处理、编译，然后优化。在这些操作过程中生成的中间文件会被传递给链接器，最终生成一个单一的二进制文件。然而，现代编译器具备在链接时执行**跨过程优化**（interprocedural
+    optimization）的能力，也称为**链接时优化**（link-time optimization）。这使得所有编译单元可以作为一个统一的模块进行优化，原则上这将实现更好的结果（有时会以更慢的构建速度和更多的内存消耗为代价）。
 - en: 'If your compiler supports interprocedural optimization, it may be a good idea
     to use it. We’ll follow the same method. The variable responsible for this setting
     is called `CMAKE_INTERPROCEDURAL_OPTIMIZATION`. But before we set it, we need
@@ -1607,6 +1677,7 @@
   id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的编译器支持跨过程优化，使用它可能是一个不错的主意。我们将采用相同的方法。负责此设置的变量叫做`CMAKE_INTERPROCEDURAL_OPTIMIZATION`。但在设置它之前，我们需要确保它被支持，以避免错误：
 - en: '[PRE24]'
   id: totrans-242
   prefs: []
@@ -1618,11 +1689,13 @@
   id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所见，我们需要包含一个内建模块以访问`check_ipo_supported()`命令。如果优化不被支持，这段代码会优雅地失败，并回退到默认行为。
 - en: Checking for supported compiler features
   id: totrans-244
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检查支持的编译器功能
 - en: 'As we discussed earlier, if our build is to fail, it’s best if it fails early,
     so we can provide a clear feedback message to the user and shorten the wait. Sometimes
     we’re specifically interested in which C++ features are supported (and which aren’t).
@@ -1632,10 +1705,13 @@
   id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们之前讨论的，如果我们的构建失败了，最好尽早失败，这样我们可以给用户提供清晰的反馈信息并缩短等待时间。有时我们特别关心哪些 C++ 特性受支持（哪些不受支持）。CMake
+    会在配置阶段询问编译器，并将可用特性的列表存储在 `CMAKE_CXX_COMPILE_FEATURES` 变量中。我们可以编写一个非常具体的检查，询问是否有某个特性可用：
 - en: '**ch04/07-features/CMakeLists.txt**'
   id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch04/07-features/CMakeLists.txt**'
 - en: '[PRE25]'
   id: totrans-247
   prefs: []
@@ -1650,15 +1726,19 @@
   id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你可能猜到的，针对我们使用的每个特性编写测试文件是一项艰巨的任务。即使是 CMake 的作者也建议只检查某些高级的 **元特性** 是否存在：`cxx_std_98`、`cxx_std_11`、`cxx_std_14`、`cxx_std_17`、`cxx_std_20`、`cxx_std_23`
+    和 `cxx_std_26`。每个 **元特性** 表示编译器支持特定的 C++ 标准。如果你愿意，可以像我们在前面的例子中那样使用它们。
 - en: 'A full list of features known to CMake can be found in the documentation: [https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html).'
   id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 已知的特性完整列表可以在文档中找到：[https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html)。
 - en: Compiling a test file
   id: totrans-250
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 编译测试文件
 - en: One particularly interesting scenario occurred to me when I was compiling an
     application with GCC 4.7.x. I had manually confirmed in the compiler’s reference
     that all of the C++11 features we were using were supported. However, the solution
@@ -1668,6 +1748,8 @@
   id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我使用 GCC 4.7.x 编译一个应用程序时，遇到了一个特别有趣的场景。我已经在编译器的参考文档中手动确认了我们使用的所有 C++11 特性都受支持。然而，解决方案仍然无法正常工作。代码默默地忽略了对标准
+    `<regex>` 头文件的调用。事实证明，这个特定的编译器存在一个 bug，导致 regex 库未实现。
 - en: No single check can protect you from such rare bugs (and you shouldn’t need
     to check for them!), but there’s a chance you may want to use some cutting-edge
     experimental feature of the latest standard, and you’re not sure which compilers
@@ -1677,11 +1759,13 @@
   id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有任何单一的检查可以防止这种罕见的 bug（你也不需要去检查这些 bug！），但你可能想使用最新标准中的一些前沿实验性特性，而且你不确定哪些编译器支持它。你可以通过创建一个测试文件，使用那些特定需求的特性，在一个可以快速编译并执行的小示例中测试你的项目是否能正常工作。
 - en: CMake provides two configure-time commands, `try_compile()` and `try_run()`,
     to verify that everything you need is supported on the target platform.
   id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 提供了两个配置时命令，`try_compile()` 和 `try_run()`，用于验证所需的所有内容是否在目标平台上受支持。
 - en: 'The `try_run()` command gives you more freedom, as you can ensure that the
     code is not only compiling but that it is also executing correctly (you could
     potentially test if `regex` is working). Of course, this won’t work for cross-compilation
@@ -1693,10 +1777,12 @@
   id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: '`try_run()` 命令提供了更多的灵活性，因为它不仅可以确保代码能够编译，还能验证代码是否正确执行（例如，你可以测试 `regex` 是否正常工作）。当然，这对于交叉编译场景来说不起作用（因为主机无法运行为不同目标平台构建的可执行文件）。请记住，这个检查的目的是为用户提供编译是否正常工作的快速反馈，因此它不用于运行单元测试或任何复杂的操作——保持文件尽可能简单。例如，像这样：'
 - en: '**ch04/08-test_run/main.cpp**'
   id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch04/08-test_run/main.cpp**'
 - en: '[PRE26]'
   id: totrans-256
   prefs: []
@@ -1708,10 +1794,12 @@
   id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用`try_run()`其实并不复杂。我们首先设置所需的标准，然后调用`try_run()`并将收集到的信息打印给用户：
 - en: '**ch04/08-test_run/CMakeLists.txt**'
   id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch04/08-test_run/CMakeLists.txt**'
 - en: '[PRE27]'
   id: totrans-259
   prefs: []
@@ -1723,6 +1811,7 @@
   id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个命令一开始可能让人觉得有些复杂，但实际上只有几个参数是必需的，用于编译和运行一个非常基础的测试文件。我还额外使用了可选的`RUN_OUTPUT_VARIABLE`关键字来收集来自`stdout`的输出。
 - en: The next step is to extend our basic test file by using some of the more modern
     C++ features that we’re going to use throughout the actual project – perhaps by
     adding a variadic template to see if the compiler on the target machine can digest
@@ -1730,6 +1819,7 @@
   id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一步是通过使用一些我们将在实际项目中使用的现代C++特性，来扩展我们的基本测试文件——或许可以通过添加一个变参模板，看看目标机器上的编译器是否能够处理它。
 - en: Finally, we can check in the conditional blocks if the collected output is meeting
     our expectations and `message(SEND_ERROR <error>)` is printed when something isn’t
     right. Remember that `SEND_ERROR` keyword will allow CMake to continue through
@@ -1740,11 +1830,13 @@
   id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们可以在条件块中检查收集到的输出是否符合我们的预期，并且当出现问题时，`message(SEND_ERROR <error>)`会被打印出来。记住，`SEND_ERROR`关键字允许CMake继续配置阶段，但会阻止生成构建系统。这对于在中止构建之前显示所有遇到的错误非常有用。现在我们已经知道如何确保编译可以完全完成。接下来，我们将讨论禁用源代码目录构建的问题。
 - en: Disabling in-source builds
   id: totrans-263
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 禁用源代码目录构建
 - en: In *Chapter 1*, *First Steps with CMake*, we talked about in-source builds,
     and how it is recommended to always specify the build path to be out of source.
     This not only allows for a cleaner build tree and a simpler `.gitignore` file,
@@ -1753,14 +1845,17 @@
   id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 在*第1章*，*CMake入门*中，我们讨论了源代码目录构建，并且建议始终指定构建路径为源代码之外。这不仅可以让构建树更干净、`.gitignore`文件更简单，还能减少你意外覆盖或删除源文件的风险。
 - en: 'To stop the build early you may use the following check:'
   id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想提前停止构建，可以使用以下检查：
 - en: '**ch04/09-in-source/CMakeLists.txt**'
   id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch04/09-in-source/CMakeLists.txt**'
 - en: '[PRE28]'
   id: totrans-267
   prefs: []
@@ -1771,12 +1866,14 @@
   id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想了解更多关于STR前缀和变量引用的信息，请回顾*第2章*，*CMake语言*。
 - en: Notice, however, that no matter what you do in the preceding code, it seems
     like CMake will still create a `CMakeFiles/` directory and a `CMakeCache.txt`
     file.
   id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是请注意，无论你在前面的代码中做什么，似乎CMake仍然会创建一个`CMakeFiles/`目录和一个`CMakeCache.txt`文件。
 - en: You might find online suggestions to use undocumented variables to make sure
     that the user can’t write in the source directory under any circumstances. Relying
     on undocumented variables to restrict writing in the source directory is not recommended.
@@ -1785,17 +1882,20 @@
   id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能会在网上看到一些建议，使用未文档化的变量来确保用户在任何情况下都不能在源目录中写入。依赖于未文档化的变量来限制在源目录中的写入是不推荐的。这些变量可能在所有版本中都不起作用，并且可能在没有警告的情况下被移除或修改。
 - en: If you’re worried about users leaving those files in the source directory, add
     them to the `.gitignore` (or equivalent), and change the message to request a
     manual cleanup.
   id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你担心用户将这些文件留在源代码目录中，可以将它们添加到`.gitignore`（或等效文件）中，并更改提示信息，要求手动清理。
 - en: Summary
   id: totrans-272
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: In this chapter, we covered valuable concepts that lay a strong foundation for
     building robust and future-proof projects. We discussed setting the minimum CMake
     version and configuring essential project aspects like name, languages, and metadata
@@ -1803,6 +1903,7 @@
   id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章介绍了有价值的概念，为构建健壮和具有未来保障的项目奠定了坚实的基础。我们讨论了设置最小CMake版本，以及配置项目的基本方面，如名称、语言和元数据字段。建立这些基础使得我们的项目能够有效地扩展。
 - en: We explored project partitioning, comparing the use of basic `include()` with
     `add_subdirectory`, which offers benefits such as scoped variable management,
     simplified paths, and increased modularity. The ability to create nested projects
@@ -1820,6 +1921,7 @@
   id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们探索了项目划分，比较了基本的`include()`与`add_subdirectory`的使用，后者带来了诸如作用域变量管理、简化路径和增加模块化等好处。能够创建嵌套项目并分别构建它们，在逐步将代码分解为更独立的单元时证明是有用的。在理解了可用的划分机制之后，我们深入探讨了如何创建透明、弹性和可扩展的项目结构。我们考察了CMake如何遍历listfile以及配置步骤的正确顺序。接下来，我们研究了如何为目标和主机机器设置环境作用域，它们之间的差异是什么，以及通过不同查询可以获得哪些关于平台和系统的信息。我们还介绍了工具链配置，包括指定所需的C++版本、处理特定供应商的编译器扩展以及启用重要的优化。我们学习了如何测试编译器所需的功能，并执行示例文件以测试编译支持。
 - en: Although the technical aspects covered so far are essential for a project, they
     are not sufficient to make it truly useful. To increase the project’s utility,
     we need to understand the concept of **targets**. We briefly touched on the topic
@@ -1830,48 +1932,59 @@
   id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管到目前为止涉及的技术方面对于项目至关重要，但它们不足以使项目真正有用。为了增加项目的实用性，我们需要理解**目标（targets）**的概念。我们之前简要地提到过这一话题，但现在我们已经准备好全面探讨它，因为我们已经充分理解了相关的基础知识。在下一章中将介绍的目标（targets），将在进一步提升项目的功能性和有效性方面发挥关键作用。
 - en: Further reading
   id: totrans-276
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'For more information on the topics covered in this chapter, you can refer to
     the following links:'
   id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关本章涉及主题的更多信息，请参阅以下链接：
 - en: 'Separation of concerns: [https://nalexn.github.io/separation-of-concerns/](https://nalexn.github.io/separation-of-concerns/)'
   id: totrans-278
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 关注点分离：[https://nalexn.github.io/separation-of-concerns/](https://nalexn.github.io/separation-of-concerns/)
 - en: 'Complete CMake variable reference: [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)'
   id: totrans-279
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 完整的CMake变量参考：[https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)
 - en: '`try_compile` and `try_run` references: [https://cmake.org/cmake/help/latest/command/try_compile.html](https://cmake.org/cmake/help/latest/command/try_compile.html),
     [https://cmake.org/cmake/help/latest/command/try_run.html](https://cmake.org/cmake/help/latest/command/try_run.html)'
   id: totrans-280
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`try_compile` 和 `try_run` 参考文献：[https://cmake.org/cmake/help/latest/command/try_compile.html](https://cmake.org/cmake/help/latest/command/try_compile.html),
+    [https://cmake.org/cmake/help/latest/command/try_run.html](https://cmake.org/cmake/help/latest/command/try_run.html)'
 - en: 'CheckIPOSupported reference: [https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html](https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html)'
   id: totrans-281
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CheckIPOSupported 参考文献：[https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html](https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html)
 - en: Leave a review!
   id: totrans-282
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 留下评论！
 - en: Enjoying this book? Help readers like you by leaving an Amazon review. Scan
     the QR code below to get a free eBook of your choice.
   id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 喜欢这本书吗？通过在亚马逊留下评论帮助像您一样的读者。扫描下面的二维码，免费获取一本您选择的电子书。
 - en: '![](img/Review_Copy.png)'
   id: totrans-284
   prefs: []
   type: TYPE_IMG
+  zh: '![](img/Review_Copy.png)'
