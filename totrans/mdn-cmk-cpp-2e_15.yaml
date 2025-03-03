@@ -253,11 +253,14 @@
   id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还将遵循既定的项目划分和结构来确定目录和文件的布局，并利用系统发现变量适应不同的构建环境。工具链配置是另一个关键方面，它使我们能够强制指定一个特定的
+    C++ 版本和编译器支持的标准。按照本章的建议，我们将禁用源代码内构建，以保持工作空间的整洁。
 - en: '*Chapter 5*, *Working with Targets*:'
   id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 5 章*，*与目标一起工作*：'
 - en: Here, we learned how every modern CMake project makes extensive use of targets.
     We’ll, of course, apply targets as well to define a few libraries and executables
     (both for test and production) that will keep the project organized and ensure
@@ -267,11 +270,14 @@
   id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们了解了每个现代 CMake 项目如何广泛使用目标。我们当然也会使用目标来定义一些库和可执行文件（既用于测试，也用于生产），以保持项目的组织性，并确保遵守**DRY**（**Don’t
+    Repeat Yourself**）原则。通过学习目标属性和传递使用要求（传播属性），我们将能够将配置保持在目标定义附近。
 - en: '*Chapter 6*, *Using Generator Expressions*:'
   id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 6 章*，*使用生成器表达式*：'
 - en: Generator expressions are heavily used throughout our project. We’ll aim to
     keep these expressions as straightforward as possible. The project will incorporate
     custom commands to generate files for Valgrind and coverage reports. Additionally,
@@ -280,11 +286,14 @@
   id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成器表达式在整个项目中被大量使用。我们将尽量使这些表达式保持简单明了。项目将包含自定义命令，以生成 Valgrind 和覆盖率报告的文件。此外，我们还将使用目标钩子，特别是
+    `PRE_BUILD`，来清理覆盖率插桩过程产生的 `.gcda` 文件。
 - en: '*Chapter 7*, *Compiling C++ Sources with CMake*:'
   id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 7 章*，*使用 CMake 编译 C++ 源代码*：'
 - en: 'There’s no C++ project without compilation. The basics are quite simple, but
     CMake allows us to tweak this process in so many ways: extend the sources of a
     target, configure the optimizer, and provide debugging information. For this project,
@@ -293,54 +302,64 @@
   id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有 C++ 项目是不需要编译的。基础知识非常简单，但 CMake 允许我们以多种方式调整这一过程：扩展目标的源文件、配置优化器、提供调试信息。对于这个项目，默认的编译标志已经足够，但我们还是会稍微玩一下预处理器：
 - en: We’ll store build metadata (the project version, build time, and the Git commit
     SHA) in the compiled executable and show it to the user.
   id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们将在编译后的可执行文件中存储构建元数据（项目版本、构建时间和 Git 提交 SHA），并将其展示给用户。
 - en: We’ll enable the precompilation of headers. It’s not really a necessity in such
     a small project, but it will help us practice this concept.
   id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 我们将启用头文件的预编译。这在如此小的项目中并不是必需的，但它有助于我们练习这一概念。
 - en: Unity builds won’t be necessary – this project won’t be big enough to make adding
     them worthwhile.
   id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 不需要 Unity 构建——这个项目不会大到需要添加它们才有意义。
 - en: '*Chapter 8*, *Linking Executables and Libraries*:'
   id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 8 章*，*链接可执行文件和库*：'
 - en: 'We will obtain general information on linking, useful in any project by default.
     Additionally, since this project includes a library, we will explicitly reference
     some specific building instructions for the following:'
   id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将获得有关链接的一般信息，这在任何项目中默认都是有用的。此外，由于这个项目包含一个库，我们将明确引用一些特定的构建指令，具体如下：
 - en: Static libraries for testing and development
   id: totrans-48
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于测试和开发的静态库
 - en: Shared libraries for release
   id: totrans-49
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 用于发布的共享库
 - en: This chapter also outlines how to isolate the `main()` function for testing
     purposes, a practice we will adopt.
   id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章还概述了如何隔离 `main()` 函数以进行测试，这是我们将采用的做法。
 - en: '*Chapter 9*, *Managing Dependencies in CMake*:'
   id: totrans-51
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 9 章*，*在 CMake 中管理依赖项*：'
 - en: 'To enhance the project’s appeal, we will introduce an external dependency:
     a text-based UI library. *Chapter 9* explores various methods for managing dependencies.
     The choice will be simple: the `FetchContent` utility module is generally recommended
@@ -348,11 +367,14 @@
   id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了增强项目的吸引力，我们将引入一个外部依赖项：一个基于文本的 UI 库。*第 9 章* 探讨了管理依赖项的各种方法。选择将很简单：`FetchContent`
+    工具模块通常是推荐的且最方便的。
 - en: '*Chapter 10*, *Using C++20 Modules*:'
   id: totrans-53
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*第 10 章*，*使用 C++20 模块*：'
 - en: Although we have explored the use of C++20 modules and the environment requirements
     to support this feature (CMake 3.28, latest compilers), its wide support is still
     lacking. To ensure the project’s accessibility, we will not incorporate modules
