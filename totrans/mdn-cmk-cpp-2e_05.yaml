@@ -1114,23 +1114,27 @@
   id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以调整这种目标的目标属性：**编译定义**、**编译** **选项**、**包含目录**等——它们甚至支持传递性使用要求。然而，你应该将它们视为不可变的；不要更改它们的源代码或依赖关系。
 - en: The scope of the definition of an `IMPORTED` target can be global or local to
     the directory where it was defined (visible in subdirectories but not in parent
     directories).
   id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: '`IMPORTED`目标的定义范围可以是全局的，也可以是局部的，即只在定义该目标的目录中可见（在子目录中可见，但在父目录中不可见）。'
 - en: Alias targets
   id: totrans-162
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 别名目标
 - en: 'Alias targets do exactly what you expect – they create another reference to
     a target under a different name. You can create alias targets for executables
     and libraries with the following commands:'
   id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 别名目标正如你所期待的那样——它们创建了一个不同名称的目标引用。你可以使用以下命令为可执行文件和库创建别名目标：
 - en: '[PRE16]'
   id: totrans-164
   prefs: []
@@ -1141,6 +1145,7 @@
   id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 别名目标的属性是只读的，不能安装或导出别名（它们在生成的构建系统中不可见）。
 - en: So, what is the reason to have aliases at all? They come in handy in scenarios
     where some part of a project (such as a subdirectory) requires a target with a
     specific name, and the actual implementation may be available under different
@@ -1149,26 +1154,31 @@
   id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，为什么要使用别名呢？它们在项目的某些部分（例如子目录）需要一个特定名称的目标，而实际的实现可能会根据情况以不同的名称出现时非常有用。例如，你可能希望构建一个与你的解决方案一起提供的库，或者根据用户的选择导入它。
 - en: Interface libraries
   id: totrans-167
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 接口库
 - en: This is an interesting construct – a library that doesn’t compile anything but
     instead serves as a utility target. Its whole concept is built around propagated
     properties (Transitive Usage Requirements).
   id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个有趣的构造——一个不编译任何东西，而是作为一个工具目标的库。它的整个概念是围绕传播的属性（传递性使用要求）构建的。
 - en: Interface libraries have two primary uses – to represent header-only libraries,
     and to bundle a bunch of propagated properties into a single logical unit.
   id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 接口库有两个主要用途——表示仅包含头文件的库，以及将一堆传播的属性捆绑成一个逻辑单元。
 - en: 'Header-only libraries are fairly easy to create with `add_library(INTERFACE)`:'
   id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`add_library(INTERFACE)`创建仅包含头文件的库非常简单：
 - en: '[PRE17]'
   id: totrans-171
   prefs: []
@@ -1178,6 +1188,7 @@
   id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用这样的库，我们只需要链接它：
 - en: '[PRE18]'
   id: totrans-173
   prefs: []
@@ -1188,6 +1199,7 @@
   id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里不会发生实际的链接，但CMake会将此命令理解为要求将所有`INTERFACE`属性传播到`executable`目标。
 - en: 'The second use case leverages exactly the same mechanism but for a different
     purpose – it creates a logical target that can be a placeholder for propagated
     properties. We can then use this target as a dependency for other targets and
@@ -1195,6 +1207,7 @@
   id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二种用法完全利用相同的机制，但目的是不同的——它创建一个逻辑目标，可以作为传播属性的占位符。然后，我们可以将这个目标作为其他目标的依赖，并以干净、方便的方式设置属性。这里是一个例子：
 - en: '[PRE19]'
   id: totrans-176
   prefs: []
@@ -1210,11 +1223,13 @@
   id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add_library(INTERFACE)`命令创建一个逻辑的`warning_properties`目标，用于设置第二个命令中指定的**编译选项**，应用于`executable`目标。我推荐使用这些`INTERFACE`目标，因为它们提高了代码的可读性和可重用性。可以将其视为将一堆魔法值重构为一个命名良好的变量。我还建议明确地添加一个后缀，如`_properties`，以便轻松区分接口库和常规库。'
 - en: Object libraries
   id: totrans-178
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 目标库
 - en: '*Object libraries* are used to group multiple source files under a single logical
     target and are compile them into (`.o`) *object files* during a build. To create
     an *object library*, we follow the same method as with other libraries, but with
@@ -1222,6 +1237,7 @@
   id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: '*目标库*用于将多个源文件归为一个逻辑目标，并在构建过程中将它们编译成（`.o`）*目标文件*。创建*目标库*的方法与其他库相同，只不过使用`OBJECT`关键字：'
 - en: '[PRE20]'
   id: totrans-180
   prefs: []
@@ -1335,11 +1351,13 @@
   id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 这就是我们探索目标及其不同方面的总结：我们知道如何创建目标，配置其属性，使用伪目标，并决定它们是否应该默认构建。此外，还有一种有趣的非目标机制，用于创建可以在所有实际目标中使用的自定义工件——**自定义命令**（不要与**自定义目标**混淆）。
 - en: Writing custom commands
   id: totrans-195
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 编写自定义命令
 - en: 'Using custom targets has one drawback – as soon as you add them to the `ALL`
     target or start depending on them for other targets, they will be built every
     single time. Sometimes, this is what you want, but there are cases when custom
@@ -1347,26 +1365,31 @@
   id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用自定义目标有一个缺点——一旦将它们添加到`ALL`目标中，或者让其他目标依赖它们，它们就会每次都被构建。有时，这是你想要的效果，但也有些情况下，出于某些原因，有必要生成不应被重新创建的文件，此时需要自定义行为：
 - en: Generating a source code file that another target depends on
   id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 生成另一个目标依赖的源代码文件
 - en: Translating another language into C++
   id: totrans-198
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将另一种语言翻译成C++
 - en: Executing a custom action immediately before or after another target was built
   id: totrans-199
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在另一个目标构建之前或之后立即执行自定义操作
 - en: 'There are two signatures for a custom command. The first one is an extended
     version of `add_custom_target()`:'
   id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 自定义命令有两个签名，第一个是`add_custom_target()`的扩展版本：
 - en: '[PRE23]'
   id: totrans-201
   prefs: []
@@ -1379,11 +1402,13 @@
   id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你可能已经猜到的那样，自定义命令并不会创建一个逻辑目标，但和自定义目标一样，它必须被添加到依赖图中。这样做有两种方式——将其输出的工件作为可执行文件（或库）的源，或者显式地将其添加到自定义目标的`DEPENDS`列表中。
 - en: Using a custom command as a generator
   id: totrans-203
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用自定义命令作为生成器
 - en: Admittedly, not every project needs to generate C++ code from other files. One
     such occasion might be a compilation of **Google’s Protocol Buffer’s** (**Protobuf’s**)
     `.proto` files. If you’re not familiar with this library, Protobuf is a platform-neutral
@@ -1391,6 +1416,7 @@
   id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 诚然，并不是每个项目都需要从其他文件生成C++代码。一个这样的情况可能是**Google的协议缓冲区**（**Protobuf**）的`.proto`文件编译。如果你不熟悉这个库，Protobuf是一个平台中立的二进制序列化工具，用于结构化数据。
 - en: 'In other words: it can be used to encode objects to and from binary streams:
     files or network connections. To keep Protobuf cross-platform and fast at the
     same time, Google’s engineers invented their own Protobuf language that defines
@@ -1398,6 +1424,7 @@
   id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 换句话说：它可以用于在二进制流中编码对象：文件或网络连接。为了保持Protobuf的跨平台性和快速性，Google的工程师发明了他们自己的Protobuf语言，该语言在`.proto`文件中定义模型，如下所示：
 - en: '[PRE24]'
   id: totrans-206
   prefs: []
@@ -1412,6 +1439,7 @@
   id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样的文件可以用于在多种语言中编码数据——C++、Ruby、Go、Python、Java等。Google提供了一个编译器`protoc`，它读取`.proto`文件，并输出针对所选语言的结构和序列化源代码（稍后需要编译或解释）。聪明的工程师不会将这些生成的源文件提交到版本库，而是会使用原始的Protobuf格式，并在构建链中添加一步生成源文件的操作。
 - en: 'We don’t know yet how to detect whether (and where) a Protobuf compiler is
     available on the target host (we’ll learn this in *Chapter 9*, *Managing Dependencies
     in CMake*). So, for now, let’s just assume that the compiler’s `protoc` command
@@ -1421,6 +1449,7 @@
   id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还不知道如何检测目标主机上是否存在（以及在哪里存在）Protobuf编译器（我们将在*第9章*，*CMake中的依赖管理*中学习这一点）。所以，目前我们暂时假设编译器的`protoc`命令位于系统已知的位置。我们已经准备了一个`person.proto`文件，并且知道Protobuf编译器将输出`person.pb.h`和`person.pb.cc`文件。下面是我们如何定义一个自定义命令来编译它们：
 - en: '[PRE25]'
   id: totrans-209
   prefs: []
@@ -1431,6 +1460,7 @@
   id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，为了在我们的可执行文件中支持序列化，我们可以直接将输出文件添加到源代码中：
 - en: '[PRE26]'
   id: totrans-211
   prefs: []
@@ -1442,15 +1472,18 @@
   id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们正确处理了头文件的包含和 Protobuf 库的链接，当我们对 `.proto` 文件进行修改时，所有内容会自动编译并更新。
 - en: 'A simplified (and much less practical) example would be to create the necessary
     header by copying it from another location:'
   id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个简化的（但不太实用的）示例是通过从另一个位置复制必要的头文件来创建它：
 - en: '**ch05/03-command/CMakeLists.txt**'
   id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch05/03-command/CMakeLists.txt**'
 - en: '[PRE27]'
   id: totrans-215
   prefs: []
@@ -1462,16 +1495,19 @@
   id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，我们的“编译器”是 `cp` 命令。它通过简单地从源代码树复制 `constants.h` 文件到构建树根目录，满足 `main` 目标的依赖。
 - en: Using a custom command as a target hook
   id: totrans-217
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用自定义命令作为目标钩子
 - en: 'The second version of the `add_custom_command()` command introduces a mechanism
     to execute commands before or after building a target:'
   id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二版本的 `add_custom_command()` 命令引入了一个机制，用于在构建目标之前或之后执行命令：
 - en: '[PRE28]'
   id: totrans-219
   prefs: []
@@ -1482,12 +1518,14 @@
   id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在第一个参数中指定希望“增强”的目标，并在以下条件下执行：
 - en: '`PRE_BUILD` will run before any other rules for this target (Visual Studio
     generators only; for others, it behaves like `PRE_LINK`).'
   id: totrans-221
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`PRE_BUILD` 会在为此目标执行任何其他规则之前运行（仅适用于 Visual Studio 生成器；对于其他生成器，它的行为像 `PRE_LINK`）。'
 - en: '`PRE_LINK` binds the command to be run just after all sources have been compiled
     but before the linking (or archiving) of the target. It doesn’t work for custom
     targets.'
@@ -1495,20 +1533,24 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`PRE_LINK` 将命令绑定到所有源文件编译完成后、目标链接（或归档）之前运行。它不适用于自定义目标。'
 - en: '`POST_BUILD` will run after all other rules have been executed for this target.'
   id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`POST_BUILD` 会在所有其他规则为此目标执行完成后运行。'
 - en: 'Using this version of `add_custom_command()`, we can replicate the generation
     of the checksum from the previous BankApp example:'
   id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这个版本的 `add_custom_command()`，我们可以复制前面 BankApp 示例中的校验和生成：
 - en: '**ch05/04-command/CMakeLists.txt**'
   id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch05/04-command/CMakeLists.txt**'
 - en: '[PRE29]'
   id: totrans-226
   prefs: []
@@ -1523,11 +1565,14 @@
   id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 `main` 可执行文件的构建完成后，CMake 会执行 `cksum` 命令并传入提供的参数。但是，首个参数发生了什么？它不是一个变量，否则它应该用大括号（`${}`）括起来，而不是用尖括号（`$<>`）。它是一个
+    **生成器表达式**，计算得到目标二进制文件的完整路径。这个机制在许多目标属性的上下文中非常有用，我们将在下一章中解释。
 - en: Summary
   id: totrans-228
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: 'Understanding targets is critical to writing clean, modern CMake projects.
     In this chapter, we have not only discussed what constitutes a target and how
     to define three different types of targets: executables, libraries, and custom
@@ -1540,6 +1585,8 @@
   id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 理解目标是编写清晰、现代 CMake 项目的关键。在本章中，我们不仅讨论了目标的构成以及如何定义三种不同类型的目标：可执行文件、库和自定义目标，还解释了目标之间如何通过依赖图相互依赖，并学习了如何使用
+    Graphviz 模块来可视化它。通过这些基本理解，我们得以学习目标的一个关键特性——属性。我们不仅介绍了几个命令来设置目标的常规属性，还解决了传递使用要求的谜团，也就是所谓的传播属性。
 - en: This was a hard one to crack, as we had to not only understand how to control
     which properties are propagated but also how that propagation affects subsequent
     targets. Furthermore, we discovered how to guarantee the compatibility of properties
@@ -1547,6 +1594,7 @@
   id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个很难解决的问题，因为我们不仅需要理解如何控制哪些属性会被传播，还要理解这种传播如何影响后续目标。此外，我们还发现了如何确保来自多个源的属性兼容性。
 - en: 'We then briefly discussed pseudo targets: imported targets, alias targets,
     and interface libraries. All of them will come in handy later in our projects,
     especially when we know how to connect them with propagated properties for our
@@ -1559,58 +1607,71 @@
   id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 接着，我们简要讨论了伪目标：导入目标、别名目标和接口库。它们在后续的项目中将派上用场，特别是当我们知道如何将它们与传播属性结合起来，造福我们自己时。然后，我们讨论了生成的构建目标，以及配置阶段如何影响它们。之后，我们花了一些时间研究了一种类似于目标但并不完全相同的机制：自定义命令。我们简要提到它们如何生成供其他目标使用的文件（如编译、翻译等），以及它们的钩子功能：在目标构建时执行附加步骤。
 - en: With such a solid foundation, we are ready for the next topic – compiling C++
     sources into executables and libraries.
   id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了如此坚实的基础，我们准备进入下一个主题——将 C++ 源代码编译成可执行文件和库。
 - en: Further reading
   id: totrans-233
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'For more information on the topics covered in this chapter, you can refer to
     the following:'
   id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 若想了解本章涉及的更多内容，您可以参考以下资源：
 - en: 'Graphviz module documentation: [https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz),
     [https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)'
   id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Graphviz 模块文档：[https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz)，[https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)
 - en: 'Graphviz software: [https://graphviz.org](https://graphviz.org)'
   id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Graphviz 软件：[https://graphviz.org](https://graphviz.org)
 - en: 'CMake target properties: [https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets)'
   id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CMake 目标属性：[https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets)
 - en: 'Transitive Usage Requirements: [https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements
     )'
   id: totrans-238
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可传递使用要求：[https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements
+    )
 - en: Join our community on Discord
   id: totrans-239
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 加入我们的 Discord 社区
 - en: 'Join our community’s Discord space for discussions with the author and other
     readers:'
   id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 加入我们社区的 Discord 频道，与作者和其他读者讨论：
 - en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
   id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
 - en: '![](img/QR_Code94081075213645359.png)'
   id: totrans-242
   prefs: []
   type: TYPE_IMG
+  zh: '![](img/QR_Code94081075213645359.png)'
