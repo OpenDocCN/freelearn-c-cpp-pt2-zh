@@ -982,15 +982,19 @@
   id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，到了检查我们是否设置了任何`PQXX_LIBRARY_PATH-NOTFOUND`或`PQXX_HEADER_PATH-NOTFOUND`变量的时间。我们可以手动打印诊断消息并停止构建，也可以使用
+    CMake 的`find_package_handle_standard_args()`帮助函数。这个函数会将`<PKG_NAME>_FOUND`变量设置为`1`，如果路径变量正确填充。它还会提供适当的诊断消息（它会尊重`QUIET`关键字），如果在`find_package()`调用中提供了`REQUIRED`关键字，它将以`FATAL_ERROR`终止执行。
 - en: 'If a library is found, we’ll call the function we wrote earlier to define the
     `IMPORTED` targets and store the paths in the cache:'
   id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果找到了库，我们将调用之前写的函数来定义`IMPORTED`目标并将路径存储在缓存中：
 - en: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake (continued)**'
   id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/03-find-package-custom/cmake/module/FindPQXX.cmake（续）**'
 - en: '[PRE16]'
   id: totrans-142
   prefs: []
@@ -1001,6 +1005,7 @@
   id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 就是这样！这个查找模块会找到`PQXX`并创建适当的`PQXX::PQXX`目标。完整文件可以在书籍的`examples`代码库中找到。
 - en: For libraries that are well supported and likely already installed, this method
     is very effective. But what if you’re dealing with older, less-supported packages?
     Unix-like systems have a tool called `pkg-config`, and CMake has a useful wrapper
@@ -1008,11 +1013,14 @@
   id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于那些支持良好且很可能已经安装的库，这种方法非常有效。但如果你正在处理旧的、支持较差的包呢？类 Unix 系统有一个叫做`pkg-config`的工具，CMake
+    也有一个有用的包装模块来支持它。
 - en: Discovering legacy packages with FindPkgConfig
   id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 FindPkgConfig 发现遗留包
 - en: Managing dependencies and figuring out the necessary compile flags is a challenge
     as old as C++ libraries themselves. Various tools have been developed to tackle
     this issue, from simple mechanisms to comprehensive solutions integrated into
@@ -1022,41 +1030,49 @@
   id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 管理依赖关系并弄清楚必要的编译标志是一个与 C++ 库本身一样古老的挑战。为了解决这个问题，开发了各种工具，从简单的机制到集成到构建系统和 IDE 中的全面解决方案。PkgConfig（[freedesktop.org/wiki/Software/pkg-config](http://freedesktop.org/wiki/Software/pkg-config)）就是其中一种工具，它曾经非常流行，通常可以在类
+    Unix 系统中找到，虽然它也可以在 macOS 和 Windows 上使用。
 - en: 'However, PkgConfig is gradually being replaced by more modern solutions. So,
     should you still consider supporting it? Chances are, you probably don’t need
     to. Here’s why:'
   id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，PkgConfig 正在逐渐被更现代的解决方案所取代。那么，你还应该考虑支持它吗？很可能，你不需要。以下是原因：
 - en: If your library doesn’t provide the `.pc` PkgConfig files, there’s little value
     in writing definition files for an aging tool; opt for newer alternatives instead
   id: totrans-148
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你的库没有提供`.pc` PkgConfig 文件，那么为一个过时的工具编写定义文件的价值不大；最好选择更新的替代方案
 - en: If you can pick a newer version of the library that supports CMake (we’ll discuss
     how to download dependencies from the internet later in this chapter)
   id: totrans-149
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你能选择一个支持 CMake 的较新版本的库（我们将在本章后面讨论如何从互联网下载依赖项）
 - en: If the package is widely used, the latest version of CMake might already include
     a find module for it
   id: totrans-150
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果这个包被广泛使用，CMake 的最新版本可能已经包含了它的查找模块
 - en: If a community-created find module is available online and its license allows
     you to use it, that’s another good option
   id: totrans-151
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果网上有社区创建的查找模块，并且它的许可证允许你使用它，那也是一个不错的选择
 - en: If you can write and maintain a find module yourself
   id: totrans-152
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你能自己编写并维护一个查找模块
 - en: Use PkgConfig only if you’re working with a library version that already provides
     a PkgConfig `.pc` file, and no config module or find module is available. Also,
     there should be a strong reason why creating a find module yourself isn’t a viable
@@ -1065,6 +1081,8 @@
   id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 只有在你正在使用的库版本已经提供了 PkgConfig `.pc` 文件，并且没有可用的配置模块或查找模块时，才使用 PkgConfig。此外，应该有充分的理由说明为什么自己创建一个查找模块不可行。如果你确信不需要
+    PkgConfig，可以跳过这一节。
 - en: 'Sadly, not all environments can be quickly updated to the latest versions of
     a library. Many companies are still using legacy systems in production, which
     are no longer receiving the latest packages. If you have a `.pc` file for a specific
@@ -1073,6 +1091,8 @@
   id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 不幸的是，并非所有环境都能迅速更新到最新版本的库。许多公司仍在生产中使用老旧系统，这些系统不再接收最新的包。如果您的系统中有某个库的 `.pc` 文件，它可能看起来像这里显示的
+    `foobar` 文件：
 - en: '[PRE17]'
   id: totrans-155
   prefs: []
@@ -1086,6 +1106,8 @@
   id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: PkgConfig 的格式简单，许多熟悉这个工具的开发者出于习惯，倾向于使用它，而不是学习更复杂的系统，如 CMake。尽管它很简单，PkgConfig
+    仍然能够检查特定的库及其版本是否可用，还能获取库的链接标志和目录信息。
 - en: To use it with CMake, you need to find the `pkg-config` tool on your system,
     run specific commands, and then store the results for later use by the compiler.
     Doing all these steps each time you use PkgConfig can feel like a lot of work.
@@ -1095,6 +1117,9 @@
   id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在 CMake 中使用它，您需要在系统中找到 `pkg-config` 工具，运行特定的命令，然后存储结果以便编译器后续使用。每次使用 PkgConfig
+    时都做这些步骤可能会觉得很繁琐。幸运的是，CMake 提供了一个 FindPkgConfig 查找模块。如果找到了 PkgConfig，`PKG_CONFIG_FOUND`
+    将被设置。然后，我们可以使用 `pkg_check_modules()` 查找所需的包。
 - en: 'We have already become familiar with `libpqxx` in the previous section, and
     since it offers a `.pc` file, let’s try and find it using PkgConfig. To put this
     in action, let’s write a simple `main.cpp` file, which utilizes a placeholder
@@ -1102,10 +1127,13 @@
   id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在上一节中已经熟悉了 `libpqxx`，并且它提供了一个 `.pc` 文件，接下来我们将尝试使用 PkgConfig 查找它。为了实现这一点，让我们编写一个简单的
+    `main.cpp` 文件，使用一个占位符连接类：
 - en: '**ch09/04-find-pkg-config/main.cpp**'
   id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/04-find-pkg-config/main.cpp**'
 - en: '[PRE18]'
   id: totrans-160
   prefs: []
@@ -1118,10 +1146,13 @@
   id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 在典型的列表文件中，我们通常会先使用 `find_package()` 函数，如果未检测到库，再切换到 PkgConfig。这种方法在环境更新时很有用，因为我们可以继续使用
+    `main` 方法，而无需修改代码。为了简洁起见，本示例将跳过这一部分。
 - en: '**ch09/04-find-pkg-config/CMakeLists.txt**'
   id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/04-find-pkg-config/CMakeLists.txt**'
 - en: '[PRE19]'
   id: totrans-163
   prefs: []
@@ -1131,12 +1162,14 @@
   id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们分解一下发生了什么：
 - en: The `find_package()` command is used to locate PkgConfig. If `pkg-config` is
     missing, the process stops due to the `REQUIRED` keyword.
   id: totrans-165
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`find_package()` 命令用于查找 PkgConfig。如果 `pkg-config` 丢失，过程将因 `REQUIRED` 关键字而停止。'
 - en: The `pkg_check_modules()` custom macro from the `FindPkgConfig` find module
     sets up a new `IMPORTED` target named `PQXX`. The find module looks for a `libpqxx`
     dependency and will fail if it’s not there, again because of the `REQUIRED` keyword.
@@ -1146,6 +1179,9 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`FindPkgConfig` 查找模块中的 `pkg_check_modules()` 自定义宏设置了一个名为 `PQXX` 的新 `IMPORTED`
+    目标。查找模块会查找 `libpqxx` 依赖项，如果找不到它，查找过程会失败，这又是由于 `REQUIRED` 关键字的作用。`IMPORTED_TARGET`
+    关键字至关重要；否则，我们将需要手动定义目标。'
 - en: We validate the setup with a `message()` function, displaying `PQXX_FOUND`.
     If we hadn’t used `REQUIRED` earlier, this is where we could check whether the
     variable was set, maybe to activate other fallbacks.
@@ -1153,11 +1189,13 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 我们通过 `message()` 函数验证设置，显示 `PQXX_FOUND`。如果我们之前没有使用 `REQUIRED`，这里就是检查变量是否已设置的地方，可能用于激活其他回退方案。
 - en: The `main` executable is declared with `add_executable()`.
   id: totrans-168
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`main` 可执行文件通过 `add_executable()` 声明。'
 - en: Finally, we use `target_link_libraries()` to link the `PkgConfig::PQXX` target,
     imported by `pkg_check_modules()`. Note that `PkgConfig::` is a fixed prefix and
     `PQXX` is derived from the first argument we passed to the macro.
@@ -1165,6 +1203,8 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 最后，我们使用 `target_link_libraries()` 将由 `pkg_check_modules()` 导入的 `PkgConfig::PQXX`
+    目标进行链接。请注意，`PkgConfig::` 是固定的前缀，`PQXX` 是我们传递给宏的第一个参数派生出来的。
 - en: Using this option is faster than creating a find module for dependencies that
     don’t have CMake support. However, it does come with some downsides. One issue
     is that it relies on the older `pkg-config` tool, which may not be available in
@@ -1173,6 +1213,7 @@
   id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这个选项比为没有 CMake 支持的依赖项创建查找模块更快。然而，它也有一些缺点。一个问题是，它依赖于较旧的`pkg-config`工具，这在构建项目的操作系统中可能不可用。此外，这种方法会创建一个特殊情况，需要与其他方法不同的维护方式。
 - en: We’ve discussed how to work with dependencies that are already installed on
     your computer. However, that’s only part of the story. Many times, your project
     will go to users who might not have all the required dependencies on their systems.
@@ -1180,11 +1221,13 @@
   id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经讨论了如何处理已安装在计算机上的依赖项。然而，这只是故事的一部分。很多时候，你的项目会交给那些可能没有系统上所有必需依赖项的用户。让我们看看如何处理这种情况。
 - en: Using dependencies not present in the system
   id: totrans-172
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用系统中不存在的依赖项
 - en: 'CMake excels at managing dependencies, particularly when they’re not already
     installed on the system. There are several approaches you can take. If you’re
     using CMake version 3.14 or newer, the `FetchContent` module is your best choice
@@ -1196,16 +1239,19 @@
   id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 在管理依赖项方面表现出色，特别是当依赖项尚未安装在系统中时。你可以采取几种方法。如果你使用的是 CMake 版本 3.14 或更新版本，那么`FetchContent`模块是管理依赖项的最佳选择。基本上，`FetchContent`是对另一个模块`ExternalProject`的用户友好封装。它不仅简化了过程，还增加了一些额外的功能。我们将在本章后面深入探讨`ExternalProject`。现在，只需知道这两者之间的主要区别是执行顺序：
 - en: '`FetchContent` brings dependencies in during the *configuration stage*.'
   id: totrans-174
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`FetchContent`会在*配置阶段*引入依赖项。'
 - en: '`ExternalProject` brings dependencies in during the *build stage*.'
   id: totrans-175
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`ExternalProject`会在*构建阶段*引入依赖项。'
 - en: This order is significant, as targets defined by `FetchContent` during the configuration
     stage will be in the same namespace, and as such can be easily used by our project.
     We can link them with other targets, just as if we had defined them ourselves.
@@ -1214,66 +1260,79 @@
   id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个顺序很重要，因为在配置阶段，由`FetchContent`定义的目标将处于相同的命名空间中，因此可以轻松地在项目中使用它们。我们可以将它们与其他目标链接，就像我们自己定义的一样。有些情况下这样做并不合适，那时`ExternalProject`是必须的选择。
 - en: Let’s see how to deal with the majority of the cases first.
   id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们先看看如何处理大多数情况。
 - en: FetchContent
   id: totrans-178
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: FetchContent
 - en: 'The `FetchContent` module is extremely useful; it offers the following features:'
   id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: '`FetchContent`模块非常有用，它提供了以下功能：'
 - en: Management of directory structure for an external project
   id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 外部项目的目录结构管理
 - en: Downloading of sources from a URL (and extracting from archives if needed)
   id: totrans-181
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从 URL 下载源代码（并在需要时从归档中提取）
 - en: Support for Git, Subversion, Mercurial, and CVS (Concurrent Versions System)
     repositories
   id: totrans-182
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 支持 Git、Subversion、Mercurial 和 CVS（并行版本系统）仓库
 - en: Fetching updates if needed
   id: totrans-183
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果需要，获取更新
 - en: Configuring and building the project with CMake, Make, or with a user-specified
     tool
   id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用 CMake、Make 或用户指定的工具配置并构建项目
 - en: Providing nested dependencies on other targets
   id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 提供其他目标的嵌套依赖项
 - en: 'The usage of the `FetchContent` module involves three main steps:'
   id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`FetchContent`模块涉及三个主要步骤：
 - en: Add the module to your project with `include(FetchContent)`.
   id: totrans-187
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用`include(FetchContent)`将模块添加到项目中。
 - en: Configure the dependencies with the `FetchContent_Declare()` command. This will
     instruct FetchContent where the dependencies are and which version should be used.
   id: totrans-188
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用`FetchContent_Declare()`命令配置依赖项。这将指示`FetchContent`依赖项的位置及使用的版本。
 - en: Complete the dependency setup using the `FetchContent_MakeAvailable()` command.
     This will download, build, install, and add the listfiles to your main project
     for parsing.
@@ -1281,6 +1340,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用`FetchContent_MakeAvailable()`命令完成依赖项设置。这将下载、构建、安装并将列表文件添加到主项目中以供解析。
 - en: 'You might wonder why *steps 2* and *3* are separate. The reason is to allow
     for **configuration overrides** in multi-layered projects. For example, consider
     a project that depends on external libraries, A and B. Library A also depends
@@ -1289,14 +1349,18 @@
   id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能会想知道为什么*步骤 2*和*步骤 3*是分开的。原因是为了在多层项目中允许**配置覆盖**。例如，考虑一个依赖于外部库A和B的项目。库A也依赖于B，但它的作者使用的是一个较旧版本，这个版本与父项目的版本不同（*图
+    9.1*）：
 - en: '![](img/B19844_09_01.png)'
   id: totrans-191
   prefs: []
   type: TYPE_IMG
+  zh: '![](img/B19844_09_01.png)'
 - en: 'Figure 9.1: The hierarchical project'
   id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 图 9.1：层次化项目
 - en: If configuration and download were to occur in the same command, the parent
     project wouldn’t be able to use a newer version, even if it’s backward compatible,
     because the dependency has already configured the *imported targets* for the older
@@ -1304,6 +1368,7 @@
   id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果配置和下载在同一个命令中进行，父项目将无法使用更新版本，即使它向后兼容，因为依赖已经为旧版本配置了*导入目标*，这会引起库的目标名称和文件的冲突。
 - en: To specify what version is needed, the top-most project has to call the `FetchContent_Declare()`
     command and provide overridden configuration for B, before library A is fully
     set up. The subsequent call to `FetchContent_Declare()` in A will be ignored,
@@ -1311,10 +1376,12 @@
   id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了指定需要的版本，最顶层的项目必须调用`FetchContent_Declare()`命令并提供B的覆盖配置，然后库A才会完全设置。随后在A中调用`FetchContent_Declare()`将被忽略，因为B的依赖已经配置好了。
 - en: 'Let’s take a look at the signature of the `FetchContent_Declare()` command:'
   id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看`FetchContent_Declare()`命令的签名：
 - en: '[PRE20]'
   id: totrans-196
   prefs: []
@@ -1325,6 +1392,7 @@
   id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: '`depName`是依赖项的唯一标识符，稍后将由`FetchContent_MakeAvailable()`命令使用。'
 - en: The `contentOptions` provides a detailed configuration of the dependency, which
     can get quite complex. It’s important to realize that, under the hood, `FetchContent_Declare()`
     uses the older `ExternalProject_Add()` command. As a matter of fact, many arguments
@@ -1334,11 +1402,13 @@
   id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: '`contentOptions`提供了依赖项的详细配置，可能会变得相当复杂。重要的是要意识到，`FetchContent_Declare()`在后台使用的是较老的`ExternalProject_Add()`命令。实际上，许多传递给`FetchContent_Declare`的参数都会直接转发到该内部调用。在详细解释所有参数之前，让我们看看一个实际示例，它从GitHub下载依赖项。'
 - en: Basic example with a YAML reader
   id: totrans-199
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用YAML读取器的基本示例
 - en: I’ve written a tiny program that reads a username from a YAML file and prints
     it out in a welcome message. YAML is a great, simple format to store human-readable
     configuration, but it’s quite complex to parse by machines. I’ve found a neat,
@@ -1346,16 +1416,20 @@
   id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 我写了一个小程序，它从YAML文件中读取用户名并在欢迎信息中打印出来。YAML是一个很好的简单格式，可以存储人类可读的配置，但机器解析起来相当复杂。我发现了一个很棒的小项目，解决了这个问题，它叫做`yaml-cpp`，由Jesse
+    Beder开发（[https://github.com/jbeder/yaml-cpp](https://github.com/jbeder/yaml-cpp)）。
 - en: 'The example is fairly straightforward. It’s a greeting program that prints
     a `Welcome <name>` message. The default value of `name` will be `Guest`, but we
     can specify a different name in a YAML configuration file. Here’s the C++ code:'
   id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个示例相当直接。它是一个问候程序，打印出`Welcome <name>`信息。`name`的默认值为`Guest`，但我们可以在YAML配置文件中指定一个不同的名字。以下是C++代码：
 - en: '**ch09/05-fetch-content/main.cpp**'
   id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/05-fetch-content/main.cpp**'
 - en: '[PRE21]'
   id: totrans-203
   prefs: []
@@ -1365,10 +1439,12 @@
   id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个示例的配置文件只有一行：
 - en: '**ch09/05-fetch-content/config.yaml**'
   id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/05-fetch-content/config.yaml**'
 - en: '[PRE22]'
   id: totrans-206
   prefs: []
@@ -1380,10 +1456,12 @@
   id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将在其他部分重用这个示例，所以请花点时间理解它的工作原理。现在代码已经准备好了，我们来看一下如何构建它并获取依赖：
 - en: '**ch09/05-fetch-content/CMakeLists.txt**'
   id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/05-fetch-content/CMakeLists.txt**'
 - en: '[PRE23]'
   id: totrans-209
   prefs: []
@@ -1394,6 +1472,7 @@
   id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以显式访问由`yaml-cpp`库创建的目标。为了证明这一点，我们将使用`CMakePrintHelpers`帮助模块：
 - en: '[PRE24]'
   id: totrans-211
   prefs: []
@@ -1404,6 +1483,7 @@
   id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我们构建这样的项目时，配置阶段将打印以下输出：
 - en: '[PRE25]'
   id: totrans-213
   prefs: []
@@ -1416,11 +1496,13 @@
   id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 这告诉我们，由 `external-yaml-cpp` 依赖项定义的目标存在，它是一个静态库，并且其源目录位于构建树内。这个输出对于实际项目来说不是必需的，但如果你不确定如何正确包含一个导入的目标，它有助于调试。
 - en: 'Since we already copied the `.yaml` file to the output with the `configure_file()`
     command, we can run the program:'
   id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于我们已经通过 `configure_file()` 命令将 `.yaml` 文件复制到输出目录，我们可以运行该程序：
 - en: '[PRE26]'
   id: totrans-216
   prefs: []
@@ -1431,6 +1513,7 @@
   id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 一切顺利！几乎没有任何工作，我们就引入了一个外部依赖，并在项目中使用了它。
 - en: 'If we need more than one dependency, we should write multiple calls to the
     `FetchContent_Declare()` command, each time selecting a unique identifier. But
     there’s no need to call `FetchContent_MakeAvailable()` more than once because
@@ -1438,6 +1521,7 @@
   id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们需要多个依赖项，我们应编写多个 `FetchContent_Declare()` 命令，每次选择一个唯一的标识符。但不需要多次调用 `FetchContent_MakeAvailable()`，因为它支持多个标识符（这些标识符不区分大小写）：
 - en: '[PRE27]'
   id: totrans-219
   prefs: []
@@ -1447,82 +1531,98 @@
   id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，我们将学习如何编写依赖声明。
 - en: Downloading the dependencies
   id: totrans-221
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 下载依赖
 - en: 'The `FetchContent_Declare()` command offers a wide range of options, which
     come from the `ExternalProject` module. Essentially, you can perform three main
     actions:'
   id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: '`FetchContent_Declare()` 命令提供了多种选项，这些选项来自于 `ExternalProject` 模块。基本上，你可以执行三种主要操作：'
 - en: Downloading dependencies
   id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 下载依赖
 - en: Updating dependencies
   id: totrans-224
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 更新依赖
 - en: Patching dependencies
   id: totrans-225
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 补丁依赖
 - en: 'Let’s begin by looking at the most common scenario: fetching files from the
     internet. There are many download sources supported by CMake:'
   id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从最常见的场景开始：从互联网获取文件。CMake 支持许多下载源：
 - en: HTTP Server (URL)
   id: totrans-227
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: HTTP 服务器（URL）
 - en: Git
   id: totrans-228
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Git
 - en: Subversion
   id: totrans-229
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Subversion
 - en: Mercurial
   id: totrans-230
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Mercurial
 - en: CVS
   id: totrans-231
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CVS
 - en: Going from the top of the list, we’ll first explore how to download dependencies
     from URLs and customize the process to fit our needs.
   id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 从列表顶部开始，我们首先探索如何从 URL 下载依赖，并根据需要定制此过程。
 - en: Downloading from a URL
   id: totrans-233
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从 URL 下载
 - en: We can provide a list of URLs to be scanned in sequence until a download succeeds.
     CMake will recognize whether the downloaded file is an archive and will unpack
     it by default.
   id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以提供一个 URL 列表，按顺序扫描，直到下载成功为止。CMake 会识别下载的文件是否为压缩包，并默认解压它。
 - en: 'Basic declaration:'
   id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 基本声明：
 - en: '[PRE28]'
   id: totrans-236
   prefs: []
@@ -1532,6 +1632,7 @@
   id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面是一些额外的选项，可以进一步定制此方法：
 - en: '`URL_HASH <algo>=<hashValue>`: This checks whether a downloaded file’s checksum
     generated by `<algo>` matches the provided `<hashValue>`. It is recommended to
     guarantee the integrity of downloads. The following algorithms are supported:
@@ -1541,6 +1642,7 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`URL_HASH <algo>=<hashValue>`：此项检查通过`<algo>`生成的下载文件的校验和是否与提供的`<hashValue>`匹配。建议使用此方法来确保下载文件的完整性。支持的算法包括：`MD5`、`SHA1`、`SHA224`、`SHA256`、`SHA384`、`SHA512`、`SHA3_224`、`SHA3_256`、`SHA3_384`和`SHA3_512`。'
 - en: '`DOWNLOAD_NO_EXTRACT <bool>`: This explicitly disables extraction after downloading.
     We may consume the filename of downloaded files in the follow-up steps by accessing
     the `<DOWNLOADED_FILE>` variable.'
@@ -1548,30 +1650,36 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`DOWNLOAD_NO_EXTRACT <bool>`：此项明确禁用下载后解压缩。我们可以在后续步骤中通过访问 `<DOWNLOADED_FILE>`
+    变量来使用下载文件的文件名。'
 - en: '`DOWNLOAD_NO_PROGRESS <bool>`: This explicitly disables logging of the download
     progress.'
   id: totrans-240
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`DOWNLOAD_NO_PROGRESS <bool>`：此项明确禁用下载进度的日志记录。'
 - en: '`TIMEOUT <seconds>` and `INACTIVITY_TIMEOUT <seconds>`: These set timeouts
     to terminate the download after a fixed total time or period of inactivity.'
   id: totrans-241
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TIMEOUT <seconds>` 和 `INACTIVITY_TIMEOUT <seconds>`：这些设置超时，以便在固定的总时间或不活动时间后终止下载。'
 - en: '`HTTP_USERNAME <username>` and `HTTP_PASSWORD <password>`: These configure
     HTTP authentication. Be cautious not to hardcode credentials.'
   id: totrans-242
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`HTTP_USERNAME <username>` 和 `HTTP_PASSWORD <password>`：这些配置 HTTP 身份验证。请小心不要硬编码凭证。'
 - en: '`HTTP_HEADER <header1> [<header2>...]`: This adds extra headers to your HTTP
     request, which is useful for AWS or custom tokens.'
   id: totrans-243
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`HTTP_HEADER <header1> [<header2>...]`：这会向你的 HTTP 请求添加额外的头部，对于 AWS 或自定义令牌非常有用。'
 - en: '`TLS_VERIFY <bool>`: This verifies the SSL certificate. If this is not set,
     CMake will read this setting from the `CMAKE_TLS_VERIFY` variable, which is set
     to `false` by default. Skipping TLS verification is an unsafe, bad practice and
@@ -1580,6 +1688,8 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TLS_VERIFY <bool>`：验证 SSL 证书。如果未设置此项，CMake 将从 `CMAKE_TLS_VERIFY` 变量中读取此设置，该变量默认设置为
+    `false`。跳过 TLS 验证是不安全且不推荐的做法，尤其是在生产环境中应避免。'
 - en: '`TLS_CAINFO <file>`: This provides a path to the authority file; if it isn’t
     specified, CMake will read this setting from the `CMAKE_TLS_CAINFO` variable.
     It is useful if your company is issuing self-signed SSL certificates.'
@@ -1587,22 +1697,27 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TLS_CAINFO <file>`：提供一个权限文件的路径；如果没有指定，CMake 会从 `CMAKE_TLS_CAINFO` 变量中读取此设置。如果你的公司发行的是自签名的
+    SSL 证书，则此选项很有用。'
 - en: The majority of programmers will refer to online repositories like GitHub to
     grab the latest versions of libraries. Here’s how.
   id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数程序员会参考像 GitHub 这样的在线仓库来获取库的最新版本。以下是操作方法。
 - en: Downloading from Git
   id: totrans-247
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从 Git 下载
 - en: 'To download dependencies from Git, ensure that the host system has Git version
     1.6.5 or later. The following options are essential for cloning the project from
     Git:'
   id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从 Git 下载依赖项，确保主机系统上安装了 Git 版本 1.6.5 或更高版本。以下选项对于从 Git 克隆项目至关重要：
 - en: '[PRE29]'
   id: totrans-249
   prefs: []
@@ -1616,32 +1731,39 @@
   id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: '`<url>` 和 `<tag>` 都应与 `git` 命令兼容。在生产环境中，建议使用特定的 `git` 哈希（而非标签），以确保生产的二进制文件可追溯，并避免不必要的
+    `git` `fetch` 操作。如果你更喜欢使用分支，可以使用类似 `origin/main` 的远程名称。这可以确保本地克隆的正确同步。'
 - en: 'Additional options include:'
   id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 其他选项包括：
 - en: '`GIT_REMOTE_NAME <name>`: This sets the remote name (`origin` is the default).'
   id: totrans-252
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`GIT_REMOTE_NAME <name>`：设置远程名称（`origin` 是默认值）。'
 - en: '`GIT_SUBMODULES <module>...`: This specifies which submodules to update; since
     3.16, this value defaults to `none` (previously, all submodules were updated).'
   id: totrans-253
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`GIT_SUBMODULES <module>...`：指定要更新的子模块；从 3.16 版本开始，此值默认为 `none`（之前会更新所有子模块）。'
 - en: '`GIT_SUBMODULES_RECURSE 1`: This enables the recursive updating of submodules.'
   id: totrans-254
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`GIT_SUBMODULES_RECURSE 1`：启用递归更新子模块。'
 - en: '`GIT_SHALLOW 1`: This performs a shallow clone, which is faster as it skips
     downloading historical commits.'
   id: totrans-255
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`GIT_SHALLOW 1`：这将执行浅克隆，因为它跳过了下载历史提交，因此速度更快。'
 - en: '`TLS_VERIFY <bool>`: This verifies the SSL certificate. If this is not set,
     CMake will read this setting from the `CMAKE_TLS_VERIFY` variable, which is set
     to `false` by default; skipping TLS verification is an unsafe, bad practice and
@@ -1650,19 +1772,24 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`TLS_VERIFY <bool>`：验证 SSL 证书。如果未设置此项，CMake 将从 `CMAKE_TLS_VERIFY` 变量中读取此设置，该变量默认设置为
+    `false`；跳过 TLS 验证是不安全且不推荐的做法，尤其是在生产环境中应避免。'
 - en: If your dependency is stored in Subversion, you can also fetch it with CMake.
   id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的依赖项存储在 Subversion 中，你也可以通过 CMake 获取它。
 - en: Downloading from Subversion
   id: totrans-258
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从 Subversion 下载
 - en: 'To download from Subversion, we should specify the following options:'
   id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从 Subversion 下载，我们需要指定以下选项：
 - en: '[PRE30]'
   id: totrans-260
   prefs: []
@@ -1672,12 +1799,14 @@
   id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，我们可以提供以下内容：
 - en: '`SVN_USERNAME <user>` and `SVN_PASSWORD <password>`: These provide credentials
     for checkout and update. Avoid hardcoding these in your projects.'
   id: totrans-262
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SVN_USERNAME <user>` 和 `SVN_PASSWORD <password>`：这些提供了用于检出和更新的凭据。避免在项目中硬编码这些信息。'
 - en: '`SVN_TRUST_CERT <bool>`: This skips the verification of the Subversion server
     site certificate. Use this option only if the network path to the server and its
     integrity are trustworthy.'
@@ -1685,20 +1814,24 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`SVN_TRUST_CERT <bool>`：跳过 Subversion 服务器站点证书的验证。仅在网络路径和服务器的完整性是可信的情况下使用此选项。'
 - en: Subversion is very easy to use with CMake. So is Mercurial.
   id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: Subversion 与 CMake 配合使用非常简单，Mercurial 也是如此。
 - en: Downloading from Mercurial
   id: totrans-265
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从 Mercurial 下载
 - en: 'This mode is very straightforward. We need to provide two arguments and we’re
     done:'
   id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种模式非常简单，我们只需提供两个参数，就可以完成：
 - en: '[PRE31]'
   id: totrans-267
   prefs: []
@@ -1708,15 +1841,18 @@
   id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，我们可以使用 CVS 提供依赖项。
 - en: Downloading from CVS
   id: totrans-269
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从 CVS 下载
 - en: 'To check out modules from CVS, we need to provide the following three arguments:'
   id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从 CVS 检出模块，我们需要提供以下三个参数：
 - en: '[PRE32]'
   id: totrans-271
   prefs: []
@@ -1727,11 +1863,13 @@
   id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样，我们已经涵盖了`FetchContent_Declare()`的所有下载选项。CMake 支持在成功下载后执行的附加步骤。
 - en: Updating and patching
   id: totrans-273
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 更新和修补
 - en: 'By default, the `update` step will re-download the external project’s files
     if the download method supports updates, for example, if we configure the Git
     dependency pointing to the `main` or `master` branch. We can override this behavior
@@ -1739,12 +1877,14 @@
   id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，如果下载方法支持更新，例如，如果我们配置了指向`main`或`master`分支的 Git 依赖项，则`update`步骤会重新下载外部项目的文件。我们可以通过两种方式覆盖这种行为：
 - en: Provide a custom command to be executed during the update with `UPDATE_COMMAND
     <cmd>`.
   id: totrans-275
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 提供在更新过程中执行的自定义命令，使用`UPDATE_COMMAND <cmd>`。
 - en: Completely disable the `update` step (to allow building with a disconnected
     network) – `UPDATE_DISCONNECTED <bool>`. Do note that dependency will still be
     downloaded during the first build.
@@ -1752,12 +1892,14 @@
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 完全禁用`update`步骤（以便在没有网络的情况下构建）– `UPDATE_DISCONNECTED <bool>`。请注意，依赖项仍然会在第一次构建时被下载。
 - en: '`Patch`, on the other hand, is an optional step that will execute after the
     update is fetched. To enable it, we need to specify the exact command we want
     to execute with `PATCH_COMMAND <cmd>`.'
   id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Patch`是一个可选步骤，会在更新后执行。要启用它，我们需要使用`PATCH_COMMAND <cmd>`指定要执行的精确命令。'
 - en: CMake documentation warns that some patches may be more “sticky” than others.
     For example, in Git, changed files don’t get restored to the original state during
     the update, and we need to be careful to avoid incorrectly patching the file twice.
@@ -1765,10 +1907,12 @@
   id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 文档警告说，有些补丁可能比其他补丁“更粘”。例如，在 Git 中，更新时修改的文件不会恢复到原始状态，我们需要小心避免错误地将文件补丁两次。理想情况下，`patch`命令应当是健壮且幂等的。
 - en: 'You can chain `update` and `patch` commands:'
   id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以将`update`和`patch`命令串联起来：
 - en: '[PRE33]'
   id: totrans-280
   prefs: []
@@ -1779,17 +1923,20 @@
   id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 下载依赖项在系统上没有时是有帮助的。但如果它们已经存在呢？我们如何使用本地版本呢？
 - en: Using the installed dependency where possible
   id: totrans-282
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 尽可能使用已安装的依赖项
 - en: 'Starting with version 3.24, CMake introduced a feature that allows `FetchContent`
     to skip downloading if the dependencies are already available locally. To enable
     this, simply add the `FIND_PACKAGE_ARGS` keyword to your declaration:'
   id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 从版本 3.24 开始，CMake 引入了一个功能，允许`FetchContent`跳过下载，如果依赖项已经在本地可用。要启用此功能，只需在声明中添加`FIND_PACKAGE_ARGS`关键字：
 - en: '[PRE34]'
   id: totrans-284
   prefs: []
@@ -1803,14 +1950,17 @@
   id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所猜测的，这个关键字指示`FetchContent`模块在启动任何下载之前使用`find_package()`函数。如果在本地找到该包，则将使用它，不会发生下载或构建。请注意，这个关键字应当是命令中的最后一个，因为它会消耗后续的所有参数。
 - en: 'Here’s how to update the previous example:'
   id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是如何更新之前的示例：
 - en: '**ch09/06-fetch-content-find-package/CMakeLists.txt**'
   id: totrans-287
   prefs: []
   type: TYPE_NORMAL
+  zh: '**ch09/06-fetch-content-find-package/CMakeLists.txt**'
 - en: '[PRE35]'
   id: totrans-288
   prefs: []
@@ -1820,6 +1970,7 @@
   id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们做了两个关键的更改：
 - en: We added `FIND_PACKAGE_ARGS` with the `NAMES` keyword to specify that we’re
     looking for the `yaml-cpp` package. Without `NAMES`, CMake would default to using
     the `dependency-id`, which, in this case, is `external-yaml-cpp`.
@@ -1827,6 +1978,7 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 我们添加了`FIND_PACKAGE_ARGS`和`NAMES`关键字，用来指定我们要查找`yaml-cpp`包。如果没有`NAMES`，CMake 将默认使用`dependency-id`，在这个例子中是`external-yaml-cpp`。
 - en: We added `INTERFACE_INCLUDE_DIRECTORIES` in the printed properties. This is
     a one-off check so we can manually verify whether we’re using the installed package
     or if a new one was downloaded.
@@ -1834,11 +1986,13 @@
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 我们在打印的属性中添加了`INTERFACE_INCLUDE_DIRECTORIES`。这是一次性检查，以便我们手动验证是否使用了已安装的包，还是下载了一个新的包。
 - en: 'Before testing, make sure the package is actually installed on your system.
     If it’s not, you can install it using the following commands:'
   id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 在测试之前，请确保包已经实际安装在您的系统上。如果没有，您可以使用以下命令安装它：
 - en: '[PRE36]'
   id: totrans-293
   prefs: []
@@ -1852,6 +2006,7 @@
   id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这个设置，我们现在可以构建我们的项目。如果一切顺利，你应该能看到来自`cmake_print_properties()`命令的调试输出。这将表明我们正在使用本地版本，如`INTERFACE_INCLUDE_DIRECTORIES`属性中所示。请记住，这些输出是特定于你的环境的，结果可能因环境不同而有所不同。
 - en: '[PRE37]'
   id: totrans-295
   prefs: []
@@ -1863,6 +2018,7 @@
   id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你没有使用CMake 3.24，或者希望支持使用旧版本的用户，你可能会考虑手动运行`find_package()`命令。这样，你只会下载那些未安装的包：
 - en: '[PRE38]'
   id: totrans-297
   prefs: []
@@ -1874,6 +2030,7 @@
   id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论你选择哪种方法，首先尝试使用本地版本，只有在找不到依赖项时才下载，是一种非常周到的做法，可以提供最佳的用户体验。
 - en: Before the introduction of `FetchContent`, CMake had a simpler module called
     `ExternalProject`. Although `FetchContent` is the recommended choice for most
     situations, `ExternalProject` still has its own set of advantages and can be useful
@@ -1881,11 +2038,13 @@
   id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: 在引入`FetchContent`之前，CMake有一个更简单的模块，名为`ExternalProject`。虽然`FetchContent`是大多数情况下的推荐选择，但`ExternalProject`仍然有其自身的一些优点，在某些情况下可能会非常有用。
 - en: ExternalProject
   id: totrans-300
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: ExternalProject
 - en: 'As mentioned, before `FetchContent` was introduced to CMake, another module
     was serving a similar purpose: `ExternalProject` (added in 3.0.0). As you can
     guess, it was used to fetch external projects from online repositories. Over the
@@ -1894,6 +2053,7 @@
   id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，在`FetchContent`引入到CMake之前，另一个模块曾经承担类似的功能：`ExternalProject`（在3.0.0版本中添加）。顾名思义，它用于从在线仓库获取外部项目。多年来，该模块逐渐扩展以满足不同的需求，最终形成了一个相当复杂的命令：`ExternalProject_Add()`。
 - en: The `ExternalProject` module populates the dependencies during the build stage.
     That’s quite different from `FetchContent`, which executes in the configuration
     stage. Because of this difference, `ExternalProject` cannot import targets into
@@ -1904,6 +2064,7 @@
   id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ExternalProject`模块在构建阶段填充依赖项。这与`FetchContent`在配置阶段执行的方式有很大不同。因此，`ExternalProject`不能像`FetchContent`那样将目标导入项目。另一方面，`ExternalProject`可以直接将依赖项安装到系统中，执行它们的测试，并做其他有趣的事情，比如覆盖配置和构建过程中使用的命令。'
 - en: There is a small set of use cases where this may be necessary. Since there’s
     a lot of overhead needed to use this legacy module effectively, treat it as a
     curiosity. We’re mostly introducing it here to show how the current method evolved
@@ -1911,11 +2072,13 @@
   id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一些少数的使用场景可能需要使用它。由于要有效地使用这个遗留模块需要较高的开销，因此可以将其视为一种好奇心。我们主要在此介绍它，是为了展示当前方法如何从它演变而来。
 - en: '`ExternalProject` offers an `ExternalProject_Add` command that configures the
     dependency. Here’s an example:'
   id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ExternalProject`提供了一个`ExternalProject_Add`命令，用于配置依赖项。以下是一个示例：'
 - en: '[PRE39]'
   id: totrans-305
   prefs: []
@@ -1930,46 +2093,55 @@
   id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，它与`FetchContent`中的`FetchContent_Declare`非常相似。你会注意到示例中有两个额外的关键词：`INSTALL_COMMAND`和`TEST_COMMAND`。在这个例子中，它们用于抑制依赖项的安装和测试，因为这些操作通常会在构建过程中执行。`ExternalProject`执行许多可深度配置的步骤，并且这些步骤按以下顺序执行：
 - en: '`mkdir`: Create a subdirectory for the external project.'
   id: totrans-307
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`mkdir`: 为外部项目创建子目录。'
 - en: '`download`: Download the project files from a repository or URL.'
   id: totrans-308
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`download`: 从仓库或URL下载项目文件。'
 - en: '`update`: Download updates if supported by the `fetch` method.'
   id: totrans-309
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`update`: 如果`fetch`方法支持，下载更新。'
 - en: '`patch` : Execute a `patch` command that alters downloaded files.'
   id: totrans-310
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`patch`: 执行一个`patch`命令，修改下载的文件。'
 - en: '`configure`: Execute the configure stage.'
   id: totrans-311
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`configure`: 执行配置阶段。'
 - en: '`build`: Perform the build stage for CMake projects.'
   id: totrans-312
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`build`: 执行CMake项目的构建阶段。'
 - en: '`install`: Install CMake projects.'
   id: totrans-313
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`install`：安装 CMake 项目。'
 - en: '`test`: Execute the tests.'
   id: totrans-314
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`test`：执行测试。'
 - en: For each of the steps, excluding `mkdir`, you can override the default behavior
     by adding a `<STEP>_COMMAND` keyword. There are plenty of other options – please
     refer to the online documentation for the full reference. If, for some reason,
@@ -1980,12 +2152,16 @@
   id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于每个步骤（排除 `mkdir` 外），你可以通过添加 `<STEP>_COMMAND` 关键字来覆盖默认行为。还有很多其他选项 – 请参考在线文档以获取完整参考。如果出于某种原因，你想使用这种方法而非推荐的
+    `FetchContent`，可以通过在 CMake 中执行 CMake 来应用一个不太优雅的黑客方式导入目标。更多细节，请查看本书仓库中的 `ch09/05-external-project`
+    代码示例。
 - en: Typically, we would rely on the library being available in the system. If it’s
     not, we’d resort to `FetchContent`, an approach that is particularly suitable
     for dependencies that are small and quick to compile.
   id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，我们会依赖系统中已存在的库。如果库不存在，我们会使用 `FetchContent`，这是一种特别适合小型且编译速度较快的依赖项的方法。
 - en: However, for more substantial libraries like Qt, this method could be time consuming.
     In such cases, package managers offering precompiled libraries tailored to the
     user’s environment become advisable. While tools like Apt or Conan provide solutions,
@@ -1995,11 +2171,14 @@
   id: totrans-317
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，对于像 Qt 这样的大型库，这种方法可能比较耗时。在这种情况下，提供预编译库的包管理器，能根据用户环境量身定制库，成为一个明智的选择。尽管像 Apt
+    或 Conan 这样的工具提供了解决方案，但它们要么过于系统特定，要么复杂，无法在本书中详细介绍。好消息是，大多数用户只要提供明确的安装说明，就能安装你项目可能需要的依赖项。
 - en: Summary
   id: totrans-318
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 总结
 - en: This chapter has equipped you with the knowledge to identify system-installed
     packages using CMake’s find modules and how to utilize the config files that come
     with the library. For older libraries that don’t support CMake but include `.pc`
@@ -2008,6 +2187,8 @@
   id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章已经为你提供了如何使用 CMake 的查找模块识别系统安装的包，并且如何利用随库一起提供的配置文件的知识。对于不支持 CMake 但包含 `.pc`
+    文件的旧版库，可以使用 PkgConfig 工具和 CMake 内置的 `FindPkgConfig` 查找模块。
 - en: We also explored the capabilities of the `FetchContent` module. This module
     allows us to download dependencies from various sources while configuring CMake
     to first scan the system, thereby avoiding unnecessary downloads. We touched upon
@@ -2016,6 +2197,8 @@
   id: totrans-320
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还探讨了 `FetchContent` 模块的功能。该模块允许我们从各种来源下载依赖项，同时配置 CMake 首先扫描系统，从而避免不必要的下载。我们还简要讨论了这些模块的历史背景，并讨论了在特殊情况下使用
+    `ExternalProject` 模块的选项。
 - en: CMake is designed to automatically generate build targets when a library is
     located through most of the methods we’ve discussed. This adds a layer of convenience
     and elegance to the process. With this foundation in place, you’re ready to incorporate
@@ -2023,72 +2206,88 @@
   id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 设计的目的是在通过我们讨论的多数方法找到库时，自动生成构建目标。这为过程增加了方便性和优雅性。有了这个基础，你就可以将标准库集成到你的项目中了。
 - en: In the next chapter, we’ll learn how to provide reusable code on a smaller scale
     with C++20 modules.
   id: totrans-322
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，我们将学习如何使用 C++20 模块在更小的范围内提供可重用的代码。
 - en: Further reading
   id: totrans-323
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 进一步阅读
 - en: 'For more information on the topics covered in this chapter, you can refer to
     the following:'
   id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: 若要获取本章所涉及主题的更多信息，可以参考以下内容：
 - en: CMake documentation – provided find modules:[https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find
     modules](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#findmodules)
   id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CMake 文档 – 提供的查找模块：[https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find
+    modules](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#findmodules)
 - en: CMake documentation – *Using Dependencies Guide*:[https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html)
   id: totrans-326
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CMake 文档 – *使用依赖项指南*：[https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html)
 - en: '*CMake and using git-submodule for dependence projects*:[https://stackoverflow.com/questions/43761594/](https://stackoverflow.com/questions/43761594/)'
   id: totrans-327
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*CMake 和使用 git-submodule 处理依赖项目*：[https://stackoverflow.com/questions/43761594/](https://stackoverflow.com/questions/43761594/)'
 - en: Piggybacking on PkgConfig:[https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config)
   id: totrans-328
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 利用 PkgConfig：[https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config)
 - en: How to use ExternalProject:[https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html](https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html)
   id: totrans-329
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如何使用 ExternalProject：[https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html](https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html)
 - en: '*CMake FetchContent vs. ExternalProject*:[https://www.scivision.dev/cmake-fetchcontent-vs-external-project/](https://www.scivision.dev/cmake-fetchcontent-vs-external-project/)'
   id: totrans-330
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*CMake FetchContent 与 ExternalProject*：[https://www.scivision.dev/cmake-fetchcontent-vs-external-project/](https://www.scivision.dev/cmake-fetchcontent-vs-external-project/)'
 - en: '*Using CMake with External Projects*:[http://www.saoe.net/blog/using-cmake-with-external-projects/](http://www.saoe.net/blog/using-cmake-with-external-projects/)'
   id: totrans-331
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '*使用 CMake 进行 External Projects*：[http://www.saoe.net/blog/using-cmake-with-external-projects/](http://www.saoe.net/blog/using-cmake-with-external-projects/)'
 - en: Join our community on Discord
   id: totrans-332
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 加入我们在 Discord 上的社区
 - en: 'Join our community’s Discord space for discussions with the author and other
     readers:'
   id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: 加入我们社区的 Discord 空间，与作者及其他读者进行讨论：
 - en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
   id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
 - en: '![](img/QR_Code94081075213645359.png)'
   id: totrans-335
   prefs: []
   type: TYPE_IMG
+  zh: '![](img/QR_Code94081075213645359.png)'
