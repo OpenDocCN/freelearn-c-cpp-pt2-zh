@@ -1,11 +1,15 @@
 - en: '2'
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '2'
 - en: The CMake Language
+  id: totrans-1
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: CMake 语言
 - en: Writing in the **CMake** **language** is trickier than one might expect. When
     you read a CMake listfile for the first time, you may be under the impression
     that the language in it is so simple that it can be just practiced without any
@@ -15,86 +19,124 @@
     something that sounds exciting to invest lots of time in. In an effort to go fast,
     we tend to make gut-based changes hoping they just might do the trick. This approach
     to solving technical problems is called *voodoo programming*.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 用 **CMake** **语言** 编写代码比想象的要复杂。当你第一次阅读 CMake 列表文件时，可能会觉得它的语言如此简单，以至于可以直接实践，而不需要任何理论基础。你可能会尝试做出修改，并在没有充分理解其工作原理的情况下实验代码。我不会责怪你。我们程序员通常都很忙，构建相关的问题通常也不是一个值得投入大量时间的有趣话题。为了快速推进，我们往往凭直觉做出修改，希望它们能奏效。这种解决技术问题的方式被称为*巫术编程*。
 - en: 'The CMake language appears trivial: after introducing our small extension,
     fix, hack, or one-liner, we suddenly realize that something isn’t working. Usually,
     the duration spent on debugging exceeds the time required for comprehending the
     topic itself. Luckily, this won’t be our fate because this chapter covers most
     of the critical knowledge needed to use the CMake language in practice.'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 语言看起来很简单：在我们引入了小扩展、修复、黑客技巧或一行代码后，我们突然发现有些东西不起作用。通常，调试所花费的时间超过了理解该主题本身所需的时间。幸运的是，这不会成为我们的命运，因为本章涵盖了使用
+    CMake 语言实践所需的大部分关键知识。
 - en: In this chapter, we’ll not only learn about the building blocks of the CMake
     language – **comments**, **commands**, **variables**, and **control structures**
     – but we’ll also understand the necessary background and try out examples following
     the latest practices.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们不仅将学习 CMake 语言的构成模块——**注释**、**命令**、**变量**和**控制结构**——还将理解相关背景知识，并根据最新的实践进行示例操作。
 - en: CMake puts you in a bit of a unique position. On one hand, you perform the role
     of a build engineer and must have a comprehensive grasp of compilers, platforms,
     and all related aspects. On the other hand, you’re a developer who writes the
     code that generates a buildsystem. Crafting high-quality code is a challenging
     task that demands a multifaceted approach. Not only must the code be functional
     and legible but it should also be easy to analyze, extend, and maintain.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: CMake 让你处于一个独特的地位。一方面，你扮演着构建工程师的角色，必须全面了解编译器、平台及相关方面；另一方面，你是一个开发者，编写生成构建系统的代码。编写高质量代码是一项具有挑战性的任务，需要多方面的能力。代码不仅要能正常工作、易于阅读，还应该易于分析、扩展和维护。
 - en: To conclude, we will present a selection of the most practical and frequently
     utilized commands in CMake. Commands that are also commonly used, but not to the
     same extent, will be placed in *Appendix*, *Miscellaneous Commands* (reference
     guides for the `string`, `list`, `file`, and `math` commands).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 总结时，我们将展示一些在 CMake 中最实用和最常用的命令。那些也常用但使用频率较低的命令将被放入*附录*，*杂项命令*中（包括 `string`、`list`、`file`
+    和 `math` 命令的参考指南）。
 - en: 'In this chapter, we’re going to cover the following main topics:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们将覆盖以下主要内容：
 - en: The basics of the CMake language syntax
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: CMake 语言语法基础
 - en: Working with variables
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 处理变量
 - en: Using lists
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用列表
 - en: Understanding control structures in CMake
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 理解 CMake 中的控制结构
 - en: Exploring the frequently used commands
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 探索常用的命令
 - en: Technical requirements
+  id: totrans-13
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 技术要求
 - en: You can find the code files that are present in this chapter on GitHub at [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch02](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch02).
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在 GitHub 上找到本章中出现的代码文件，链接地址是：[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch02](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch02)。
 - en: 'To build the examples provided in this book, always use the recommended commands:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了构建本书提供的示例，始终使用推荐的命令：
 - en: '[PRE0]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Be sure to replace the placeholders `<build tree>` and `<source tree>` with
     appropriate paths. As a reminder: **build tree** is the path to the target/output
     directory and **source tree** is the path at which your source code is located.'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 请确保将 `<build tree>` 和 `<source tree>` 占位符替换为适当的路径。提醒一下：**build tree** 是目标/输出目录的路径，**source
+    tree** 是源代码所在的路径。
 - en: The basics of the CMake language syntax
+  id: totrans-18
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: CMake 语言语法基础
 - en: 'Composing CMake code is very much like writing in any other imperative language:
     lines are executed from top to bottom and from left to right, occasionally stepping
     into an included file or a called function. The starting point of execution is
     determined by the mode (see the *Mastering the command line* section in *Chapter
     1*, *First Steps with CMake*), either from the root file of the source tree (`CMakeLists.txt`)
     or a `.cmake` script file provided as an argument to `cmake`.'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: Since CMake scripts offer extensive support for the CMake language, except for
@@ -102,116 +144,145 @@
     chapter. Once we become proficient in composing simple listfiles, we can advance
     to creating actual project files, which we will cover in *Chapter 4*, *Setting
     Up Your First CMake Project*.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: 'As a reminder, scripts can be run with the following command: `cmake -P script.cmake`.'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: CMake supports **7-bit** **ASCII** text files for portability across all platforms.
     You can use both `\n` or `\r\n` line endings. CMake versions above 3.2 support
     **UTF-8** and **UTF-16** with optional **byte-order markers** (**BOMs**).
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
 - en: Everything in a CMake listfile is either a *comment* or a *command invocation*.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: Comments
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Just like in **C++**, there are two kinds of comments: *single-line* comments
     and *bracket* (multiline) comments. But unlike in C++, bracket comments can be
     nested. Single-line comments start with a hash sign, `#`:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Multiline bracket comments get their name from their symbol – they start with
     `#` followed by opening square bracket `[`, any number of equal signs `=` (which
     can also include 0), and another square bracket `[`. To close a bracket comment,
     use the same number of equal signs and reverse the brackets `]`:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'You can deactivate a multiline comment swiftly by adding another `#` to the
     initial line of the bracket comment, as demonstrated in the following:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Knowing how to use comments is definitely useful, but it raises another question:
     when should we do it? Since writing listfiles is essentially programming, it is
     a good idea to bring our best coding practices to them as well.'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
 - en: Code that follows such practices is often called *clean code* – a term used
     over the years by software development gurus like Robert C. Martin, Martin Fowler,
     and many other authors.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
 - en: 'There is often a lot of controversy surrounding which practices are considered
     beneficial or detrimental, and as you might expect, comments have not been exempt
     from these debates. Everything should be judged on a case-by-case basis, but generally
     agreed-upon guidelines say that good comments provide at least one of the following:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
 - en: '**Information**: They can untangle complexities such as regex patterns or formatting
     strings.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Intent**: They can explain the intent of the code when it is not obvious
     from the implementation or interface.'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Clarification**: They can explain concepts that can’t be easily refactored
     or changed.'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Warnings of consequences**: They can provide warnings, especially around
     code that can break other things.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Amplification**: They can underline the importance of an idea that is hard
     to express in code.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Legal clauses**: They can add this necessary evil, which is usually not the
     domain of a programmer.'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'It’s best to avoid comments by applying better naming, refactoring or correcting
     your code. Omit comments that are:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
 - en: '**Mandated**: These are added for completeness but they are not really important.'
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Redundant**: These repeat what is already clearly written in the code.'
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Misleading**: These could be outdated or incorrect if they don’t follow code
     changes.'
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Journal**: These note what has been changed and when (use **Version Control
     Systems** (**VCS**) for this instead).'
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Dividers**: These mark sections.'
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -223,81 +294,101 @@
     at the end of this chapter for some good references on *clean code*. If you’re
     interested in comments, you’ll find a link to my YouTube video *Which comments
     in your code ARE GOOD?* touching on this subject in depth.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
 - en: Command invocations
+  id: totrans-47
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: Time for some action! Invoking commands is the bread and butter of CMake listfiles.
     In order to run a command, you must specify its name followed by parentheses,
     in which you can enclose a list of **command arguments** separated by whitespace.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B19844_02_01.png)'
+  id: totrans-49
   prefs: []
   type: TYPE_IMG
 - en: 'Figure 2.1: An example of a command'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: Command names aren’t case-sensitive, but there is a convention in the CMake
     community to use `snake_case` (that is, lowercase words joined with underscores).
     You can also define your own commands, which we’ll cover in the *Understanding
     control structures in CMake* section of this chapter.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
 - en: One significant difference between CMake and C++ is that command invocations
     in CMake are not expressions. This means that you cannot pass another command
     as an argument to a called command because *everything* inside the parentheses
     is treated as an argument for that specific command.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
 - en: CMake commands are also not followed with semicolons. This is because each line
     of source code can only contain one command.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
 - en: 'A command can be optionally followed by a comment:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'But not the other way around:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: As we said earlier, everything in a CMake listfile is either a *comment* or
     a *command* *invocation*. CMake syntax really is that simple, and for the most
     part, it’s a good thing. While there are some constraints (for instance, you can’t
     increment a counter variable using an expression), for the most part, these limitations
     are mostly acceptable because CMake is not intended to be a general-purpose language.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
 - en: 'CMake provides commands to manipulate variables, direct the flow of execution,
     modify files, and much more. To make things easier, we will be introducing the
     relevant commands as we progress through different examples. These commands can
     be categorized into two groups:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
 - en: '**Scripting commands**: These are always available and they change the state
     of the command processor and access variables, and affect other commands and the
     environment.'
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Project commands**: These are available in projects and they manipulate the
     project state and build targets.'
+  id: totrans-61
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Virtually every command relies on other elements of the language in order to
     function: variables, conditional statements, and, most importantly, command-line
     arguments. Now, let’s explore how we can utilize them.'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
 - en: Command arguments
+  id: totrans-63
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -305,6 +396,7 @@
     configure their behavior. As demonstrated in *Figure 2.1*, the quotation marks
     used around the arguments can be quite peculiar. While certain arguments require
     quotes, others do not. What’s the reasoning behind this distinction?
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
 - en: Under the hood, the only data type recognized by CMake is a `string`. This is
@@ -313,35 +405,43 @@
     means **string interpolation**, or substituting parts of a string with another
     value. This can mean replacing the **escape sequences,** expanding the **variable
     references** (also called *variable interpolation*), and unpacking **lists**.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
 - en: 'Depending on the context, we might want to enable such evaluation as needed.
     For that reason, CMake offers three types of arguments:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
 - en: Bracket arguments
+  id: totrans-67
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Quoted arguments
+  id: totrans-68
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Unquoted arguments
+  id: totrans-69
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Every argument type in CMake has its own peculiarities and provides a distinct
     level of evaluation.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
 - en: Bracket arguments
+  id: totrans-71
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: Bracket arguments aren’t evaluated because they are used to pass multiline strings,
     verbatim, as a single argument to commands. This means that such an argument will
     include whitespace in the form of tabs and newlines.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
 - en: Bracket arguments are formatted identically to comments. They are initiated
@@ -349,37 +449,48 @@
     opening and closing tokens must match (omitting equal signs is permissible as
     long as they match). The only difference from the comments is that bracket arguments
     cannot be nested.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
 - en: 'Here’s an example of the use of such an argument with the `message()` command,
     which prints all passed arguments to the screen:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/01-arguments/bracket.cmake**'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'In the preceding example, we can see different forms of bracket arguments.
     Note how putting closing tags on a separate line in the first call introduces
     an empty line in the output:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The second form is useful when we’re passing text that contains double brackets
     (`]]`) (highlighted in the code snippet), as they won’t be interpreted as marking
     the end of the argument.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
 - en: These kinds of bracket arguments have limited use – typically, they contain
     lengthier blocks of text with messages that are displayed to the user. In most
     cases, we’ll need something more dynamic, such as quoted arguments.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
 - en: Quoted arguments
+  id: totrans-81
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -390,6 +501,7 @@
     with a backslash, `\"`. Other well-known escape sequences are supported as well:
     `\\` denotes a literal backslash, `\t` is a tab character, `\n` is a newline,
     and `\r` is a carriage return.'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
 - en: 'This is where the similarities with C++ strings end. Quoted arguments can span
@@ -398,30 +510,40 @@
     **C++20**. To insert a variable reference to your argument, wrap the name of the
     variable in a token like so: `${name}`. We’ll talk more about variable references
     in the *Working with variables* section of this chapter.'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
 - en: Can you guess how many lines will be in the output of the following script?
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/01-arguments/quoted.cmake**'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Let’s see it in action:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: That’s right – we have one escaped quote character, one newline escape sequence,
     and a literal newline. We also accessed a built-in `CMAKE_VERSION` variable, which
     we can see interpolated on the last line. Let’s take a look at how CMake treats
     arguments without quotes.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
 - en: Unquoted arguments
+  id: totrans-90
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -430,6 +552,7 @@
     quotes, or a backslash. CMake deviates from this convention and introduces *unquoted
     arguments*. We might argue that dropping delimiters makes the code easier to read.
     Is that true? I’ll let you form your own opinion.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
 - en: Unquoted arguments evaluate both *escape sequences* and *variable references*.
@@ -438,71 +561,91 @@
     into multiple arguments. If you need to use them, escape every semicolon with
     a backslash, `\;`. We’ll talk more about semicolons in the *Using lists* section
     of this chapter.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
 - en: 'You may find that these arguments are the most perplexing to work with, so
     here’s an illustration to help clarify how these arguments are partitioned:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B19844_02_02.png)'
+  id: totrans-94
   prefs: []
   type: TYPE_IMG
 - en: 'Figure 2.2: Escape sequences cause separate tokens to be interpreted as a single
     argument'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
 - en: It’s always worth being careful with unquoted arguments. Some CMake commands
     require a specific number of arguments and ignore any overhead. If your arguments
     become accidentally separated, you’ll get hard-to-debug errors.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
 - en: Unquoted arguments cannot contain unescaped *quotes (“), hashes (#), and backslashes
     (\). And if that’s not enough to remember, parentheses, `()`, are allowed only
     if they form correct, matching pairs. That is, you’ll start with an opening parenthesis
     and close it before closing the command argument list.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
 - en: 'Here are some examples that demonstrate the rules we have discussed:'
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/01-arguments/unquoted.cmake**'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'What will be the output of the preceding? Let’s have a look:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Even a simple command such as `message()` is very particular about separated
     unquoted arguments. The space in `a single argument` was correctly printed when
     it was explicitly escaped. However, `twoarguments` and `threeseparatearguments`
     were *glued* together, since `message()` doesn’t add any spaces on its own.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
 - en: 'Given all these complexities, when is it beneficial to use unquoted arguments?
     Some CMake commands allow optional arguments that are preceded by a keyword to
     signify that an optional argument will be provided. In such instances, using an
     unquoted argument for the keyword can make the code more legible. For example:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-105
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: In this command, the `VERSION` keyword and the following argument `1.2.3` are
     optional. As you can see, both are left unquoted for readability. Note that keywords
     are case-sensitive.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
 - en: Now that we understand how to deal with the complexities and quirks of CMake
     arguments, we are ready to tackle the next interesting subject – working with
     all kinds of variables in CMake.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
 - en: Working with variables
+  id: totrans-108
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -512,92 +655,114 @@
     one *scope* affects the other. Very often, a poor understanding of these rules
     becomes a source of bugs and headaches. I recommend you study this section with
     care and make sure you understand all of the concepts before moving on.'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
 - en: 'Let’s start with some key facts about variables in CMake:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
 - en: Variable names are case-sensitive and can include almost any character.
+  id: totrans-111
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: All variables are stored internally as strings, even if some commands can interpret
     them as values of other data types (even *lists*!).
+  id: totrans-112
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The basic variable manipulation commands are `set()` and `unset()`, but there
     are other commands that can alter variable values, such as `string()` and `list()`.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
 - en: 'To declare a **normal variable**, we simply call `set()`, providing its name
     and the value:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/02-variables/set.cmake**'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-116
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: As you can see, the use of brackets and quoted arguments allows for spaces to
     be included in the variable name. However, when referencing it later, we have
     to escape the whitespace with a backslash, `\`. For that reason, it is recommended
     to use only alphanumeric characters, dashes `(-)`, and underscores `(_)` in variable
     names.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
 - en: 'Also avoid reserved names (in uppercase, lowercase, or mixed case) that begin
     with any of the following: `CMAKE_`, `_CMAKE_`, or an underscore, `_`, followed
     by the name of any CMake command.'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
 - en: 'To unset a variable, we can use `unset()` in the following way: `unset(MyString1)`.'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
 - en: The `set()` command accepts a plain text variable name as its first argument,
     but the `message()` command uses a variable reference wrapped in the `${}` syntax.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
 - en: What would happen if we were to provide a variable wrapped in the `${}` syntax
     to the `set()` command?
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
 - en: To answer that, we’ll need to understand *variable references* better.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
 - en: Variable references
+  id: totrans-123
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'I already mentioned references briefly in the *Command arguments* section,
     as they’re evaluated for quoted and unquoted arguments. We learned that to create
     a reference to a defined variable, we need to use the `${}` syntax, like so: `message(${MyString1})`.'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
 - en: On evaluation, CMake will traverse the *variable scopes* from the innermost
     scope to the outermost scope and replace `${MyString1}` with a value, or an empty
     string if no variable is found (CMake won’t produce any error messages). This
     process is also called *variable evaluation*, *expansion*, or *interpolation*.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
 - en: 'Interpolation is performed in an inside-out manner, beginning from the innermost
     curly brace pair and moving outward. For example, if the ${MyOuter${MyInner}}
     reference is encountered:'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
 - en: CMake will try to evaluate `MyInner` first, rather than searching for a variable
     named `MyOuter${MyInner}`.
+  id: totrans-127
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: If the `MyInner` variable is successfully expanded, CMake will repeat the expansion
     process using the newly formed reference until no further expansion is possible.
+  id: totrans-128
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: To avoid receiving unexpected outcomes, it is recommended to refrain from storing
     variable expansion tokens in variable values.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
 - en: CMake will perform variable expansion to the full extent, and only after completion
@@ -605,21 +770,26 @@
     we call `set(${MyInner} "Hi")`; we won’t actually be changing the `MyInner` variable,
     but instead, we’ll change the variable named after the value stored in `MyInner`.
     Very often, this is not what we want.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
 - en: 'Variable references are a bit peculiar in how they work when it comes to variable
     categories, but in general, the following applies:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
 - en: The `${}` syntax is used to reference *normal* or *cache* variables.
+  id: totrans-132
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The `$ENV{}` syntax is used to reference *environment* variables.
+  id: totrans-133
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The `$CACHE{}` syntax is used to reference *cache* variables.
+  id: totrans-134
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -627,19 +797,23 @@
     the *normal* variable will be used if it was set in the current scope, but if
     it wasn’t set, or was unset, CMake will use the *cache* variable with the same
     name. If there’s no such variable, the reference evaluates to an empty string.'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
 - en: CMake predefines a lot of built-in normal variables that serve different purposes.
     For example, you can pass command-line arguments to scripts after the `--` token
     and they will be stored in the `CMAKE_ARGV<n>` variables (the `CMAKE_ARGC` variable
     will contain the count).
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s introduce other categories of variables so that we understand clearly
     what they are.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
 - en: Using environment variables
+  id: totrans-138
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -647,60 +821,77 @@
     that were in the environment used to start the `cmake` process and makes them
     available in a single, global scope. To reference these variables, use the `$ENV{<name>}`
     syntax.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
 - en: CMake changes these variables, but changes will only be made to a local copy
     in the running `cmake` process and not the actual system environment; moreover,
     these changes won’t be visible to subsequent runs of builds or tests, so it is
     not recommended.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
 - en: 'Be aware that there are a few environment variables that affect different aspects
     of CMake behavior. For example, the `CXX` variable specifies what executable will
     be used for compiling C++ files. We’ll cover environment variables, as they will
     become relevant to this book. A full list is available in the documentation: [https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html).'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
 - en: It’s important to realize that if you use `ENV` variables as arguments to your
     commands, the values will be interpolated during the generation of the buildsystem.
     This means that they will get permanently baked into the build tree, and changing
     the environment for the build stage won’t have any effect.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
 - en: 'For example, take the following project file:'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/03-environment/CMakeLists.txt**'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'The preceding example has two steps: it will print the `myenv` environment
     variable during the configuration, and it will add a build stage through `add_custom_target()`,
     which echoes the same variable as part of the build process. We can test what
     happens with a bash script that uses one value for the configuration stage and
     another for the build stage:'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/03-environment/build.sh**'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-148
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Running the preceding code clearly shows that the value set during the configuration
     is persisted to the generated buildsystem:'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'This concludes our discussion on environmental variables for the time being.
     Let us now move on to the final category of variables: cache variables.'
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
 - en: Using cache variables
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -711,69 +902,86 @@
     the system (path to compilers, linkers, tools, and others) and from the user,
     provided through the GUI or from the command line with the `-D` option. Again,
     cache variables are not available in *scripts*; they only exist in *projects*.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
 - en: 'Cache variables will be used if the `${<name>}` reference can’t find a normal
     variable defined in the current scope but a cache variable with the same name
     exists. However, they can also be explicitly referenced with the `$CACHE{<name>}`
     syntax and defined with a special form of the `set()` command:'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'In contrast to the `set()` command for *normal variables*, extra arguments
     are necessary for cache variables: `<type>` and `<docstring>`. This is because
     these variables can be configured by the user, and the GUI requires this information
     to display them appropriately.'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
 - en: 'The following *types* are accepted:'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
 - en: '`BOOL`: A Boolean on/off value. The GUI will show a checkbox.'
+  id: totrans-158
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`FILEPATH`: A path to a file on a disk. The GUI will open a file dialog.'
+  id: totrans-159
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`PATH`: A path to a directory on a disk. The GUI will open a directory dialog.'
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`STRING`: A line of text. The GUI offers a text field to be filled. It can
     be replaced by a drop-down control by calling `set_property(CACHE <variable> STRINGS
     <values>)`.'
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`INTERNAL`: A line of text. The GUI skips internal entries. The internal entries
     may be used to store variables persistently across runs. Use of this type implicitly
     adds the `FORCE` keyword.'
+  id: totrans-162
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The `<doctring>` value is simply a label that will be displayed by the GUI next
     to the field to provide more detail about this setting to the user. It is required
     even for an `INTERNAL` type.
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
 - en: 'Setting cache variables in the code follows the same rules as environmental
     variables to some extent – values are overwritten only for the current execution
     of CMake. However, if the variable doesn’t exist in the cache file or an optional
     `FORCE` argument is specified, the value will be persisted:'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Similar to C++, CMake supports *variable scopes*, albeit implemented in a rather
     specific way.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
 - en: How to correctly use variable scopes in CMake
+  id: totrans-167
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -781,6 +989,7 @@
     This is maybe because we’re so accustomed to how it is implemented in general-purpose
     languages. We’re explaining this early because incorrect understanding of scopes
     is often a source of bugs that are difficult to find and fix.'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
 - en: Just to clarify, variable scope as a general concept is meant to separate different
@@ -790,21 +999,26 @@
     or discussed scope. Scopes create boundaries between variables, so that the *nested
     scope* can access variables defined in the *outer scope*, but not the other way
     around.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
 - en: 'CMake has two kinds of variable scopes:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
 - en: '**File**: Used when blocks and custom functions are executed within a file'
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '**Directory**: Used when the `add_subdirectory()` command is called to execute
     another `CMakeLists.txt` listfile in a nested directory'
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Conditional blocks, loop blocks, and macros don’t create separate scopes.
+  id: totrans-173
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
@@ -813,6 +1027,7 @@
     variables from the *outer scope*. Subsequent commands will affect these copies.
     But as soon as the execution of the *nested scope* is completed, all copies are
     deleted and the original variables from the *outer scope* are restored.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
 - en: How the concept of scope works in CMake has interesting implications that aren’t
@@ -822,6 +1037,7 @@
     reference this variable, CMake will determine that no such variable is defined,
     it will ignore the *outer scopes*, and continue searching through the cache variables
     (which are considered separate). That’s a possible gotcha.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
 - en: '*File variable scopes* are opened using the `block()` and `function()` commands
@@ -829,118 +1045,157 @@
     respectively. We’ll cover functions in the *Command definitions* section of this
     chapter. For now, let’s see how variable scope works in practice with the simpler
     `block()` command (introduced in CMake 3.25).'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
 - en: 'Consider the following example:'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/04-scope/scope.cmake**'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE19]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'We initially set the variable `V` to `1` in the *global scope*. After entering
     the outer and inner blocks, we immediately change them to `2` and `3`, respectively.
     We also print the variable upon entering and exiting each scope:'
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE20]'
+  id: totrans-181
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: As explained previously, as we enter each *nested scope*, the variable values
     are temporarily copied from the *outer scope* but their original values are restored
     upon exiting. This is reflected in the last two lines of the output.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
 - en: 'The `block()` command can also propagate values to outer scopes (like C++ would
     do by default), but it has to be explicitly enabled with the `PROPAGATE` keyword.
     If we were to enable propagation for the inner block with `block(PROPAGATE V)`,
     the output would be as follows:'
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE21]'
+  id: totrans-184
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Again, we affected the scope of the outer block but not the global scope.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
 - en: 'Another method for modifying a variable in the outer scope is to set the `PARENT_SCOPE`
     flag for the `set()` and `unset()` commands:'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE22]'
+  id: totrans-187
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: That workaround is a bit limited, as it doesn’t allow accessing variables more
     than one level up. Another thing worth noting is the fact that using `PARENT_SCOPE`
     doesn’t change variables in the current scope.
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
 - en: 'Now that we know how to handle basic variables, let’s take a look at one special
     case: since all variables are stored as strings, CMake has to take a more creative
     approach to more complex data structures such as *lists*.'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
 - en: Using lists
+  id: totrans-190
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'To store a **list**, CMake concatenates all elements into a string, using a
     semicolon, `;`, as a delimiter: `a;list;of;5;elements`. You can escape a semicolon
     in an element with a backslash, like so: `a\;single\;element`.'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
 - en: 'To create a list, we can use the `set()` command:'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE23]'
+  id: totrans-193
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Because of how lists are stored, the following commands will have exactly the
     same effect:'
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE24]'
+  id: totrans-195
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'CMake automatically unpacks lists in unquoted arguments. By passing an unquoted
     `myList` reference, we effectively send more arguments to the command:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE25]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'The `message()` command will receive six arguments: “`the list is:`", “`a`",
     “`list`", “`of`", “`five`", and “`elements`". This may have unintended consequences,
     as the output will be printed without any additional spaces between the arguments:'
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE26]'
+  id: totrans-199
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: As you can see, this is a very simple mechanism, and it should be used carefully.
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
 - en: 'CMake offers a `list()` command that provides a multitude of subcommands to
     read, search, modify, and order lists. Here’s a short summary:'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE27]'
+  id: totrans-202
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Most of the time, we don’t really need to use lists in our projects. However,
     if you find yourself in that rare case where this concept would be convenient,
     you’ll find a more in-depth reference of the `list()` command in *Appendix*, *Miscellaneous
     Commands*.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
 - en: Now that we know how to work with lists and variables of all kinds, let’s shift
     our focus to controlling the execution flow and learn about control structures
     available in CMake.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
 - en: Understanding control structures in CMake
+  id: totrans-205
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -949,9 +1204,11 @@
     three categories: **conditional blocks**, **loops**, and **command definitions**.
     Control structures are executed in scripts and during buildsystem generation for
     projects.'
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
 - en: Conditional blocks
+  id: totrans-207
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -959,77 +1216,98 @@
     All conditional blocks have to be closed with an `endif()` command, and they may
     have any number of `elseif()` commands and one optional `else()` command in this
     order:'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE28]'
+  id: totrans-209
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'As in many other imperative languages, the `if()`-`endif()` block controls
     which sets of commands will be executed:'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
 - en: If the `<condition>` expression specified in the `if()` command is met, the
     first section will be executed.
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Otherwise, CMake will execute commands in the section belonging to the first
     `elseif()` command in this block that has met its condition.
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If there are no such commands, CMake will check whether the `else()` command
     is provided and execute any commands in that section of the code.
+  id: totrans-213
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: If none of the preceding conditions are met, the execution continues after the
     `endif()` command.
+  id: totrans-214
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Note that no local *variable scope* is created in any of the conditional blocks.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
 - en: The provided `<condition>` expression is evaluated according to a very simple
     syntax – let’s learn more about it.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
 - en: The syntax for conditional commands
+  id: totrans-217
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: The same syntax is valid for `if()`, `elseif()`, and `while()` commands.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
 - en: Logical operators
+  id: totrans-219
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
 - en: 'The `if()` conditions support the `NOT`, `AND`, and `OR` logical operators:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
 - en: '`NOT <condition>`'
+  id: totrans-221
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<condition> AND <condition>`'
+  id: totrans-222
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<condition> OR <condition>`'
+  id: totrans-223
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Also, the nesting of conditions is possible with matching pairs of parentheses
     (`()`). As in all decent languages, the CMake language respects the order of evaluation
     and starts from the innermost parenthesis:'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE29]'
+  id: totrans-225
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: The evaluation of a string and a variable
+  id: totrans-226
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
@@ -1038,30 +1316,38 @@
     references*. In other words, using a plain variable name (for example, `QUX`)
     inside a condition is equal to writing `${QUX}`. Here’s an example for you to
     consider, and a gotcha:'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE30]'
+  id: totrans-228
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'The `if()` condition works in a bit of a convoluted way here – first, it will
     evaluate `${QUX}` to `BAZ`, which is a recognized variable, and this in turn is
     evaluated to a string containing five characters spelling `FALSE`. Strings are
     considered *Boolean true* only if they equal any of the following constants (these
     comparisons are case-insensitive): `ON`, `Y`, `YES`, `TRUE`, or a *non-zero number*.'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
 - en: This brings us to the conclusion that the condition in the preceding example
     will evaluate to *Boolean false*.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
 - en: 'However, here’s another catch – what would be the evaluation of a condition
     with an unquoted argument with the name of a variable containing a value such
     as `BAR`? Consider the following code example:'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE31]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'According to what we have said so far, it would be `false`, as the `BAR` string
     doesn’t meet the criteria to evaluate to a *Boolean true* value. That’s unfortunately
     not the case, because CMake makes an exception when it comes to unquoted variable
@@ -1069,142 +1355,185 @@
     an `if("BAR")` statement (which would be `false`). Instead, CMake will only evaluate
     `if(FOO)` to `false` if it is any of the following constants (these comparisons
     are case-insensitive):'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
 - en: '`OFF`, `NO`, `FALSE`, `N`, `IGNORE`, or `NOTFOUND`'
+  id: totrans-234
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: A string ending with `-NOTFOUND`
+  id: totrans-235
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: An empty string
+  id: totrans-236
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Zero
+  id: totrans-237
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'So, simply asking for an undefined variable will be evaluated to `false`:'
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE32]'
+  id: totrans-239
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'When a variable is defined beforehand, the scenario changes and the condition
     evaluates to `true`:'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE33]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: 'If you think that the recursive evaluation of unquoted `if()` arguments is
     confusing, wrap variable references in quoted arguments: `if("${`CORGE`}")`. This
     will result in argument evaluation before the provided argument is passed into
     the `if()` command, and the behavior will be consistent with the evaluation of
     strings.'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
 - en: 'In other words, CMake assumes that the user passing a variable name to the
     `if()` command is asking whether the variable is defined with a value that does
     not evaluate to *Boolean false*. To explicitly check whether the variable is defined
     or not (and ignore its value), we can use the following:'
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE34]'
+  id: totrans-244
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: Comparing values
+  id: totrans-245
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
 - en: 'Comparison operations are supported with the following operators:'
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
 - en: '`EQUAL`, `LESS`, `LESS_EQUAL`, `GREATER`, and `GREATER_EQUAL`'
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
 - en: 'The usual comparison operators found in other languages do not work in CMake:
     `==`, `>`, `<`, `!=`, and so on.'
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
 - en: 'They can be used to compare numeric values, like so:'
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE35]'
+  id: totrans-250
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'You can compare software versions following the `major[.minor[.patch[.tweak]]]`
     format by adding a `VERSION_` prefix to any of the operators:'
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE36]'
+  id: totrans-252
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Omitted components are treated as zeros, and non-integer version components
     truncate the compared string at that point.
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
 - en: 'For *lexicographic* string comparisons, we need to prepend an operator with
     the `STR` prefix (note the lack of an underscore):'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE37]'
+  id: totrans-255
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: 'We often need more advanced mechanisms than simple equality comparisons. Fortunately,
     CMake also supports **POSIX** **regex** matching (the CMake documentation hints
     at an **Extended Regular Expression** (**ERE**) flavor, but no support for specific
     regex character classes is mentioned). We can use the `MATCHES` operator as follows:'
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE38]'
+  id: totrans-257
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: Any matched groups are captured in `CMAKE_MATCH_<n>` variables.
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
 - en: Simple checks
+  id: totrans-259
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
 - en: We already mentioned one simple check, `DEFINED`, but there are others that
     simply return `true` if a condition is met.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
 - en: 'We can check the following:'
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
 - en: 'Whether a value is in a list: `<VARIABLE|STRING> IN_LIST <VARIABLE>`'
+  id: totrans-262
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Whether a command is available for invocation in this version of CMake: `COMMAND
     <command-name>`'
+  id: totrans-263
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Whether a CMake policy exists: `POLICY <policy-id>` (this is covered in *Chapter
     4*, *Setting Up Your First CMake Project* )'
+  id: totrans-264
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Whether a CTest test was added with `add_test()`: `TEST <test-name>`'
+  id: totrans-265
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Whether a build target is defined: `TARGET <target-name>`'
+  id: totrans-266
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: We’ll explore build targets in *Chapter 5*, *Working with Targets*, but for
     now, let’s just say that targets are logical units of a build process in a project
     created with `add_executable()`, `add_library()`, or `add_custom_target()` commands.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
 - en: Examining the filesystem
+  id: totrans-268
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
@@ -1213,75 +1542,94 @@
     this book will provide a short list of the file-related commands in the *Appendix*.
     But most often, only the following operators will be needed (behavior is well-defined
     only for absolute paths):'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
 - en: '`EXISTS <path-to-file-or-directory>`: Checks if a file or directory exists.'
+  id: totrans-270
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: This resolves symbolic links (it returns `true` if the target of the symbolic
     link exists).
+  id: totrans-271
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`<file1> IS_NEWER_THAN <file2>`: Checks which file is newer.'
+  id: totrans-272
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: This returns `true` if `file1` is newer than (or equal to) `file2` or if one
     of the two files doesn’t exist.
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
 - en: '`IS_DIRECTORY path-to-directory`: Checks if a path is a directory.'
+  id: totrans-274
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`IS_SYMLINK file-name`: Checks if a path is a symbolic link.'
+  id: totrans-275
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`IS_ABSOLUTE path`: Checks if a path is absolute.'
+  id: totrans-276
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Additionally, since 3.24 CMake supports a simple path comparison check, that
     will collapse multiple path separators but won’t do any other normalization:'
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE39]'
+  id: totrans-278
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: For more advanced path manipulation, refer to the documentation on the `cmake_path()`
     command.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
 - en: This completes the syntax for conditional commands; the next control structure
     we’ll discuss is a loop.
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
 - en: Loops
+  id: totrans-281
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Loops in CMake are fairly straightforward – we can use either a `while()` loop
     or a `foreach()` loop to repeatedly execute the same set of commands. Both of
     these commands support loop control mechanisms:'
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
 - en: The `break()` loop stops the execution of the remaining block and breaks from
     the enclosing loop.
+  id: totrans-283
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: The `continue()` loop stops the execution of the current iteration and starts
     at the top of the next one.
+  id: totrans-284
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Note that no local *variable scope* is created in any of the loop blocks.
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
 - en: while()
+  id: totrans-286
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -1289,113 +1637,155 @@
     command. Any enclosed commands will be executed as long as the `<condition>` expression
     provided in `while()` is `true`. The syntax for phrasing the condition is the
     same as for the `if()` command:'
+  id: totrans-287
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE40]'
+  id: totrans-288
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: You probably guessed that – with some additional variables – the `while` loop
     can replace a `for` loop. Actually, it’s way easier to use a `foreach()` loop
     for that – let’s take a look.
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
 - en: foreach() loops
+  id: totrans-290
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'There are several variations of the `foreach()` block, which execute the enclosed
     commands for each value in the given list. Like other blocks, it has opening and
     closing commands: `foreach()` and `endforeach()`.'
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
 - en: 'The simplest form of `foreach()` is meant to provide a C++-style `for` loop:'
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE41]'
+  id: totrans-293
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: 'CMake will iterate from `0` to `<max>` (inclusive). If we need more control,
     we can use the second variant, providing `<min>`, `<max>`, and, optionally, `<step>`.
     All arguments must be non-negative integers, and `<min>` has to be smaller than
     `<max>`:'
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE42]'
+  id: totrans-295
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: 'However, `foreach()` shows its true colors when it is working with lists:'
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE43]'
+  id: totrans-297
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: 'CMake will retrieve elements from one or more specified `<lists>` list variables,
     as well as a list of `<items>` values defined in-line, and put them in `<loop
     variable>`. Then, it will execute all commands for each item in the list. You
     can choose to provide only lists, only values, or both:'
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/06-loops/foreach.cmake**'
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE44]'
+  id: totrans-300
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: 'The preceding code will print the following:'
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE45]'
+  id: totrans-302
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'Or, we can use a short version (skipping the `IN` keyword) for the same result:'
+  id: totrans-303
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE46]'
+  id: totrans-304
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: 'Since version 3.17, `foreach()` has learned how to zip lists (`ZIP_LISTS`):'
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE47]'
+  id: totrans-306
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: 'The process of zipping lists involves iterating through multiple lists and
     operating on corresponding items that have the same index. Let’s look at an example:'
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/06-loops/foreach.cmake**'
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE48]'
+  id: totrans-309
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: CMake will create a `num_<N>` variable for each list provided, which it will
     fill with items from each list.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
 - en: 'You can pass multiple variable names (one for every list) and each list will
     use a separate variable to store its items:'
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE49]'
+  id: totrans-312
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: 'Both examples on `ZIP_LISTS` will produce the same output:'
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE50]'
+  id: totrans-314
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: In the event that the item counts between lists vary, variables for the shorter
     lists will be empty.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
 - en: It is worth noting that, as of version 3.21, the loop variables in `foreach()`
     are restricted to the local scope of the loop. This concludes our discussion on
     loops.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
 - en: Command definitions
+  id: totrans-317
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1403,6 +1793,7 @@
     or the `function()` command. The easiest way to explain the differences between
     these commands is by comparing them to *C-style preprocessor macros* and actual
     C++ functions:'
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
 - en: A `macro()` command works more like a find-and-replace instruction than an actual
@@ -1410,33 +1801,40 @@
     a separate entry on a call stack. This means that calling `return()` in a macro
     will return to the calling statement one level higher than it would for a function
     (possibly terminating the execution if we’re already in the top scope).
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
 - en: The `function()` command creates a *local scope* for its variables, unlike the
     `macro()` command, which works in the *variable scope* of the caller. This may
     lead to confusing results. Let’s talk about these details in the next section.
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
 - en: 'Both methods of defining commands allow the defining of named arguments that
     can be referred to in the local scope of the defined command. Moreover, CMake
     offers the following variables for accessing call-related values:'
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
 - en: '`${ARGC}`: The count of arguments'
+  id: totrans-322
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`${ARGV}`: All arguments as list'
+  id: totrans-323
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`${ARGV<index>}`: The value of an argument at a specific index (starting from
     0), regardless of whether this argument was expected or not'
+  id: totrans-324
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`${ARGN}`: A list of anonymous arguments that were passed by a caller after
     the last expected argument'
+  id: totrans-325
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -1445,43 +1843,57 @@
     of arguments), you may be interested to read about `cmake_parse_arguments()` in
     the official documentation. If you decide to define a command with named arguments,
     every call has to pass all of them or it will be invalid.
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
 - en: Macros
+  id: totrans-327
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'Defining a macro is similar to any other block:'
+  id: totrans-328
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE51]'
+  id: totrans-329
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: After this declaration, we may execute our macro by calling its name (function
     calls are case- insensitive).
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
 - en: 'As we know, macros don’t create a separate entry on a call stack or a *variable
     scope*. The following example highlights some of the problems relating to this
     behavior in macros:'
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/08-definitions/macro.cmake**'
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE52]'
+  id: totrans-333
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'Here’s the output from this script:'
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE53]'
+  id: totrans-335
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: 'What happened? Despite explicitly setting `myVar` to `new value`, it didn’t
     affect the output for `message("argument: ${myVar}")`! This is because arguments
     passed to macros aren’t treated as real variables but rather, as constant find-and-replace
     instructions.'
+  id: totrans-336
   prefs: []
   type: TYPE_NORMAL
 - en: On the other hand, the `myVar` variable in the global scope was changed from
@@ -1489,23 +1901,29 @@
     a bad practice, as it’s impossible to tell which global variables will be changed
     by a macro without reading it. It is advisable to utilize functions whenever possible,
     as they are likely to prevent many issues.
+  id: totrans-337
   prefs: []
   type: TYPE_NORMAL
 - en: Functions
+  id: totrans-338
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'To declare a command as a function, follow this syntax:'
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE54]'
+  id: totrans-340
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: A function requires a name and optionally accepts a list of names of expected
     arguments. As mentioned before, functions create their own *variable scopes*.
     You can call `set()`, providing one of the named arguments of the function, and
     any change will be local to the function (unless `PARENT_SCOPE` is specified,
     as we discussed in the *How to correctly use variable scopes in CMake* section).
+  id: totrans-341
   prefs: []
   type: TYPE_NORMAL
 - en: Functions follow the rules of the call stack, enabling returning to the calling
@@ -1513,75 +1931,97 @@
     allows an optional `PROPAGATE` keyword followed by a list of variable names. Its
     purpose is similar to the one in the `block()` command – it transfers the values
     of the specified variables from the *local scope* to the scope of the call.
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
 - en: 'CMake sets the following variables for each function (these have been available
     since version 3.17):'
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
 - en: '`CMAKE_CURRENT_FUNCTION`'
+  id: totrans-344
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_CURRENT_FUNCTION_LIST_DIR`'
+  id: totrans-345
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_CURRENT_FUNCTION_LIST_FILE`'
+  id: totrans-346
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`CMAKE_CURRENT_FUNCTION_LIST_LINE`'
+  id: totrans-347
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Let’s take a look at these function variables in practice:'
+  id: totrans-348
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/08-definitions/function.cmake**'
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE55]'
+  id: totrans-350
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: 'Running this script with `cmake -P function.cmake` prints the following output:'
+  id: totrans-351
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE56]'
+  id: totrans-352
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: As you can see, the general syntax and concept of the functions are very similar
     to macros but less susceptible to implicit errors.
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
 - en: The procedural paradigm in CMake
+  id: totrans-354
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
 - en: 'Let us suppose that we want to write CMake code similar to how we write a program
     in C++. We’ll make a `CMakeLists.txt` listfile that will call three defined commands
     that may call defined commands of their own. *Figure 2.3* illustrates that:'
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B19844_02_03.png)'
+  id: totrans-356
   prefs: []
   type: TYPE_IMG
 - en: 'Figure 2.3: A procedural call graph'
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
 - en: 'In CMake, writing in a procedural style can be problematic since you must provide
     command definitions before calling them. The CMake parser will not have it any
     other way. Your code could look something like this:'
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE57]'
+  id: totrans-359
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: What a nightmare! Everything is reversed! It will be very difficult to understand
     because the code with the lowest level of abstraction is at the beginning of the
     file. A correctly structured piece of code lists the most general steps in the
     first subroutine, after which it provides the slightly more detailed subroutines,
     and keeps the most detailed steps at the very end of the file.
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
 - en: 'There are solutions to this problem, such as moving command definitions to
@@ -1589,26 +2029,33 @@
     be explained in detail in *Chapter 4*, *Setting Up Your First CMake Project* ).
     But there is also a simple and elegant approach – declaring an entry-point macro
     at the top of the file and calling it at the very end of the file:'
+  id: totrans-361
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE58]'
+  id: totrans-362
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: With this approach, our code is written with a gradually narrowing scope, and
     because we’re not actually calling the `main()` macro until the very end, CMake
     won’t complain about the execution of undefined commands.
+  id: totrans-363
   prefs: []
   type: TYPE_NORMAL
 - en: Why use a macro over a function in this case? It’s good to have unrestricted
     access to global variables, and since we’re not passing any arguments to `main()`,
     we don’t need to worry about the usual caveats.
+  id: totrans-364
   prefs: []
   type: TYPE_NORMAL
 - en: You’ll find a simple example of this concept in the `ch02/09-procedural/CMakeLists.txt`
     listfile in the GitHub repository for this book.
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
 - en: A word on naming conventions
+  id: totrans-366
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
@@ -1616,30 +2063,37 @@
     important to maintain a solution that is easy to read and understand. When it
     comes to CMake scripts and projects, we should follow the rules of the *clean
     code* approach, as we would with any software development solution:'
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
 - en: Follow a consistent naming style (`snake_case` is an accepted standard in the
     CMake community).
+  id: totrans-368
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Use short but meaningful names (for example, avoid `func()`, `f()`, and similar).
+  id: totrans-369
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Avoid puns and cleverness in your naming.
+  id: totrans-370
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Use pronounceable, searchable names that don’t require mental mapping.
+  id: totrans-371
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Now that we know how to properly invoke the commands with the correct syntax,
     let’s explore which commands will be the most beneficial to us to begin with.
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
 - en: Exploring the frequently used commands
+  id: totrans-373
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -1649,32 +2103,40 @@
     `find_package()`, and `find_path()`, fit better in chapters that talk about their
     respective subjects. In this section, we will provide a brief overview of the
     common commands that are useful in most situations:'
+  id: totrans-374
   prefs: []
   type: TYPE_NORMAL
 - en: '`message()`'
+  id: totrans-375
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`include()`'
+  id: totrans-376
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`include_guard()`'
+  id: totrans-377
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`file()`'
+  id: totrans-378
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`execute_process()`'
+  id: totrans-379
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Let’s get to it.
+  id: totrans-380
   prefs: []
   type: TYPE_NORMAL
 - en: The message() command
+  id: totrans-381
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1682,108 +2144,136 @@
     to standard output. However, there’s a lot more to it than meets the eye. By providing
     a `MODE` argument, you can customize the behavior of the command like so: `message(<MODE>
     "text to print")`.'
+  id: totrans-382
   prefs: []
   type: TYPE_NORMAL
 - en: 'The recognized modes are as follows:'
+  id: totrans-383
   prefs: []
   type: TYPE_NORMAL
 - en: '`FATAL_ERROR`: This stops processing and generation.'
+  id: totrans-384
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`SEND_ERROR`: This continues processing but skips generation.'
+  id: totrans-385
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`WARNING`: This continues processing.'
+  id: totrans-386
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`AUTHOR_WARNING`: A CMake warning. This continues processing.'
+  id: totrans-387
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DEPRECATION`: This works accordingly if either of the `CMAKE_ERROR_DEPRECATED`
     or `CMAKE_WARN_DEPRECATED` variables are enabled.'
+  id: totrans-388
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`NOTICE` or omitted mode (default): This prints a message to `stderr` to attract
     the user’s attention.'
+  id: totrans-389
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`STATUS`: This continues processing and is recommended for main messages to
     users.'
+  id: totrans-390
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`VERBOSE`: This continues processing and should be used for more detailed information
     that usually isn’t very necessary.'
+  id: totrans-391
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DEBUG`: This continues processing and should contain any fine details that
     might be helpful when there’s an issue with a project.'
+  id: totrans-392
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`TRACE`: This continues processing and is recommended to print messages during
     project development. Usually, these sorts of messages would be removed before
     publishing the project.'
+  id: totrans-393
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Picking the right mode is extra work, but it can save debugging time by coloring
     the output text based on the severity (since 3.21) or even stop the execution
     after declaring an irrecoverable error:'
+  id: totrans-394
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/10-useful/message_error.cmake**'
+  id: totrans-395
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE59]'
+  id: totrans-396
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: Messages will be printed depending on the current log level (which is `STATUS`
     by default). We discussed how to change this in the previous chapter in the *Options
     for debugging and tracing* section.
+  id: totrans-397
   prefs: []
   type: TYPE_NORMAL
 - en: 'In *Chapter 1*, *First Steps with CMake*, I mentioned debugging with `CMAKE_MESSAGE_CONTEXT`,
     and now it’s time to delve into it. In the meantime, we have gained insights into
     three crucial pieces of this subject: lists, scopes, and functions.'
+  id: totrans-398
   prefs: []
   type: TYPE_NORMAL
 - en: 'In complex debugging scenarios, it can be extremely useful to indicate in which
     context the message is occurring. Consider the following output, where messages
     printed in the `foo` function have the appropriate prefix:'
+  id: totrans-399
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE60]'
+  id: totrans-400
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: 'Here’s how this works:'
+  id: totrans-401
   prefs: []
   type: TYPE_NORMAL
 - en: '**ch02/10-useful/message_context.cmake**'
+  id: totrans-402
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE61]'
+  id: totrans-403
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: 'Let’s break this down:'
+  id: totrans-404
   prefs: []
   type: TYPE_NORMAL
 - en: First, we append the `top` to the context-tracking variable `CMAKE_MESSAGE_CONTEXT`,
     then we print the initial `` Before `foo` `` message, and the matching prefix
     `[top]` will be added to the output.
+  id: totrans-405
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Next, upon entering the `foo()` function, we append a new context to the list
     named `foo` after the function it belongs to and output another message, which
     appears with the extended `[top.foo]` prefix in the output.
+  id: totrans-406
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -1792,45 +2282,59 @@
     of the *variable scope* rules: the changed `CMAKE_MESSAGE_CONTEXT` variable only
     lives until the end of the function scope, and is then restored to the original
     unchanged version.'
+  id: totrans-407
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: 'Another cool trick with `message()` is to add indentation to the `CMAKE_MESSAGE_INDENT`
     list (in exactly the same way as with `CMAKE_MESSAGE_CONTEXT`):'
+  id: totrans-408
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE62]'
+  id: totrans-409
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: 'The output from our scripts can then look a bit simpler:'
+  id: totrans-410
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE63]'
+  id: totrans-411
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: Since CMake doesn’t offer any real debugger with breakpoints or other tools,
     the ability to produce clean log messages comes in very handy when things don’t
     go exactly as planned.
+  id: totrans-412
   prefs: []
   type: TYPE_NORMAL
 - en: The include() command
+  id: totrans-413
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'Partitioning code into different files to keep things ordered and, well, *separate*,
     is quite useful. Then, we can reference them from our parent listfile by calling
     `include()`, like so:'
+  id: totrans-414
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE64]'
+  id: totrans-415
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: If we provide a filename (a path with a `.cmake` extension), CMake will try
     to open and execute it.
+  id: totrans-416
   prefs: []
   type: TYPE_NORMAL
 - en: Note that no nested, separate *variable scope* will be created, so any changes
     to variables made in that file will affect the calling scope.
+  id: totrans-417
   prefs: []
   type: TYPE_NORMAL
 - en: CMake will raise an error if a file doesn’t exist unless we specify that it
@@ -1838,40 +2342,49 @@
     was successful, we can provide a `RESULT_VARIABLE` keyword with the name of the
     variable. It will be filled with a full path to the included file on success or
     not found (`NOTFOUND`) on failure.
+  id: totrans-418
   prefs: []
   type: TYPE_NORMAL
 - en: 'When running in script mode, any relative paths will be resolved from the current
     working directory. To force searching in relation to the script itself, provide
     an absolute path:'
+  id: totrans-419
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE65]'
+  id: totrans-420
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: If we don’t provide a path but do provide the name of a module (without `.cmake`
     or otherwise), CMake will try to find a module and include it. CMake will search
     for a file with the name of `<module>.cmake` in `CMAKE_MODULE_PATH` and then in
     the CMake module directory.
+  id: totrans-421
   prefs: []
   type: TYPE_NORMAL
 - en: 'As CMake walks the source tree and includes different listfiles, the following
     variables are set: `CMAKE_CURRENT_LIST_DIR`, `CMAKE_CURRENT_LIST_FILE`, `CMAKE_PARENT_LIST_FILE`,
     and `CMAKE_CURRENT_LIST_LINE`.'
+  id: totrans-422
   prefs: []
   type: TYPE_NORMAL
 - en: The include_guard() command
+  id: totrans-423
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: When we include files that have side effects, we might want to restrict them
     so that they’re only included once. This is where `include_guard([DIRECTORY|GLOBAL])`
     comes in.
+  id: totrans-424
   prefs: []
   type: TYPE_NORMAL
 - en: Put `include_guard()` at the top of the included file. When CMake encounters
     it for the first time, it will make a note of this fact in the current scope.
     If the file gets included again (maybe because we don’t control all the files
     in our project), it won’t be processed any further.
+  id: totrans-425
   prefs: []
   type: TYPE_NORMAL
 - en: If we want to protect against inclusion in unrelated function scopes that won’t
@@ -1879,25 +2392,32 @@
     As the names suggest, the `DIRECTORY` keyword will apply the protection within
     the current directory and below it, and the `GLOBAL` keyword applies the protection
     to the whole build.
+  id: totrans-426
   prefs: []
   type: TYPE_NORMAL
 - en: The file() command
+  id: totrans-427
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
 - en: 'To give you an idea of what you can do with CMake scripts, let’s take a quick
     look at the most useful variants of the file manipulation command:'
+  id: totrans-428
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE66]'
+  id: totrans-429
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: In short, the `file()` command will let you read, write, and transfer files
     and work with the filesystem, file locks, paths, and archives, all in a system-independent
     manner. Please see the *Appendix* for more details.
+  id: totrans-430
   prefs: []
   type: TYPE_NORMAL
 - en: The execute_process() command
+  id: totrans-431
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -1907,38 +2427,47 @@
     their output. This command is a great fit for scripts and it can also be used
     in projects, but it **only works during the configuration stage**. Here’s the
     general form of the command:'
+  id: totrans-432
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE67]'
+  id: totrans-433
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE67]'
 - en: CMake will use the API of the operating system to create a child process (so,
     shell operators such as `&&`, `||`, and `>` won’t work). However, you can still
     chain commands and pass the output of one to another simply by providing the `COMMAND
     <cmd> <arguments>` arguments more than once.
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
 - en: Optionally, you may use a `TIMEOUT <seconds>` argument to terminate the process
     if it hasn’t finished the task within the required limit, and you can set the
     `WORKING_DIRECTORY <directory>` as you need.
+  id: totrans-435
   prefs: []
   type: TYPE_NORMAL
 - en: 'The exit codes of all tasks can be collected in a list by providing `RESULTS_VARIABLE
     <variable>` arguments. If you’re only interested in the result of the last executed
     command, use the singular form: `RESULT_VARIABLE <variable>`.'
+  id: totrans-436
   prefs: []
   type: TYPE_NORMAL
 - en: 'To collect the output, CMake provides two arguments: `OUTPUT_VARIABLE` and
     `ERROR_VARIABLE` (which are used in a similar fashion). If you would like to merge
     both `stdout` and `stderr`, use the same variable for both arguments.'
+  id: totrans-437
   prefs: []
   type: TYPE_NORMAL
 - en: Remember that when writing projects for other users, you should make sure that
     the command you’re planning to use is available on the platforms you claim to
     support.
+  id: totrans-438
   prefs: []
   type: TYPE_NORMAL
 - en: Summary
+  id: totrans-439
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -1956,55 +2485,68 @@
     state of the files in the system. This allows us to write conditional blocks and
     `while` loops; while we were talking about loops, we also grasped the syntax of
     `foreach` loops.
+  id: totrans-440
   prefs: []
   type: TYPE_NORMAL
 - en: Understanding how to define custom commands using macro and function statements
     will undoubtedly facilitate cleaner, more procedural code. We also discussed strategies
     for improving code structure and creating more readable names.
+  id: totrans-441
   prefs: []
   type: TYPE_NORMAL
 - en: Finally, we formally introduced the `message()` command and its multiple log
     levels. We also studied how to partition and include listfiles, and we discovered
     a few other useful commands. With this information, we are well prepared to take
     on the next chapter, *Chapter 3*, *Using CMake in Popular IDEs*.
+  id: totrans-442
   prefs: []
   type: TYPE_NORMAL
 - en: Further reading
+  id: totrans-443
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'For more information on the topics covered in this chapter, you can refer to
     the following links:'
+  id: totrans-444
   prefs: []
   type: TYPE_NORMAL
 - en: 'Clean Code: A Handbook of Agile Software Craftsmanship (Robert C. Martin):
     [https://amzn.to/3cm69DD](https://www.amazon.co.uk/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882?&linkCode=sl1&tag=smoku-21&linkId=2bce0992e1e138154bfec781f28805ce&language=en_GB&ref_=as_li_ss_tl)'
+  id: totrans-445
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Refactoring: Improving the Design of Existing Code (Martin Fowler): [https://amzn.to/3cmWk8o](https://amzn.to/3cmWk8o)'
+  id: totrans-446
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'Which comments in your code ARE GOOD? (Rafał Świdzinski): [https://youtu.be/4t9bpo0THb8](https://youtu.be/4t9bpo0THb8)'
+  id: totrans-447
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: 'What’s the CMake syntax to set and use variables? (StackOverflow): [https://stackoverflow.com/questions/31037882/whats-the-cmake-syntax-to-set-and-use-variables](https://stackoverflow.com/questions/31037882/whats-the-cmake-syntax-to-set-and-use-variables)'
+  id: totrans-448
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: Join our community on Discord
+  id: totrans-449
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'Join our community’s Discord space for discussions with the author and other
     readers:'
+  id: totrans-450
   prefs: []
   type: TYPE_NORMAL
 - en: '[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)'
+  id: totrans-451
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/QR_Code94081075213645359.png)'
+  id: totrans-452
   prefs: []
   type: TYPE_IMG
