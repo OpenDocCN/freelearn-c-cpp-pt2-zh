@@ -1,48 +1,68 @@
 - en: '6'
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '6'
 - en: Automatically Generating Documentation
+  id: totrans-1
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自动生成文档
 - en: Documentation is—without a doubt—an essential part of all projects. Documentation
     conveys information that is not implicitly available to the user. It is a way
     of sharing the intent, functionality, capabilities, and restrictions regarding
     a project and it enables both technical and non-technical people to work on a
     project. However, it is indeed a time-consuming process to write documentation.
     Thus, it is crucial to make use of the tools available for generating documentation.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档无疑是所有项目中不可或缺的一部分。文档传递的是用户无法直接获得的信息，它是一种分享项目意图、功能、能力和限制的方式，使技术人员和非技术人员都能参与项目的工作。然而，编写文档确实是一个费时的过程。因此，利用现有的工具来生成文档非常重要。
 - en: This chapter will show you ways of integrating Doxygen, `dot`, and PlantUML
     into CMake to speed up the documentation process. These tools will let us lessen
     the context switch between code and documentation and ease the maintenance burden
     of documentation.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章将展示如何将 Doxygen、`dot` 和 PlantUML 集成到 CMake 中，以加速文档生成过程。这些工具将帮助我们减少代码和文档之间的上下文切换，并减轻文档维护的负担。
 - en: 'To understand the skills shared in this chapter, we’ll cover the following
     main topics:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了理解本章所介绍的技巧，我们将涵盖以下主要内容：
 - en: Generating documentation from your code
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 从代码生成文档
 - en: Packaging and distributing documentation with CPack
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用 CPack 打包和分发文档
 - en: Creating dependency graphs of CMake targets
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 创建 CMake 目标的依赖图
 - en: Let’s begin with the technical requirements.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从技术要求开始。
 - en: Technical requirements
+  id: totrans-9
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 技术要求
 - en: 'Before you dive further into this chapter, you should have a good grasp of
     the content covered in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging,
     Deploying, and Installing a CMake Project*, and [*Chapter 5*](B30947_05.xhtml#_idTextAnchor084),
@@ -56,16 +76,25 @@
     is used. If you are not using the provided Docker container, ensure that you have
     installed Doxygen, PlantUML, and Graphviz in your environment. Consult your package
     manager’s index for installation details.'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在深入本章内容之前，你应该对[*第 4 章*](B30947_04.xhtml#_idTextAnchor071)《打包、部署和安装 CMake 项目》和[*第
+    5 章*](B30947_05.xhtml#_idTextAnchor084)《集成第三方库和依赖管理》有一个清晰的了解。本章将使用的技术都已在这两章中涵盖。此外，建议从[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06)获取本章的示例内容。所有示例都假设你将使用项目提供的开发环境容器，相关链接为：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。这是一个类似于
+    Debian 的环境，已经预先安装了所有必要的依赖。如果使用不同的环境，命令和输出可能会有所不同。如果你没有使用提供的 Docker 容器，请确保你已经在环境中安装了
+    Doxygen、PlantUML 和 Graphviz。有关安装详细信息，请查阅你的包管理器索引。
 - en: Let’s dive into the realm of documentation by learning ways of generating documentation
     from existing code.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过学习如何从现有代码生成文档，来深入了解文档的领域。
 - en: Generating documentation from your code
+  id: totrans-12
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 从代码生成文档
 - en: Most people, either knowingly or not, structure their software projects in an
     organized way. The organization is a positive side effect of methodologies and
     procedures such as **object-oriented** (**OO**) design, programming language rules,
@@ -74,15 +103,18 @@
     project structure. When procedures, rules, order, and organization exist, the
     computer can make sense of things. Documentation generation software leverages
     that fact to our benefit.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
 - en: One of the most prominent tools to generate documentation out of code is Doxygen.
     As a de facto standard for code documentation in C++, it integrates very well
     with CMake. We will learn how we can integrate Doxygen with CMake to automatically
     generate documentation for CMake projects.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
 - en: Understanding what Doxygen is
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -94,6 +126,7 @@
     relations, and so on. Doxygen combines this information with inline code documentation
     written by the programmer. The final result is human-readable documentation in
     various formats that is compatible with both online and offline reading.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
 - en: 'In order to be able to make sense of code comments, Doxygen requires comments
@@ -102,28 +135,35 @@
     We will be using **Javadoc**-style comments in our examples, which are commonly
     used, but feel free to use whatever suits your personal preference. An example
     Javadoc comment for a C++ function is provided here:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE0]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Doxygen also requires a **Doxyfile**, which essentially contains all the parameters
     of documentation generation, such as output format, excluded file patterns, project
     name, and so on. Because of the sheer number of configuration parameters, configuring
     Doxygen may be intimidating at the start, but fear not—CMake will generate a Doxyfile
     for you too.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
 - en: As we dive further into this chapter, you will start to see the benefits of
     using documentation generation software for your project. Through this, it is
     way easier to keep the documentation consistent with code, and the ability to
     read the code structure also makes graphing easier.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
 - en: Let’s see how Doxygen and CMake work together.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
 - en: Using Doxygen with CMake
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -132,6 +172,7 @@
     Doxygen with CMake is pretty straightforward. We’ll utilize the `FindDoxygen.cmake`
     module of CMake to integrate Doxygen into our projects. This module is, by default,
     provided by the CMake installation and requires no extra setup.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
 - en: '`FindDoxygen.cmake` is, as the name suggests, a module package file designated
@@ -141,11 +182,14 @@
     we will be following the `Chapter 6` `- Example 01` example for this section.
     Our target is to generate documentation for a simple calculator library along
     with its `README` file. The interface definition of this library looks like this:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE1]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'The `calculator` class implements the class interface defined in the `calculator_interface`
     class. It is properly documented in Javadoc format. We will expect Doxygen to
     generate `calculator` and `calculator_interface` classes, together with an inheritance
@@ -158,11 +202,14 @@
     `CMakeLists.txt` file, `chapter6/ex01_doxdocgen/CMakeLists.txt`, as usual. The
     `CMakeLists.txt` file begins with finding the Doxygen package, as can be seen
     here:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE2]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The `find_package(...)` call will utilize the `FindDoxygen.cmake` module provided
     by the CMake installation to find Doxygen in the environment if present. The `REQUIRED`
     parameter is omitted in order to allow package maintainers to pack the project
@@ -171,23 +218,28 @@
     several Doxygen configurations. These configurations will be placed into the Doxyfile
     that will be generated by CMake. Detailed descriptions for each option are listed
     here:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
 - en: '`DOXYGEN_OUTPUT_DIRECTORY`: Sets the output directory for Doxygen.'
+  id: totrans-29
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_GENERATE_HTML`: Instructs Doxygen to emit **HyperText Markup Language**
     (**HTML**) output.'
+  id: totrans-30
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_GENERATE_MAN`: Instructs Doxygen to emit `MAN` page output.'
+  id: totrans-31
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_AUTOLINK_SUPPORT`: Allows Doxygen to automatically link language symbols
     and filenames to relevant documentation pages if available.'
+  id: totrans-32
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -195,38 +247,46 @@
     that can be utilized for generating graphs. This will enable Doxygen to enrich
     generated documentation with diagrams such as dependency, inheritance, and collaboration
     diagrams.'
+  id: totrans-33
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_COLLABORATION_GRAPH`: Tells Doxygen to generate collaboration diagrams
     for classes.'
+  id: totrans-34
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_CLASS_GRAPH`: Tells Doxygen to generate class diagrams for classes.'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_UML_LOOK`: Instructs Doxygen to generate **Unified Modeling Language**
     (**UML**)-like diagrams.'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_DOT_UML_DETAILS`: Adds type and parameter information to UML diagrams.'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_DOT_WRAP_THRESHOLD`: Sets the line wrapping threshold for UML diagrams.'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_CALL_GRAPH`: Instructs Doxygen to generate call graphs for functions
     in function documentation.'
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
 - en: '`DOXYGEN_QUIET`: Suppresses Doxygen output generated to **standard** **output**
     (**stdout**).'
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
@@ -238,35 +298,47 @@
     back to the example code. The CMake code shown before is followed by the target
     declarations. The following lines of code define a regular static library that
     contains our example code for the documentation:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE3]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Subsequently, the following lines of code define an executable that consumes
     the static library target defined before:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE4]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Lastly, the `doxygen_add_docs(...)` function is called to specify the code
     that we wish to generate documentation from, as can be seen next:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE5]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The `doxygen_add_docs(...)` function is a function provided by the `FindDoxygen.cmake`
     module. Its sole purpose is to provide a convenient way to create a CMake target
     for documentation generation without explicitly dealing with Doxygen. The signature
     for the `doxygen_add_docs(...)` function is shown here (non-relevant parameters
     are omitted):'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE6]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The first parameter of the `targetName` function is the name of the documentation
     target. The function will generate a custom target named `targetName`. This target
     will trigger Doxygen and create documentation from the code when built. The next
@@ -278,6 +350,7 @@
     is for making CMake print a message to the output when the target is being built.
     `COMMENT` is primarily useful for diagnostic purposes so that we can quickly know
     whether documentation is being generated or not.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
 - en: After this brief introduction of `doxygen_add_docs(...)`, let’s go back to the
@@ -286,32 +359,42 @@
     `${CMAKE_CURRENT_LIST_DIR}` to the documentation generation directory, requests
     the `ALL` meta-target to depend on it, and specifies a `COMMENT` parameter that
     will be printed when the target is built.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
 - en: 'All right—it’s time to test whether this works or not. Go into the `chapter06/`
     directory and configure the project in the `build/` directory with the following
     command:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE7]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Check the CMake output to see whether the configuration succeeded or not. If
     the configuration was successful, that means CMake succeeded in finding Doxygen
     in the environment. You should be able to see that in the CMake output, as can
     be seen next:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE8]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'After a successful configuration, let’s try to build it with the following
     command:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE9]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'In the build output, you should be able to see that the text we’ve given into
     the `COMMENT` parameter is being printed to the CMake output. This means the documentation
     target is being built and Doxygen is running. Notice that we did not specify a
@@ -320,54 +403,72 @@
     `doxygen_add_docs(...)` function, a `ch6_ex01_doxdocgen_generate_docs` target
     is built too. The output of the `build` command should look similar to the output
     given here:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE10]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'It seems we have succeeded in building the project and the documentation. Let’s
     inspect the generated documentation in the `${CMAKE_CURRENT_BINARY_DIR}/docs`
     output folder, as follows:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE11]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Here, we can see Doxygen has emitted the `HTML` and `MAN` page output into
     the `html/` and `man/` directories. Let’s inspect the result for each type. To
     inspect the generated `MAN` page, simply type the following:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE12]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'To use `man` in the dev container supplied with the repo run, use `sudo unminimize`
     first, as the container image is optimized for size. The command will open the
     Man page and show something like this screenshot:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_01.jpg)'
+  id: totrans-64
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.1 an example man page generated with Doxygen
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
 - en: 'Great! Our code comments turned into a Man page. Similarly, let’s inspect the
     HTML output as well. Use a browser of your choice to open the `build/ex01_doxdocgen/docs/html/index.html`
     file, as shown next:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE13]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'This will display the main page of your documentation, as shown in the following
     screenshot:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_02.jpg)'
+  id: totrans-69
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.2 – The main page of the documentation
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
 - en: 'In the preceding screenshot, we can see that Doxygen has rendered the `README.md`
@@ -378,36 +479,45 @@
     feature and the `@ref` Doxygen command. Click on the `calculator` link under the
     `calculator` class. The `calculator` class documentation page should look similar
     to this:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_03.jpg)'
+  id: totrans-72
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.3 – Generated HTML documentation for the calculator class (basic layout)
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
 - en: In the preceding screenshot, we can see that Doxygen is aware that the `calculator`
     class inherits from `calculator_interface` and draws an inheritance diagram for
     the `calculator` class.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
 - en: Note
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
 - en: Doxygen requires the `dot` tool to render diagrams. The `dot` tool is available
     in the Graphviz software package.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
 - en: 'Also, the generated diagrams contain function names and encapsulation symbols
     in UML style. Let’s take a look at the detailed member function documentation
     shown in the following screenshot:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_04.jpg)'
+  id: totrans-78
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.4 – Generated documentation for the div() function of the calculator
     class
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
 - en: 'As we can see in *Figure 6**.3*, Doxygen did a pretty good job of putting the
@@ -415,12 +525,15 @@
     you would be happy. Lastly, let’s navigate to `main.cpp` to look at the documentation
     of `main.cpp` to illustrate what a dependency graph looks like. You can see a
     representation of the documentation page in the following screenshot:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_05.jpg)'
+  id: totrans-81
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.5 – main.cpp documentation page
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
 - en: 'The dependency graph in the preceding screenshot shows that the `main.cpp`
@@ -430,12 +543,15 @@
     know exactly what the file dependencies are without having to dive into the code.
     If you scroll down a bit more, you will see a call graph for the `main()` function
     as well, as can be seen in the following screenshot:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_06.jpg)'
+  id: totrans-84
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.6 – main() function call graph
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
 - en: Splendid! We have generated documentation with graphs for our code in two different
@@ -444,9 +560,11 @@
     But our journey in this chapter is not over yet. The upcoming section will enrich
     our knowledge by teaching us how to embed custom UML diagrams into documentation.
     Let’s go!
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
 - en: Embedding custom UML diagrams into documentation
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
@@ -461,6 +579,7 @@
     PlantUML supports. But before starting to put PlantUML code in Doxygen comments,
     there’s a small thing that must be taken care of: enabling PlantUML support in
     Doxygen. We have got ourselves a starting point. Let’s roll!'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
 - en: 'Enabling PlantUML support in Doxygen is pretty easy. Doxygen requires a `PLANTUML_JAR_PATH`
@@ -473,11 +592,14 @@
     We will be following `Chapter 6` `- Example 02` for this section. As ever, let’s
     dive into the `CMakeLists.txt` file of the example code, located at the `chapter06/ex02_doxplantuml/CMakeLists.txt`
     path. Let’s start inspecting from the `find_path(...)` call, as follows:'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE14]'
+  id: totrans-90
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'In the `find_path(...)` call here, `PLANTUML_JAR_PATH` is the name of the output
     variable. `NAMES` are the filenames that will be searched in the search locations.
     `HINTS` are extra paths in addition to default search locations. These are useful
@@ -490,11 +612,14 @@
     example are omitted too. Doxygen should be able to use PlantUML right now. Let’s
     test that with an example PlantUML graph, embedded into the `src/main.cpp` source
     file, as follows:'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE15]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'The `@startuml` and `@enduml` Doxygen comment keywords are for indicating the
     beginning and the end of a PlantUML diagram, respectively. Regular PlantUML code
     can be placed inside of a `@startuml - @enduml` block. In our example, we have
@@ -502,27 +627,36 @@
     expected, we should see the embedded PlantUML diagram in the `main()` function’s
     documentation. Let’s generate documentation by building the example with the code
     shown here:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE16]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'The documentation for the second example should be built now. Open the generated
     `build/ex02_doxplantuml/docs/html/index.html` HTML documentation with the browser
     of your choice, by running the following command:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE17]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'If you scroll down to the main function, you’ll see our UML sequence diagram,
     like this:'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_07.jpg)'
+  id: totrans-98
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.7 – Embedded PlantUML diagram in the main() function documentation
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
 - en: In *Figure 6**.6*, we can see that Doxygen has generated a PlantUML diagram
@@ -530,14 +664,17 @@
     diagrams into our generated documentation as well. This will allow us to explain
     complicated systems and relationships without having to interact with external
     graphing tools.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
 - en: Now that we have the right tools for generating documentation, it’s time to
     learn how to package and deliver them. In the next section, we will learn about
     ways of delivering documentation, together with the software involved.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
 - en: Packaging and distributing documentation with CPack
+  id: totrans-102
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -545,14 +682,17 @@
     is an artifact of a project, after all. Thus, we will use the techniques we learned
     in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging, Deploying, and
     Installing a CMake Project*, to package our documentation.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
 - en: Note
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
 - en: If you have not yet read [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071), *Packaging,
     Deploying, and Installing a CMake Project*, it is strongly recommended to do so
     before reading this section.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
 - en: 'To illustrate this section, we will return to `Chapter 6` `- Example 01`. We
@@ -560,11 +700,14 @@
     packageable. Let’s dive back into the `CMakeLists.txt` file located in the `chapter06/ex01_doxdocgen/`
     folder. With the following code, we will make the `html` and `man` documentation
     installable:'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE18]'
+  id: totrans-107
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Remember that we were using `install(DIRECTORY...)` to install any kind of
     folder while preserving its structure in [*Chapter 4*](B30947_04.xhtml#_idTextAnchor071),
     *Packaging, Deploying, and Installing a CMake Project*? This is exactly what is
@@ -574,48 +717,63 @@
     it means it is also packageable since CMake is able to generate the required packaging
     code from `install(...)` calls. So, let’s include the `CPack` module to enable
     packaging for this example too. The code is illustrated in the following snippet:'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE19]'
+  id: totrans-109
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'And there we have it! Simple as that. Let’s try building and packaging the
     example project by invoking the following commands:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE20]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'So, let’s summarize what is happening here. We have configured and built the
     `chapter06/` code and invoked CPack to package the project into the `build/pak`
     folder using the generated `CPackConfig.cmake` file. To check whether everything
     is in order, let’s extract the contents of the generated package into the `/tmp/ch6-ex01`
     path by invoking the following command:'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE21]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'After the extraction completes, the documentation must become available under
     the `/tmp/ch6-ex01/usr/share` path. Since we have used a non-default path, we
     have used the `MANPATH` environment variable to let the `man` command know the
     path of our documentation. Let’s start by checking whether we can access the man
     pages by invoking the `man` command, as follows:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE22]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: The `chapter6_ex01_calculator` name is automatically inferred by Doxygen from
     the `chapter6::ex01::calculator` class name. You should be able to see the man
     page output we covered in the previous section.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
 - en: Up to now, we have learned a great deal about generating and packaging documentation.
     Up next, we will be learning about generating dependency graphs of CMake targets.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
 - en: Creating dependency graphs of CMake targets
+  id: totrans-118
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -630,17 +788,21 @@
     by a multitude of programs, the most famous one being the freely available Graphviz.
     DOT files can be converted to images or even `dot` command-line utility from Graphviz,
     like this: `dot -Tpng filename.dot -``o out.png`.'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
 - en: 'As [*Chapter 3*](B30947_03.xhtml#_idTextAnchor054) offers more varied targets,
     let’s run this command on the `build` folder for this chapter. This will produce
     an output similar to this:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
 - en: '![](img/B30947_06_08.jpg)'
+  id: totrans-121
   prefs: []
   type: TYPE_IMG
 - en: Figure 6.8 – The project structure of chapter3 visualized with the DOT language
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
 - en: 'Behavior and options can be controlled by the variables provided in `CMakeGraphVizOptions`.
@@ -648,17 +810,22 @@
     in the `PROJECT_SOURCE_DIR` and `PROJECT_BINARY_DIR` directories and, if found,
     will use the values provided within. An example of such a config file might look
     like this:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
 - en: '[PRE23]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: By default, CMake creates dependency graphs for all targets. Setting `GRAPHVIZ_GENERATE_PER_TARGET`
     and `GRAPHVIZ_GENERATE_DEPENDERS` to `FALSE` will reduce the number of files generated.
     A full set of available options can be found in the CMake documentation at [https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html).
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
 - en: Summary
+  id: totrans-126
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
@@ -676,6 +843,7 @@
     Machines are amazingly better at performing deterministic jobs than humans. They
     are never sick, rarely break, and are easily scaled and never tired. Automation
     is a way of harnessing this untamed power.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
 - en: The main orientation of this book is not to teach you how to do things, but
@@ -684,60 +852,74 @@
     that could be done by a machine manually more than once, you are wasting your
     precious time. Invest in automating things—it is a profitable investment that
     pays for itself quickly.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
 - en: In the next chapter, we will learn how we can improve our code quality by integrating
     unit testing, code sanitizers, static code analysis, micro-benchmarking, and code
     coverage tools into a CMake project, and of course, we will be automating all
     of this as well.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
 - en: See you in the next chapter!
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
 - en: Questions
+  id: totrans-131
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: 'After completing this chapter, you should be able to answer the following questions:'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
 - en: What is Doxygen?
+  id: totrans-133
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: What is the easiest way to integrate Doxygen into a CMake project?
+  id: totrans-134
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Can Doxygen draw diagrams and graphs? If so, how can we enable this behavior?
+  id: totrans-135
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Which Doxygen tags should be used to embed a PlantUML diagram into Doxygen documentation?
+  id: totrans-136
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Which configuration steps should be taken to enable Doxygen to use PlantUML?
+  id: totrans-137
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Given that man/page output is present under the `build/` folder, how can we
     make this documentation installable?
+  id: totrans-138
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Answers
+  id: totrans-139
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
 - en: Doxygen is the de facto standard of documentation generation tools for C and
     C++ projects.
+  id: totrans-140
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: Since CMake already provides a `find` module for Doxygen, this could be done
     by using the `find_package(...)` CMake command.
+  id: totrans-141
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
@@ -745,19 +927,23 @@
     and PlantUML is available in the environment. To enable DOT graphing, setting
     `HAVE_DOT` to `TRUE` is sufficient. For PlantUML, `PLANTUML_JAR_PATH` needs to
     be set to the path that contains the `plantuml.jar` file.
+  id: totrans-142
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`@startuml` and `@enduml`.'
+  id: totrans-143
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: '`PLANTUML_JAR_PATH` needs to be set to the path that contains the `plantuml.jar`
     file.'
+  id: totrans-144
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
 - en: With the help of the `install(DIRECTORY)` command.
+  id: totrans-145
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
