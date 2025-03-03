@@ -1,1 +1,0 @@
-["```cpp\ncmake_minimum_required(VERSION 3.28)\nproject(mc-array LANGUAGES C)\n```", "```cpp\nShaders not found. Have you built them using compile-shader-<platform>.sh/bat script?\n```"]

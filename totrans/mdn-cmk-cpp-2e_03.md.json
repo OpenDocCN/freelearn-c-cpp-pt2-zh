@@ -1,1 +1,0 @@
-["```cpp\ntar -xzf CLion-<version>.tar.gz\n./CLion-<version>/bin/CLion.sh \n```", "```cpp\nHello CMake. \n```"]
