@@ -1,6 +1,4 @@
-# 10
-
-# 在超级构建中处理分布式仓库和依赖项
+# 第十章：在超级构建中处理分布式仓库和依赖项
 
 正如我们现在应该已经了解的，每个大项目都有自己的依赖项。处理这些依赖项最简单的方法是使用包管理器，如**Conan**或**vcpkg**。但是，使用包管理器并不总是可行的，可能是由于公司政策、项目需求或资源不足。因此，项目作者可能会考虑使用传统的老式方式来处理依赖项。处理这些依赖项的常见方式可能包括将所有依赖项嵌入到仓库的构建代码中。或者，项目作者可能决定让最终用户从头开始处理依赖项。这两种方式都不太清晰，各有缺点。如果我告诉你有一个折衷方案呢？欢迎使用*超级构建*方法。
 
@@ -18,7 +16,7 @@
 
 # 技术要求
 
-在深入本章之前，你应该已经掌握了[*第5章*](B30947_05.xhtml#_idTextAnchor084)的内容，*整合第三方库* *和依赖管理*。本章将采用以实例教学的方式，因此建议从[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10)获取本章的示例内容。所有示例都假设你将使用项目中提供的容器，项目地址为[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。
+在深入本章之前，你应该已经掌握了*第五章*的内容，*整合第三方库* *和依赖管理*。本章将采用以实例教学的方式，因此建议从[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter10)获取本章的示例内容。所有示例都假设你将使用项目中提供的容器，项目地址为[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。
 
 让我们从检查超级构建的前提和要求开始学习。
 
@@ -30,7 +28,7 @@
 
 # 跨多个代码仓库进行构建
 
-软件项目，无论是直接的还是间接的，都涉及多个代码仓库。处理本地项目代码是最简单的，但软件项目很少是独立的。如果没有合适的依赖管理策略，事情可能会很快变得复杂。本章的第一个建议是*如果可能的话，使用包管理器或依赖提供者*。正如在 [*第5章*](B30947_05.xhtml#_idTextAnchor084) 中所描述的，*集成第三方库和依赖管理*，包管理器大大减少了在依赖管理上花费的精力。如果你不能使用预构建的包管理器，你可能需要为你的项目创建一个专门的迷你包管理器，这就是所谓的 **超级构建**。
+软件项目，无论是直接的还是间接的，都涉及多个代码仓库。处理本地项目代码是最简单的，但软件项目很少是独立的。如果没有合适的依赖管理策略，事情可能会很快变得复杂。本章的第一个建议是*如果可能的话，使用包管理器或依赖提供者*。正如在 *第五章* 中所描述的，*集成第三方库和依赖管理*，包管理器大大减少了在依赖管理上花费的精力。如果你不能使用预构建的包管理器，你可能需要为你的项目创建一个专门的迷你包管理器，这就是所谓的 **超级构建**。
 
 超级构建主要用于使项目在依赖方面自给自足，也就是说，项目能够在不需要用户干预的情况下满足自身的依赖。拥有这样的能力对所有使用者来说都非常方便。为了演示这种技术，我们将从一个这种场景的示例开始。让我们开始吧。
 
@@ -71,7 +69,7 @@ FetchContent_MakeAvailable(GTest benchmark)
 add_library(GTest::Main ALIAS gtest_main)
 ```
 
-在第一行中，我们包含了`FetchContent` CMake模块，因为我们将利用它来处理依赖关系。在接下来的六行中，使用`FetchContent_Declare`函数声明了两个外部目标，`benchmark`和`GTest`，并指示它们通过Git获取。因此，调用了`FetchContent_MakeAvailable(…)`函数以使声明的目标可用。最后，调用`add_library(…)`来定义一个名为`GTest::Main`的别名目标，指向`gtest_main`目标。这样做是为了保持`find_package(…)`和超级构建目标名称之间的兼容性。对于`benchmark`，没有定义别名目标，因为它的`find_package(…)`和超级构建目标名称已经兼容。
+在第一行中，我们包含了`FetchContent` CMake 模块，因为我们将利用它来处理依赖关系。在接下来的六行中，使用`FetchContent_Declare`函数声明了两个外部目标，`benchmark`和`GTest`，并指示它们通过 Git 获取。因此，调用了`FetchContent_MakeAvailable(…)`函数以使声明的目标可用。最后，调用`add_library(…)`来定义一个名为`GTest::Main`的别名目标，指向`gtest_main`目标。这样做是为了保持`find_package(…)`和超级构建目标名称之间的兼容性。对于`benchmark`，没有定义别名目标，因为它的`find_package(…)`和超级构建目标名称已经兼容。
 
 让我们通过调用以下命令来配置和构建示例：
 
@@ -89,7 +87,7 @@ cmake --build build/ --parallel $(nproc)
 
 ## 传统方法 – ExternalProject_Add
 
-在`FetchContent`出现之前，大多数人通过使用`ExternalProject_Add` CMake函数实现了超级构建方法。该函数由`ExternalProject` CMake模块提供。在本节中，我们将通过`ExternalProject_Add`查看一个超级构建示例，以了解它与使用`FetchContent`模块的区别。
+在`FetchContent`出现之前，大多数人通过使用`ExternalProject_Add` CMake 函数实现了超级构建方法。该函数由`ExternalProject` CMake 模块提供。在本节中，我们将通过`ExternalProject_Add`查看一个超级构建示例，以了解它与使用`FetchContent`模块的区别。
 
 让我们一起看看`Chapter 10`, Example 02`中的`CMakeLists.txt`文件（注释和项目指令已省略）：
 
@@ -101,7 +99,7 @@ target_sources(ch10_ex02_tests PRIVATE src/tests.cpp)
 target_link_libraries(ch10_ex02_tests PRIVATE catch2)
 ```
 
-同样，这个项目是一个单元测试项目，包含一个C++源文件，不过这次使用的是`catch2`而不是Google Test。`CMakeLists.txt`文件直接包含了`superbuild.cmake`文件，定义了一个可执行目标，并将`Catch2`库链接到该目标。你可能已经注意到，这个示例没有使用`FindPackage(...)`来发现`Catch2`库。原因在于，与`FetchContent`不同，`ExternalProject`是在构建时获取并构建外部依赖项。由于`Catch2`库的内容在配置时不可用，我们无法在此使用`FindPackage(...)`。`FindPackage(…)`在配置时运行，并需要包文件存在。让我们也看看`superbuild.cmake`：
+同样，这个项目是一个单元测试项目，包含一个 C++源文件，不过这次使用的是`catch2`而不是 Google Test。`CMakeLists.txt`文件直接包含了`superbuild.cmake`文件，定义了一个可执行目标，并将`Catch2`库链接到该目标。你可能已经注意到，这个示例没有使用`FindPackage(...)`来发现`Catch2`库。原因在于，与`FetchContent`不同，`ExternalProject`是在构建时获取并构建外部依赖项。由于`Catch2`库的内容在配置时不可用，我们无法在此使用`FindPackage(...)`。`FindPackage(…)`在配置时运行，并需要包文件存在。让我们也看看`superbuild.cmake`：
 
 ```cpp
 include(ExternalProject)
@@ -166,7 +164,7 @@ All tests passed (4 assertions in 1 test case)
 
 ## 奖励 – 使用 Qt 6 框架与超构建
 
-到目前为止，我们已经处理了那些占用空间较小的库。现在让我们尝试一些更复杂的内容，比如在超级构建中使用像 Qt 这样的框架。在这一部分，我们将跟随`第10章`，示例`03`进行操作。
+到目前为止，我们已经处理了那些占用空间较小的库。现在让我们尝试一些更复杂的内容，比如在超级构建中使用像 Qt 这样的框架。在这一部分，我们将跟随`第十章`，示例`03`进行操作。
 
 重要提示
 
@@ -278,7 +276,7 @@ Cloning into 'qt6-src'...
 
 如果一切正常，一个小的图形界面窗口应该会弹出。该窗口应类似于下图所示：
 
-![图10.1 – 简单的 Qt 应用程序窗口](img/B30947_10_01.jpg)
+![图 10.1 – 简单的 Qt 应用程序窗口](img/B30947_10_01.jpg)
 
 图 10.1 – 简单的 Qt 应用程序窗口
 
@@ -286,7 +284,7 @@ Cloning into 'qt6-src'...
 
 # 确保超级构建中的版本一致性
 
-版本一致性是所有软件项目中的一个重要方面。正如你现在应该已经了解到的，软件世界中的一切都不是一成不变的。软件随着时间的发展而演变和变化。这些变化往往需要提前得到确认，要么通过对新版本运行一系列测试，要么通过对消费代码本身进行修改。理想情况下，上游代码的变化不应该影响现有构建的复现，除非我们希望它们产生影响。如果软件验证和测试已经针对某一组合完成，那么一个项目的`x.y`版本应该始终与`z.q`依赖版本一起构建。原因在于，即便没有API或ABI的变化，上游依赖中的最小变动也可能影响你的软件行为。如果没有提供版本一致性，你的软件将没有明确定义的行为。因此，提供版本一致性的方法非常关键。
+版本一致性是所有软件项目中的一个重要方面。正如你现在应该已经了解到的，软件世界中的一切都不是一成不变的。软件随着时间的发展而演变和变化。这些变化往往需要提前得到确认，要么通过对新版本运行一系列测试，要么通过对消费代码本身进行修改。理想情况下，上游代码的变化不应该影响现有构建的复现，除非我们希望它们产生影响。如果软件验证和测试已经针对某一组合完成，那么一个项目的`x.y`版本应该始终与`z.q`依赖版本一起构建。原因在于，即便没有 API 或 ABI 的变化，上游依赖中的最小变动也可能影响你的软件行为。如果没有提供版本一致性，你的软件将没有明确定义的行为。因此，提供版本一致性的方法非常关键。
 
 在超构建中确保版本一致性取决于超构建的组织方式。对于通过版本控制系统获取的代码库来说，相对容易。与其克隆项目并按原样使用，不如切换到特定的分支或标签。如果没有这些锚点，可以切换到特定的提交。这样可以确保你的超构建具备前瞻性。但即使这样也可能不足够。标签可能被覆盖，分支可能被强制推送，历史可能被重写。为了降低这种风险，你可以选择分叉项目并使用该分叉作为上游。这样，你就可以完全控制上游内容。但请记住，这种方法带来了维护的负担。
 
@@ -296,7 +294,7 @@ Cloning into 'qt6-src'...
 
 本章简要介绍了超构建的概念，以及如何利用超构建进行依赖管理。超构建是一种非侵入性且强大的依赖管理方式，适用于缺少包管理器的情况。
 
-在下一章中，我们将详细探讨如何为苹果生态系统构建软件。由于苹果的封闭性以及macOS和iOS的紧密集成，在针对这些平台时需要考虑一些事项。
+在下一章中，我们将详细探讨如何为苹果生态系统构建软件。由于苹果的封闭性以及 macOS 和 iOS 的紧密集成，在针对这些平台时需要考虑一些事项。
 
 # 问题
 

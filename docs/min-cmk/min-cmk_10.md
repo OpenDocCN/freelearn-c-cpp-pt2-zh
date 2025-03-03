@@ -1,8 +1,6 @@
-# 8
+# 第八章：使用超级构建简化入门
 
-# 使用超级构建简化入门
-
-在本章中，我们将回到简化和精简项目设置的工作中。在开发过程中，添加功能和应对随之而来的复杂性之间总有一种自然的推拉关系。在[*第 7 章*](B21152_07.xhtml#_idTextAnchor170)《为你的库添加安装支持》中，我们花了大量时间切换目录并运行 CMake 命令。为了构建我们的应用程序，我们需要穿越至少五个文件夹（`third-party`、`array`、`draw`、`gol` 和 `app`），并在途中运行大量 CMake 命令。这是学习 CMake 的一种极好的方式，但当你想要完成工作时，这并不有趣。它还可能阻碍不熟悉的用户访问或贡献你的项目。
+在本章中，我们将回到简化和精简项目设置的工作中。在开发过程中，添加功能和应对随之而来的复杂性之间总有一种自然的推拉关系。在*第七章*《为你的库添加安装支持》中，我们花了大量时间切换目录并运行 CMake 命令。为了构建我们的应用程序，我们需要穿越至少五个文件夹（`third-party`、`array`、`draw`、`gol` 和 `app`），并在途中运行大量 CMake 命令。这是学习 CMake 的一种极好的方式，但当你想要完成工作时，这并不有趣。它还可能阻碍不熟悉的用户访问或贡献你的项目。
 
 现在是时候解决这个问题了。你将在本章中学到的技能将有助于减少启动和运行项目所需的手动步骤。本章将向你展示如何去除平台特定的脚本，并自动化更多的构建过程。
 
@@ -20,13 +18,13 @@
 
 # 技术要求
 
-要跟随本教程，请确保已满足[*第 1 章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。这些要求包括以下内容：
+要跟随本教程，请确保已满足*第一章*《入门》的要求。这些要求包括以下内容：
 
 +   一台运行最新**操作**系统（**OS**）的 Windows、Mac 或 Linux 机器
 
 +   一个可用的 C/C++ 编译器（如果你还没有，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 # 使用 ExternalProject_Add 与你自己的库
 
@@ -53,7 +51,7 @@ ExternalProject_Add(
   CMAKE_CACHE_ARGS -DCMAKE_DEBUG_POSTFIX:STRING=d)
 ```
 
-该命令看起来与我们在[*第6章*](B21152_06.xhtml#_idTextAnchor152)中讲解的非常相似，*安装依赖项和ExternalProject_Add*。唯一的真正不同之处是对`SOURCE_DIR`的引用。由于本书仓库的布局稍显不传统，我们可以直接引用源文件夹，因为库的源代码存储在同一仓库中：
+该命令看起来与我们在*第六章*中讲解的非常相似，*安装依赖项和 ExternalProject_Add*。唯一的真正不同之处是对`SOURCE_DIR`的引用。由于本书仓库的布局稍显不传统，我们可以直接引用源文件夹，因为库的源代码存储在同一仓库中：
 
 ```cpp
 SOURCE_DIR URL or GIT_REPOSITORY link. If we did, for some reason, want to refer to an older version of one of the libraries at a specific moment in the Git history of our project, we could use this approach:
@@ -74,8 +72,8 @@ SOURCE_SUBDIR ch8/part-1/lib/array
 
 ```cpp
 
-			We did the same thing in [*Chapter 3*](B21152_03.xhtml#_idTextAnchor065), *Using FetchContent with External Dependencies*, when using `FetchContent`. The preceding command will clone the entire repository into the build folder of our third-party `CMakeList.txt` file, and then treat the `ch8/part-1/lib/array` directory as the root of the repository (at least as far as `ExternalProject_Add` is concerned). It’s not often needed but can be useful if a repository holds more than one CMake project.
-			While we’re making changes to `third-party/CMakeLists.txt`, we’ll also make one small improvement to how we handle our bgfx dependency. When bgfx was first introduced in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and ExternalProject_Add* (see `ch6/part-4`), we wound up needing to clone the repository twice, once for the static version of the library (needed to build the tools), and again for the shared version of the library that our application linked against. The good news is there’s a handy technique we can apply to download the library once. The following is an extract of the changes with the differences highlighted:
+			We did the same thing in *Chapter 3*, *Using FetchContent with External Dependencies*, when using `FetchContent`. The preceding command will clone the entire repository into the build folder of our third-party `CMakeList.txt` file, and then treat the `ch8/part-1/lib/array` directory as the root of the repository (at least as far as `ExternalProject_Add` is concerned). It’s not often needed but can be useful if a repository holds more than one CMake project.
+			While we’re making changes to `third-party/CMakeLists.txt`, we’ll also make one small improvement to how we handle our bgfx dependency. When bgfx was first introduced in *Chapter 6*, *Installing Dependencies and ExternalProject_Add* (see `ch6/part-4`), we wound up needing to clone the repository twice, once for the static version of the library (needed to build the tools), and again for the shared version of the library that our application linked against. The good news is there’s a handy technique we can apply to download the library once. The following is an extract of the changes with the differences highlighted:
 
 ```
 
@@ -234,7 +232,7 @@ set(PREFIX_DIR ${THIRD_PARTY_BINARY_DIR})
 ```cpp
 
 			Here, we introduce `THIRD_PARTY_BINARY_DIR`, which we default to `app/build-third-party` (we could have stuck with `third-party/build`, but this way, our app and third-party build folders will stay closer together to make clean-up easier). We also ensure to handle if a user provides a relative path by using `if(NOT IS_ABSOLUTE ${THIRD_PARTY_BINARY_DIR})`. In this case we append the path provided to `CMAKE_SOURCE_DIR` (which, in our case, will be the `app` folder). This check also treats paths beginning with `~/` on macOS and Linux as absolute paths. It’s a little more code, but the increased flexibility can be incredibly useful for our users.
-			The extra check of `AND NOT PROJECT_IS_TOP_LEVEL` is to guard against someone accidentally setting `SUPERBUILD` to `ON` when building the third-party dependencies separately as their own project. `SUPERBUILD` will have no effect if this is the case. `PROJECT_IS_TOP_LEVEL` can be used to check whether the preceding call to `project` was from the top-level `CMakeList.txt` file or not (for more information, please see [https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html](https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html)). 
+			The extra check of `AND NOT PROJECT_IS_TOP_LEVEL` is to guard against someone accidentally setting `SUPERBUILD` to `ON` when building the third-party dependencies separately as their own project. `SUPERBUILD` will have no effect if this is the case. `PROJECT_IS_TOP_LEVEL` can be used to check whether the preceding call to `project` was from the top-level `CMakeList.txt` file or not (for more information, please see [`cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html`](https://cmake.org/cmake/help/latest/variable/PROJECT_IS_TOP_LEVEL.html)). 
 			By introducing the `PREFIX_DIR` variable, we can later pass this to `PREFIX` in the `ExternalProject_Add` command, along with the dependency name, to ensure that the build files wind up in `app/build-third-party/<dep>` instead of `app/build`. When building normally, `CMAKE_CURRENT_BINARY_DIR` will resolve to whatever the user sets as their build folder as part of the third-party CMake configure command.
 			We use `PREFIX_DIR` in the `ExternalProject_Add` command like so:
 
@@ -389,21 +387,21 @@ build/multi-ninja # 常规构建
 
 ```cpp
 
-			We get these two build folders thanks to our use of CMake presets and the `binaryDir` property, which lets us use the current preset name (`${sourceDir}/build/${presetName}`). [*Chapter 5*](B21152_05.xhtml#_idTextAnchor141), *Streamlining CMake Configuration*, contains more information about this topic for reference.
+			We get these two build folders thanks to our use of CMake presets and the `binaryDir` property, which lets us use the current preset name (`${sourceDir}/build/${presetName}`). *Chapter 5*, *Streamlining CMake Configuration*, contains more information about this topic for reference.
 			One final gotcha to mention is that when using a multi-config generator, changing the config passed to the build command will only trigger the application to rebuild in the new configuration, not all the dependencies. To ensure that all dependencies are rebuilt, it is necessary to configure before running the build command (`cmake --``build <build-folder>`).
 			For example, this might look as follows:
 
 ```
 
-# 默认构建为Debug
+# 默认构建为 Debug
 
 cmake --preset multi-ninja-super
 
-# 在Debug模式下构建所有内容
+# 在 Debug 模式下构建所有内容
 
 cmake --build build/multi-ninja-super
 
-# 仅在Release模式下构建应用程序
+# 仅在 Release 模式下构建应用程序
 
 cmake --build build/multi-ninja-super --config Release
 
@@ -411,7 +409,7 @@ cmake --build build/multi-ninja-super --config Release
 
 cmake --preset multi-ninja-super
 
-# 现在以Release模式构建所有内容
+# 现在以 Release 模式构建所有内容
 
 cmake --build build/multi-ninja-super --config Release
 
@@ -434,7 +432,7 @@ app/third-party/install
 			Automating scripts with CMake
 			We’ve removed a lot of manual steps that we were dealing with at the start of the chapter, but one remains. This is the requirement to build the shaders needed by bgfx to transform and color our geometry. Up until now, we’ve been relying on running custom `.bat`/`.sh` scripts from the `app` folder before running our *Game of Life* application, but there’s a better possibility. In this section, we’ll show how to make this process part of the build itself, and use CMake to achieve a cross-platform solution without the need for OS-specific scripts.
 			To start with, we’re going to do away with our existing `.bat`/`.sh` scripts and replace them with `.cmake` files. We’ll pick macOS as the first platform to update; the file will be called `compile-shader-macos.cmake`, and will live under a new `cmake` folder in the `app` directory (equivalent files for Windows and Linux will differ in the exact same way as the existing scripts).
-			We’re eventually going to invoke these scripts from our top-level `CMakeLists.txt` file. However, before we do, it’s useful to introduce a CMake operation we haven’t covered so far, and that is the ability to run a CMake script from the command line using `cmake –P` (see [https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-script](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-script) for more details). As a quick example, we can create a file called `hello-world.cmake` and add a simple `message` command to output `Hello, world!`:
+			We’re eventually going to invoke these scripts from our top-level `CMakeLists.txt` file. However, before we do, it’s useful to introduce a CMake operation we haven’t covered so far, and that is the ability to run a CMake script from the command line using `cmake –P` (see [`cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-script`](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-script) for more details). As a quick example, we can create a file called `hello-world.cmake` and add a simple `message` command to output `Hello, world!`:
 
 ```
 
@@ -453,7 +451,7 @@ message(STATUS "Hello, World!")
 ```cpp
 
 			(If we include `hello-world.cmake` in a `CMakeLists.txt` file, it will run at configure time and `Hello, World!` will be printed then).
-			The CMake functionality to invoke a script also supports first providing CMake variables from the command line using the familiar `-D` argument introduced in [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello, CMake!* (importantly appearing before `-P`):
+			The CMake functionality to invoke a script also supports first providing CMake variables from the command line using the familiar `-D` argument introduced in *Chapter 2*, *Hello, CMake!* (importantly appearing before `-P`):
 
 ```
 
@@ -463,7 +461,7 @@ cmake -DA_USEFUL_SETTING=ON -P cmake-script.cmake
 
 			We’ll use this in our shader script example a little later to help control the output when invoking the command.
 			CMake provides a wealth of useful modules and functions to support file and path manipulation. We’re going to take advantage of them as we craft a CMake script to build our shaders. It’s important to ensure that we have a consistent working directory when invoking `compile-shader-<platform>.cmake`. There are some subtle differences when running from a top-level CMake project and invoking the script using `-P` directly. For example, if we decided to use `CMAKE_SOURCE_DIR` when specifying our paths, this would work correctly when running from the top-level `CMakeLists.txt` file, and when invoking `compile-shader-<platform>.cmake` from the app folder (e.g., `cmake -P cmake/compile-shader-macos.cmake`), but would fail if a user tried to run it from the nested `cmake` folder itself. This is because `CMAKE_SOURCE_DIR` will default to the folder holding the top-level `CMakeLists.txt` file when part of a CMake configure step, and to the folder CMake was invoked from when running `cmake -P path/to/cmake-script.cmake` (this is the same problem we had with the `.``sh`/`.bat` scripts).
-			To account for these differences, we’re going to use a CMake path-related function to ensure that our script’s working directory is always set to the `app` folder. The function we’re going to use is called `cmake_path`. Added in CMake `3.20`, `cmake_path` provides utilities to manipulate paths, decoupled from the filesystem itself (to learn more about `cmake_path`, see [https://cmake.org/cmake/help/latest/command/cmake_path.html](https://cmake.org/cmake/help/latest/command/cmake_path.html)). In our case, we’d like to find the directory containing our `compile-shader-<platform>.cmake` file. This can be performed with the following command:
+			To account for these differences, we’re going to use a CMake path-related function to ensure that our script’s working directory is always set to the `app` folder. The function we’re going to use is called `cmake_path`. Added in CMake `3.20`, `cmake_path` provides utilities to manipulate paths, decoupled from the filesystem itself (to learn more about `cmake_path`, see [`cmake.org/cmake/help/latest/command/cmake_path.html`](https://cmake.org/cmake/help/latest/command/cmake_path.html)). In our case, we’d like to find the directory containing our `compile-shader-<platform>.cmake` file. This can be performed with the following command:
 
 ```
 
@@ -478,8 +476,8 @@ COMPILE_SHADER_DIR)
 			In the preceding command, we can see the following arguments:
 
 				*   The first argument, `GET`, describes the type of operation we’d like to perform.
-				*   The next argument, `CMAKE_SCRIPT_MODE_FILE` ([https://cmake.org/cmake/help/latest/variable/CMAKE_SCRIPT_MODE_FILE.html](https://cmake.org/cmake/help/latest/variable/CMAKE_SCRIPT_MODE_FILE.html)), holds the full path to the current script being processed. It’s important to note that this variable is only set when using `cmake -P` to execute the script. It will not be populated when using `include`. A check for this variable can be included at the top of the script and a warning issued if a user incorrectly tries to include it (see `ch8/part-3/app/cmake/compile-shader-<platform>.cmake` for an example).
-				*   The following argument, `PARENT_PATH`, is the component to retrieve from the preceding path. In this case, we are requesting the parent path of the current script file (essentially, the directory it is in). To see what other components are available, please see [https://cmake.org/cmake/help/latest/command/cmake_path.html#decomposition](https://cmake.org/cmake/help/latest/command/cmake_path.html#decomposition).
+				*   The next argument, `CMAKE_SCRIPT_MODE_FILE` ([`cmake.org/cmake/help/latest/variable/CMAKE_SCRIPT_MODE_FILE.html`](https://cmake.org/cmake/help/latest/variable/CMAKE_SCRIPT_MODE_FILE.html)), holds the full path to the current script being processed. It’s important to note that this variable is only set when using `cmake -P` to execute the script. It will not be populated when using `include`. A check for this variable can be included at the top of the script and a warning issued if a user incorrectly tries to include it (see `ch8/part-3/app/cmake/compile-shader-<platform>.cmake` for an example).
+				*   The following argument, `PARENT_PATH`, is the component to retrieve from the preceding path. In this case, we are requesting the parent path of the current script file (essentially, the directory it is in). To see what other components are available, please see [`cmake.org/cmake/help/latest/command/cmake_path.html#decomposition`](https://cmake.org/cmake/help/latest/command/cmake_path.html#decomposition).
 				*   The final argument, `COMPILE_SHADER_DIR`, is the variable to populate the result with.
 
 			Now we have this directory, we just need to go one level up to reach the `app` folder. We can achieve this using the same command, only substituting the first argument with the variable we populated in the preceding command.
@@ -507,7 +505,7 @@ ${COMPILE_SHADER_WORKING_DIR}/shader/build)
 
 ```cpp
 
-			The first argument is the operation to perform, and the second is where to do it. This ensures that we now have an output directory to hold our compiled shader files. To learn more about the `file` command, see [https://cmake.org/cmake/help/latest/command/file.html](https://cmake.org/cmake/help/latest/command/file.html).
+			The first argument is the operation to perform, and the second is where to do it. This ensures that we now have an output directory to hold our compiled shader files. To learn more about the `file` command, see [`cmake.org/cmake/help/latest/command/file.html`](https://cmake.org/cmake/help/latest/command/file.html).
 			We’re next going to make use of a CMake command called `execute_process`, which allows us to run child processes from within a CMake script. In this case, we’re going to replicate the contents of our `compile_shader_macos.sh` file inside the `execute_process` command. The following is an example of what this looks like:
 
 ```
@@ -530,7 +528,7 @@ WORKING_DIRECTORY ${COMPILE_SHADER_WORKING_DIR})
 
 ```cpp
 
-			We first call `execute_process`, and then pass the `COMMAND` argument. What follows are the same instructions we would pass at the command line, which were previously invoked from our `.sh` script. We then pass one more argument, `WORKING_DIRECTORY`, to specify where the listed commands should be run relative to (this is populated by the variable we created earlier referring to the `app` directory, regardless of whether the script is being run using `cmake -P` or whether it is being invoked from a `CMakeLists.txt` file). We can now build our shaders using `cmake -P path/to/app/cmake/compile-shader-macos.cmake` from any folder of our choosing (to understand what else `execute_process` can do, see [https://cmake.org/cmake/help/latest/command/execute_process.html](https://cmake.org/cmake/help/latest/command/execute_process.html)).
+			We first call `execute_process`, and then pass the `COMMAND` argument. What follows are the same instructions we would pass at the command line, which were previously invoked from our `.sh` script. We then pass one more argument, `WORKING_DIRECTORY`, to specify where the listed commands should be run relative to (this is populated by the variable we created earlier referring to the `app` directory, regardless of whether the script is being run using `cmake -P` or whether it is being invoked from a `CMakeLists.txt` file). We can now build our shaders using `cmake -P path/to/app/cmake/compile-shader-macos.cmake` from any folder of our choosing (to understand what else `execute_process` can do, see [`cmake.org/cmake/help/latest/command/execute_process.html`](https://cmake.org/cmake/help/latest/command/execute_process.html)).
 			Before we look at invoking our new scripts from `CMakeLists.txt` as part of the main build, there’s a small improvement we can make to our new `compile-shader-macos.cmake` file. Up until now, we’ve been passing the `--verbose` flag to the *bgfx* `shaderc` program to show the full output of compiling our shaders. This can sometimes be useful, but it’s unlikely that we want to see this as part of the main build every time we either configure or build using CMake. Even with the `--verbose` argument removed, the output is still generated when invoking `shaderc`, which, in the default case, we might want to hide.
 			To work around this, let’s introduce a new CMake variable called `USE_VERBOSE_SHADER_OUTPUT` to our `compile-shader-<platform>.cmake` scripts. This will default to `OFF` and will control two internal CMake variables. The first is `VERBOSE_SHADER_OUTPUT`, which will substitute the direct reference to `--verbose`:
 
@@ -564,7 +562,7 @@ WORKING_DIRECTORY ${COMPILE_SHADER_WORKING_DIR})
 
 ```
 
-cmake --verbose，shaderc仍然会将一些信息输出到终端，这可能会干扰正常的CMake构建输出。为了隐藏这些信息，我们可以引入另一个CMake变量叫做QUIET_SHADER_OUTPUT，然后将其设置为ERROR_QUIET（或在Linux上设置为OUTPUT_QUIET）以抑制`execute_process`命令的所有输出（OUTPUT_QUIET和ERROR_QUIET分别对应标准输出和标准错误输出，例如C语言中的`fprintf`，`stdout`和`stderr`，以及C++中的`std::cout`和`std::cerr`）。
+cmake --verbose，shaderc 仍然会将一些信息输出到终端，这可能会干扰正常的 CMake 构建输出。为了隐藏这些信息，我们可以引入另一个 CMake 变量叫做 QUIET_SHADER_OUTPUT，然后将其设置为 ERROR_QUIET（或在 Linux 上设置为 OUTPUT_QUIET）以抑制`execute_process`命令的所有输出（OUTPUT_QUIET 和 ERROR_QUIET 分别对应标准输出和标准错误输出，例如 C 语言中的`fprintf`，`stdout`和`stderr`，以及 C++中的`std::cout`和`std::cerr`）。
 
             我们的最终代码如下：
 
@@ -584,7 +582,7 @@ execute_process(
 
             这意味着我们目前无法拥有非详细输出；要么全开，要么全关，但这通常足以满足我们调用这些脚本的需求。所有`compile-shader-<platform>.cmake`文件中的变化几乎是相同的，现在我们已经准备好查看如何从我们应用的`CMakeLists.txt`文件中调用这些脚本。
 
-            从CMakeLists.txt调用CMake脚本
+            从 CMakeLists.txt 调用 CMake 脚本
 
             我们的脚本现在可以从`CMakeLists.txt`文件中调用。首先，我们需要根据构建的平台引用正确的文件。我们可以通过简单的条件检查来实现：
 
@@ -617,9 +615,9 @@ else()
 endif()
 ```
 
-            当CMake脚本作为`CMakeLists.txt`文件的一部分被调用时，`CMAKE_SCRIPT_MODE_FILE`不会被设置（也叫填充），而`CMAKE_PARENT_LIST_FILE`是包含它的CMake文件的完整路径。通过使用这两个检查，我们可以确保只有在文件以脚本模式运行且未被其他文件包含时，才会执行第一个分支。如果我们知道该文件是从`CMakeLists.txt`文件中调用的，我们可以简单地将`COMPILE_SHADER_WORKING_DIR`设置为`CMAKE_SOURCE_DIR`（它将是包含根`CMakeLists.txt`文件的文件夹），这样一切就会按预期工作。
+            当 CMake 脚本作为`CMakeLists.txt`文件的一部分被调用时，`CMAKE_SCRIPT_MODE_FILE`不会被设置（也叫填充），而`CMAKE_PARENT_LIST_FILE`是包含它的 CMake 文件的完整路径。通过使用这两个检查，我们可以确保只有在文件以脚本模式运行且未被其他文件包含时，才会执行第一个分支。如果我们知道该文件是从`CMakeLists.txt`文件中调用的，我们可以简单地将`COMPILE_SHADER_WORKING_DIR`设置为`CMAKE_SOURCE_DIR`（它将是包含根`CMakeLists.txt`文件的文件夹），这样一切就会按预期工作。
 
-            使用这种方法时，每次配置时都会构建着色器。还有一种替代方法可以代替使用`include`，那就是使用我们之前遇到过的CMake命令`add_custom_command`。通过`add_custom_command`，我们可以指定一个目标和命令执行的时机（在下面的示例中，我们使用`POST_BUILD`在应用程序构建完成后调用该命令）。完整的命令如下：
+            使用这种方法时，每次配置时都会构建着色器。还有一种替代方法可以代替使用`include`，那就是使用我们之前遇到过的 CMake 命令`add_custom_command`。通过`add_custom_command`，我们可以指定一个目标和命令执行的时机（在下面的示例中，我们使用`POST_BUILD`在应用程序构建完成后调用该命令）。完整的命令如下：
 
 ```cpp
 add_custom_command(
@@ -632,7 +630,7 @@ add_custom_command(
 
             这个命令对我们的用户非常方便，并确保在应用程序运行之前先编译着色器。缺点是，目前该命令可能比严格必要时运行得更频繁，如果命令变得更复杂并开始需要更长时间运行，将来可能会成为一个问题。
 
-            还有一个`add_custom_command`的替代版本，它不是接受一个目标（`TARGET`），而是接受一个输出文件（`OUTPUT`）。通过`DEPENDS`参数可以列出依赖项，只有在输出文件需要更新时，命令才会执行。这种方法非常高效，但遗憾的是，设置起来稍微复杂一些，而由于前面的命令执行较快，当前使用的是较简单的版本（要了解更多关于`add_custom_command`的信息，请查看[https://cmake.org/cmake/help/latest/command/add_custom_command.html](https://cmake.org/cmake/help/latest/command/add_custom_command.html)））。
+            还有一个`add_custom_command`的替代版本，它不是接受一个目标（`TARGET`），而是接受一个输出文件（`OUTPUT`）。通过`DEPENDS`参数可以列出依赖项，只有在输出文件需要更新时，命令才会执行。这种方法非常高效，但遗憾的是，设置起来稍微复杂一些，而由于前面的命令执行较快，当前使用的是较简单的版本（要了解更多关于`add_custom_command`的信息，请查看[`cmake.org/cmake/help/latest/command/add_custom_command.html`](https://cmake.org/cmake/help/latest/command/add_custom_command.html)））。
 
             添加新命令后，我们已经拥有了使用一个命令构建整个应用程序和附带资源（着色器）所需的一切。从`ch8/part-3/app`目录下，运行以下命令：
 
@@ -646,7 +644,7 @@ cmake --workflow --preset multi-ninja-super
 ./build/multi-ninja-super/Release/minimal-cmake_game-of-life_window
 ```
 
-            当然，我们也可以像之前一样使用CMake的`--preset`和`--build`参数分别进行配置和构建。不过，利用`--workflow`在这里特别方便。
+            当然，我们也可以像之前一样使用 CMake 的`--preset`和`--build`参数分别进行配置和构建。不过，利用`--workflow`在这里特别方便。
 
             审查`ch8/part-3/app/CMakeLists.txt`和`ch8/part-3/app/cmake/compile-shader-<platform>.cmake`文件，查看上下文中的所有内容。你可能会注意到一个小变化，那就是在每个`compile-shader-<platform>.cmake`文件的顶部，加入了一个简化的检查，以确保它们必须在脚本模式下运行：
 
@@ -663,9 +661,9 @@ endif()
 
             在嵌套文件中设置选项
 
-            我们为简化和精简应用程序构建所采取的步骤已经带来了巨大的变化，并将在未来节省时间和精力。然而，我们在这个过程中不幸失去了一样东西，那就是调整依赖项构建方式的能力。之前，当我们使用`FetchContent`并直接构建依赖项时，我们可以传递各种构建选项来设置是否将特定库构建为静态库或共享库。在[*第7章*](B21152_07.xhtml#_idTextAnchor170)中，*为库添加安装支持*，当我们考虑单独构建库并手动安装时，我们也可以决定如何构建它们。不幸的是，通过使用`ExternalProject_Add`，我们失去了一些灵活性，因为没有额外的支撑框架，无法直接将选项传递给`ExternalProject_Add`命令。
+            我们为简化和精简应用程序构建所采取的步骤已经带来了巨大的变化，并将在未来节省时间和精力。然而，我们在这个过程中不幸失去了一样东西，那就是调整依赖项构建方式的能力。之前，当我们使用`FetchContent`并直接构建依赖项时，我们可以传递各种构建选项来设置是否将特定库构建为静态库或共享库。在*第七章*中，*为库添加安装支持*，当我们考虑单独构建库并手动安装时，我们也可以决定如何构建它们。不幸的是，通过使用`ExternalProject_Add`，我们失去了一些灵活性，因为没有额外的支撑框架，无法直接将选项传递给`ExternalProject_Add`命令。
 
-            幸运的是，失去的灵活性并不难恢复。所需的仅仅是创建我们自己的CMake选项，然后将它们作为`CMAKE_ARGS`参数的一部分转发给内部的`ExternalProject_Add`命令。
+            幸运的是，失去的灵活性并不难恢复。所需的仅仅是创建我们自己的 CMake 选项，然后将它们作为`CMAKE_ARGS`参数的一部分转发给内部的`ExternalProject_Add`命令。
 
             例如，如果我们查看`ch8/part-4/app/third-party/CMakeLists.txt`，我们可以看到在文件顶部，我们添加了两个新选项：
 
@@ -708,7 +706,7 @@ add_custom_command(
 
             请参阅`ch8/part-4/app/CMakeLists.txt`以获取完整示例。
 
-            这种变量传递的需求主要出现在`ExternalProject_Add`中。当使用超级构建时，我们需要记住遵循相同的方法，将选项传递到嵌套的应用程序中。这就是为什么有时使用普通的非超级构建项目会很有用（请参见`ch8/part-4/app/CMakePresets.json`中的`multi-ninja`和`multi-ninja-super` CMake预设作为示例）。配置应用程序的选项数量通常较少，您可以将剩余的、不需要更改的选项直接设置在`ExternalProject_Add`调用中，但有时提供一种更改这些选项的方法会很有用。
+            这种变量传递的需求主要出现在`ExternalProject_Add`中。当使用超级构建时，我们需要记住遵循相同的方法，将选项传递到嵌套的应用程序中。这就是为什么有时使用普通的非超级构建项目会很有用（请参见`ch8/part-4/app/CMakePresets.json`中的`multi-ninja`和`multi-ninja-super` CMake 预设作为示例）。配置应用程序的选项数量通常较少，您可以将剩余的、不需要更改的选项直接设置在`ExternalProject_Add`调用中，但有时提供一种更改这些选项的方法会很有用。
 
             安装应用程序
 
@@ -720,9 +718,9 @@ add_custom_command(
 "CMAKE_INSTALL_PREFIX": "${sourceDir}/install"
 ```
 
-            接下来的一些更改将专门针对`ch8/part-5/app/CMakeLists.txt`。首先，我们需要像为库一样包含`GNUInstallDirs`，以访问标准的CMake安装位置（在这个例子中，我们只关心`CMAKE_INSTALL_BINDIR`）。
+            接下来的一些更改将专门针对`ch8/part-5/app/CMakeLists.txt`。首先，我们需要像为库一样包含`GNUInstallDirs`，以访问标准的 CMake 安装位置（在这个例子中，我们只关心`CMAKE_INSTALL_BINDIR`）。
 
-            我们想要实现的高层目标是拥有一个可重定位的文件夹，包含我们的应用程序可执行文件、需要由应用程序加载的共享库以及运行时所需的资源（我们编译的着色器文件）。我们可以通过以下CMake安装命令来实现这一目标。
+            我们想要实现的高层目标是拥有一个可重定位的文件夹，包含我们的应用程序可执行文件、需要由应用程序加载的共享库以及运行时所需的资源（我们编译的着色器文件）。我们可以通过以下 CMake 安装命令来实现这一目标。
 
             第一个步骤很简单，它将应用程序的可执行文件复制到`install`文件夹：
 
@@ -734,7 +732,7 @@ install(
 
             我们提供目标以复制，并使用`RUNTIME`类型来指代可执行文件，同时指定复制目标路径（这通常是`bin`，并且会相对于我们在`CMakePresets.json`文件中提供的`CMAKE_INSTALL_PREFIX`变量）。
 
-            接下来，我们需要复制应用程序启动时需要加载的共享库文件。由于我们正在开发一个跨平台应用程序，为了简化起见，我们将所有共享库文件（Windows上的`.dll`、macOS上的`.dylib`和Linux上的`.so`）复制到与应用程序相同的文件夹。这与我们之前在Windows上做的非常相似，但现在我们将在所有平台上做同样的事，以保持一致性。复制这些文件的简化安装命令如下所示：
+            接下来，我们需要复制应用程序启动时需要加载的共享库文件。由于我们正在开发一个跨平台应用程序，为了简化起见，我们将所有共享库文件（Windows 上的`.dll`、macOS 上的`.dylib`和 Linux 上的`.so`）复制到与应用程序相同的文件夹。这与我们之前在 Windows 上做的非常相似，但现在我们将在所有平台上做同样的事，以保持一致性。复制这些文件的简化安装命令如下所示：
 
 ```cpp
 install(
@@ -749,7 +747,7 @@ install(
 
 ```cpp
 $<$<STREQUAL:$<TARGET_PROPERTY:minimal-cmake::line,TYPE is equal to SHARED_LIBRARY, then substitute the path to the shared library, otherwise, do nothing (the expression will evaluate to an empty string).
-			Sticking with the dynamic libraries, there’s another minor change we need to make. If you recall [*Chapter 4*](B21152_04.xhtml#_idTextAnchor086), *Creating Libraries for FetchContent*, we discussed the topic of making libraries relocatable on macOS and Linux by changing the `RPATH` variable of the executable. We achieved this by using `set_target_properties` to update the `BUILD_RPATH` property of the executable. To ensure things work correctly for both build and install targets, we need to update this command slightly. The changes are shown here:
+			Sticking with the dynamic libraries, there’s another minor change we need to make. If you recall *Chapter 4*, *Creating Libraries for FetchContent*, we discussed the topic of making libraries relocatable on macOS and Linux by changing the `RPATH` variable of the executable. We achieved this by using `set_target_properties` to update the `BUILD_RPATH` property of the executable. To ensure things work correctly for both build and install targets, we need to update this command slightly. The changes are shown here:
 
 ```
 
@@ -767,7 +765,7 @@ INSTALL_RPATH
 
             现在，通过将共享库分别复制到构建和安装文件夹中，我们实现了构建目标和安装目标之间的相同行为。构建完成后，我们可以安全地移除已安装的依赖项（即在 `app/third-party/install` 中的已安装库文件），并继续运行应用程序（然而，这样会破坏我们重新编译和构建的能力，因为在没有先通过生成新的超级构建或配置并从 `third-party` 文件夹构建的情况下，无法恢复第三方依赖项）。
 
-            `RPATH` 处理是一个复杂的话题，这里提供的解决方案只是处理共享库安装的一种方法。要了解更多内容，请参考 CMake 属性文档页面上的与 `RPATH` 相关的变量（[https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)）以及 CMake 社区 Wiki 上关于 `RPATH` 处理的部分（[https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling)）。
+            `RPATH` 处理是一个复杂的话题，这里提供的解决方案只是处理共享库安装的一种方法。要了解更多内容，请参考 CMake 属性文档页面上的与 `RPATH` 相关的变量（[`cmake.org/cmake/help/latest/manual/cmake-properties.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)）以及 CMake 社区 Wiki 上关于 `RPATH` 处理的部分（[`gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling`](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling)）。
 
             为了确保完全的跨平台兼容性，还需要进行最后一个添加，才能正确处理在 Linux 上为我们的应用程序安装 SDL 2 依赖项。当 SDL 2 在 Linux 上构建时，它会提供作为共享库的一部分的多个文件。这些文件与 `libSDL2-2.0.so.0.3000.2` 相关，但这不是动态链接器查找的文件。`libSDL2-2.0.so.0` 文件是指向 `libSDL2-2.0.so.0.3000.2` 的符号链接，它是动态链接器在查找 SDL 2 库时使用的文件。确保我们安装这两个文件非常重要；否则，应用程序将在运行时找不到共享库。
 
@@ -797,17 +795,17 @@ cmake --build build/multi-ninja-super
 
             当从超级构建目录（`multi-ninja-super`）构建时，由于我们使用`ExternalProject_Add`来包装我们的项目（在`app/third-party/CMakeLists.txt`的末尾为`${CMAKE_PROJECT_NAME}_superbuild`），安装操作会在运行`cmake --build build/multi-ninja-super`时自动发生（就像我们直接从`third-party`文件夹构建第三方依赖一样）。在配置后首次构建时，无需传递`--target install`（尝试传递该参数实际上会导致错误，因为找不到安装目标）。之后的构建或从普通构建文件夹（例如`build/multi-ninja`）构建时，将需要`--target install`参数，因为安装目标将可用。最后，再次运行配置命令（例如`cmake --preset multi-ninja-super`）将重置此行为，以便用于后续的构建。
 
-            如果我们之前使用`--workflow`预设构建了我们的应用程序，我们也可以改用CMake的`--install`命令：
+            如果我们之前使用`--workflow`预设构建了我们的应用程序，我们也可以改用 CMake 的`--install`命令：
 
 ```cpp
 cmake --install build/multi-ninja-super
 ```
 
-            要启动应用程序，安装完成后，切换到`ch8/part-5/app/install/bin`目录并运行`./minimal-cmake_game-of-life_window`。可以自由地探索`ch8/part-5/app`的内容，以查看所有上下文，并通过运行我们到目前为止介绍的不同CMake命令进行实验（从`cmake --preset list`开始，然后运行`cmake --preset <preset>`是一个不错的起点）。还可以尝试将`app/install/bin`文件夹复制或移动到新的位置（或与之匹配的操作系统和架构的计算机上），以验证应用程序是否仍然能够启动并成功运行。
+            要启动应用程序，安装完成后，切换到`ch8/part-5/app/install/bin`目录并运行`./minimal-cmake_game-of-life_window`。可以自由地探索`ch8/part-5/app`的内容，以查看所有上下文，并通过运行我们到目前为止介绍的不同 CMake 命令进行实验（从`cmake --preset list`开始，然后运行`cmake --preset <preset>`是一个不错的起点）。还可以尝试将`app/install/bin`文件夹复制或移动到新的位置（或与之匹配的操作系统和架构的计算机上），以验证应用程序是否仍然能够启动并成功运行。
 
             总结
 
-            是时候再休息一下，让我们所涵盖的内容稍微消化一下了。我们触及了一些高级CMake特性，如果你感到有些头晕也不用担心。你练习和实验这些概念的次数越多，理解会越来越清晰。
+            是时候再休息一下，让我们所涵盖的内容稍微消化一下了。我们触及了一些高级 CMake 特性，如果你感到有些头晕也不用担心。你练习和实验这些概念的次数越多，理解会越来越清晰。
 
             在本章中，我们从手动安装自己的库转向利用`ExternalProject_Add`来自动化安装过程。这大大减少了设置项目时的繁琐步骤，并且是一种适用于未来项目的有用策略。接着，我们查看了为项目设置超级构建的过程，这提供了一种使用单个命令构建所有内容的方式，同时不失去我们所期望的灵活性。这种技术进一步简化了项目配置，是为用户创建应用程序时提供的极好的默认设置。
 

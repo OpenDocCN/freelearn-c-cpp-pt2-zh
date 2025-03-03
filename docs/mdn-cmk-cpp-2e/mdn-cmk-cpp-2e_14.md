@@ -1,6 +1,4 @@
-# 14
-
-# 安装和打包
+# 第十四章：安装和打包
 
 我们的项目已经构建、测试并且文档化完毕。现在，终于到了将其发布给用户的时候。本章主要集中在我们需要采取的最后两步：安装和打包。这些是建立在我们迄今为止所学的所有内容之上的高级技术：管理目标及其依赖关系、临时使用要求、生成器表达式等等。
 
@@ -22,7 +20,7 @@
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中出现的代码文件，网址是[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch14](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch14)。
+你可以在 GitHub 上找到本章中出现的代码文件，网址是[`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch14`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch14)。
 
 为了构建本书中提供的示例，请始终使用推荐的命令：
 
@@ -43,7 +41,7 @@ cmake --install <build tree>
 
 我们如何让项目`A`的目标对使用它的项目`B`可用？通常，我们会使用`find_package()`命令，但这要求创建一个包并将其安装到系统中。虽然有用，但这种方法需要一些工作。有时，我们只需要一种快速构建项目并使其目标可供其他项目使用的方法。
 
-一种节省时间的方法是包含项目`B`中`A`的主列表文件，该文件已经包含了所有目标定义。然而，这个文件也可能包含全局配置、带有副作用的CMake命令、额外的依赖项，甚至可能包含不适合`B`的目标（比如单元测试）。因此，这不是最好的方法。相反，我们可以为使用项目`B`提供一个**目标导出文件**，让它通过`include()`命令来包含：
+一种节省时间的方法是包含项目`B`中`A`的主列表文件，该文件已经包含了所有目标定义。然而，这个文件也可能包含全局配置、带有副作用的 CMake 命令、额外的依赖项，甚至可能包含不适合`B`的目标（比如单元测试）。因此，这不是最好的方法。相反，我们可以为使用项目`B`提供一个**目标导出文件**，让它通过`include()`命令来包含：
 
 ```cpp
 cmake_minimum_required(VERSION 3.26.0)
@@ -66,7 +64,7 @@ export(**TARGETS [target1 [target2 [...]]]**
 
 +   `NAMESPACE`建议用来指示目标是从其他项目导入的。
 
-+   `APPEND`防止CMake在写入前清除文件内容。
++   `APPEND`防止 CMake 在写入前清除文件内容。
 
 +   `EXPORT_LINK_INTERFACE_LIBRARIES`导出目标链接依赖关系（包括导入的和配置特定的变体）。
 
@@ -155,7 +153,7 @@ set_target_properties(Calc::calc PROPERTIES
 
 # 将项目安装到系统中
 
-在*第1章*，*CMake入门*中，我们提到CMake为将构建的项目安装到系统中提供了命令行模式：
+在*第一章*，*CMake 入门*中，我们提到 CMake 为将构建的项目安装到系统中提供了命令行模式：
 
 ```cpp
 cmake --install <dir> [<options>] 
@@ -169,17 +167,17 @@ cmake --install <dir> [<options>]
 
 +   `--default-directory-permissions <permissions>`：设置已安装目录的默认权限（以`<u=rwx,g=rx,o=rx>`格式）。
 
-+   `--install-prefix <prefix>`：指定非默认的安装路径（存储在`CMAKE_INSTALL_PREFIX`变量中）。在类Unix系统上默认为`/usr/local`，在Windows上默认为`c:/Program Files/${PROJECT_NAME}`。在CMake 3.21之前，您必须使用一个不太明确的选项：`--prefix <prefix>`。
++   `--install-prefix <prefix>`：指定非默认的安装路径（存储在`CMAKE_INSTALL_PREFIX`变量中）。在类 Unix 系统上默认为`/usr/local`，在 Windows 上默认为`c:/Program Files/${PROJECT_NAME}`。在 CMake 3.21 之前，您必须使用一个不太明确的选项：`--prefix <prefix>`。
 
 +   `-v, --verbose`：增加输出的详细程度（也可以通过设置`VERBOSE`环境变量实现）。
 
-安装通常涉及将生成的产物和必要的依赖项复制到系统目录中。使用CMake为所有CMake项目引入了一个方便的安装标准，并提供了几个额外的好处：
+安装通常涉及将生成的产物和必要的依赖项复制到系统目录中。使用 CMake 为所有 CMake 项目引入了一个方便的安装标准，并提供了几个额外的好处：
 
-+   它为不同类型的产物提供平台特定的安装路径（遵循*GNU编码标准*）。
++   它为不同类型的产物提供平台特定的安装路径（遵循*GNU 编码标准*）。
 
 +   它通过生成目标导出文件来增强安装过程，允许其他项目直接重用项目的目标。
 
-+   它通过**配置文件**创建可发现的包，包装目标导出文件以及作者定义的特定于包的CMake宏和函数。
++   它通过**配置文件**创建可发现的包，包装目标导出文件以及作者定义的特定于包的 CMake 宏和函数。
 
 这些功能非常强大，因为它们节省了大量时间，并简化了以这种方式准备的项目的使用。执行基本安装的第一步是将构建的产物复制到目标目录。这将引导我们进入`install()`命令及其各种模式：
 
@@ -236,25 +234,25 @@ install(TARGETS <target>... [EXPORT <export-name>]
        [NAMELINK_ONLY|NAMELINK_SKIP] 
 ```
 
-该命令要求每个输出产物块以`<TYPE>`开始（这是唯一必需的元素）。CMake识别几种类型：
+该命令要求每个输出产物块以`<TYPE>`开始（这是唯一必需的元素）。CMake 识别几种类型：
 
-+   `ARCHIVE`：静态库（`.a`）和Windows系统的DLL导入库（`.lib`）。
++   `ARCHIVE`：静态库（`.a`）和 Windows 系统的 DLL 导入库（`.lib`）。
 
-+   `LIBRARY`：共享库（`.so`），但不包括DLL。
++   `LIBRARY`：共享库（`.so`），但不包括 DLL。
 
-+   `RUNTIME`：可执行文件和DLL。
++   `RUNTIME`：可执行文件和 DLL。
 
 +   `OBJECTS`：来自`OBJECT`库的*目标文件*。
 
-+   `FRAMEWORK`：具有`FRAMEWORK`属性设置的静态库和共享库（这将使它们排除在`ARCHIVE`和`LIBRARY`之外）。这是特定于macOS的。
++   `FRAMEWORK`：具有`FRAMEWORK`属性设置的静态库和共享库（这将使它们排除在`ARCHIVE`和`LIBRARY`之外）。这是特定于 macOS 的。
 
 +   `BUNDLE`：标记为`MACOSX_BUNDLE`的可执行文件（也不属于`RUNTIME`）。
 
-+   `FILE_SET <set>`：目标指定的`<set>`文件集中的文件。可以是C++头文件或C++模块头文件（自CMake 3.23起）。
++   `FILE_SET <set>`：目标指定的`<set>`文件集中的文件。可以是 C++头文件或 C++模块头文件（自 CMake 3.23 起）。
 
-+   `PUBLIC_HEADER`，`PRIVATE_HEADER`，`RESOURCE`：在目标属性中指定的文件，名称相同（在Apple平台上，它们应该设置在`FRAMEWORK`或`BUNDLE`目标中）。
++   `PUBLIC_HEADER`，`PRIVATE_HEADER`，`RESOURCE`：在目标属性中指定的文件，名称相同（在 Apple 平台上，它们应该设置在`FRAMEWORK`或`BUNDLE`目标中）。
 
-CMake文档声称，如果你只配置了一种产物类型（例如`LIBRARY`），则仅安装这种类型。对于CMake 3.26.0版本而言，这不准确：所有产物都会像使用默认选项一样安装。可以通过为所有不需要的产物类型指定`<TYPE> EXCLUDE_FROM_ALL`来解决此问题。
+CMake 文档声称，如果你只配置了一种产物类型（例如`LIBRARY`），则仅安装这种类型。对于 CMake 3.26.0 版本而言，这不准确：所有产物都会像使用默认选项一样安装。可以通过为所有不需要的产物类型指定`<TYPE> EXCLUDE_FROM_ALL`来解决此问题。
 
 一个`install(TARGETS)`命令可以包含多个产物配置块。然而，需要注意的是，每次调用时只能指定一种类型。也就是说，如果你想为`Debug`和`Release`配置设置不同的`ARCHIVE`产物目标路径，那么必须分别执行两次`install(TARGETS ... ARCHIVE)`调用。
 
@@ -270,13 +268,13 @@ install(TARGETS executable, static_lib1
 
 ### 利用不同平台的默认安装路径
 
-当CMake安装你的项目文件时，它会将文件复制到系统中的特定目录。不同的文件类型应该放在不同的目录中。该目录由以下公式确定：
+当 CMake 安装你的项目文件时，它会将文件复制到系统中的特定目录。不同的文件类型应该放在不同的目录中。该目录由以下公式确定：
 
 ```cpp
 ${CMAKE_INSTALL_PREFIX} + ${DESTINATION} 
 ```
 
-如前一节所述，你可以显式地提供安装的`DESTINATION`组件，或者让CMake根据产物类型使用内建的默认值：
+如前一节所述，你可以显式地提供安装的`DESTINATION`组件，或者让 CMake 根据产物类型使用内建的默认值：
 
 | **产物类型** | **内建默认值** | **安装目录变量** |
 | --- | --- | --- |
@@ -284,11 +282,11 @@ ${CMAKE_INSTALL_PREFIX} + ${DESTINATION}
 | `LIBRARY``ARCHIVE` | `lib` | `CMAKE_INSTALL_LIBDIR` |
 | `PUBLIC_HEADER``PRIVATE_HEADER``FILE_SET`（`type` `HEADERS`） | `include` | `CMAKE_INSTALL_INCLUDEDIR` |
 
-表14.1：每种产物类型的默认目标路径
+表 14.1：每种产物类型的默认目标路径
 
-虽然默认路径非常有用，但并非总是适用。例如，CMake默认将库的`DESTINATION`设置为`lib`。库的完整路径会被计算为Unix类系统上的`/usr/local/lib`，在Windows上则是类似`C:\Program Files (x86)\<project-name>\lib`的路径。然而，对于支持多架构的Debian来说，这并不理想，因为它需要一个架构特定的路径（例如，`i386-linux-gnu`），当`INSTALL_PREFIX`为`/usr`时。为每个平台确定正确的路径是Unix类系统的常见挑战。为了解决这个问题，可以遵循*GNU编码标准*，相关链接会在本章最后的*进一步阅读*部分提供。
+虽然默认路径非常有用，但并非总是适用。例如，CMake 默认将库的`DESTINATION`设置为`lib`。库的完整路径会被计算为 Unix 类系统上的`/usr/local/lib`，在 Windows 上则是类似`C:\Program Files (x86)\<project-name>\lib`的路径。然而，对于支持多架构的 Debian 来说，这并不理想，因为它需要一个架构特定的路径（例如，`i386-linux-gnu`），当`INSTALL_PREFIX`为`/usr`时。为每个平台确定正确的路径是 Unix 类系统的常见挑战。为了解决这个问题，可以遵循*GNU 编码标准*，相关链接会在本章最后的*进一步阅读*部分提供。
 
-我们可以通过设置`CMAKE_INSTALL_<DIRTYPE>DIR`变量来覆盖每个值的默认目标路径。与其开发算法来检测平台并为安装目录变量分配适当的路径，不如使用CMake的`GNUInstallDirs`工具模块。该模块通过相应地设置安装目录变量来处理大多数平台。只需在任何`install()`命令之前通过`include()`包含该模块，就可以完成配置。
+我们可以通过设置`CMAKE_INSTALL_<DIRTYPE>DIR`变量来覆盖每个值的默认目标路径。与其开发算法来检测平台并为安装目录变量分配适当的路径，不如使用 CMake 的`GNUInstallDirs`工具模块。该模块通过相应地设置安装目录变量来处理大多数平台。只需在任何`install()`命令之前通过`include()`包含该模块，就可以完成配置。
 
 需要自定义配置的用户可以通过命令行参数覆盖安装目录变量，如下所示：
 
@@ -300,7 +298,7 @@ ${CMAKE_INSTALL_PREFIX} + ${DESTINATION}
 
 ### 处理公共头文件
 
-在CMake中管理公共头文件时，最佳实践是将其存储在一个能表示其来源并引入命名空间的目录中，例如`/usr/local/include/calc`。这使得它们可以在C++项目中通过包含指令使用：
+在 CMake 中管理公共头文件时，最佳实践是将其存储在一个能表示其来源并引入命名空间的目录中，例如`/usr/local/include/calc`。这使得它们可以在 C++项目中通过包含指令使用：
 
 ```cpp
 #include <calc/basic.h> 
@@ -308,7 +306,7 @@ ${CMAKE_INSTALL_PREFIX} + ${DESTINATION}
 
 大多数预处理器将尖括号指令解释为请求扫描标准系统目录。我们可以使用`GNUInstallDirs`模块自动填充安装路径中的`DESTINATION`部分，确保头文件最终被放置在`include`目录中。
 
-从CMake 3.23.0开始，我们可以通过`target_sources()`命令和`FILE_SET`关键字显式地添加要安装到适当目标的头文件。这个方法更为推荐，因为它处理了头文件的*重定位*问题。以下是语法：
+从 CMake 3.23.0 开始，我们可以通过`target_sources()`命令和`FILE_SET`关键字显式地添加要安装到适当目标的头文件。这个方法更为推荐，因为它处理了头文件的*重定位*问题。以下是语法：
 
 ```cpp
 target_sources(<target>
@@ -354,7 +352,7 @@ install(TARGETS calc ARCHIVE FILE_SET HEADERS)
 -- Installing: /usr/local/include/calc/basic.h 
 ```
 
-对`FILE_SET HEADERS`关键字的支持是一个相对较新的更新，遗憾的是，并不是所有环境都能提供更新版的CMake**。**
+对`FILE_SET HEADERS`关键字的支持是一个相对较新的更新，遗憾的是，并不是所有环境都能提供更新版的 CMake**。**
 
 如果你使用的版本低于 3.23，你需要在库目标的 `PUBLIC_HEADER` 属性中指定公共头文件（以分号分隔的列表），并手动处理重定位问题（更多信息请参见 *理解可重定位目标的问题* 部分）：
 
@@ -526,9 +524,9 @@ install(DIRECTORY aaa/ DESTINATION /xxx)
 
 +   `FILE_PERMISSIONS`允许我们指定要设置的已安装文件和目录的权限。默认权限为`OWNER_WRITE`、`OWNER_READ`、`GROUP_READ`和`WORLD_READ`。
 
-+   `DIRECTORY_PERMISSIONS`的工作方式与`FILE_PERMISSIONS`相似，但它会为所有用户设置额外的`EXECUTE`权限（因为在类Unix系统中，目录的`EXECUTE`权限表示允许列出其内容）。
++   `DIRECTORY_PERMISSIONS`的工作方式与`FILE_PERMISSIONS`相似，但它会为所有用户设置额外的`EXECUTE`权限（因为在类 Unix 系统中，目录的`EXECUTE`权限表示允许列出其内容）。
 
-请注意，CMake会忽略不支持权限选项的平台上的权限设置。通过在每个过滤表达式后添加`PERMISSIONS`关键字，可以实现更精细的权限控制。通过此方式匹配到的文件或目录将会接收指定的权限。
+请注意，CMake 会忽略不支持权限选项的平台上的权限设置。通过在每个过滤表达式后添加`PERMISSIONS`关键字，可以实现更精细的权限控制。通过此方式匹配到的文件或目录将会接收指定的权限。
 
 让我们来谈谈过滤器或“通配”表达式。它们控制从源目录中安装哪些文件/目录，并遵循以下语法：
 
@@ -627,7 +625,7 @@ install(DIRECTORY etc/ TYPE SYSCONF
 
 ## 在安装过程中调用脚本
 
-如果你曾经在类Unix系统上安装过共享库，你可能记得需要指示动态链接器扫描受信目录并使用`ldconfig`构建缓存（参考*进一步阅读*部分获取相关资料）。为了便于完全自动化的安装，CMake提供了`install(SCRIPT)`和`install(CODE)`模式。以下是完整的语法：
+如果你曾经在类 Unix 系统上安装过共享库，你可能记得需要指示动态链接器扫描受信目录并使用`ldconfig`构建缓存（参考*进一步阅读*部分获取相关资料）。为了便于完全自动化的安装，CMake 提供了`install(SCRIPT)`和`install(CODE)`模式。以下是完整的语法：
 
 ```cpp
 install([[SCRIPT <file>] [CODE <code>]]
@@ -659,7 +657,7 @@ install(TARGETS calc **LIBRARY** FILE_SET HEADERS))
 **endif****()** 
 ```
 
-`if()`条件确保命令适用于操作系统（`ldconfig`不应在Windows或macOS上执行）。提供的代码在CMake中必须是语法有效的（错误只会在安装时显示）。
+`if()`条件确保命令适用于操作系统（`ldconfig`不应在 Windows 或 macOS 上执行）。提供的代码在 CMake 中必须是语法有效的（错误只会在安装时显示）。
 
 运行安装命令后，通过打印缓存的库来确认安装成功：
 
@@ -676,11 +674,11 @@ install(TARGETS calc **LIBRARY** FILE_SET HEADERS))
 
 `SCRIPT`和`CODE`模式都支持生成器表达式，增加了此命令的多功能性。它可以用于多种目的：打印用户消息、验证安装成功、进行广泛的配置、文件签名等。
 
-接下来，我们深入探讨在CMake安装中管理运行时依赖项的方面，这是CMake的最新功能之一。
+接下来，我们深入探讨在 CMake 安装中管理运行时依赖项的方面，这是 CMake 的最新功能之一。
 
 ## 安装运行时依赖项
 
-我们已经涵盖了几乎所有可安装的工件及其相应的命令。接下来要讨论的主题是运行时依赖项。可执行文件和共享库通常依赖于其他库，这些库必须存在于系统中并在程序初始化时动态加载。从版本3.21开始，CMake可以为每个目标构建所需库的列表，并通过引用二进制文件的适当部分在构建时捕获其位置。然后可以使用该列表将这些运行时工件安装到系统中以备将来使用。
+我们已经涵盖了几乎所有可安装的工件及其相应的命令。接下来要讨论的主题是运行时依赖项。可执行文件和共享库通常依赖于其他库，这些库必须存在于系统中并在程序初始化时动态加载。从版本 3.21 开始，CMake 可以为每个目标构建所需库的列表，并通过引用二进制文件的适当部分在构建时捕获其位置。然后可以使用该列表将这些运行时工件安装到系统中以备将来使用。
 
 对于在项目中定义的目标，可以通过两步实现：
 
@@ -704,11 +702,11 @@ RUNTIME_DEPENDENCY_SET <set-name> argument to create a named reference that can 
 
 如果这个功能对你的项目有益，建议查阅`install()`命令的官方文档了解更多信息。
 
-现在我们了解了在系统上安装文件的各种方式，接下来让我们探索如何将它们转换为其他CMake项目可用的本地包。
+现在我们了解了在系统上安装文件的各种方式，接下来让我们探索如何将它们转换为其他 CMake 项目可用的本地包。
 
 # 创建可重用的包
 
-在前面的章节中，我们广泛使用了`find_package()`并观察到了它的便捷性和简单性。为了通过此命令访问我们的项目，我们需要完成几个步骤，以便CMake可以将我们的项目视为一个一致的包：
+在前面的章节中，我们广泛使用了`find_package()`并观察到了它的便捷性和简单性。为了通过此命令访问我们的项目，我们需要完成几个步骤，以便 CMake 可以将我们的项目视为一个一致的包：
 
 1.  使我们的目标可迁移。
 
@@ -734,19 +732,19 @@ set_target_properties(calc PROPERTIES
 ) 
 ```
 
-在这个例子中，我们特地将`include` `directory` 添加到`calc`的`include` `directories`中。由于这是一个相对路径，CMake导出的目标生成过程会自动将该路径与`CMAKE_CURRENT_SOURCE_DIR`变量的内容结合，指向包含此列表文件的目录。
+在这个例子中，我们特地将`include` `directory` 添加到`calc`的`include` `directories`中。由于这是一个相对路径，CMake 导出的目标生成过程会自动将该路径与`CMAKE_CURRENT_SOURCE_DIR`变量的内容结合，指向包含此列表文件的目录。
 
 ```cpp
 include directory path still points to its source tree.
 ```
 
-CMake通过生成器表达式解决了这个*本末倒置*的问题，这些表达式会根据上下文被替换为它们的参数或空字符串：
+CMake 通过生成器表达式解决了这个*本末倒置*的问题，这些表达式会根据上下文被替换为它们的参数或空字符串：
 
 +   `$<BUILD_INTERFACE:...>`：这会在常规构建中评估为‘`...`’参数，但在安装时排除。
 
 +   `$<INSTALL_INTERFACE:...>`：这会在安装时评估为‘`...`’参数，但在常规构建时排除。
 
-+   `$<BUILD_LOCAL_INTERFACE:...>`：当另一个目标在相同的构建系统中使用时，它会评估为‘`...`’参数（此功能在CMake 3.26中新增）。
++   `$<BUILD_LOCAL_INTERFACE:...>`：当另一个目标在相同的构建系统中使用时，它会评估为‘`...`’参数（此功能在 CMake 3.26 中新增）。
 
 这些表达式允许将选择使用哪条路径的决定推迟到后续阶段：构建和安装。以下是如何在实践中使用它们：
 
@@ -966,7 +964,7 @@ configure_package_config_file(<template> <output>
 
 `<template>`文件将与变量进行插值并存储在`<output>`路径中。`INSTALL_DESTINATION`路径用于将存储在`PATH_VARS`中的路径转换为相对于安装目标的路径。`INSTALL_PREFIX`可以作为基本路径提供，表示`INSTALL_DESTINATION`相对于此路径。
 
-`NO_SET_AND_CHECK_MACRO`和`NO_CHECK_REQUIRED_COMPONENTS_MACRO`选项告诉CMake不要将这些宏定义添加到生成的*配置文件*中。让我们在实际中看到这种生成方式，扩展`07-install-export`示例：
+`NO_SET_AND_CHECK_MACRO`和`NO_CHECK_REQUIRED_COMPONENTS_MACRO`选项告诉 CMake 不要将这些宏定义添加到生成的*配置文件*中。让我们在实际中看到这种生成方式，扩展`07-install-export`示例：
 
 **ch14/11-advanced-config/CMakeLists.txt（片段）**
 
@@ -1014,7 +1012,7 @@ check_required_components(Calc)
 
 此模板以`@PACKAGE_INIT@`占位符开始。生成器将用`set_and_check`和`check_required_components`宏的定义填充它。
 
-下一行将`CALC_LIB_DIR`设置为传递给`@PACKAGE_LIB_INSTALL_DIR@`占位符的路径。CMake将使用列表文件中提供的`$LIB_INSTALL_DIR`填充它，但路径是相对于安装路径计算的。随后，该路径将用于`include()`命令来包含*目标导出文件*。最后，`check_required_components()`验证是否已找到使用此包的项目所需的所有组件。即使包没有任何组件，推荐使用此命令，以确保用户仅使用受支持的依赖项。否则，他们可能会错误地认为他们已成功添加了组件（这些组件可能仅存在于包的更新版本中）。
+下一行将`CALC_LIB_DIR`设置为传递给`@PACKAGE_LIB_INSTALL_DIR@`占位符的路径。CMake 将使用列表文件中提供的`$LIB_INSTALL_DIR`填充它，但路径是相对于安装路径计算的。随后，该路径将用于`include()`命令来包含*目标导出文件*。最后，`check_required_components()`验证是否已找到使用此包的项目所需的所有组件。即使包没有任何组件，推荐使用此命令，以确保用户仅使用受支持的依赖项。否则，他们可能会错误地认为他们已成功添加了组件（这些组件可能仅存在于包的更新版本中）。
 
 通过这种方式生成的`CalcConfig.cmake`*配置文件*如下所示：
 
@@ -1040,11 +1038,11 @@ check_required_components(Calc)
 
 以下图示展示了各种包文件之间的关系，帮助更好地理解：
 
-![图11.1 – 高级包的文件结构](img/B19844_14_01.png)
+![图 11.1 – 高级包的文件结构](img/B19844_14_01.png)
 
-图14.1：高级包的文件结构
+图 14.1：高级包的文件结构
 
-包的所有必需的子依赖项也必须在包的配置文件中找到。这可以通过调用`CMakeFindDependencyMacro`帮助器中的`find_dependency()`宏来完成。我们在*第9章*《CMake中的依赖管理》中学习了如何使用它。
+包的所有必需的子依赖项也必须在包的配置文件中找到。这可以通过调用`CMakeFindDependencyMacro`帮助器中的`find_dependency()`宏来完成。我们在*第九章*《CMake 中的依赖管理》中学习了如何使用它。
 
 任何暴露给消费项目的宏或函数定义应当放在一个单独的文件中，该文件通过包的*配置文件*包含。有趣的是，`CMakePackageConfigHelpers`也有助于生成包的版本文件。接下来我们将探讨这一点。
 
@@ -1056,7 +1054,7 @@ check_required_components(Calc)
 find_package(Calc 1.2.3 REQUIRED) 
 ```
 
-CMake将搜索`Calc`的配置文件，并检查是否在同一目录下存在名为`<config-file>-version.cmake`或`<config-file>Version.cmake`的*版本文件*（例如，`CalcConfigVersion.cmake`）。该文件包含版本信息，并指定与其他版本的兼容性。例如，即使你没有安装确切的版本1.2.3，可能会有1.3.5版本，而它被标记为与旧版本兼容。CMake将接受该包，因为它向后兼容。
+CMake 将搜索`Calc`的配置文件，并检查是否在同一目录下存在名为`<config-file>-version.cmake`或`<config-file>Version.cmake`的*版本文件*（例如，`CalcConfigVersion.cmake`）。该文件包含版本信息，并指定与其他版本的兼容性。例如，即使你没有安装确切的版本 1.2.3，可能会有 1.3.5 版本，而它被标记为与旧版本兼容。CMake 将接受该包，因为它向后兼容。
 
 你可以使用`CMakePackageConfigHelpers`工具模块，通过调用`write_basic_package_version_file()`来生成包的*版本文件*：
 
@@ -1069,7 +1067,7 @@ write_basic_package_version_file(
 ) 
 ```
 
-首先，提供生成物件的`<filename>`；确保它遵循之前讨论的命名规则。你可以选择性地传入显式的`VERSION`（采用major.minor.patch格式）。如果未提供，`project()`命令中指定的版本将被使用（如果项目没有指定版本，将会出现错误）。
+首先，提供生成物件的`<filename>`；确保它遵循之前讨论的命名规则。你可以选择性地传入显式的`VERSION`（采用 major.minor.patch 格式）。如果未提供，`project()`命令中指定的版本将被使用（如果项目没有指定版本，将会出现错误）。
 
 `COMPATIBILITY`关键字表示：
 
@@ -1079,7 +1077,7 @@ write_basic_package_version_file(
 
 +   `SameMajorVersion`在第一个组件相同的情况下匹配（忽略`minor`和`patch`）。
 
-+   `AnyNewerVersion`与其名称相反，它匹配任何旧版本（例如，版本1.4.2与`find_package(<package> 1.2.8)`兼容）。
++   `AnyNewerVersion`与其名称相反，它匹配任何旧版本（例如，版本 1.4.2 与`find_package(<package> 1.2.8)`兼容）。
 
 对于依赖架构的包，需要精确的架构匹配。然而，对于与架构无关的包（如仅包含头文件的库或宏包），你可以指定`ARCH_INDEPENDENT`关键字来跳过此检查。
 
@@ -1168,7 +1166,7 @@ install(CODE "MESSAGE(\"Installing 'extra' component\")"
 
 +   `lib`：包含静态库和目标导出文件，默认情况下会安装。
 
-+   `headers`：包含C++头文件，默认情况下也会安装。
++   `headers`：包含 C++头文件，默认情况下也会安装。
 
 +   `extra`：执行一段代码以打印消息，默认情况下不安装。
 
@@ -1182,7 +1180,7 @@ install(CODE "MESSAGE(\"Installing 'extra' component\")"
 
 如果安装的工件没有指定`COMPONENT`关键字，则默认为`Unspecified`，这一点由`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME`变量定义。
 
-由于无法通过cmake命令行列出所有可用组件，彻底记录包的组件对用户非常有帮助。一个`INSTALL`“`README`”文件是存放这些信息的好地方。
+由于无法通过 cmake 命令行列出所有可用组件，彻底记录包的组件对用户非常有帮助。一个`INSTALL`“`README`”文件是存放这些信息的好地方。
 
 如果`cmake`在没有指定组件的情况下使用`--component`参数调用一个不存在的组件，命令将会成功完成，但不会安装任何内容，也不会出现警告或错误。
 
@@ -1192,7 +1190,7 @@ install(CODE "MESSAGE(\"Installing 'extra' component\")"
 
 您的安装目标平台可能使用符号链接来帮助链接器发现当前安装的共享库版本。在创建一个指向`lib<name>.so.1`文件的`lib<name>.so`符号链接后，可以通过将`-l<name>`参数传递给链接器来链接此库。
 
-CMake的`install(TARGETS <target> LIBRARY)`块在需要时处理创建此类符号链接的操作。不过，我们可以决定将该步骤移到另一个`install()`命令中，方法是向该块添加`NAMELINK_SKIP`：
+CMake 的`install(TARGETS <target> LIBRARY)`块在需要时处理创建此类符号链接的操作。不过，我们可以决定将该步骤移到另一个`install()`命令中，方法是向该块添加`NAMELINK_SKIP`：
 
 ```cpp
 install(TARGETS <target> LIBRARY 
@@ -1213,13 +1211,13 @@ install(TARGETS <target> LIBRARY
         COMPONENT cmp NAMELINK_COMPONENT lnk) 
 ```
 
-现在我们已经配置了自动安装，可以使用CMake自带的CPack工具为用户提供预构建的工件。
+现在我们已经配置了自动安装，可以使用 CMake 自带的 CPack 工具为用户提供预构建的工件。
 
-# 使用CPack进行打包
+# 使用 CPack 进行打包
 
-尽管从源代码构建项目有其优点，但它可能耗时且复杂，这对于最终用户尤其是非开发者来说并不理想。一个更方便的分发方式是使用二进制包，其中包含已编译的工件和其他必要的静态文件。CMake支持通过一个名为`cpack`的命令行工具生成这样的包。
+尽管从源代码构建项目有其优点，但它可能耗时且复杂，这对于最终用户尤其是非开发者来说并不理想。一个更方便的分发方式是使用二进制包，其中包含已编译的工件和其他必要的静态文件。CMake 支持通过一个名为`cpack`的命令行工具生成这样的包。
 
-要生成一个软件包，请选择适合目标平台和软件包类型的生成器。不要将软件包生成器与构建系统生成器（如Unix Makefile或Visual Studio）混淆。
+要生成一个软件包，请选择适合目标平台和软件包类型的生成器。不要将软件包生成器与构建系统生成器（如 Unix Makefile 或 Visual Studio）混淆。
 
 以下表格列出了可用的软件包生成器：
 
@@ -1227,24 +1225,24 @@ install(TARGETS <target> LIBRARY
 | --- | --- | --- |
 | Archive | 7Z, 7zip - (`.7z`)TBZ2 (`.tar.bz2`)TGZ (`.tar.gz`)TXZ (`.tar.xz`)TZ (`.tar.Z`)TZST (`.tar.zst`)ZIP (`.zip`) | 跨平台 |
 | Bundle | macOS Bundle (`.bundle`) | macOS |
-| Cygwin | Cygwin软件包 | Cygwin |
-| DEB | Debian软件包（`.deb`） | Linux |
-| External | 第三方打包工具的JSON（`.json`）文件 | 跨平台 |
+| Cygwin | Cygwin 软件包 | Cygwin |
+| DEB | Debian 软件包（`.deb`） | Linux |
+| External | 第三方打包工具的 JSON（`.json`）文件 | 跨平台 |
 | FreeBSD | PKG (`.pkg`) | *BSD, Linux, macOS |
-| IFW | QT安装程序二进制文件 | Linux, Windows, macOS |
+| IFW | QT 安装程序二进制文件 | Linux, Windows, macOS |
 | NSIS | 二进制文件（`.exe`） | Windows |
-| NuGet | NuGet包（`.nupkg`） | Windows |
+| NuGet | NuGet 包（`.nupkg`） | Windows |
 | productbuild | PKG (`.pkg`) | macOS |
 | RPM | RPM (`.rpm`) | Linux |
 | WIX | 微软安装程序（`.msi`） | Windows |
 
-表14.3：可用的软件包生成器
+表 14.3：可用的软件包生成器
 
 这些生成器中的大多数具有广泛的配置。虽然本书的范围不涉及其所有细节，但你可以在*进一步阅读*部分找到更多信息。我们将专注于一个一般的使用案例。
 
-要使用CPack，请使用必要的`install()`命令配置项目的安装，并构建项目。生成的`cmake_install.cmake`文件将在构建目录中，供CPack根据`CPackConfig.cmake`文件准备二进制软件包。虽然你可以手动创建此文件，但在项目的清单文件中使用`include(CPack)`更为简便。它会在构建目录中生成配置，并在需要时提供默认值。
+要使用 CPack，请使用必要的`install()`命令配置项目的安装，并构建项目。生成的`cmake_install.cmake`文件将在构建目录中，供 CPack 根据`CPackConfig.cmake`文件准备二进制软件包。虽然你可以手动创建此文件，但在项目的清单文件中使用`include(CPack)`更为简便。它会在构建目录中生成配置，并在需要时提供默认值。
 
-让我们扩展`13-components`示例，使用CPack：
+让我们扩展`13-components`示例，使用 CPack：
 
 **ch14/14-cpack/CMakeLists.txt（片段）**
 
@@ -1262,7 +1260,7 @@ install(...)
 **include****(CPack)** 
 ```
 
-CPack模块从`project()`命令中提取以下变量：
+CPack 模块从`project()`命令中提取以下变量：
 
 +   `CPACK_PACKAGE_NAME`
 
@@ -1276,7 +1274,7 @@ CPack模块从`project()`命令中提取以下变量：
 $CPACK_PACKAGE_NAME-$CPACK_PACKAGE_VERSION-$CPACK_SYSTEM_NAME 
 ```
 
-在这里，`CPACK_SYSTEM_NAME`是目标操作系统的名称，如`Linux`或`win32`。例如，在Debian上执行ZIP生成器时，CPack将生成一个名为`CPackPackage-1.2.3-Linux.zip`的文件。
+在这里，`CPACK_SYSTEM_NAME`是目标操作系统的名称，如`Linux`或`win32`。例如，在 Debian 上执行 ZIP 生成器时，CPack 将生成一个名为`CPackPackage-1.2.3-Linux.zip`的文件。
 
 要在构建项目后生成软件包，请进入项目的构建目录并运行：
 
@@ -1332,28 +1330,28 @@ cpack -G "ZIP;7Z;DEB" -B packages
 
 # 进一步阅读
 
-+   GNU 目标目录的编码标准：[https://www.gnu.org/prep/standards/html_node/Directory-Variables.html](https://www.gnu.org/prep/standards/html_node/Directory-Variables.html)
++   GNU 目标目录的编码标准：[`www.gnu.org/prep/standards/html_node/Directory-Variables.html`](https://www.gnu.org/prep/standards/html_node/Directory-Variables.html)
 
-+   关于使用 `FILE_SET` 关键字进行新的公共头文件管理的讨论：[https://gitlab.kitware.com/cmake/cmake/-/issues/22468#note_991860](https://gitlab.kitware.com/cmake/cmake/-/issues/22468#note_991860)
++   关于使用 `FILE_SET` 关键字进行新的公共头文件管理的讨论：[`gitlab.kitware.com/cmake/cmake/-/issues/22468#note_991860`](https://gitlab.kitware.com/cmake/cmake/-/issues/22468#note_991860)
 
-+   如何安装共享库：[https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
++   如何安装共享库：[`tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html`](https://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html)
 
-+   创建可重新定位的包：[https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages)
++   创建可重新定位的包：[`cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages`](https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#creating-relocatable-packages)
 
-+   `find_package()`扫描的查找配置文件的路径列表：[https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure](https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure)
++   `find_package()`扫描的查找配置文件的路径列表：[`cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure`](https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure)
 
-+   `CMakePackageConfigHelpers`的完整文档：[https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html)
++   `CMakePackageConfigHelpers`的完整文档：[`cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html`](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html)
 
-+   CPack 包生成器：[https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html](https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html)
++   CPack 包生成器：[`cmake.org/cmake/help/latest/manual/cpack-generators.7.html`](https://cmake.org/cmake/help/latest/manual/cpack-generators.7.html)
 
-+   针对不同平台的首选包生成器：[https://stackoverflow.com/a/46013099](https://stackoverflow.com/a/46013099)
++   针对不同平台的首选包生成器：[`stackoverflow.com/a/46013099`](https://stackoverflow.com/a/46013099)
 
-+   CPack 工具模块文档：[https://cmake.org/cmake/help/latest/module/CPack.html](https://cmake.org/cmake/help/latest/module/CPack.html)
++   CPack 工具模块文档：[`cmake.org/cmake/help/latest/module/CPack.html`](https://cmake.org/cmake/help/latest/module/CPack.html)
 
 # 加入我们的 Discord 社区
 
 加入我们社区的 Discord 频道，与作者及其他读者进行讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

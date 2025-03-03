@@ -1,6 +1,4 @@
-# 3
-
-# 使用 FetchContent 与外部依赖
+# 第三章：使用 FetchContent 与外部依赖
 
 现在我们已经启动并运行了 CMake，值得注意的一个非常有用的功能是 `FetchContent`。`FetchContent` 是 CMake 的一项功能，允许你将外部库（也称为 **依赖**）引入到你的项目中。只需要几行代码，使用起来快速且方便。它确实依赖于依赖库本身也使用 CMake，但好消息是，使用 C 和 C++ 编写的开源软件中有相当一部分使用 CMake 进行构建。即使该依赖库不使用 CMake，添加 CMake 支持通常也非常简单，并且能使使用该库变得更加轻松。
 
@@ -20,13 +18,13 @@
 
 # 技术要求
 
-为了跟上进度，请确保你已满足[*第 1 章*](B21152_01.xhtml#_idTextAnchor019)《入门》中的要求。这些要求包括：
+为了跟上进度，请确保你已满足*第一章*《入门》中的要求。这些要求包括：
 
 +   一台运行最新 **操作系统** (**OS**) 的 Windows、Mac 或 Linux 机器
 
 +   一个可用的 C/C++ 编译器（如果你还没有，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 # 为什么选择 FetchContent
 
@@ -46,11 +44,11 @@
 
 ## 什么时候不应该使用 FetchContent
 
-虽然 `FetchContent` 是一个非常有用的工具，但它并非没有缺点。使用 `FetchContent` 构建时需要注意的主要权衡是，你在构建自己的代码的同时也在构建依赖项。这通常会增加不必要的工作，并且使得在不重新构建依赖项的情况下重新构建代码变得困难（理想情况下，我们希望只构建一次依赖项，然后忘记它们）。对于小型依赖项来说，这不是大问题，但正如我们稍后将看到的，对于较大的依赖项，使用更好的替代方案会更加合适（我们将在 [*第 6 章*](B21152_06.xhtml#_idTextAnchor152) 中详细讨论，*安装依赖项和 ExternalProject_Add*）。
+虽然 `FetchContent` 是一个非常有用的工具，但它并非没有缺点。使用 `FetchContent` 构建时需要注意的主要权衡是，你在构建自己的代码的同时也在构建依赖项。这通常会增加不必要的工作，并且使得在不重新构建依赖项的情况下重新构建代码变得困难（理想情况下，我们希望只构建一次依赖项，然后忘记它们）。对于小型依赖项来说，这不是大问题，但正如我们稍后将看到的，对于较大的依赖项，使用更好的替代方案会更加合适（我们将在 *第六章* 中详细讨论，*安装依赖项和 ExternalProject_Add*）。
 
 使用 `FetchContent` 和 `ExternalProject_Add` 时需要注意的另一个因素是，所引用的依赖项将来可能会变得不可用（例如，某个仓库可能会被删除，或者远程文件可能会被重命名或移动）。这些是我们需要考虑的风险，采取一些措施，比如为公共仓库创建分支或自托管重要文件，可能是值得考虑的。
 
-最后，如果我们想使用的依赖项目前没有 CMake 支持，我们就无法使用 `FetchContent`。对于较小的依赖项，添加 CMake 支持可能不会太困难，但对于较大的依赖项来说，这可能是一个挑战。保持 CMake 支持的持续维护也可能成为一个巨大的开销（在这里，CMake 查找模块可以提供帮助，相关内容请参见 [*第 7 章*](B21152_07.xhtml#_idTextAnchor170)，*为你的库添加安装支持*）。
+最后，如果我们想使用的依赖项目前没有 CMake 支持，我们就无法使用 `FetchContent`。对于较小的依赖项，添加 CMake 支持可能不会太困难，但对于较大的依赖项来说，这可能是一个挑战。保持 CMake 支持的持续维护也可能成为一个巨大的开销（在这里，CMake 查找模块可以提供帮助，相关内容请参见 *第七章*，*为你的库添加安装支持*）。
 
 现在我们已经了解了 `FetchContent` 及其在更大 CMake 环境中的位置，接下来我们可以深入探讨使用它所需的具体命令。
 
@@ -70,7 +68,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib)
 
 我们将要介绍的库是一个跨平台的计时器库，名为 `timer_lib`。`timer_lib` 将允许我们的 `Game of Life` 应用程序独立运行，用户无需按 *Enter* 键来切换到棋盘的下一阶段。
 
-上述代码片段来自书籍 GitHub 仓库中的 `ch3/part-1/CMakeListst.txt`，并且紧接着我们在 [*第二章*](B21152_02.xhtml#_idTextAnchor032) 中回顾的 CMake 命令（见 `ch2/part-3/CMakeLists.txt）`。接下来，我们将逐一讲解每条命令。
+上述代码片段来自书籍 GitHub 仓库中的 `ch3/part-1/CMakeListst.txt`，并且紧接着我们在 *第二章* 中回顾的 CMake 命令（见 `ch2/part-3/CMakeLists.txt）`。接下来，我们将逐一讲解每条命令。
 
 ## 引入其他 CMake 代码
 
@@ -88,7 +86,7 @@ include(FetchContent)
 
 +   Linux: `/opt/cmake-3.28.1-linux-aarch64/share/cmake-3.28/Modules`
 
-上述路径与我们在 [*第一章*](B21152_01.xhtml#_idTextAnchor019) *入门* 中安装 CMake 时的路径相匹配。对于 Windows 和 macOS，路径通常只会根据 CMake 版本有所不同。对于 Linux，路径可能会有所不同，具体取决于 CMake 的安装方式（例如，如果通过 `apt` 等包管理器安装 CMake，安装位置可能是 `/usr/share/cmake-<version>/Modules`）。
+上述路径与我们在 *第一章* *入门* 中安装 CMake 时的路径相匹配。对于 Windows 和 macOS，路径通常只会根据 CMake 版本有所不同。对于 Linux，路径可能会有所不同，具体取决于 CMake 的安装方式（例如，如果通过 `apt` 等包管理器安装 CMake，安装位置可能是 `/usr/share/cmake-<version>/Modules`）。
 
 CMake 知道在 `Modules/` 文件夹中搜索这些默认模块（由 CMake 开发者维护）。也可以使用 `include` 命令来引入我们自己的 CMake 文件。例如，我们可以编写一个简单的 CMake 函数来列出所有 CMake 变量。让我们创建一个新文件 `CMakeHelpers.cmake`，并将该命令作为函数添加进去：
 
@@ -112,7 +110,7 @@ endfunction()
 
 在 `ch3/part-1/CMakeLists.txt` 中，现在我们可以在 `project` 命令之后的任何位置写入 `include(CMakeHelpers.cmake)`，然后在脚本的末尾调用 `list_cmake_variables()`。为了查看所有 CMake 变量在终端中的输出，完成建议的更改后，从 `ch3/part-1` 目录运行 `cmake -B build`（如果你不想自己实现这些更改，可以转到 `ch3/part-2`，那里有一个功能正常的示例）。
 
-该命令的输出非常冗长，默认情况下不建议开启。排序顺序也有些不常见，按区分大小写的顺序排序（大写的`Z`会出现在小写的`a`之前），但偶尔启用这种调试功能可以帮助我们更好地理解CMake在后台执行的内容：
+该命令的输出非常冗长，默认情况下不建议开启。排序顺序也有些不常见，按区分大小写的顺序排序（大写的`Z`会出现在小写的`a`之前），但偶尔启用这种调试功能可以帮助我们更好地理解 CMake 在后台执行的内容：
 
 ```cpp
 ...
@@ -122,7 +120,7 @@ include(CMakeHelpers.cmake)
 list_cmake_variables()
 ```
 
-你可能注意到我们的`include`调用与`FetchContent`的`include`调用之间有一个区别，那就是我们必须指定完整的文件名，包括扩展名（`include(CMakeHelpers.cmake)`而不是`include(CMakeHelpers)`）。这是因为当我们省略`.cmake`扩展名时，CMake并不是在查找文件，而是在查找一个模块。模块与我们的示例文件没有区别，唯一的不同是它可以在`CMAKE_MODULE_PATH`中找到。
+你可能注意到我们的`include`调用与`FetchContent`的`include`调用之间有一个区别，那就是我们必须指定完整的文件名，包括扩展名（`include(CMakeHelpers.cmake)`而不是`include(CMakeHelpers)`）。这是因为当我们省略`.cmake`扩展名时，CMake 并不是在查找文件，而是在查找一个模块。模块与我们的示例文件没有区别，唯一的不同是它可以在`CMAKE_MODULE_PATH`中找到。
 
 为了快速验证这一点，我们可以在调用`include`之前添加以下代码：
 
@@ -132,7 +130,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 前面的命令将包含`CMakeLists.txt`文件的目录添加到`CMAKE_MODULE_PATH`中。现在`include(CMakeHelpers)`可以正常工作了。这不是推荐的做法，而是为了演示没有特殊的语法或命令可以将常规的`.cmake`文件转换为模块。`CMakeHelpers.cmake`只需要通过查找`CMAKE_MODULE_PATH`中的目录来被发现。
 
-要了解更多关于CMake的`include`命令，请参阅[https://cmake.org/cmake/help/latest/command/include.html](https://cmake.org/cmake/help/latest/command/include.html).
+要了解更多关于 CMake 的`include`命令，请参阅[`cmake.org/cmake/help/latest/command/include.html`](https://cmake.org/cmake/help/latest/command/include.html).
 
 # 描述我们的依赖
 
@@ -155,9 +153,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest-distribution, and the targets to depend on are gtest and gtest_main. For our purposes, naming the dependency in the context of our project as GoogleTest is very convenient and helps improve readability.
 			The next argument, `GIT_REPOSITORY`, is where to find and download the code. `GIT_REPOSITORY` is just one choice; there are several including `SVN_REPOSITORY` (Subversion), `HG_REPOSITORY` (Mercurial), and `URL` (ZIP file). For open source projects, Git is by far the most popular, but you have alternatives to Git, including but not limited to the preceding list of options.
 			FetchContent and ExternalProject_Add
-			In this book, we’re explicitly covering `FetchContent` before `ExternalProject_Add` as it’s much easier to get to grips with initially (`ExternalProject_Add` is a useful command we’ll cover in more detail in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and ExternalProject_Add*). Something to be aware of is that internally, `FetchContent` is implemented on top of `ExternalProject_Add`, so a lot of the configuration options are the same between the two. If you’re looking for more details about `FetchContent`, start with [https://cmake.org/cmake/help/latest/module/FetchContent.html](https://cmake.org/cmake/help/latest/module/FetchContent.html), but it can also be helpful to consult [https://cmake.org/cmake/help/latest/module/ExternalProject.html](https://cmake.org/cmake/help/latest/module/ExternalProject.html). This covers details such as download, and directory options shared between both `FetchContent` and `ExternalProject_Add`.
+			In this book, we’re explicitly covering `FetchContent` before `ExternalProject_Add` as it’s much easier to get to grips with initially (`ExternalProject_Add` is a useful command we’ll cover in more detail in *Chapter 6*, *Installing Dependencies and ExternalProject_Add*). Something to be aware of is that internally, `FetchContent` is implemented on top of `ExternalProject_Add`, so a lot of the configuration options are the same between the two. If you’re looking for more details about `FetchContent`, start with [`cmake.org/cmake/help/latest/module/FetchContent.html`](https://cmake.org/cmake/help/latest/module/FetchContent.html), but it can also be helpful to consult [`cmake.org/cmake/help/latest/module/ExternalProject.html`](https://cmake.org/cmake/help/latest/module/ExternalProject.html). This covers details such as download, and directory options shared between both `FetchContent` and `ExternalProject_Add`.
 			Using libraries from GitHub
-			To find the Git repository path referenced in the preceding subsection (where the project is hosted, in this case, GitHub), navigate to the project page ([https://github.com/pr0g/timer_lib](https://github.com/pr0g/timer_lib)), and then click the green **Code** dropdown toward the top right of the page:
+			To find the Git repository path referenced in the preceding subsection (where the project is hosted, in this case, GitHub), navigate to the project page ([`github.com/pr0g/timer_lib`](https://github.com/pr0g/timer_lib)), and then click the green **Code** dropdown toward the top right of the page:
 			![Figure 3.1: GitHub UI for cloning a repository](img/B21152_03_1.jpg)
 
 			Figure 3.1: GitHub UI for cloning a repository
@@ -197,7 +195,7 @@ GIT_REPOSITORY https://github.com/pr0g/timer_lib.git
 
 GIT_TAG 2d7217114f1ab10d9b46a2e7544009867b80b59c)
 
-# 2d72171也可以正常工作
+# 2d72171 也可以正常工作
 
 ```cpp
 
@@ -290,7 +288,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib)
 ```cpp
 
 			When used with a CMake target as shown in the preceding code snippet, `target_link_libraries` is a deceptively powerful command. There is quite a bit going on that CMake is taking care of for us. As the library we’re depending on is using CMake, it has already described what the `include` paths are and where to find the library file itself. This might seem like a small thing, but doing this by hand is a tedious and error-prone process.
-			If we were depending on a library we’d built outside of CMake (without using find modules, a topic covered in [*Chapter 7*](B21152_07.xhtml#_idTextAnchor170), *Adding Install Support for Your Libraries*), we would have to manually specify the include paths, library path, and library in the following manner:
+			If we were depending on a library we’d built outside of CMake (without using find modules, a topic covered in *Chapter 7*, *Adding Install Support for Your Libraries*), we would have to manually specify the include paths, library path, and library in the following manner:
 
 ```
 
@@ -314,13 +312,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib)
 
 ```cpp
 
-			Some details have been omitted in the preceding example, but the sentiment is much the same. If you visit the book’s GitHub repository ([https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)) and navigate to `ch3/part-3`, you can see a full example (both `x86_64` and `arm64` architectures are supported, to override the architecture, set `MC_ARCH` when configuring).
+			Some details have been omitted in the preceding example, but the sentiment is much the same. If you visit the book’s GitHub repository ([`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)) and navigate to `ch3/part-3`, you can see a full example (both `x86_64` and `arm64` architectures are supported, to override the architecture, set `MC_ARCH` when configuring).
 			This approach is sometimes necessary (especially if a library we’re depending on isn’t using CMake and creating a find module file is too much overhead for what’s needed). Building separately and updating all individual library files can be tiresome and does not scale well if you’re using many dependencies and updating them regularly.
 			Another example is also included in `ch3/part-4`, which shows the use of `add_subdirectory` (it is necessary to navigate to `ch3/part-4/third-party` and run `git clone https://github.com/pr0g/timer_lib.git` to download the library before configuring the project from `ch3/part-4`; see `ch3/part-4/README.md` for details). This has the advantage of relying on the CMake target again (so we get all the `include` directories and library paths for free), but it suffers from the problem mentioned at the start of the chapter, where code from other projects can get mixed up in our source tree.
 			We’ll stick with the `FetchContent` approach for the rest of this chapter, and with `timer_lib` now added to `target_link_libraries`, we’re ready to start using the dependency in our project.
 			Setting options on dependencies
-			When bringing in dependencies, there are often situations where we want to customize exactly what gets built. One of the most common examples is whether to build unit tests or not. Usually, libraries will provide an option to build the tests, with the default set to either `on` or `off` (this is something we’ll cover in more detail in [*Chapter 4*](B21152_04.xhtml#_idTextAnchor086), *Creating Libraries* *for FetchContent*).
-			To understand this in a bit more detail, let’s continue to evolve our sample project, the `Game of Life` implementation introduced in [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello CMake!*.
+			When bringing in dependencies, there are often situations where we want to customize exactly what gets built. One of the most common examples is whether to build unit tests or not. Usually, libraries will provide an option to build the tests, with the default set to either `on` or `off` (this is something we’ll cover in more detail in *Chapter 4*, *Creating Libraries* *for FetchContent*).
+			To understand this in a bit more detail, let’s continue to evolve our sample project, the `Game of Life` implementation introduced in *Chapter 2*, *Hello CMake!*.
 			We are going to bring in another library in addition to `timer_lib` called `as-c-math`. This is a linear algebra math library intended for use in 3D applications and games. It also includes a set of 2D operations, which will help to refine our `Game of` `Life` implementation.
 			To introduce the new library, let’s use the now-familiar `FetchContent_Declare` command to describe where to find it:
 
@@ -340,7 +338,7 @@ GIT_TAG 616fe946956561ef4884fc32c4eec2432fd952c8)
 
 ```
 
-FetchContent_MakeAvailable(timer_lib add_library（我们将在*第4章*，*为 FetchContent 创建库*中进一步了解 add_library），该内容包含我们希望在 target_link_libraries 中链接的目标名称。在这种情况下，它是项目的名称，使用我们在*第2章*，*Hello CMake!*中讨论的相同技术（使用 ${PROJECT_NAME} CMake 变量）。现在让我们添加这个依赖项，以确保我们正确地链接它：
+FetchContent_MakeAvailable(timer_lib add_library（我们将在*第四章*，*为 FetchContent 创建库*中进一步了解 add_library），该内容包含我们希望在 target_link_libraries 中链接的目标名称。在这种情况下，它是项目的名称，使用我们在*第二章*，*Hello CMake!*中讨论的相同技术（使用 ${PROJECT_NAME} CMake 变量）。现在让我们添加这个依赖项，以确保我们正确地链接它：
 
 ```cpp
 target_link_libraries(${PROJECT_NAME} PRIVATE timer_lib ch3/part-5, you can see a version of the project with the changes we have listed. Simply run cmake -B build (with your choice of generator; we’ll stick with Ninja Multi-Config) and then cmake --build build:

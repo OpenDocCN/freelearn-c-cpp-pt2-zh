@@ -1,6 +1,4 @@
-# 2
-
-# Hello, CMake!
+# 第二章：Hello, CMake!
 
 我们现在开始使用 CMake。首先，我们将介绍在终端中频繁使用的命令，然后是我们在 CMake 脚本中编写的命令。我们将通过启动一个*Hello, CMake!* 应用程序（回顾每个人最喜欢的 *Hello, World!* 程序），并用一个最小的 CMake 脚本进行引导，深入探讨我们使用的每个 CMake 命令。很快，这些命令将成为你的第二天性，让你轻松构建代码。
 
@@ -20,13 +18,13 @@ CMake 拥有丰富的功能集，但幸运的是，开始时只需要学习很�
 
 # 技术要求
 
-为了跟上进度，请确保你已满足[*第 1 章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。包括以下内容：
+为了跟上进度，请确保你已满足*第一章*《入门》的要求。包括以下内容：
 
 +   一个具有最新 **操作系统** (**OS**) 的 Windows、Mac 或 Linux 机器
 
 +   一个工作中的 C/C++ 编译器（如果你还没有，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-](https://github.com/PacktPublishing/Minimal-CMake)CMake。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-`](https://github.com/PacktPublishing/Minimal-CMake)CMake。
 
 # 从命令行使用 CMake
 
@@ -60,7 +58,7 @@ git clone https://github.com/PacktPublishing/Minimal-CMake.git .
 
 ## 探索仓库
 
-克隆仓库后，导航到[*第 2 章*](B21152_02.xhtml#_idTextAnchor032)的第一个代码示例：
+克隆仓库后，导航到*第二章*的第一个代码示例：
 
 ```cpp
 cd ch2/part-1
@@ -135,7 +133,7 @@ cmake --build build
 
 如果你知道底层的构建系统是 Make，你可以选择运行 `make -C build`，它的效果与 `cmake --build build` 相同。不幸的是，这并不具有可移植性（如果我们有一个构建脚本，在其他平台上选择了不同的构建系统，它将无法很好地工作）。坚持使用 CMake 命令可以保持一致的抽象层次，避免将来与特定的构建系统耦合。
 
-Windows 上的情况略有不同，现在值得讨论。`cmake -B build` 和 `cmake --build build` 仍然会为我们生成构建文件并构建我们的代码，但底层的构建系统会有所不同。在 Windows 上，尤其是如果你按照 [*第一章*](B21152_01.xhtml#_idTextAnchor019) 中的步骤，*入门*，生成的可能是 Visual Studio/MSBuild 项目文件，并且这些文件随后会被构建。
+Windows 上的情况略有不同，现在值得讨论。`cmake -B build` 和 `cmake --build build` 仍然会为我们生成构建文件并构建我们的代码，但底层的构建系统会有所不同。在 Windows 上，尤其是如果你按照 *第一章* 中的步骤，*入门*，生成的可能是 Visual Studio/MSBuild 项目文件，并且这些文件随后会被构建。
 
 在 Windows 和 macOS/Linux 之间切换时的一个障碍是这两个独立的构建系统（Make 和 Visual Studio）具有稍微不同的行为（这是一种不幸的巧合）。Make 被称为**单配置**，而 Visual Studio 是**多配置**。我们尚未涉及配置的概念，但让我们先看看它们之间的可观察差异。
 
@@ -263,7 +261,7 @@ CMake is pretending there is a "project(Project)" command on the first line.
 
 +   `HOMEPAGE_URL`
 
-这些选项的有用性可能因项目而异。对于小型本地项目，它们可能过于复杂，但如果一个项目开始获得关注并被更广泛使用，那么添加这些选项对于新用户可能是有帮助的。如需了解更多关于 CMake `project` 命令的信息，请参阅 [https://cmake.org/cmake/help/latest/command/project.html#options](https://cmake.org/cmake/help/latest/command/project.html#options)。
+这些选项的有用性可能因项目而异。对于小型本地项目，它们可能过于复杂，但如果一个项目开始获得关注并被更广泛使用，那么添加这些选项对于新用户可能是有帮助的。如需了解更多关于 CMake `project` 命令的信息，请参阅 [`cmake.org/cmake/help/latest/command/project.html#options`](https://cmake.org/cmake/help/latest/command/project.html#options)。
 
 ## 声明应用程序
 
@@ -285,7 +283,7 @@ add_executable(${PROJECT_NAME})
 
 +   为什么我们需要在 `PROJECT_NAME` 周围使用 `${}`？
 
-第一个问题的答案可以通过访问 [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) 来解决。这个页面是一个有用的资源，列出了所有当前的 CMake 变量。如果我们向下滚动页面，我们会找到 **PROJECT_NAME** ([https://cmake.org/cmake/help/latest/variable/PROJECT_NAME.html](https://cmake.org/cmake/help/latest/variable/PROJECT_NAME.html))，并看到如下描述：
+第一个问题的答案可以通过访问 [`cmake.org/cmake/help/latest/manual/cmake-variables.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) 来解决。这个页面是一个有用的资源，列出了所有当前的 CMake 变量。如果我们向下滚动页面，我们会找到 **PROJECT_NAME** ([`cmake.org/cmake/help/latest/variable/PROJECT_NAME.html`](https://cmake.org/cmake/help/latest/variable/PROJECT_NAME.html))，并看到如下描述：
 
 这是当前目录范围或更高范围内最近调用的 `project()` 命令所赋予的名称。
 
@@ -321,7 +319,7 @@ target_sources(${PROJECT_NAME} PRIVATE main.c)
 target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)
 ```
 
-我们的 `CMakeLists.txt` 文件中的最后一条命令是 `target_compile_features`。这是指定我们希望使用的语言版本的便捷方法，在本例中为 `C17`。我们也可以更精细地选择特定的语言特性（例如，`c_restrict`），但选择语言版本更加清晰简洁。你可以在这里查看 C 语言的可用模式和特性：[https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html)
+我们的 `CMakeLists.txt` 文件中的最后一条命令是 `target_compile_features`。这是指定我们希望使用的语言版本的便捷方法，在本例中为 `C17`。我们也可以更精细地选择特定的语言特性（例如，`c_restrict`），但选择语言版本更加清晰简洁。你可以在这里查看 C 语言的可用模式和特性：[`cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html`](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_C_KNOWN_FEATURES.html)
 
 我们也可以选择另一种方式，使用 `set(CMAKE_C_STANDARD 17)`。这会在整个项目中应用此设置。我们可能希望这种行为，但在我们的情况下，我们坚持采用更具目标导向的方法，因此只有 `minimal-cmake` 目标会受到影响。
 
@@ -329,7 +327,7 @@ target_compile_features(${PROJECT_NAME} PRIVATE c_std_17)
 
 # CMake 生成器
 
-在 *调用 CMake* 部分，我们略过了运行 `cmake -B build` 时发生了什么。当我们运行 `cmake -B build` 时，我们要求 CMake 为我们生成构建文件，但到底是什么构建文件呢？CMake 会尽力选择平台的默认值；在 Windows 上是 Visual Studio，而在 macOS 和 Linux 上是 Make。所有潜在生成器的列表可以通过访问 [https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) 或运行 `cmake --help` 命令找到（默认生成器会用星号标出）。如果你不确定正在使用哪个生成器，可以打开 `build/` 文件夹中的 `CMakeCache.txt` 文件并搜索 `CMAKE_GENERATOR`。你应该能找到类似下面的行：
+在 *调用 CMake* 部分，我们略过了运行 `cmake -B build` 时发生了什么。当我们运行 `cmake -B build` 时，我们要求 CMake 为我们生成构建文件，但到底是什么构建文件呢？CMake 会尽力选择平台的默认值；在 Windows 上是 Visual Studio，而在 macOS 和 Linux 上是 Make。所有潜在生成器的列表可以通过访问 [`cmake.org/cmake/help/latest/manual/cmake-generators.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html) 或运行 `cmake --help` 命令找到（默认生成器会用星号标出）。如果你不确定正在使用哪个生成器，可以打开 `build/` 文件夹中的 `CMakeCache.txt` 文件并搜索 `CMAKE_GENERATOR`。你应该能找到类似下面的行：
 
 ```cpp
 INTERNAL, so we shouldn’t depend on this in our scripts, but as a debugging aid it’s sometimes useful to check.
@@ -342,8 +340,8 @@ cmake -B build -G Ninja
 
 ```cpp
 
-			Here, we’ve referenced the Ninja build system generator ([https://ninja-build.org/](https://ninja-build.org/)), a build tool designed to run builds as fast as possible. Unfortunately, if we try and run this command on macOS or Linux, we’ll get an error as we currently do not have Ninja installed (fortunately on Windows, Ninja comes bundled with Visual Studio, and if we’re using the Developer Command Prompt or have run `VsDevCmd.bat`, we’ll have it in our path).
-			Ninja can be downloaded from GitHub ([https://github.com/ninja-build/ninja/releases](https://github.com/ninja-build/ninja/releases)), and once the executable is on your machine, you can add it to your `PATH` or move it to an appropriate folder such as `/usr/local/bin` or `/opt/bin`.
+			Here, we’ve referenced the Ninja build system generator ([`ninja-build.org/`](https://ninja-build.org/)), a build tool designed to run builds as fast as possible. Unfortunately, if we try and run this command on macOS or Linux, we’ll get an error as we currently do not have Ninja installed (fortunately on Windows, Ninja comes bundled with Visual Studio, and if we’re using the Developer Command Prompt or have run `VsDevCmd.bat`, we’ll have it in our path).
+			Ninja can be downloaded from GitHub ([`github.com/ninja-build/ninja/releases`](https://github.com/ninja-build/ninja/releases)), and once the executable is on your machine, you can add it to your `PATH` or move it to an appropriate folder such as `/usr/local/bin` or `/opt/bin`.
 			Security settings for macOS
 			On macOS, you may need to open **System Settings** and navigate to **Privacy and Security** to allow Ninja to run because it is not from an identified developer.
 			It may also be easier to acquire Ninja through a package manager, particularly on Linux (e.g., `apt-get` `install ninja-build`).
@@ -435,14 +433,14 @@ cmake --build build --config Release
 ```cpp
 
 			Press *Enter* on your keyboard and you’ll see the pattern denoted by the `@` symbols update (hitting *Enter* repeatedly will cause the scene to keep updating).
-			What you are seeing is an incredibly simple implementation of John Horton Conway’s *Game of Life*. *Game of Life* is an example of cellular automaton. Conway’s *Game of Life* is represented as a grid, with each cell in either an on or off state. A set of rules is processed for each update to decide which cells turn on, which turn off, and which stay the same. The topic is vast; if you would like to learn more about it, please check out the Wikipedia pages about both Conway’s *Game of Life* ([https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)) and cellular automaton more generally ([https://en.wikipedia.org/wiki/Cellular_automaton](https://en.wikipedia.org/wiki/Cellular_automaton)).
+			What you are seeing is an incredibly simple implementation of John Horton Conway’s *Game of Life*. *Game of Life* is an example of cellular automaton. Conway’s *Game of Life* is represented as a grid, with each cell in either an on or off state. A set of rules is processed for each update to decide which cells turn on, which turn off, and which stay the same. The topic is vast; if you would like to learn more about it, please check out the Wikipedia pages about both Conway’s *Game of Life* ([`en.wikipedia.org/wiki/Conway%27s_Game_of_Life`](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)) and cellular automaton more generally ([`en.wikipedia.org/wiki/Cellular_automaton`](https://en.wikipedia.org/wiki/Cellular_automaton)).
 			For our purposes, we’d just like something interesting to look at so we can start to evolve it over time. The implementation is written in C and the `CMakeLists.txt` file differs from the first one we looked at by only the name (the *Game of Life* implementation lives in `main.c`).
-			In the book’s repository (available from [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)), every `ch<n>/part-<n>` section in each chapter builds on the last in some small way. To help make sense of these incremental changes, see the following callout about using Visual Studio Code to make visualizing these differences easier.
+			In the book’s repository (available from [`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)), every `ch<n>/part-<n>` section in each chapter builds on the last in some small way. To help make sense of these incremental changes, see the following callout about using Visual Studio Code to make visualizing these differences easier.
 			Visual Studio Code compare
 			A useful feature in Visual Studio Code is the `code .` from your terminal will help with this, so all related files can be easily accessed). It’s then simple to highlight what has changed between versions of our `CMakeLists.txt` files without needing to switch back and forth between them. Focusing on the changes instead of reviewing an entire file, which may be very similar to the previous one, is an efficient strategy.
 			Don’t worry too much about the code. It’s not super important how it works; what is important is how CMake can start to help us organize and enhance our application.
 			Adding another file
-			Before we wrap up, let’s make one small addition to our application. We’d like to improve the performance of our update logic in our current implementation of *Game of Life*. One subtlety of implementing *Game of Life* is we can’t change the board we’re reading from at the same time. If we do, then the cells from the row we’re on will have changed from their earlier state by the time we get to the next row, which will mean the simulation won’t run correctly. In the implementation in `ch2/part2` (a reminder to refer to [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake) to find this), we simply make a copy of the whole board, read from that in `update_board` (see line 72 in `ch2/part-2/main.c`) and write back to the original board. This is okay, but if most cells don’t change, it’s wasteful. A better approach is to record the cells that change, and then write back to the original board at the end. By doing this, we only need to allocate memory for cells that change instead of the whole board.
+			Before we wrap up, let’s make one small addition to our application. We’d like to improve the performance of our update logic in our current implementation of *Game of Life*. One subtlety of implementing *Game of Life* is we can’t change the board we’re reading from at the same time. If we do, then the cells from the row we’re on will have changed from their earlier state by the time we get to the next row, which will mean the simulation won’t run correctly. In the implementation in `ch2/part2` (a reminder to refer to [`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake) to find this), we simply make a copy of the whole board, read from that in `update_board` (see line 72 in `ch2/part-2/main.c`) and write back to the original board. This is okay, but if most cells don’t change, it’s wasteful. A better approach is to record the cells that change, and then write back to the original board at the end. By doing this, we only need to allocate memory for cells that change instead of the whole board.
 			Adding a dynamic array
 			Let’s add a simple data structure to make this possible. C unfortunately doesn’t have a built-in dynamic array, which would be particularly useful in this case, so let’s add one.
 			Moving to `ch2/part3` from the book’s GitHub repository, there are two new files, `array.h` and `array.c`. To keep them grouped logically together, they’ve been added to a folder called `array`. The interface provided by `array.h` is like that of `std::vector` from C++. It’s a little trickier to use as C doesn’t support generics/templates, but for our purposes, it’ll be a huge help.
@@ -488,20 +486,20 @@ target_sources(foobar PRIVATE ${sources})
 
             在 target_sources 中引用接口文件
 
-            最后一个值得提及的点是`array.h`怎么办？由于我们在`main.c`中相对引用了这个文件（使用`#include "array/array.h"`而不是`#include <array/array.h>`），我们不需要在`CMakeLists.txt`文件中明确提到任何包含目录（当我们涉及到库时，这一点会更重要）。如果你使用的是一种生成工具，能够生成一个可以在独立工具中打开的项目或解决方案（例如集成开发环境，如Visual Studio或Xcode），那么你可以像下面这样将`array.h`添加到`target_sources`中：
+            最后一个值得提及的点是`array.h`怎么办？由于我们在`main.c`中相对引用了这个文件（使用`#include "array/array.h"`而不是`#include <array/array.h>`），我们不需要在`CMakeLists.txt`文件中明确提到任何包含目录（当我们涉及到库时，这一点会更重要）。如果你使用的是一种生成工具，能够生成一个可以在独立工具中打开的项目或解决方案（例如集成开发环境，如 Visual Studio 或 Xcode），那么你可以像下面这样将`array.h`添加到`target_sources`中：
 
 ```cpp
 target_sources(
   ${PROJECT_NAME} PRIVATE main.c array/array.h array/array.c)
 ```
 
-            这样，它会出现在项目视图中，这对于维护可能很有用；不过，它并不是构建代码所必需的。由于我们在大多数示例中将使用Visual Studio Code和文件夹项目视图，为了简洁起见，我们会省略头文件。指定头文件还有一个好处，那就是如果文件被意外删除，或者无法从源控制中获取，CMake会在配置步骤中提前失败，而不是在构建时。增加的维护成本可能是值得的，特别是在团队较大的情况下。
+            这样，它会出现在项目视图中，这对于维护可能很有用；不过，它并不是构建代码所必需的。由于我们在大多数示例中将使用 Visual Studio Code 和文件夹项目视图，为了简洁起见，我们会省略头文件。指定头文件还有一个好处，那就是如果文件被意外删除，或者无法从源控制中获取，CMake 会在配置步骤中提前失败，而不是在构建时。增加的维护成本可能是值得的，特别是在团队较大的情况下。
 
             总结
 
-            非常棒，你已经走到了这一步；我们已经覆盖了很多内容！我们从熟悉如何通过终端使用CMake开始（`cmake -B build`和`cmake --build build`应该已经深深记在你的脑海中了）。接着，我们通过一个简单的`CMakeLists.txt`文件，检查了最重要的命令以及它们为何需要。然后，我们深入探讨了生成器，研究了单配置生成器和多配置生成器之间的一些差异，以及如何在每种情况下指定构建类型。最后，我们看了我们项目的种子，康威的*生命游戏*实现，并了解了如何在扩展功能时，逐步向现有项目中添加更多文件。
+            非常棒，你已经走到了这一步；我们已经覆盖了很多内容！我们从熟悉如何通过终端使用 CMake 开始（`cmake -B build`和`cmake --build build`应该已经深深记在你的脑海中了）。接着，我们通过一个简单的`CMakeLists.txt`文件，检查了最重要的命令以及它们为何需要。然后，我们深入探讨了生成器，研究了单配置生成器和多配置生成器之间的一些差异，以及如何在每种情况下指定构建类型。最后，我们看了我们项目的种子，康威的*生命游戏*实现，并了解了如何在扩展功能时，逐步向现有项目中添加更多文件。
 
-            在下一章中，我们将探讨如何将外部依赖项引入我们的项目。这将使我们能够增强和改善应用程序的功能以及代码的可维护性。这正是CMake的强大之处，它帮助我们集成现有的库，而无需从头开始实现一切。
+            在下一章中，我们将探讨如何将外部依赖项引入我们的项目。这将使我们能够增强和改善应用程序的功能以及代码的可维护性。这正是 CMake 的强大之处，它帮助我们集成现有的库，而无需从头开始实现一切。
 
 ```cpp
 

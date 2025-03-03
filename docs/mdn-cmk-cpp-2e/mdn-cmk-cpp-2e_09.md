@@ -1,14 +1,12 @@
-# 9
+# 第九章：在 CMake 中管理依赖项
 
-# 在CMake中管理依赖项
+解决方案的大小无关紧要；随着项目的增长，你很可能会选择依赖其他项目。避免创建和维护模板代码的工作至关重要，这样可以腾出时间专注于真正重要的事情：业务逻辑。外部依赖有多种用途。它们提供框架和功能，解决复杂问题，并在构建和确保代码质量方面发挥关键作用。这些依赖项可以有所不同，从像**Protocol Buffers**（**Protobuf**）这样的专用编译器到像 Google Test 这样的测试框架。
 
-解决方案的大小无关紧要；随着项目的增长，你很可能会选择依赖其他项目。避免创建和维护模板代码的工作至关重要，这样可以腾出时间专注于真正重要的事情：业务逻辑。外部依赖有多种用途。它们提供框架和功能，解决复杂问题，并在构建和确保代码质量方面发挥关键作用。这些依赖项可以有所不同，从像**Protocol Buffers**（**Protobuf**）这样的专用编译器到像Google Test这样的测试框架。
+在处理开源项目或内部代码时，高效管理外部依赖项至关重要。手动进行这些管理将需要大量的设置时间和持续的支持。幸运的是，CMake 在处理各种依赖管理方法方面表现出色，同时能够保持与行业标准的同步。
 
-在处理开源项目或内部代码时，高效管理外部依赖项至关重要。手动进行这些管理将需要大量的设置时间和持续的支持。幸运的是，CMake在处理各种依赖管理方法方面表现出色，同时能够保持与行业标准的同步。
+我们将首先学习如何识别和利用主机系统上已有的依赖项，从而避免不必要的下载和延长的编译时间。这项任务相对简单，因为许多包要么与 CMake 兼容，要么 CMake 自带对其的支持。我们还将探索如何指示 CMake 查找并包含那些没有本地支持的依赖项。对于旧版包，某些情况下采用替代方法可能会更有效：我们可以使用曾经流行的 `pkg-config` 工具来处理更繁琐的任务。
 
-我们将首先学习如何识别和利用主机系统上已有的依赖项，从而避免不必要的下载和延长的编译时间。这项任务相对简单，因为许多包要么与CMake兼容，要么CMake自带对其的支持。我们还将探索如何指示CMake查找并包含那些没有本地支持的依赖项。对于旧版包，某些情况下采用替代方法可能会更有效：我们可以使用曾经流行的 `pkg-config` 工具来处理更繁琐的任务。
-
-此外，我们将深入探讨如何管理尚未安装在系统上的在线可用依赖项。我们将研究如何从HTTP服务器、Git和其他类型的仓库中获取这些依赖项。我们还将讨论如何选择最佳方法：首先在系统内搜索，如果未找到包，则转而获取。最后，我们将回顾一种较旧的技术，用于下载外部项目，这在某些特殊情况下可能仍然适用。
+此外，我们将深入探讨如何管理尚未安装在系统上的在线可用依赖项。我们将研究如何从 HTTP 服务器、Git 和其他类型的仓库中获取这些依赖项。我们还将讨论如何选择最佳方法：首先在系统内搜索，如果未找到包，则转而获取。最后，我们将回顾一种较旧的技术，用于下载外部项目，这在某些特殊情况下可能仍然适用。
 
 在本章中，我们将涵盖以下主要内容：
 
@@ -18,7 +16,7 @@
 
 # 技术要求
 
-你可以在GitHub上找到本章中的代码文件，链接为 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09)。
+你可以在 GitHub 上找到本章中的代码文件，链接为 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch09)。
 
 要构建本书中提供的示例，始终使用推荐的命令：
 
@@ -49,7 +47,7 @@ cmake --build <build tree>
 
 要执行这个示例，我们必须安装我们想使用的依赖项，因为`find_package()`命令只会查找已经安装在系统中的包。它假设你已经安装了所有必要的包，或者用户知道如何安装所需的包。如果你想处理其他情况，你需要一个备用计划。你可以在*使用系统中不存在的依赖项*部分找到更多信息。
 
-对于 Protobuf，情况相对简单：你可以从官方仓库（[https://github.com/protocolbuffers/protobuf](https://github.com/protocolbuffers/protobuf)）下载、编译并安装库，或者使用操作系统中的包管理器。如果你按照*第一章：CMake的第一步*中提到的 Docker 镜像进行操作，你的依赖项已经安装好了，你无需做任何事情。然而，如果你想自己尝试安装，Debian Linux 上安装 Protobuf 库和编译器的命令如下：
+对于 Protobuf，情况相对简单：你可以从官方仓库（[`github.com/protocolbuffers/protobuf`](https://github.com/protocolbuffers/protobuf)）下载、编译并安装库，或者使用操作系统中的包管理器。如果你按照*第一章：CMake 的第一步*中提到的 Docker 镜像进行操作，你的依赖项已经安装好了，你无需做任何事情。然而，如果你想自己尝试安装，Debian Linux 上安装 Protobuf 库和编译器的命令如下：
 
 ```cpp
 $ apt update
@@ -58,27 +56,27 @@ $ apt install protobuf-compiler libprotobuf-dev
 
 目前很多项目选择支持 CMake。它们通过创建一个**配置文件**并在安装过程中将其放入合适的系统目录来实现这一点。配置文件是选择支持 CMake 的项目中不可或缺的一部分。
 
-如果你想使用一个没有配置文件的库，别担心。CMake支持一种外部机制来查找此类库，称为**查找模块**。与配置文件不同，查找模块不是它们帮助定位的项目的一部分。实际上，CMake本身通常会为许多流行的库提供这些查找模块。
+如果你想使用一个没有配置文件的库，别担心。CMake 支持一种外部机制来查找此类库，称为**查找模块**。与配置文件不同，查找模块不是它们帮助定位的项目的一部分。实际上，CMake 本身通常会为许多流行的库提供这些查找模块。
 
 如果你卡住了，既没有配置文件也没有查找模块，你还有其他选择：
 
 +   为特定包编写自己的查找模块并将其包含到你的项目中
 
-+   使用FindPkgConfig模块来利用传统的Unix包定义文件
++   使用 FindPkgConfig 模块来利用传统的 Unix 包定义文件
 
 +   编写配置文件并请求包维护者将其包含进来
 
-你可能会认为自己还没准备好创建这样的合并请求。没关系，因为你很可能不需要这么做。CMake自带了超过150个查找模块，可以找到如Boost、bzip2、curl、curses、GIF、GTK、iconv、ImageMagick、JPEG、Lua、OpenGL、OpenSSL、PNG、PostgreSQL、Qt、SDL、Threads、XML-RPC、X11和zlib等库，也包括我们在本例中将使用的Protobuf文件。完整列表可以在CMake文档中找到（请参见*进一步阅读*部分）。
+你可能会认为自己还没准备好创建这样的合并请求。没关系，因为你很可能不需要这么做。CMake 自带了超过 150 个查找模块，可以找到如 Boost、bzip2、curl、curses、GIF、GTK、iconv、ImageMagick、JPEG、Lua、OpenGL、OpenSSL、PNG、PostgreSQL、Qt、SDL、Threads、XML-RPC、X11 和 zlib 等库，也包括我们在本例中将使用的 Protobuf 文件。完整列表可以在 CMake 文档中找到（请参见*进一步阅读*部分）。
 
-CMake的`find_package()`命令可以使用查找模块和配置文件。CMake首先检查其内建的查找模块。如果没有找到需要的模块，它会继续检查不同包提供的配置文件。CMake会扫描通常安装包的路径（取决于操作系统）。它会寻找与这些模式匹配的文件：
+CMake 的`find_package()`命令可以使用查找模块和配置文件。CMake 首先检查其内建的查找模块。如果没有找到需要的模块，它会继续检查不同包提供的配置文件。CMake 会扫描通常安装包的路径（取决于操作系统）。它会寻找与这些模式匹配的文件：
 
 +   `<CamelCasePackageName>Config.cmake`
 
 +   `<kebab-case-package-name>-config.cmake`
 
-如果你想将外部查找模块添加到你的项目中，设置`CMAKE_MODULE_PATH`变量。CMake会首先扫描这个目录。
+如果你想将外部查找模块添加到你的项目中，设置`CMAKE_MODULE_PATH`变量。CMake 会首先扫描这个目录。
 
-回到我们的示例，目标很简单：我想展示我可以构建一个有效使用Protobuf的项目。别担心，你不需要了解Protobuf就能理解发生了什么。简单来说，Protobuf是一个将数据以特定二进制格式保存的库。这使得将C++对象读写到文件或通过网络传输变得容易。为了设置这个，我们使用一个`.proto`文件来给Protobuf定义数据结构：
+回到我们的示例，目标很简单：我想展示我可以构建一个有效使用 Protobuf 的项目。别担心，你不需要了解 Protobuf 就能理解发生了什么。简单来说，Protobuf 是一个将数据以特定二进制格式保存的库。这使得将 C++对象读写到文件或通过网络传输变得容易。为了设置这个，我们使用一个`.proto`文件来给 Protobuf 定义数据结构：
 
 **ch09/01-find-package-variables/message.proto**
 
@@ -89,7 +87,7 @@ message Message {
 } 
 ```
 
-这段代码是一个简单的模式定义，包含了一个32位整数。Protobuf包自带一个二进制文件，该文件会将这些`.proto`文件编译成C++源文件和头文件，我们的应用程序可以使用这些文件。我们需要将这个编译步骤加入到构建过程中，但稍后我们会回到这个话题。现在，让我们看看`main.cpp`文件如何使用Protobuf生成的输出：
+这段代码是一个简单的模式定义，包含了一个 32 位整数。Protobuf 包自带一个二进制文件，该文件会将这些`.proto`文件编译成 C++源文件和头文件，我们的应用程序可以使用这些文件。我们需要将这个编译步骤加入到构建过程中，但稍后我们会回到这个话题。现在，让我们看看`main.cpp`文件如何使用 Protobuf 生成的输出：
 
 **ch09/01-find-package-variables/main.cpp**
 
@@ -184,7 +182,7 @@ target_include_directories(main PRIVATE
 
 看看高亮代码与此示例的前一个版本有何不同：与使用列出文件和目录的变量相比，使用 `IMPORTED` 目标是个好主意。这种方法简化了列表文件。它还自动处理了瞬态使用要求或传递的属性，如这里的 `protobuf::libprotobuf` 目标所示。
 
-如果你想确切知道某个特定的 find 模块提供了什么，最好的资源就是它的在线文档。例如，你可以通过以下链接在 CMake 官方网站上找到 Protobuf 的详细信息：[https://cmake.org/cmake/help/latest/module/FindProtobuf.html](https://cmake.org/cmake/help/latest/module/FindProtobuf.html)。
+如果你想确切知道某个特定的 find 模块提供了什么，最好的资源就是它的在线文档。例如，你可以通过以下链接在 CMake 官方网站上找到 Protobuf 的详细信息：[`cmake.org/cmake/help/latest/module/FindProtobuf.html`](https://cmake.org/cmake/help/latest/module/FindProtobuf.html)。
 
 为了简化示例，本节中的例子将直接在找不到 Protobuf 库时失败。但一个真正稳健的解决方案应该验证 `Protobuf_FOUND` 变量，并为用户提供明确的诊断信息（以便他们可以安装它），或者自动执行安装。我们将在本章稍后学习如何做到这一点。
 
@@ -212,21 +210,21 @@ cmake -B <build tree> -S <source tree> --debug-find-pkg=<pkg>
 
 使用此命令时要小心。确保你准确输入包名，因为它是区分大小写的。
 
-关于`find_package()`命令的更多信息可以在文档页面找到：[https://cmake.org/cmake/help/latest/command/find_package.html](https://cmake.org/cmake/help/latest/command/find_package.html)。
+关于`find_package()`命令的更多信息可以在文档页面找到：[`cmake.org/cmake/help/latest/command/find_package.html`](https://cmake.org/cmake/help/latest/command/find_package.html)。
 
-查找模块是为CMake提供已安装依赖项信息的非常便捷的方式。大多数流行的库都在所有主要平台上得到CMake的广泛支持。但是，当我们想要使用一个还没有专门查找模块的第三方库时，该怎么办呢？
+查找模块是为 CMake 提供已安装依赖项信息的非常便捷的方式。大多数流行的库都在所有主要平台上得到 CMake 的广泛支持。但是，当我们想要使用一个还没有专门查找模块的第三方库时，该怎么办呢？
 
 ### 编写自己的查找模块
 
-在极少数情况下，你想在项目中使用的库没有提供配置文件，并且CMake中也没有现成的查找模块。你可以为该库编写一个自定义的查找模块，并将其随项目一起分发。虽然这种情况并不理想，但为了照顾项目的用户，还是必须这么做。
+在极少数情况下，你想在项目中使用的库没有提供配置文件，并且 CMake 中也没有现成的查找模块。你可以为该库编写一个自定义的查找模块，并将其随项目一起分发。虽然这种情况并不理想，但为了照顾项目的用户，还是必须这么做。
 
-我们可以尝试为`libpqxx`库编写一个自定义的查找模块，`libpqxx`是PostgreSQL数据库的客户端。`libpqxx`已经预安装在本书的Docker镜像中，因此如果你使用的是该镜像，就不必担心。Debian用户可以通过`libpqxx-dev`包安装它（其他操作系统可能需要不同的命令）：
+我们可以尝试为`libpqxx`库编写一个自定义的查找模块，`libpqxx`是 PostgreSQL 数据库的客户端。`libpqxx`已经预安装在本书的 Docker 镜像中，因此如果你使用的是该镜像，就不必担心。Debian 用户可以通过`libpqxx-dev`包安装它（其他操作系统可能需要不同的命令）：
 
 ```cpp
 apt-get install libpqxx-dev 
 ```
 
-我们将首先编写一个名为`FindPQXX.cmake`的新文件，并将其存储在项目源树中的`cmake/module`目录下。为了确保CMake在调用`find_package()`时能够找到这个查找模块，我们将在`CMakeLists.txt`中使用`list(APPEND)`将该路径添加到`CMAKE_MODULE_PATH`变量中。简单提醒一下：CMake会首先检查`CMAKE_MODULE_PATH`中列出的目录，以查找查找模块，然后才会在其他位置进行搜索。你完整的listfile应如下所示：
+我们将首先编写一个名为`FindPQXX.cmake`的新文件，并将其存储在项目源树中的`cmake/module`目录下。为了确保 CMake 在调用`find_package()`时能够找到这个查找模块，我们将在`CMakeLists.txt`中使用`list(APPEND)`将该路径添加到`CMAKE_MODULE_PATH`变量中。简单提醒一下：CMake 会首先检查`CMAKE_MODULE_PATH`中列出的目录，以查找查找模块，然后才会在其他位置进行搜索。你完整的 listfile 应如下所示：
 
 **ch09/03-find-package-custom/CMakeLists.txt**
 
@@ -240,13 +238,13 @@ add_executable(main main.cpp)
 target_link_libraries(main PRIVATE **PQXX::PQXX**) 
 ```
 
-完成这些步骤后，我们将继续编写实际的查找模块。如果`FindPQXX.cmake`文件为空，即使使用`find_package()`并加上`REQUIRED`选项，CMake也不会报错。查找模块的作者需要负责设置正确的变量并遵循最佳实践（例如引发错误）。根据CMake的指南，以下是一些关键点：
+完成这些步骤后，我们将继续编写实际的查找模块。如果`FindPQXX.cmake`文件为空，即使使用`find_package()`并加上`REQUIRED`选项，CMake 也不会报错。查找模块的作者需要负责设置正确的变量并遵循最佳实践（例如引发错误）。根据 CMake 的指南，以下是一些关键点：
 
-+   当调用`find_package(<PKG_NAME> REQUIRED)`时，CMake会将`<PKG_NAME>_FIND_REQUIRED`变量设置为`1`。如果找不到库，查找模块应使用`message(FATAL_ERROR)`。
++   当调用`find_package(<PKG_NAME> REQUIRED)`时，CMake 会将`<PKG_NAME>_FIND_REQUIRED`变量设置为`1`。如果找不到库，查找模块应使用`message(FATAL_ERROR)`。
 
-+   当使用`find_package(<PKG_NAME> QUIET)`时，CMake会将`<PKG_NAME>_FIND_QUIETLY`设置为`1`。此时，查找模块应避免显示任何额外的消息。
++   当使用`find_package(<PKG_NAME> QUIET)`时，CMake 会将`<PKG_NAME>_FIND_QUIETLY`设置为`1`。此时，查找模块应避免显示任何额外的消息。
 
-+   CMake会将`<PKG_NAME>_FIND_VERSION`变量设置为listfiles中指定的版本。如果查找模块无法找到正确的版本，应该触发`FATAL_ERROR`。
++   CMake 会将`<PKG_NAME>_FIND_VERSION`变量设置为 listfiles 中指定的版本。如果查找模块无法找到正确的版本，应该触发`FATAL_ERROR`。
 
 当然，最好遵循上述规则，以确保与其他查找模块的一致性。
 
@@ -254,17 +252,17 @@ target_link_libraries(main PRIVATE **PQXX::PQXX**)
 
 1.  如果库和头文件的路径已经知道（由用户提供或从上次运行的缓存中检索），则使用这些路径创建`IMPORTED`目标。如果完成此操作，您可以停止这里。
 
-1.  如果路径未知，首先找到底层依赖（在本例中是PostgreSQL）的库和头文件。
+1.  如果路径未知，首先找到底层依赖（在本例中是 PostgreSQL）的库和头文件。
 
-1.  接下来，搜索常见路径以查找PostgreSQL客户端库的二进制版本。
+1.  接下来，搜索常见路径以查找 PostgreSQL 客户端库的二进制版本。
 
-1.  同样，扫描已知路径以找到PostgreSQL客户端的`include`头文件。
+1.  同样，扫描已知路径以找到 PostgreSQL 客户端的`include`头文件。
 
 1.  最后，确认是否找到了库和头文件。如果找到了，就创建一个`IMPORTED`目标。
 
 要为`PQXX`创建一个强大的查找模块，让我们专注于几个重要任务。首先，`IMPORTED`目标的创建有两种情况——要么用户指定了库的路径，要么路径是自动检测的。为了保持代码的简洁并避免重复，我们将编写一个函数来管理搜索过程的结果。
 
-#### 定义IMPORTED目标
+#### 定义 IMPORTED 目标
 
 要设置一个`IMPORTED`目标，我们实际上只需要定义一个带有`IMPORTED`关键字的库。这样，我们就可以在调用的`CMakeLists.txt`列表文件中使用`target_link_libraries()`命令。我们需要指定库的类型，为了简化，我们将其标记为`UNKNOWN`。这意味着我们不关心库是静态的还是动态的，我们只需要将一个参数传递给链接器。
 
@@ -272,7 +270,7 @@ target_link_libraries(main PRIVATE **PQXX::PQXX**)
 
 之后，为了提高查找模块的效率，我们将在缓存变量中存储找到的路径。这样，我们在未来的运行中就不需要重复搜索了。值得注意的是，我们在缓存中显式设置了`PQXX_FOUND`，使其全局可访问，并允许用户的`CMakeLists.txt`进行引用。
 
-最后，我们将这些缓存变量标记为`advanced`，在CMake GUI中隐藏它们，除非激活了`advanced`选项。这是一个常见的最佳实践，我们也会采用这种做法。
+最后，我们将这些缓存变量标记为`advanced`，在 CMake GUI 中隐藏它们，除非激活了`advanced`选项。这是一个常见的最佳实践，我们也会采用这种做法。
 
 以下是这些操作的代码示例：
 
@@ -300,7 +298,7 @@ endfunction()
 
 #### 接受用户提供的路径并重用缓存值
 
-让我们处理一下用户将`PQXX`安装在非标准位置，并通过命令行参数`-D`提供所需路径的情况。如果是这样，我们立即调用之前定义的函数，并使用`return()`停止搜索。我们假设用户已提供了库及其依赖项（如PostgreSQL）的准确路径：
+让我们处理一下用户将`PQXX`安装在非标准位置，并通过命令行参数`-D`提供所需路径的情况。如果是这样，我们立即调用之前定义的函数，并使用`return()`停止搜索。我们假设用户已提供了库及其依赖项（如 PostgreSQL）的准确路径：
 
 **ch09/03-find-package-custom/cmake/module/FindPQXX.cmake（续）**
 
@@ -536,7 +534,7 @@ CMake 在管理依赖项方面表现出色，特别是当依赖项尚未安装�
 
 1.  使用`FetchContent_MakeAvailable()`命令完成依赖项设置。这将下载、构建、安装并将列表文件添加到主项目中以供解析。
 
-你可能会想知道为什么*步骤 2*和*步骤 3*是分开的。原因是为了在多层项目中允许**配置覆盖**。例如，考虑一个依赖于外部库A和B的项目。库A也依赖于B，但它的作者使用的是一个较旧版本，这个版本与父项目的版本不同（*图 9.1*）：
+你可能会想知道为什么*步骤 2*和*步骤 3*是分开的。原因是为了在多层项目中允许**配置覆盖**。例如，考虑一个依赖于外部库 A 和 B 的项目。库 A 也依赖于 B，但它的作者使用的是一个较旧版本，这个版本与父项目的版本不同（*图 9.1*）：
 
 ![](img/B19844_09_01.png)
 
@@ -544,7 +542,7 @@ CMake 在管理依赖项方面表现出色，特别是当依赖项尚未安装�
 
 如果配置和下载在同一个命令中进行，父项目将无法使用更新版本，即使它向后兼容，因为依赖已经为旧版本配置了*导入目标*，这会引起库的目标名称和文件的冲突。
 
-为了指定需要的版本，最顶层的项目必须调用`FetchContent_Declare()`命令并提供B的覆盖配置，然后库A才会完全设置。随后在A中调用`FetchContent_Declare()`将被忽略，因为B的依赖已经配置好了。
+为了指定需要的版本，最顶层的项目必须调用`FetchContent_Declare()`命令并提供 B 的覆盖配置，然后库 A 才会完全设置。随后在 A 中调用`FetchContent_Declare()`将被忽略，因为 B 的依赖已经配置好了。
 
 让我们看看`FetchContent_Declare()`命令的签名：
 
@@ -554,13 +552,13 @@ FetchContent_Declare(<depName> <contentOptions>...)
 
 `depName`是依赖项的唯一标识符，稍后将由`FetchContent_MakeAvailable()`命令使用。
 
-`contentOptions`提供了依赖项的详细配置，可能会变得相当复杂。重要的是要意识到，`FetchContent_Declare()`在后台使用的是较老的`ExternalProject_Add()`命令。实际上，许多传递给`FetchContent_Declare`的参数都会直接转发到该内部调用。在详细解释所有参数之前，让我们看看一个实际示例，它从GitHub下载依赖项。
+`contentOptions`提供了依赖项的详细配置，可能会变得相当复杂。重要的是要意识到，`FetchContent_Declare()`在后台使用的是较老的`ExternalProject_Add()`命令。实际上，许多传递给`FetchContent_Declare`的参数都会直接转发到该内部调用。在详细解释所有参数之前，让我们看看一个实际示例，它从 GitHub 下载依赖项。
 
-### 使用YAML读取器的基本示例
+### 使用 YAML 读取器的基本示例
 
-我写了一个小程序，它从YAML文件中读取用户名并在欢迎信息中打印出来。YAML是一个很好的简单格式，可以存储人类可读的配置，但机器解析起来相当复杂。我发现了一个很棒的小项目，解决了这个问题，它叫做`yaml-cpp`，由Jesse Beder开发（[https://github.com/jbeder/yaml-cpp](https://github.com/jbeder/yaml-cpp)）。
+我写了一个小程序，它从 YAML 文件中读取用户名并在欢迎信息中打印出来。YAML 是一个很好的简单格式，可以存储人类可读的配置，但机器解析起来相当复杂。我发现了一个很棒的小项目，解决了这个问题，它叫做`yaml-cpp`，由 Jesse Beder 开发（[`github.com/jbeder/yaml-cpp`](https://github.com/jbeder/yaml-cpp)）。
 
-这个示例相当直接。它是一个问候程序，打印出`Welcome <name>`信息。`name`的默认值为`Guest`，但我们可以在YAML配置文件中指定一个不同的名字。以下是C++代码：
+这个示例相当直接。它是一个问候程序，打印出`Welcome <name>`信息。`name`的默认值为`Guest`，但我们可以在 YAML 配置文件中指定一个不同的名字。以下是 C++代码：
 
 **ch09/05-fetch-content/main.cpp**
 
@@ -857,7 +855,7 @@ cmake --install build-dir
                                                 "/usr/local/include" 
 ```
 
-如果你没有使用CMake 3.24，或者希望支持使用旧版本的用户，你可能会考虑手动运行`find_package()`命令。这样，你只会下载那些未安装的包：
+如果你没有使用 CMake 3.24，或者希望支持使用旧版本的用户，你可能会考虑手动运行`find_package()`命令。这样，你只会下载那些未安装的包：
 
 ```cpp
 find_package(yaml-cpp QUIET)
@@ -868,11 +866,11 @@ endif()
 
 无论你选择哪种方法，首先尝试使用本地版本，只有在找不到依赖项时才下载，是一种非常周到的做法，可以提供最佳的用户体验。
 
-在引入`FetchContent`之前，CMake有一个更简单的模块，名为`ExternalProject`。虽然`FetchContent`是大多数情况下的推荐选择，但`ExternalProject`仍然有其自身的一些优点，在某些情况下可能会非常有用。
+在引入`FetchContent`之前，CMake 有一个更简单的模块，名为`ExternalProject`。虽然`FetchContent`是大多数情况下的推荐选择，但`ExternalProject`仍然有其自身的一些优点，在某些情况下可能会非常有用。
 
 ## ExternalProject
 
-如前所述，在`FetchContent`引入到CMake之前，另一个模块曾经承担类似的功能：`ExternalProject`（在3.0.0版本中添加）。顾名思义，它用于从在线仓库获取外部项目。多年来，该模块逐渐扩展以满足不同的需求，最终形成了一个相当复杂的命令：`ExternalProject_Add()`。
+如前所述，在`FetchContent`引入到 CMake 之前，另一个模块曾经承担类似的功能：`ExternalProject`（在 3.0.0 版本中添加）。顾名思义，它用于从在线仓库获取外部项目。多年来，该模块逐渐扩展以满足不同的需求，最终形成了一个相当复杂的命令：`ExternalProject_Add()`。
 
 `ExternalProject`模块在构建阶段填充依赖项。这与`FetchContent`在配置阶段执行的方式有很大不同。因此，`ExternalProject`不能像`FetchContent`那样将目标导入项目。另一方面，`ExternalProject`可以直接将依赖项安装到系统中，执行它们的测试，并做其他有趣的事情，比如覆盖配置和构建过程中使用的命令。
 
@@ -894,7 +892,7 @@ ExternalProject_Add(external-yaml-cpp
 
 1.  `mkdir`: 为外部项目创建子目录。
 
-1.  `download`: 从仓库或URL下载项目文件。
+1.  `download`: 从仓库或 URL 下载项目文件。
 
 1.  `update`: 如果`fetch`方法支持，下载更新。
 
@@ -902,7 +900,7 @@ ExternalProject_Add(external-yaml-cpp
 
 1.  `configure`: 执行配置阶段。
 
-1.  `build`: 执行CMake项目的构建阶段。
+1.  `build`: 执行 CMake 项目的构建阶段。
 
 1.  `install`：安装 CMake 项目。
 
@@ -928,24 +926,24 @@ CMake 设计的目的是在通过我们讨论的多数方法找到库时，自�
 
 若要获取本章所涉及主题的更多信息，可以参考以下内容：
 
-+   CMake 文档 – 提供的查找模块：[https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find modules](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#findmodules)
++   CMake 文档 – 提供的查找模块：[`cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find modules`](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#findmodules)
 
-+   CMake 文档 – *使用依赖项指南*：[https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html)
++   CMake 文档 – *使用依赖项指南*：[`cmake.org/cmake/help/latest/guide/using-dependencies/index.html`](https://cmake.org/cmake/help/latest/guide/using-dependencies/index.html)
 
-+   *CMake 和使用 git-submodule 处理依赖项目*：[https://stackoverflow.com/questions/43761594/](https://stackoverflow.com/questions/43761594/)
++   *CMake 和使用 git-submodule 处理依赖项目*：[`stackoverflow.com/questions/43761594/`](https://stackoverflow.com/questions/43761594/)
 
-+   利用 PkgConfig：[https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config)
++   利用 PkgConfig：[`gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config`](https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/How-To-Find-Libraries#piggybacking-on-pkg-config)
 
-+   如何使用 ExternalProject：[https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html](https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html)
++   如何使用 ExternalProject：[`www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html`](https://www.jwlawson.co.uk/interest/2020/02/23/cmake-external-project.html)
 
-+   *CMake FetchContent 与 ExternalProject*：[https://www.scivision.dev/cmake-fetchcontent-vs-external-project/](https://www.scivision.dev/cmake-fetchcontent-vs-external-project/)
++   *CMake FetchContent 与 ExternalProject*：[`www.scivision.dev/cmake-fetchcontent-vs-external-project/`](https://www.scivision.dev/cmake-fetchcontent-vs-external-project/)
 
-+   *使用 CMake 进行 External Projects*：[http://www.saoe.net/blog/using-cmake-with-external-projects/](http://www.saoe.net/blog/using-cmake-with-external-projects/)
++   *使用 CMake 进行 External Projects*：[`www.saoe.net/blog/using-cmake-with-external-projects/`](http://www.saoe.net/blog/using-cmake-with-external-projects/)
 
 # 加入我们在 Discord 上的社区
 
 加入我们社区的 Discord 空间，与作者及其他读者进行讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

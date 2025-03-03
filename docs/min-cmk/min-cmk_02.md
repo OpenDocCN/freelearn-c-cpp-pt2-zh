@@ -1,6 +1,4 @@
-# 1
-
-# 入门
+# 第一章：入门
 
 *Minimal CMake* 的目标是引导你完成应用程序的开发过程，从一个简单的控制台应用程序开始，直到一个完整的窗口化应用程序，你可以向朋友演示，并将其作为未来项目的模板。
 
@@ -28,7 +26,7 @@
 
 +   一个工作中的 C/C++ 编译器（如果你还没有安装，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 CMake 版本
 
@@ -38,9 +36,9 @@ CMake 版本
 
 在本节中，我们将介绍如何安装你在 Windows 上开始使用 CMake 构建应用所需的所有内容。
 
-首先，你将需要一个 C/C++ 编译器。如果你还没有安装编译器，推荐使用 Visual Studio（可以从 [https://visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/) 下载 Visual Studio 2022 Community Edition）。
+首先，你将需要一个 C/C++ 编译器。如果你还没有安装编译器，推荐使用 Visual Studio（可以从 [`visualstudio.microsoft.com/vs/community/`](https://visualstudio.microsoft.com/vs/community/) 下载 Visual Studio 2022 Community Edition）。
 
-Visual Studio 是一个集成开发环境，附带微软的 C++ 编译器用于 Windows（`cl.exe`）。我们不会直接讨论 Visual Studio，尽管如果你更喜欢，也可以使用它（见 [*第 11 章*](B21152_11.xhtml#_idTextAnchor228)*，支持工具与后续步骤*，其中有简要总结）。我们将讨论如何生成 Visual Studio 解决方案文件，并调用 MSBuild 构建项目。为了保持尽可能的一致性，我们将使用 Visual Studio Code 来展示大多数示例。这更多是出于方便的考虑，如果你更习惯使用其他工具，完全可以选择使用它。随着 CMake 的流行，Visual Studio 对 CMake 的支持大大增强，如果你主要在 Windows 上开发，值得了解一下。
+Visual Studio 是一个集成开发环境，附带微软的 C++ 编译器用于 Windows（`cl.exe`）。我们不会直接讨论 Visual Studio，尽管如果你更喜欢，也可以使用它（见 *第十一章**，支持工具与后续步骤*，其中有简要总结）。我们将讨论如何生成 Visual Studio 解决方案文件，并调用 MSBuild 构建项目。为了保持尽可能的一致性，我们将使用 Visual Studio Code 来展示大多数示例。这更多是出于方便的考虑，如果你更习惯使用其他工具，完全可以选择使用它。随着 CMake 的流行，Visual Studio 对 CMake 的支持大大增强，如果你主要在 Windows 上开发，值得了解一下。
 
 Visual Studio 与 Visual Studio Code
 
@@ -94,7 +92,7 @@ CMake 和 Visual Studio
 
 Visual Studio 自带了自己的 CMake 版本，你可以依赖这个版本并跳过接下来的两步。它位于 `C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin`。运行 `cmake --version` 会显示 `cmake version <version>-msvc1`，这表示该版本与普通的 CMake 版本不同。
 
-1.  如果你的系统上尚未安装 CMake（或者安装的是相当旧的版本），请访问 [https://cmake.org/download/](https://cmake.org/download/) 获取最新版本（截至本文写作时，版本是 `3.28.1`）。
+1.  如果你的系统上尚未安装 CMake（或者安装的是相当旧的版本），请访问 [`cmake.org/download/`](https://cmake.org/download/) 获取最新版本（截至本文写作时，版本是 `3.28.1`）。
 
     最简单的选项是下载 Windows x64 安装程序 (cmake-3.28.1-windows-x86_64.msi)，然后按照标准安装说明进行操作。
 
@@ -146,7 +144,7 @@ Visual Studio 自带了自己的 CMake 版本，你可以依赖这个版本并�
 
 图 1.13：Xcode 应用程序安装
 
-也可以从 [https://developer.apple.com](https://developer.apple.com) 安装**Xcode**的**命令行工具**，特别是从 [https://developer.apple.com/download/all/](https://developer.apple.com/download/all/)，该链接也包含了我们与 CMake 一起使用所需的核心工具。要访问 Apple Developer 网站，需要一个 Apple Developer 账户（你可以在这里了解更多：[https://developer.apple.com/account](https://developer.apple.com/account)）。
+也可以从 [`developer.apple.com`](https://developer.apple.com) 安装**Xcode**的**命令行工具**，特别是从 [`developer.apple.com/download/all/`](https://developer.apple.com/download/all/)，该链接也包含了我们与 CMake 一起使用所需的核心工具。要访问 Apple Developer 网站，需要一个 Apple Developer 账户（你可以在这里了解更多：[`developer.apple.com/account`](https://developer.apple.com/account)）。
 
 1.  一旦打开 `Terminal`，再次输入以下命令：
 
@@ -163,7 +161,7 @@ Apple clang version 15.0.0 (clang-1500.3.9.4)
 
 这确认了我们有一个有效的编译器，并且现在可以安装 CMake 来与其一起使用。
 
-1.  如果你当前没有在系统上安装 CMake（或者安装的是一个相当旧的版本），请访问 [https://cmake.org/download/](https://cmake.org/download/) 获取最新版本（截至本文撰写时为 3.28.1）。
+1.  如果你当前没有在系统上安装 CMake（或者安装的是一个相当旧的版本），请访问 [`cmake.org/download/`](https://cmake.org/download/) 获取最新版本（截至本文撰写时为 3.28.1）。
 
     最简单的选项是获取适用于 macOS 10.13 或更高版本的磁盘镜像（`.dmg` 文件）（cmake-3.28.1-macos-universal.dmg），并按照标准安装说明进行操作。
 
@@ -183,9 +181,9 @@ Apple clang version 15.0.0 (clang-1500.3.9.4)
 
 1.  点击此项后，会弹出一个包含多个选项的窗口。最不干扰的选项可能是第一个，第二个选项也是不错的选择。
 
-![图 1.16：CMake命令行安装选项面板](img/B21152_01_16.jpg)
+![图 1.16：CMake 命令行安装选项面板](img/B21152_01_16.jpg)
 
-图 1.16：CMake命令行安装选项面板
+图 1.16：CMake 命令行安装选项面板
 
 1.  为了使路径选项持久化，我们需要更新我们的`.zshrc`文件。复制以下行：
 
@@ -195,49 +193,49 @@ PATH="/Applications/CMake.app/Contents/bin":"$PATH"
 
 1.  从终端确保你在主目录（`cd ~`）中，然后打开你的`.zshrc`文件（你可以使用你喜欢的文本编辑器，或者在终端中输入`nano .zshrc`）。
 
-![图 1.17：从终端用nano打开.zshrc](img/B21152_01_17.jpg)
+![图 1.17：从终端用 nano 打开.zshrc](img/B21152_01_17.jpg)
 
-图 1.17：从终端用nano打开.zshrc
+图 1.17：从终端用 nano 打开.zshrc
 
 1.  粘贴之前的命令并保存文件。
 
-![图 1.18：在终端内用nano修改.zshrc](img/B21152_01_18.jpg)
+![图 1.18：在终端内用 nano 修改.zshrc](img/B21152_01_18.jpg)
 
-图 1.18：在终端内用nano修改.zshrc
+图 1.18：在终端内用 nano 修改.zshrc
 
-1.  为了重新加载Zsh配置文件并更新`PATH`变量，运行`source .zshrc`。
+1.  为了重新加载 Zsh 配置文件并更新`PATH`变量，运行`source .zshrc`。
 
-![图 1.19：通过再次执行.zshrc来刷新终端环境](img/B21152_01_19.jpg)
+![图 1.19：通过再次执行.zshrc 来刷新终端环境](img/B21152_01_19.jpg)
 
-图 1.19：通过再次执行.zshrc来刷新终端环境
+图 1.19：通过再次执行.zshrc 来刷新终端环境
 
 1.  最后，从终端运行`cmake`来验证是否能够找到它。
 
-![图 1.20：从终端运行cmake](img/B21152_01_20.jpg)
+![图 1.20：从终端运行 cmake](img/B21152_01_20.jpg)
 
-图 1.20：从终端运行cmake
+图 1.20：从终端运行 cmake
 
 你也可以使用`where cmake`和`cmake --version`来验证是否安装了正确版本。
 
-有了这些，我们就可以开始使用CMake进行构建了。
+有了这些，我们就可以开始使用 CMake 进行构建了。
 
-# 在Linux（Ubuntu）上安装CMake
+# 在 Linux（Ubuntu）上安装 CMake
 
-在这一节中，我们将介绍如何获取你在Linux（Ubuntu）上构建应用所需的一切。
+在这一节中，我们将介绍如何获取你在 Linux（Ubuntu）上构建应用所需的一切。
 
-首先，你需要一个C/C++编译器。如果你还没有安装编译器，一个很好的选择是使用GCC。可以通过标准的Ubuntu包管理器`apt`来安装：
+首先，你需要一个 C/C++编译器。如果你还没有安装编译器，一个很好的选择是使用 GCC。可以通过标准的 Ubuntu 包管理器`apt`来安装：
 
 1.  使用桌面上的**显示应用程序**打开**终端**。
 
-![图 1.21：Ubuntu显示应用菜单选项](img/B21152_01_21.jpg)
+![图 1.21：Ubuntu 显示应用菜单选项](img/B21152_01_21.jpg)
 
-图 1.21：Ubuntu显示应用菜单选项
+图 1.21：Ubuntu 显示应用菜单选项
 
-1.  运行`sudo apt update`，然后运行`sudo apt install build-essential`（你的Ubuntu版本可能已经安装了这个，但最好检查一下）。
+1.  运行`sudo apt update`，然后运行`sudo apt install build-essential`（你的 Ubuntu 版本可能已经安装了这个，但最好检查一下）。
 
-![图 1.22：从终端安装build-essential](img/B21152_01_22.jpg)
+![图 1.22：从终端安装 build-essential](img/B21152_01_22.jpg)
 
-图 1.22：从终端安装build-essential
+图 1.22：从终端安装 build-essential
 
 1.  运行`gcc --version`来验证编译器是否能够找到并正常工作。你应该看到类似以下的输出：
 
@@ -245,13 +243,13 @@ PATH="/Applications/CMake.app/Contents/bin":"$PATH"
 gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0 ...
 ```
 
-![图 1.23：从终端运行gcc --version](img/B21152_01_23.jpg)
+![图 1.23：从终端运行 gcc --version](img/B21152_01_23.jpg)
 
-图 1.23：从终端运行gcc --version
+图 1.23：从终端运行 gcc --version
 
-1.  接下来，我们需要安装CMake。这可以通过包管理器（例如`apt`）完成，但我们在这里直接进行安装，以指定精确的版本。访问[https://cmake.org/download/](https://cmake.org/download/)，并向下滚动找到二进制发行版部分。根据你的架构，选择Linux x86_64（Intel）（`cmake-3.28.1-linux-x86_64.tar.gz`）或Linux aarch64（ARM）（`cmake-3.28.1-linux-aarch64.tar.gz`）。
+1.  接下来，我们需要安装 CMake。这可以通过包管理器（例如`apt`）完成，但我们在这里直接进行安装，以指定精确的版本。访问[`cmake.org/download/`](https://cmake.org/download/)，并向下滚动找到二进制发行版部分。根据你的架构，选择 Linux x86_64（Intel）（`cmake-3.28.1-linux-x86_64.tar.gz`）或 Linux aarch64（ARM）（`cmake-3.28.1-linux-aarch64.tar.gz`）。
 
-1.  从你下载CMake的文件夹运行此命令，提取并安装CMake到你的`/opt`文件夹：
+1.  从你下载 CMake 的文件夹运行此命令，提取并安装 CMake 到你的`/opt`文件夹：
 
 ```cpp
 sudo tar -C /opt -xzf cmake-3.28.1-linux-aarch64.tar.gz
@@ -299,9 +297,9 @@ sudo tar -C /opt -xzf cmake-3.28.1-linux-aarch64.tar.gz
 
 # 安装 Git
 
-为了跟随本书每章提供的示例并获取书中的源代码（可从书籍网站 [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake) 获取），建议在你的系统上安装 Git。
+为了跟随本书每章提供的示例并获取书中的源代码（可从书籍网站 [`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake) 获取），建议在你的系统上安装 Git。
 
-最简单的做法是访问 [https://git-scm.com/downloads](https://git-scm.com/downloads)，并根据你选择的平台下载 Git，如果你还没有安装的话。
+最简单的做法是访问 [`git-scm.com/downloads`](https://git-scm.com/downloads)，并根据你选择的平台下载 Git，如果你还没有安装的话。
 
 在 macOS 上，Git 是作为我们在 *macOS 上安装 CMake* 一文中介绍的 Xcode 安装的一部分。 在 Windows 上，下载 64 位安装程序并运行安装。在 Linux（Ubuntu）上，运行 `sudo apt-get install git` 来安装 Git。
 
@@ -309,9 +307,9 @@ sudo tar -C /opt -xzf cmake-3.28.1-linux-aarch64.tar.gz
 
 # Visual Studio Code 设置（可选）
 
-为了确保全书体验的一致性，将使用 Visual Studio Code 和本地终端来演示代码示例，无论是在 Windows、macOS 还是 Linux 上。以下部分概述了如何设置 Visual Studio Code 并配置开发环境。如果你更倾向于使用其他编辑器，也是可以的。跟随本书所需的只需一个 C/C++ 编译器和 CMake。Visual Studio Code 只是作为一个跨平台编辑器使用（它还提供了很棒的 CMake 支持，详细内容可见 [*第 11 章*](B21152_11.xhtml#_idTextAnchor228)*，支持工具与下一步*）。
+为了确保全书体验的一致性，将使用 Visual Studio Code 和本地终端来演示代码示例，无论是在 Windows、macOS 还是 Linux 上。以下部分概述了如何设置 Visual Studio Code 并配置开发环境。如果你更倾向于使用其他编辑器，也是可以的。跟随本书所需的只需一个 C/C++ 编译器和 CMake。Visual Studio Code 只是作为一个跨平台编辑器使用（它还提供了很棒的 CMake 支持，详细内容可见 *第十一章**，支持工具与下一步*）。
 
-要安装 Visual Studio Code，请访问 [https://code.visualstudio.com/Download](https://code.visualstudio.com/Download)。那里有适用于 Windows、Linux 和 macOS 的下载链接。按照你选择的平台的安装说明进行操作。在 Windows 上，选择 **用户安装程序**，并按照设置说明进行操作。
+要安装 Visual Studio Code，请访问 [`code.visualstudio.com/Download`](https://code.visualstudio.com/Download)。那里有适用于 Windows、Linux 和 macOS 的下载链接。按照你选择的平台的安装说明进行操作。在 Windows 上，选择 **用户安装程序**，并按照设置说明进行操作。
 
 在 Linux 上，可以下载 `.deb` 包并使用 `code-stable-...tar.gz` 文件，并将其解压到 `/opt`，就像我们解压 CMake 一样（例如，`sudo tar -C /opt -xzf code-stable-arm64-1702460949.tar.gz`）。解压后，通过再次更新 `.bashrc` 文件，将 `/opt/VSCode-linux-<arch>/bin` 添加到你的路径中。
 
@@ -327,7 +325,7 @@ sudo tar -C /opt -xzf cmake-3.28.1-linux-aarch64.tar.gz
 
 **C/C++ 扩展包**扩展包括 C/C++ 扩展，提供 IntelliSense 和调试功能。该扩展包还包括 CMake 语言支持和 CMake Tools，这是 Visual Studio Code 的 CMake 集成工具。
 
-现在我们已经安装了 Visual Studio Code，确保在所有平台上开发时都能获得一致的体验。使用 Visual Studio Code 完全是可选的，但强烈推荐使用。在 [*第 11 章*](B21152_11.xhtml#_idTextAnchor228)*，支持工具与下一步*，我们将展示 CMake 和 Visual Studio Code 如何相辅相成。
+现在我们已经安装了 Visual Studio Code，确保在所有平台上开发时都能获得一致的体验。使用 Visual Studio Code 完全是可选的，但强烈推荐使用。在 *第十一章**，支持工具与下一步*，我们将展示 CMake 和 Visual Studio Code 如何相辅相成。
 
 # 总结
 

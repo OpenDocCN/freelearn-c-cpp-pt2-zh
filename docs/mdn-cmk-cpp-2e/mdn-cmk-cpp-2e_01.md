@@ -1,6 +1,4 @@
-# 1
-
-# CMake 入门
+# 第一章：CMake 入门
 
 软件创建有一种神奇的魅力。我们不仅仅是在创建一个能够被激活的工作机制，而且我们还常常在构思解决方案功能背后的想法。
 
@@ -28,7 +26,7 @@ CMake 是许多此类需求的答案；然而，它需要一些工作来正确�
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中提供的代码文件，地址是 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch01](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch01)。
+你可以在 GitHub 上找到本章中提供的代码文件，地址是 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch01`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch01)。
 
 要构建本书提供的示例，请始终执行所有推荐的命令：
 
@@ -39,13 +37,13 @@ cmake --build <build tree>
 
 一定要将占位符`<build tree>`和`<source tree>`替换为适当的路径。正如本章所述，**build tree**是输出目录的路径，而**source tree**是源代码所在的路径。
 
-为了构建C++程序，你还需要一个适合你平台的编译器。如果你熟悉Docker，你可以使用在*不同平台上安装CMake*一节中介绍的完全集成的镜像。如果你更倾向于手动设置CMake，我们将在同一节中解释安装过程。
+为了构建 C++程序，你还需要一个适合你平台的编译器。如果你熟悉 Docker，你可以使用在*不同平台上安装 CMake*一节中介绍的完全集成的镜像。如果你更倾向于手动设置 CMake，我们将在同一节中解释安装过程。
 
 # 理解基础知识
 
-C++源代码的编译似乎是一个相当简单的过程。让我们从经典的Hello World示例开始。
+C++源代码的编译似乎是一个相当简单的过程。让我们从经典的 Hello World 示例开始。
 
-以下代码位于`ch01/01-hello/hello.cpp`中，*C++语言中的Hello World*：
+以下代码位于`ch01/01-hello/hello.cpp`中，*C++语言中的 Hello World*：
 
 ```cpp
 #include <iostream>
@@ -55,15 +53,15 @@ int main() {
 } 
 ```
 
-为了生成可执行文件，我们当然需要一个C++编译器。CMake本身不附带编译器，因此你需要自行选择并安装一个。常见的选择包括：
+为了生成可执行文件，我们当然需要一个 C++编译器。CMake 本身不附带编译器，因此你需要自行选择并安装一个。常见的选择包括：
 
 +   Microsoft Visual C++ 编译器
 
-+   GNU编译器集合
++   GNU 编译器集合
 
 +   Clang/LLVM
 
-大多数读者都对*编译器*非常熟悉，因为它是学习C++时不可或缺的部分，所以我们不会详细介绍如何选择和安装编译器。本书中的示例将使用GNU GCC，因为它是一个成熟的、开源的、可免费在多个平台上使用的软件编译器。
+大多数读者都对*编译器*非常熟悉，因为它是学习 C++时不可或缺的部分，所以我们不会详细介绍如何选择和安装编译器。本书中的示例将使用 GNU GCC，因为它是一个成熟的、开源的、可免费在多个平台上使用的软件编译器。
 
 假设我们已经安装了编译器，对于大多数供应商和系统，运行它的方式类似。我们应该将文件名作为参数传递给它：
 
@@ -80,7 +78,7 @@ Hello World!
 
 运行一个命令来构建程序很简单；然而，随着项目的增长，你会很快明白，所有东西都保存在一个文件中是不可能的。清洁代码实践建议源代码文件应保持简短，并且结构要井井有条。手动编译每个文件可能是一个乏味且容易出错的过程。一定有更好的方法。
 
-## 什么是CMake？
+## 什么是 CMake？
 
 假设我们通过编写一个脚本来自动化构建，该脚本遍历我们的项目树并编译所有内容。为了避免不必要的编译，脚本将检测自上次运行以来源代码是否已被修改。现在，我们希望有一种方便的方式来管理每个文件传递给编译器的参数——最好是基于可配置的标准来处理。此外，我们的脚本应当知道如何将所有已编译的文件链接成一个单一的二进制文件，或者更好的是，构建可以重用的完整解决方案，并将其作为模块集成到更大的项目中。
 
@@ -227,11 +225,11 @@ Hello World!
 
 现在你知道结果是什么样子了，我相信你一定有很多问题：这个过程的前提条件是什么？这些命令是什么意思？为什么需要两个命令？我该如何编写自己的项目文件？别担心——这些问题将在接下来的章节中得到解答。
 
-本书将为您提供与当前版本的 CMake 相关的最重要信息（截至写作时，版本为 3.26）。为了给您提供最佳建议，我特别避免了任何已弃用或不再推荐的功能，并且强烈建议至少使用 CMake 版本 3.15，这被认为是*现代 CMake*。如果您需要更多信息，可以在[https://cmake.org/cmake/help/](https://cmake.org/cmake/help/)在线查看最新的完整文档。
+本书将为您提供与当前版本的 CMake 相关的最重要信息（截至写作时，版本为 3.26）。为了给您提供最佳建议，我特别避免了任何已弃用或不再推荐的功能，并且强烈建议至少使用 CMake 版本 3.15，这被认为是*现代 CMake*。如果您需要更多信息，可以在[`cmake.org/cmake/help/`](https://cmake.org/cmake/help/)在线查看最新的完整文档。
 
 # 在不同平台上安装 CMake
 
-CMake 是一个跨平台的开源软件，用 C++ 编写。这意味着你当然可以自己编译它；然而，最可能的情况是你不需要这么做。因为可以从官方网站下载预编译的二进制文件，[https://cmake.org/download/](https://cmake.org/download/)。
+CMake 是一个跨平台的开源软件，用 C++ 编写。这意味着你当然可以自己编译它；然而，最可能的情况是你不需要这么做。因为可以从官方网站下载预编译的二进制文件，[`cmake.org/download/`](https://cmake.org/download/)。
 
 基于 Unix 的系统提供了可以直接从命令行安装的现成包。
 
@@ -243,11 +241,11 @@ CMake 是一个跨平台的开源软件，用 C++ 编写。这意味着你当然
 
 ## Docker
 
-Docker（[https://www.docker.com/](https://www.docker.com/)）是一个跨平台工具，提供操作系统级虚拟化，允许应用程序以称为容器的定义良好的包的形式进行交付。这些自给自足的包包含了运行软件所需的所有库、依赖项和工具。Docker 在轻量级环境中执行其容器，并且这些环境相互隔离。
+Docker（[`www.docker.com/`](https://www.docker.com/)）是一个跨平台工具，提供操作系统级虚拟化，允许应用程序以称为容器的定义良好的包的形式进行交付。这些自给自足的包包含了运行软件所需的所有库、依赖项和工具。Docker 在轻量级环境中执行其容器，并且这些环境相互隔离。
 
 这个概念使得共享完整的工具链变得极为方便，这些工具链是某一特定过程所必需的，已经配置好并随时可以使用。当你不需要担心微小的环境差异时，一切变得非常简单，我无法强调这点有多么重要。
 
-Docker 平台有一个公开的容器镜像仓库，[https://registry.hub.docker.com/](https://registry.hub.docker.com/)，提供数百万个现成的镜像。
+Docker 平台有一个公开的容器镜像仓库，[`registry.hub.docker.com/`](https://registry.hub.docker.com/)，提供数百万个现成的镜像。
 
 为了方便起见，我已经发布了两个 Docker 仓库：
 
@@ -287,17 +285,17 @@ devuser/examples/examples/ch<N>/<M>-<title>
 
 正如我之前提到的，这是开源软件，因此你可以自行构建 CMake。然而，在 Windows 上，你首先需要在系统上获取 CMake 的二进制版本。这种情况是 CMake 贡献者用来生成新版本的方式。
 
-Windows平台与其他平台没有区别，也需要一个可以完成CMake启动的构建工具。一个流行的选择是Visual Studio IDE，它捆绑了一个C++编译器。社区版可以从Microsoft官网免费下载：[https://visualstudio.microsoft.com/downloads/](https://visualstudio.microsoft.com/downloads/)。
+Windows 平台与其他平台没有区别，也需要一个可以完成 CMake 启动的构建工具。一个流行的选择是 Visual Studio IDE，它捆绑了一个 C++编译器。社区版可以从 Microsoft 官网免费下载：[`visualstudio.microsoft.com/downloads/`](https://visualstudio.microsoft.com/downloads/)。
 
 ## Linux
 
-在Linux上安装CMake与其他流行软件包的安装过程相同：从命令行调用包管理器。包仓库通常会保持更新，提供相对较新的CMake版本，但通常不会是最新版本。如果您对此没有异议，并且使用的是Debian或Ubuntu等发行版，那么最简单的做法就是直接安装适当的包：
+在 Linux 上安装 CMake 与其他流行软件包的安装过程相同：从命令行调用包管理器。包仓库通常会保持更新，提供相对较新的 CMake 版本，但通常不会是最新版本。如果您对此没有异议，并且使用的是 Debian 或 Ubuntu 等发行版，那么最简单的做法就是直接安装适当的包：
 
 ```cpp
 $ sudo apt-get install cmake 
 ```
 
-对于Red Hat发行版，请使用以下命令：
+对于 Red Hat 发行版，请使用以下命令：
 
 ```cpp
 $ yum install cmake 
@@ -305,43 +303,43 @@ $ yum install cmake
 
 请注意，在安装包时，包管理器将从为您的操作系统配置的仓库中获取最新版本。在许多情况下，包仓库并不提供最新版本，而是提供一个经过时间验证的稳定版本，这些版本通常能够可靠地运行。根据您的需求选择，但请注意，旧版本不会具备本书中描述的所有功能。
 
-要获取最新版本，请参考CMake官方网站的下载部分。如果您知道当前版本号，可以使用以下命令之一。
+要获取最新版本，请参考 CMake 官方网站的下载部分。如果您知道当前版本号，可以使用以下命令之一。
 
-Linux x86_64的命令是：
+Linux x86_64 的命令是：
 
 ```cpp
 $ VER=3.26.0 && wget https://github.com/Kitware/CMake/releases/download/v$VER/cmake-$VER-linux-x86_64.sh && chmod +x cmake-$VER-linux-x86_64.sh && ./cmake-$VER-linux-x86_64.sh 
 ```
 
-Linux AArch64的命令是：
+Linux AArch64 的命令是：
 
 ```cpp
 $ VER=3.26.0 && wget https://github.com/Kitware/CMake/releases/download/v$VER/cmake-$VER-Linux-aarch64.sh && chmod +x cmake-$VER-Linux-aarch64.sh && ./cmake-$VER-Linux-aarch64.sh 
 ```
 
-或者，查看*从源代码构建*部分，学习如何在您的平台上自行编译CMake。
+或者，查看*从源代码构建*部分，学习如何在您的平台上自行编译 CMake。
 
 ## macOS
 
-这个平台也得到了CMake开发者的强力支持。最常见的安装选择是通过MacPorts，使用以下命令：
+这个平台也得到了 CMake 开发者的强力支持。最常见的安装选择是通过 MacPorts，使用以下命令：
 
 ```cpp
 $ sudo port install cmake 
 ```
 
-请注意，在写作时，MacPorts中提供的最新版本是3.24.4。要获取最新版本，请安装`cmake-devel`包：
+请注意，在写作时，MacPorts 中提供的最新版本是 3.24.4。要获取最新版本，请安装`cmake-devel`包：
 
 ```cpp
 $ sudo port install cmake-devel 
 ```
 
-或者，您可以使用Homebrew包管理器：
+或者，您可以使用 Homebrew 包管理器：
 
 ```cpp
 $ brew install cmake 
 ```
 
-macOS的包管理器将涵盖所有必要步骤，但请注意，除非您从源代码构建，否则您可能无法获得最新版本。
+macOS 的包管理器将涵盖所有必要步骤，但请注意，除非您从源代码构建，否则您可能无法获得最新版本。
 
 ## 从源代码构建
 
@@ -356,9 +354,9 @@ $ make
 $ make install 
 ```
 
-从源代码构建相对较慢，并且需要更多步骤。然而，只有通过这种方式，您才能自由选择任何版本的CMake。这对于操作系统仓库中提供的包过时的情况尤其有用：系统版本越老，更新的频率越低。
+从源代码构建相对较慢，并且需要更多步骤。然而，只有通过这种方式，您才能自由选择任何版本的 CMake。这对于操作系统仓库中提供的包过时的情况尤其有用：系统版本越老，更新的频率越低。
 
-现在我们已经安装了CMake，接下来让我们学习如何使用它！
+现在我们已经安装了 CMake，接下来让我们学习如何使用它！
 
 # 精通命令行
 
@@ -422,7 +420,7 @@ CMake 将从 `./project` 目录读取项目文件，并在 `./build` 目录中�
 
 **运行 CMAKE 时要明确**
 
-不要使用 `cmake <directory>` 命令的第二种或第三种形式，因为它们可能会产生一个杂乱的 *源代码内构建*。在 *第4章*，*设置你的第一个 CMake 项目* 中，我们将学习如何防止用户这样做。
+不要使用 `cmake <directory>` 命令的第二种或第三种形式，因为它们可能会产生一个杂乱的 *源代码内构建*。在 *第四章*，*设置你的第一个 CMake 项目* 中，我们将学习如何防止用户这样做。
 
 ```cpp
 <directory>: it will use the cached path to the sources and rebuild from there. Since we often invoke the same commands from the Terminal command history, we might get into trouble here; before using this form, always check whether your shell is currently working in the right directory.
@@ -446,13 +444,13 @@ cmake -B build
 
 如前所述，在生成阶段，你可以指定一些选项。选择和配置生成器决定了在后续的*构建项目*部分中，系统将使用哪个构建工具，构建文件的样子，以及构建树的结构。
 
-那么，你应该在意吗？幸运的是，答案通常是“否”。CMake确实支持多个本地构建系统在许多平台上的使用；然而，除非你同时安装了几个生成器，否则CMake会为你正确地选择一个。这个选择可以通过`CMAKE_GENERATOR`环境变量或直接在命令行中指定生成器来覆盖，例如：
+那么，你应该在意吗？幸运的是，答案通常是“否”。CMake 确实支持多个本地构建系统在许多平台上的使用；然而，除非你同时安装了几个生成器，否则 CMake 会为你正确地选择一个。这个选择可以通过`CMAKE_GENERATOR`环境变量或直接在命令行中指定生成器来覆盖，例如：
 
 ```cpp
 cmake -G <generator name> -S <source tree> -B <build tree> 
 ```
 
-一些生成器（例如Visual Studio）支持对工具集（编译器）和平台（编译器或SDK）进行更深入的指定。此外，CMake会扫描那些覆盖默认值的环境变量：`CMAKE_GENERATOR_TOOLSET`和`CMAKE_GENERATOR_PLATFORM`。另外，这些值也可以在命令行中直接指定：
+一些生成器（例如 Visual Studio）支持对工具集（编译器）和平台（编译器或 SDK）进行更深入的指定。此外，CMake 会扫描那些覆盖默认值的环境变量：`CMAKE_GENERATOR_TOOLSET`和`CMAKE_GENERATOR_PLATFORM`。另外，这些值也可以在命令行中直接指定：
 
 ```cpp
 cmake -G <generator name>
@@ -461,7 +459,7 @@ cmake -G <generator name>
       -S <source tree> -B <build tree> 
 ```
 
-Windows用户通常希望为他们喜欢的IDE生成构建系统。在Linux和macOS上，使用**Unix Makefiles**或**Ninja**生成器非常常见。
+Windows 用户通常希望为他们喜欢的 IDE 生成构建系统。在 Linux 和 macOS 上，使用**Unix Makefiles**或**Ninja**生成器非常常见。
 
 要检查你的系统上可用的生成器，请使用以下命令：
 
@@ -469,7 +467,7 @@ Windows用户通常希望为他们喜欢的IDE生成构建系统。在Linux和ma
 cmake --help 
 ```
 
-在`help`输出的末尾，你将得到一个完整的生成器列表，例如在Windows 10上生成的列表（部分输出已被截断以提高可读性）：
+在`help`输出的末尾，你将得到一个完整的生成器列表，例如在 Windows 10 上生成的列表（部分输出已被截断以提高可读性）：
 
 此平台上可用的生成器如下：
 
@@ -514,11 +512,11 @@ Sublime Text 2 - Ninja
 Sublime Text 2 - Unix Makefiles 
 ```
 
-如你所见，CMake支持许多不同的生成器和IDE。
+如你所见，CMake 支持许多不同的生成器和 IDE。
 
 #### 管理项目缓存
 
-CMake在配置阶段会查询系统的各种信息。由于这些操作可能需要一些时间，因此收集到的信息会缓存到构建树目录中的`CMakeCache.txt`文件中。有一些命令行选项可以更方便地管理缓存的行为。
+CMake 在配置阶段会查询系统的各种信息。由于这些操作可能需要一些时间，因此收集到的信息会缓存到构建树目录中的`CMakeCache.txt`文件中。有一些命令行选项可以更方便地管理缓存的行为。
 
 我们可以使用的第一个选项是能够*预填充缓存信息*：
 
@@ -526,7 +524,7 @@ CMake在配置阶段会查询系统的各种信息。由于这些操作可能需
 cmake -C <initial cache script> -S <source tree> -B <build tree> 
 ```
 
-我们可以提供一个CMake列表文件的路径，该文件（仅）包含一个`set()`命令列表，用于指定将用于初始化一个空构建树的变量。我们将在下一章讨论编写列表文件。
+我们可以提供一个 CMake 列表文件的路径，该文件（仅）包含一个`set()`命令列表，用于指定将用于初始化一个空构建树的变量。我们将在下一章讨论编写列表文件。
 
 *初始化和修改*现有的缓存变量可以通过另一种方式进行（例如，当创建一个文件仅仅是为了设置几个变量时，可能有些过于繁琐）。你可以在命令行中直接设置它们，如下所示：
 
@@ -534,11 +532,11 @@ cmake -C <initial cache script> -S <source tree> -B <build tree>
 cmake -D <var>[:<type>]=<value> -S <source tree> -B <build tree> 
 ```
 
-`:<type>`部分是可选的（它由GUI使用），并接受以下类型：`BOOL`、`FILEPATH`、`PATH`、`STRING`或`INTERNAL`。如果你省略类型，CMake会检查变量是否存在于`CMakeCache.txt`文件中并使用其类型；否则，它将被设置为`UNINITIALIZED`。
+`:<type>`部分是可选的（它由 GUI 使用），并接受以下类型：`BOOL`、`FILEPATH`、`PATH`、`STRING`或`INTERNAL`。如果你省略类型，CMake 会检查变量是否存在于`CMakeCache.txt`文件中并使用其类型；否则，它将被设置为`UNINITIALIZED`。
 
-一个特别重要的变量是我们通常通过命令行设置的，它指定了**构建类型**（`CMAKE_BUILD_TYPE`）。大多数CMake项目将在多个场合使用它来决定诊断信息的详细程度、调试信息的存在与否，以及创建的工件的优化级别。
+一个特别重要的变量是我们通常通过命令行设置的，它指定了**构建类型**（`CMAKE_BUILD_TYPE`）。大多数 CMake 项目将在多个场合使用它来决定诊断信息的详细程度、调试信息的存在与否，以及创建的工件的优化级别。
 
-对于单配置生成器（如GNU Make和Ninja），你应该在配置阶段指定**构建类型**，并为每种配置类型生成一个单独的构建树。这里使用的值有`Debug`、`Release`、`MinSizeRel`或`RelWithDebInfo`。如果缺少此信息，可能会对依赖它进行配置的项目产生未定义的影响。
+对于单配置生成器（如 GNU Make 和 Ninja），你应该在配置阶段指定**构建类型**，并为每种配置类型生成一个单独的构建树。这里使用的值有`Debug`、`Release`、`MinSizeRel`或`RelWithDebInfo`。如果缺少此信息，可能会对依赖它进行配置的项目产生未定义的影响。
 
 这是一个例子：
 
@@ -583,7 +581,7 @@ cmake --system-information [file]
 
 可选的文件参数允许你将输出存储到文件中。在**构建树**目录中运行它将打印关于缓存变量和日志文件中构建信息的额外内容。
 
-在我们的项目中，我们将使用`message()`命令来报告构建过程的详细信息。CMake根据当前的日志级别（默认情况下为`STATUS`）筛选这些日志输出。以下行指定了我们感兴趣的日志级别：
+在我们的项目中，我们将使用`message()`命令来报告构建过程的详细信息。CMake 根据当前的日志级别（默认情况下为`STATUS`）筛选这些日志输出。以下行指定了我们感兴趣的日志级别：
 
 ```cpp
 cmake --log-level=<level> 
@@ -603,7 +601,7 @@ cmake --log-level=<level>
 cmake --log-context <source tree> 
 ```
 
-我们将在*第2章*，《CMake语言》中更详细地讨论命名上下文和日志命令。
+我们将在*第二章*，《CMake 语言》中更详细地讨论命名上下文和日志命令。
 
 如果其他方法都失败了，我们需要使用“重磅武器”，那么总有*追踪模式*，它会打印出每个执行的命令，包含文件名、调用所在的行号以及传递的参数列表。你可以通过以下方式启用它：
 
@@ -629,7 +627,7 @@ cmake --list-presets
 cmake --preset=<preset> -S <source> -B <build tree> 
 ```
 
-要了解更多，请参阅本章的*导航项目文件*部分和*第16章*，*编写 CMake 预设*。
+要了解更多，请参阅本章的*导航项目文件*部分和*第十六章*，*编写 CMake 预设*。
 
 #### 清理构建树
 
@@ -704,7 +702,7 @@ cmake --build <build tree> --target <target1> --target <target2> …
 cmake --build <build tree> -t clean 
 ```
 
-此外，如果你希望先清理然后再执行正常构建，CMake还提供了一个便捷的别名：
+此外，如果你希望先清理然后再执行正常构建，CMake 还提供了一个便捷的别名：
 
 ```cpp
 cmake --build <build tree> --clean-first 
@@ -714,7 +712,7 @@ cmake --build <build tree> --clean-first
 
 #### 为多配置生成器配置构建类型
 
-所以，我们已经了解了一些关于生成器的信息：它们有不同的形状和大小。其中一些生成器支持在一个构建树中构建`Debug`和`Release`这两种构建类型。支持这一功能的生成器包括Ninja Multi-Config、Xcode和Visual Studio。其他生成器都是单配置生成器，它们需要为每个想要构建的配置类型提供单独的构建树。
+所以，我们已经了解了一些关于生成器的信息：它们有不同的形状和大小。其中一些生成器支持在一个构建树中构建`Debug`和`Release`这两种构建类型。支持这一功能的生成器包括 Ninja Multi-Config、Xcode 和 Visual Studio。其他生成器都是单配置生成器，它们需要为每个想要构建的配置类型提供单独的构建树。
 
 选择`Debug`、`Release`、`MinSizeRel`或`RelWithDebInfo`并按以下方式指定：
 
@@ -722,11 +720,11 @@ cmake --build <build tree> --clean-first
 cmake --build <build tree> --config <cfg> 
 ```
 
-否则，CMake将使用`Debug`作为默认设置。
+否则，CMake 将使用`Debug`作为默认设置。
 
 #### 调试构建过程
 
-当出现问题时，我们首先应该检查输出信息。然而，经验丰富的开发者知道，始终打印所有细节会让人困惑，所以它们通常默认隐藏这些信息。当我们需要深入查看时，可以通过告诉CMake启用详细模式来获得更详细的日志：
+当出现问题时，我们首先应该检查输出信息。然而，经验丰富的开发者知道，始终打印所有细节会让人困惑，所以它们通常默认隐藏这些信息。当我们需要深入查看时，可以通过告诉 CMake 启用详细模式来获得更详细的日志：
 
 ```cpp
 cmake --build <build tree> --verbose
@@ -737,7 +735,7 @@ cmake --build <build tree> -v
 
 ### 安装项目
 
-当构建产物生成后，用户可以将它们安装到系统中。通常，这意味着将文件复制到正确的目录，安装库，或执行某些来自CMake脚本的自定义安装逻辑。
+当构建产物生成后，用户可以将它们安装到系统中。通常，这意味着将文件复制到正确的目录，安装库，或执行某些来自 CMake 脚本的自定义安装逻辑。
 
 安装模式的语法是：
 
@@ -781,7 +779,7 @@ cmake --install <build tree> --config <cfg>
 
 #### 选择要安装的组件
 
-作为开发人员，你可能选择将项目拆分为可以独立安装的组件。我们将在*第14章* *安装和打包*中进一步讨论组件的概念。现在，我们假设它们表示一些不需要在每种情况下都使用的工件集。这可能是像`application`、`docs`和`extra-tools`之类的东西。
+作为开发人员，你可能选择将项目拆分为可以独立安装的组件。我们将在*第十四章* *安装和打包*中进一步讨论组件的概念。现在，我们假设它们表示一些不需要在每种情况下都使用的工件集。这可能是像`application`、`docs`和`extra-tools`之类的东西。
 
 要安装单个组件，使用以下选项：
 
@@ -856,7 +854,7 @@ cmake ––workflow --list-presets
 cmake --workflow --preset <name> 
 ```
 
-这一部分将在 *第 16 章*，*编写 CMake 预设* 中深入讲解。
+这一部分将在 *第十六章*，*编写 CMake 预设* 中深入讲解。
 
 ### 获取帮助
 
@@ -884,7 +882,7 @@ Guessing configuration Debug
 Total Test time (real) =   3.24 sec 
 ```
 
-我们为此专门编写了整整一章内容：*第 11 章*，*测试框架*。
+我们为此专门编写了整整一章内容：*第十一章*，*测试框架*。
 
 ## CPack 命令行
 
@@ -892,7 +890,7 @@ Total Test time (real) =   3.24 sec
 
 CMake 并不会让你陷入困境，它是自带电池的。CPack 是一个工具，用于为各种平台创建可重新分发的包：压缩归档、可执行安装程序、向导、NuGet 包、macOS 包、DMG 包、RPM 等。
 
-CPack 的工作方式与 CMake 非常相似：它使用 CMake 语言进行配置，并且有许多 *包生成器* 可供选择（不要与 CMake 构建系统生成器混淆）。我们将在 *第 14 章*《安装与打包》中详细介绍它，因为这个工具是为成熟的 CMake 项目使用的。
+CPack 的工作方式与 CMake 非常相似：它使用 CMake 语言进行配置，并且有许多 *包生成器* 可供选择（不要与 CMake 构建系统生成器混淆）。我们将在 *第十四章*《安装与打包》中详细介绍它，因为这个工具是为成熟的 CMake 项目使用的。
 
 ## CMake GUI
 
@@ -936,7 +934,7 @@ CMake 项目由相当多的文件和目录组成。让我们大致了解每个�
 
 ## 源代码树
 
-这是你的项目所在的目录（也称为**项目根目录**）。它包含所有C++源代码和CMake项目文件。
+这是你的项目所在的目录（也称为**项目根目录**）。它包含所有 C++源代码和 CMake 项目文件。
 
 以下是该目录中的最重要要点：
 
@@ -944,41 +942,41 @@ CMake 项目由相当多的文件和目录组成。让我们大致了解每个�
 
 +   这个目录的路径由用户在使用`cmake`命令*生成构建系统*时通过`-S`参数指定。
 
-+   避免在CMake代码中硬编码任何指向*源代码树*的绝对路径——你的软件用户会将项目存储在不同的路径中。
++   避免在 CMake 代码中硬编码任何指向*源代码树*的绝对路径——你的软件用户会将项目存储在不同的路径中。
 
-在这个目录中初始化一个版本库是个好主意，可以使用像`Git`这样的VCS。
+在这个目录中初始化一个版本库是个好主意，可以使用像`Git`这样的 VCS。
 
 ## 构建树
 
-CMake在用户指定的路径中创建此目录。它将存储构建系统和构建过程中创建的所有内容：项目的构建产物、临时配置、缓存、构建日志以及本地构建工具（如GNU Make）的输出。此目录的其他名称包括**构建根目录**和**二进制树**。
+CMake 在用户指定的路径中创建此目录。它将存储构建系统和构建过程中创建的所有内容：项目的构建产物、临时配置、缓存、构建日志以及本地构建工具（如 GNU Make）的输出。此目录的其他名称包括**构建根目录**和**二进制树**。
 
 记住的关键点：
 
 +   你的构建配置（构建系统）和构建产物将被创建在这里（例如二进制文件、可执行文件、库文件，以及用于最终链接的*目标文件*和归档文件）。
 
-+   CMake建议将该目录放置在源代码树目录之外（这种做法称为**源外构建**）。这样，我们可以防止项目的污染（**源内构建**）。
++   CMake 建议将该目录放置在源代码树目录之外（这种做法称为**源外构建**）。这样，我们可以防止项目的污染（**源内构建**）。
 
 +   它通过`-B`参数在*生成构建系统*时指定给`cmake`命令。
 
 +   这个目录并不是生成文件的最终目的地。相反，建议你的项目包含一个安装阶段，将最终的构件复制到系统中应有的位置，并删除所有用于构建的临时文件。
 
-不要将这个目录添加到版本控制系统（VCS）中——每个用户会为自己选择一个目录。如果你有充分的理由进行源代码内构建，请确保将这个目录添加到VCS忽略文件中（例如`.gitignore`）。
+不要将这个目录添加到版本控制系统（VCS）中——每个用户会为自己选择一个目录。如果你有充分的理由进行源代码内构建，请确保将这个目录添加到 VCS 忽略文件中（例如`.gitignore`）。
 
 ## 列表文件
 
-包含CMake语言的文件称为列表文件，可以通过调用`include()`和`find_package()`来互相包含，或者通过`add_subdirectory()`间接包含。CMake并不强制规定这些文件的命名规则，但根据惯例，它们的扩展名是`.cmake`。
+包含 CMake 语言的文件称为列表文件，可以通过调用`include()`和`find_package()`来互相包含，或者通过`add_subdirectory()`间接包含。CMake 并不强制规定这些文件的命名规则，但根据惯例，它们的扩展名是`.cmake`。
 
 ### 项目文件
 
-CMake项目使用`CMakeLists.txt`列表文件进行配置（注意，由于历史原因，这个文件的扩展名不常见）。该文件是每个项目源代码树顶端必须存在的文件，并且是配置阶段首先执行的文件。
+CMake 项目使用`CMakeLists.txt`列表文件进行配置（注意，由于历史原因，这个文件的扩展名不常见）。该文件是每个项目源代码树顶端必须存在的文件，并且是配置阶段首先执行的文件。
 
 顶级的`CMakeLists.txt`应该包含至少两个命令：
 
-+   `cmake_minimum_required(VERSION <x.xx>)`：设置CMake的期望版本，并告诉CMake如何处理与策略相关的遗留行为。
++   `cmake_minimum_required(VERSION <x.xx>)`：设置 CMake 的期望版本，并告诉 CMake 如何处理与策略相关的遗留行为。
 
-+   `project(<name> <OPTIONS>)`：命名项目（提供的名称将存储在`PROJECT_NAME`变量中），并指定配置项目的选项（更多内容请参见*第2章*，*CMake语言*）。
++   `project(<name> <OPTIONS>)`：命名项目（提供的名称将存储在`PROJECT_NAME`变量中），并指定配置项目的选项（更多内容请参见*第二章*，*CMake 语言*）。
 
-随着软件的成长，你可能希望将其划分为可以单独配置和推理的小单元。CMake通过引入具有独立`CMakeLists.txt`文件的子目录来支持这一点。你的项目结构可能类似于以下示例：
+随着软件的成长，你可能希望将其划分为可以单独配置和推理的小单元。CMake 通过引入具有独立`CMakeLists.txt`文件的子目录来支持这一点。你的项目结构可能类似于以下示例：
 
 ```cpp
 myProject/CMakeLists.txt
@@ -996,7 +994,7 @@ message("Top level CMakeLists.txt")
 add_subdirectory(api) 
 ```
 
-项目的主要方面在顶层文件中得到涵盖：管理依赖项、声明需求以及检测环境。我们还有一个`add_subdirectory(api)`命令，用来包含`api`子目录中的另一个`CMakeLists.txt`文件，以执行特定于应用程序API部分的步骤。
+项目的主要方面在顶层文件中得到涵盖：管理依赖项、声明需求以及检测环境。我们还有一个`add_subdirectory(api)`命令，用来包含`api`子目录中的另一个`CMakeLists.txt`文件，以执行特定于应用程序 API 部分的步骤。
 
 ### 缓存文件
 
@@ -1027,7 +1025,7 @@ CMAKE_CACHE_MINOR_VERSION:INTERNAL=19
 # ... more variables here ... 
 ```
 
-从头部注释中可以看到，这种格式非常易于理解。`EXTERNAL`部分的缓存项是供用户修改的，而`INTERNAL`部分则由CMake管理。
+从头部注释中可以看到，这种格式非常易于理解。`EXTERNAL`部分的缓存项是供用户修改的，而`INTERNAL`部分则由 CMake 管理。
 
 这里有几个关键点需要记住：
 
@@ -1035,27 +1033,27 @@ CMAKE_CACHE_MINOR_VERSION:INTERNAL=19
 
 +   你可以通过删除此文件来重置项目为默认配置；它将从列表文件重新生成。
 
-缓存变量可以从列表文件中读取和写入。有时，变量引用的求值过程会有些复杂；我们将在*第2章*，*CMake语言*中详细讨论这一点。
+缓存变量可以从列表文件中读取和写入。有时，变量引用的求值过程会有些复杂；我们将在*第二章*，*CMake 语言*中详细讨论这一点。
 
 ### 包定义文件
 
-CMake生态系统的一个重要组成部分是项目可以依赖的外部包。它们以无缝、跨平台的方式提供库和工具。希望提供CMake支持的包作者会附带一个CMake包配置文件。
+CMake 生态系统的一个重要组成部分是项目可以依赖的外部包。它们以无缝、跨平台的方式提供库和工具。希望提供 CMake 支持的包作者会附带一个 CMake 包配置文件。
 
-我们将在*第14章*，*安装与打包*中学习如何编写这些文件。与此同时，以下是一些值得注意的细节：
+我们将在*第十四章*，*安装与打包*中学习如何编写这些文件。与此同时，以下是一些值得注意的细节：
 
-+   **配置文件**（原始拼写）包含有关如何使用库的二进制文件、头文件和辅助工具的信息。有时，它们会公开可以在你的项目中使用的CMake宏和函数。
++   **配置文件**（原始拼写）包含有关如何使用库的二进制文件、头文件和辅助工具的信息。有时，它们会公开可以在你的项目中使用的 CMake 宏和函数。
 
 +   **配置文件**命名为`<PackageName>-config.cmake`或`<PackageName>Config.cmake`。
 
 +   使用`find_package()`命令来包含包。
 
-如果需要特定版本的包，CMake将会检查关联的`<PackageName>-config-version.cmake`或`<PackageName>ConfigVersion.cmake`。
+如果需要特定版本的包，CMake 将会检查关联的`<PackageName>-config-version.cmake`或`<PackageName>ConfigVersion.cmake`。
 
-如果供应商没有为包提供配置文件，有时配置会与CMake本身捆绑，或者可以通过项目中的**Find-module**（原始拼写）提供。
+如果供应商没有为包提供配置文件，有时配置会与 CMake 本身捆绑，或者可以通过项目中的**Find-module**（原始拼写）提供。
 
 ### 生成的文件
 
-许多文件是由`cmake`可执行文件在生成阶段生成的。因此，它们不应手动编辑。CMake将它们用作`cmake`安装操作、CTest和CPack的配置。
+许多文件是由`cmake`可执行文件在生成阶段生成的。因此，它们不应手动编辑。CMake 将它们用作`cmake`安装操作、CTest 和 CPack 的配置。
 
 可能会遇到的文件包括：
 
@@ -1065,31 +1063,31 @@ CMake生态系统的一个重要组成部分是项目可以依赖的外部包。
 
 +   `CPackConfig.cmake`
 
-如果你正在实现源代码构建，最好将它们添加到VCS忽略文件中。
+如果你正在实现源代码构建，最好将它们添加到 VCS 忽略文件中。
 
 ## JSON 和 YAML 文件
 
-CMake使用的其他格式包括**JavaScript对象表示法**（**JSON**）和**另一种标记语言**（**YAML**）。这些文件作为与外部工具（如IDE）进行通信的接口，或者提供可以轻松生成和解析的配置。
+CMake 使用的其他格式包括**JavaScript 对象表示法**（**JSON**）和**另一种标记语言**（**YAML**）。这些文件作为与外部工具（如 IDE）进行通信的接口，或者提供可以轻松生成和解析的配置。
 
 ### 预设文件
 
-项目的高级配置在需要指定诸如缓存变量、选择的生成器、构建树的路径等事项时，可能变得相对繁琐，特别是当我们有多种方式构建项目时。这时预设（presets）就派上用场了——我们可以通过提供一个存储所有详细信息的文件，而不是通过命令行手动配置这些值，并将其与项目一起发布。自CMake 3.25起，预设还允许我们配置**工作流**，将各个阶段（配置、构建、测试和打包）绑定为一个命名的执行步骤列表。
+项目的高级配置在需要指定诸如缓存变量、选择的生成器、构建树的路径等事项时，可能变得相对繁琐，特别是当我们有多种方式构建项目时。这时预设（presets）就派上用场了——我们可以通过提供一个存储所有详细信息的文件，而不是通过命令行手动配置这些值，并将其与项目一起发布。自 CMake 3.25 起，预设还允许我们配置**工作流**，将各个阶段（配置、构建、测试和打包）绑定为一个命名的执行步骤列表。
 
-如本章的*掌握命令行*部分所提到的，用户可以通过GUI选择预设，或者使用命令`--list-presets`并使用`--preset=<preset>`选项为构建系统选择一个预设。
+如本章的*掌握命令行*部分所提到的，用户可以通过 GUI 选择预设，或者使用命令`--list-presets`并使用`--preset=<preset>`选项为构建系统选择一个预设。
 
 预设存储在两个文件中：
 
 +   `CMakePresets.json`：这是供项目作者提供官方预设的文件。
 
-+   `CMakeUserPresets.json`：这是为那些希望根据自己的喜好自定义项目配置的用户设计的（可以将其添加到VCS忽略文件中）。
++   `CMakeUserPresets.json`：这是为那些希望根据自己的喜好自定义项目配置的用户设计的（可以将其添加到 VCS 忽略文件中）。
 
-预设在项目中并非必需，只有在高级场景下才会变得有用。详情请参见*第16章*，*编写CMake预设*。
+预设在项目中并非必需，只有在高级场景下才会变得有用。详情请参见*第十六章*，*编写 CMake 预设*。
 
-### 基于文件的API
+### 基于文件的 API
 
-CMake 3.14引入了一个API，允许外部工具查询构建系统信息：生成文件的路径、缓存条目、工具链等。我们提到这个非常高级的话题，是为了避免在文档中看到*基于文件的API*时产生困惑。该名称暗示了它的工作原理：必须将带有查询的JSON文件放置在构建树中的特定路径下。CMake将在构建系统生成期间读取该文件，并将响应写入另一个文件，以便外部应用程序解析。
+CMake 3.14 引入了一个 API，允许外部工具查询构建系统信息：生成文件的路径、缓存条目、工具链等。我们提到这个非常高级的话题，是为了避免在文档中看到*基于文件的 API*时产生困惑。该名称暗示了它的工作原理：必须将带有查询的 JSON 文件放置在构建树中的特定路径下。CMake 将在构建系统生成期间读取该文件，并将响应写入另一个文件，以便外部应用程序解析。
 
-基于文件的API是为了替代一个已被弃用的机制——*服务器模式*（或 `cmake-server`），该机制最终在CMake 3.26中被移除。
+基于文件的 API 是为了替代一个已被弃用的机制——*服务器模式*（或 `cmake-server`），该机制最终在 CMake 3.26 中被移除。
 
 ### 配置日志
 
@@ -1138,7 +1136,7 @@ CMake 提供了一种与平台无关的编程语言，配备了许多有用的�
 
 我们已经从 *掌握命令行* 部分学到，我们可以使用 `-P` 选项来执行脚本：`cmake -P script.cmake`。
 
-但是我们希望使用的脚本文件的实际要求是什么呢？其实并不复杂：脚本可以根据需要复杂，也可以只是一个空文件。不过，仍然建议在每个脚本的开头调用 `cmake_minimum_required()` 命令。该命令告诉 CMake 应该对项目中的后续命令应用哪些策略（详细内容请参见 *第 4 章*，*设置你的第一个 CMake 项目*）。
+但是我们希望使用的脚本文件的实际要求是什么呢？其实并不复杂：脚本可以根据需要复杂，也可以只是一个空文件。不过，仍然建议在每个脚本的开头调用 `cmake_minimum_required()` 命令。该命令告诉 CMake 应该对项目中的后续命令应用哪些策略（详细内容请参见 *第四章*，*设置你的第一个 CMake 项目*）。
 
 这是一个简单脚本的示例：
 
@@ -1157,7 +1155,7 @@ file(WRITE Hello.txt "I am writing to a file")
 
 CMake 项目可以使用外部模块来增强其功能。模块是用 CMake 语言编写的，包含宏定义、变量和执行各种功能的命令。它们的复杂程度从非常复杂的脚本（如 `CPack` 和 `CTest` 提供的脚本）到相对简单的脚本，例如 `AddFileDependencies` 或 `TestBigEndian`。
 
-CMake 分发版包含了超过 80 个不同的实用模块。如果这些还不够，你可以通过浏览一些策划的列表，如 [https://github.com/onqtam/awesome-cmake](https://github.com/onqtam/awesome-cmake)，从互联网上下载更多，或者从头编写你自己的模块。
+CMake 分发版包含了超过 80 个不同的实用模块。如果这些还不够，你可以通过浏览一些策划的列表，如 [`github.com/onqtam/awesome-cmake`](https://github.com/onqtam/awesome-cmake)，从互联网上下载更多，或者从头编写你自己的模块。
 
 要使用实用模块，我们需要调用 `include(<MODULE>)` 命令。以下是一个简单的项目，展示了这一过程：
 
@@ -1175,7 +1173,7 @@ message("LITTLE_ENDIAN")
 endif() 
 ```
 
-我们将在相关主题时学习哪些模块可用。如果你感兴趣，可以查看包含模块的完整列表，网址为 [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html)。
+我们将在相关主题时学习哪些模块可用。如果你感兴趣，可以查看包含模块的完整列表，网址为 [`cmake.org/cmake/help/latest/manual/cmake-modules.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html)。
 
 ## 查找模块
 
@@ -1185,7 +1183,7 @@ endif()
 
 例如，`FindCURL` 模块搜索一个流行的 *Client URL* 库，并定义以下变量：`CURL_FOUND`、`CURL_INCLUDE_DIRS`、`CURL_LIBRARIES` 和 `CURL_VERSION_STRING`。
 
-我们将在 *第9章*《*在 CMake 中管理依赖*》中更深入地讨论查找模块。
+我们将在 *第九章*《*在 CMake 中管理依赖*》中更深入地讨论查找模块。
 
 # 总结
 
@@ -1197,11 +1195,11 @@ endif()
 
 获取更多信息，您可以参考以下资源：
 
-+   官方 CMake 网页和文档：[https://cmake.org/](https://cmake.org/)
++   官方 CMake 网页和文档：[`cmake.org/`](https://cmake.org/)
 
-+   单配置生成器：[https://cgold.readthedocs.io/en/latest/glossary/single-config.html](https://cgold.readthedocs.io/en/latest/glossary/single-config.html)
++   单配置生成器：[`cgold.readthedocs.io/en/latest/glossary/single-config.html`](https://cgold.readthedocs.io/en/latest/glossary/single-config.html)
 
-+   CMake GUI 中阶段的划分：[https://stackoverflow.com/questions/39401003/](https://stackoverflow.com/questions/39401003/)
++   CMake GUI 中阶段的划分：[`stackoverflow.com/questions/39401003/`](https://stackoverflow.com/questions/39401003/)
 
 # 留下评论！
 

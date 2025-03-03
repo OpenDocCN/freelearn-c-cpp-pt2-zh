@@ -1,8 +1,6 @@
-# 4
+# 第四章：为 FetchContent 创建库
 
-# 为 FetchContent 创建库
-
-在[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用 FetchContent 处理外部依赖》中，我们详细了解了如何作为应用程序开发者使用 `FetchContent`。这是非常有用的，如果你不打算创建自己的库，那么这些知识会对你大有帮助。然而，如果你对创建库以在多个项目间共享（或者更好的是，与更广泛的开源社区共享）充满兴趣，那么本章将适合你。
+在*第三章*《使用 FetchContent 处理外部依赖》中，我们详细了解了如何作为应用程序开发者使用 `FetchContent`。这是非常有用的，如果你不打算创建自己的库，那么这些知识会对你大有帮助。然而，如果你对创建库以在多个项目间共享（或者更好的是，与更广泛的开源社区共享）充满兴趣，那么本章将适合你。
 
 在本章中，我们将介绍用于创建库的 CMake 命令，并通过 `FetchContent` 使其易于访问。你将在这里学到的技能不仅对你的库有帮助，还可以应用到其他不使用 CMake 的项目中。根据库的大小和复杂性，通常只需几个命令就能为库添加 `FetchContent` 支持。
 
@@ -20,7 +18,7 @@
 
 # 技术要求
 
-为了跟上进度，请确保你已经满足[*第一章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。包括以下内容：
+为了跟上进度，请确保你已经满足*第一章*《入门》的要求。包括以下内容：
 
 +   一台运行最新 **操作系统**（**OS**）的 Windows、Mac 或 Linux 机器
 
@@ -34,9 +32,9 @@
 
 ## 项目结构
 
-在我们查看 `CMakeLists.txt` 文件之前，先对项目结构做一些小的调整，以确保我们的库遵循常见的惯例。这些调整并非严格必要（我们在[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用 FetchContent 处理外部依赖》中包含的库（`timer_lib` 和 `as-c-math`）并未遵循这些指南），但了解这些惯例是有用的，并且它们将帮助我们在项目不断发展时保持整洁和有序。
+在我们查看 `CMakeLists.txt` 文件之前，先对项目结构做一些小的调整，以确保我们的库遵循常见的惯例。这些调整并非严格必要（我们在*第三章*《使用 FetchContent 处理外部依赖》中包含的库（`timer_lib` 和 `as-c-math`）并未遵循这些指南），但了解这些惯例是有用的，并且它们将帮助我们在项目不断发展时保持整洁和有序。
 
-从我们在[*第二章*](B21152_02.xhtml#_idTextAnchor032)《你好，CMake！》和[*第三章*](B21152_03.xhtml#_idTextAnchor065)《使用 FetchContent 处理外部依赖》中看到的 `array/` 文件夹开始，结构如下：
+从我们在*第二章*《你好，CMake！》和*第三章*《使用 FetchContent 处理外部依赖》中看到的 `array/` 文件夹开始，结构如下：
 
 ```cpp
 .
@@ -51,7 +49,7 @@
 
 为了支持重用，我们将把`array.h`和`array.c`移到我们“生命游戏”应用程序之外的新文件夹中（如果你在跟随教程，请在`minimal-cmake`仓库之外创建一个名为`minimal-cmake-array`的新文件夹，并将`array.h`和`array.c`复制到接下来展示的位置）。
 
-为了使一切保持自包含在*Minimal CMake*书籍仓库中（[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)），我们暂时将内容移至`ch4/part-1/lib/array`（可以将其视为顶级CMake项目的同义词）。
+为了使一切保持自包含在*Minimal CMake*书籍仓库中（[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)），我们暂时将内容移至`ch4/part-1/lib/array`（可以将其视为顶级 CMake 项目的同义词）。
 
 结构如下：
 
@@ -97,7 +95,7 @@
 
 使用第一种方法，可以明确知道依赖项的来源。这还减少了与其他库发生命名冲突的可能性（这种方法属于*代码卫生*的范畴）。
 
-另一种选择是为库文件添加前缀。例如，我们本可以选择将`array.h`重命名为`mc-array.h`，或`minimal-cmake-array.h`，并省略子文件夹。为文件、函数和类型名称（例如，`mc_array_push`）添加项目标识符作为前缀，也是避免与其他库命名冲突的好做法。对于C++，命名空间是首选的机制，但在C语言中，我们必须依赖显式的函数和类型前缀。这也是我们在数组实现中将采用的方法。
+另一种选择是为库文件添加前缀。例如，我们本可以选择将`array.h`重命名为`mc-array.h`，或`minimal-cmake-array.h`，并省略子文件夹。为文件、函数和类型名称（例如，`mc_array_push`）添加项目标识符作为前缀，也是避免与其他库命名冲突的好做法。对于 C++，命名空间是首选的机制，但在 C 语言中，我们必须依赖显式的函数和类型前缀。这也是我们在数组实现中将采用的方法。
 
 在这里展示的示例中，`src` 文件夹没有任何子文件夹。这是随意的，具体如何安排由库的作者决定。对于一个较小的库来说，`src` 下没有层级的扁平结构可能是可以的。而对于较大的库，我们可能会决定将某些文件分组以便更好地组织。由于 `src` 文件夹下的所有内容都可以视为库的私有部分，因此 `src` 下的结构不应影响库的使用者，所以它可以是你喜欢的任何结构。
 
@@ -146,13 +144,13 @@ project(mc-array LANGUAGES C)
 add_library(${PROJECT_NAME})
 ```
 
-由于我们创建的是一个库，而不是一个应用程序，我们必须使用`add_library`命令而不是`add_executable`。默认情况下，CMake会为我们创建一个静态库（对于静态库，内容将会被打包进我们的可执行文件并在编译时链接）。为了覆盖这个行为，在配置CMake项目时（运行`cmake -B build`），可以传递`-DBUILD_SHARED_LIBS=ON`来切换到构建共享库。为了确保在所有平台（Windows、macOS和Linux）上都能正常工作，我们需要做一些额外的工作，所以我们暂时不做处理。为了提供不同于默认的设置，可以在我们的`CMakeLists.txt`文件中添加一个选项，如下所示：
+由于我们创建的是一个库，而不是一个应用程序，我们必须使用`add_library`命令而不是`add_executable`。默认情况下，CMake 会为我们创建一个静态库（对于静态库，内容将会被打包进我们的可执行文件并在编译时链接）。为了覆盖这个行为，在配置 CMake 项目时（运行`cmake -B build`），可以传递`-DBUILD_SHARED_LIBS=ON`来切换到构建共享库。为了确保在所有平台（Windows、macOS 和 Linux）上都能正常工作，我们需要做一些额外的工作，所以我们暂时不做处理。为了提供不同于默认的设置，可以在我们的`CMakeLists.txt`文件中添加一个选项，如下所示：
 
 ```cpp
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 ```
 
-更多关于`BUILD_SHARED_LIBS`选项的信息，请参见[https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html](https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html)。
+更多关于`BUILD_SHARED_LIBS`选项的信息，请参见[`cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html`](https://cmake.org/cmake/help/latest/variable/BUILD_SHARED_LIBS.html)。
 
 为了硬编码静态或共享库，可以通过在库名后传递`STATIC`或`SHARED`来提供库类型给`add_library`。以下是一个示例：
 
@@ -164,7 +162,7 @@ add_library(${PROJECT_NAME} STATIC can be a good approach. If you’re creating 
 
 target_sources(${PROJECT_NAME} PRIVATE PRIVATE，这里作为`array.c`是实现细节，我们不希望（也不需要）它重新编译。唯一的区别是我们在新的位置引用它。
 
-            剩下的新命令（我们在[ *第3章* ](B21152_03.xhtml#_idTextAnchor065)，*使用 FetchContent 与外部依赖项* 中简要提到过，在查看依赖项链接时）是`target_include_directories`：
+            剩下的新命令（我们在 *第三章* ，*使用 FetchContent 与外部依赖项* 中简要提到过，在查看依赖项链接时）是`target_include_directories`：
 
 ```cpp
 target_include_directories(
@@ -176,7 +174,7 @@ target_include_directories(
 
             生成器表达式
 
-            看看之前提到的`target_include_directories`命令，它的第三行可能一开始看起来有点陌生。你看到的是CMake提供的一项功能，称为**生成器表达式**。如果我们暂时移除生成器表达式，命令看起来是这样的：
+            看看之前提到的`target_include_directories`命令，它的第三行可能一开始看起来有点陌生。你看到的是 CMake 提供的一项功能，称为**生成器表达式**。如果我们暂时移除生成器表达式，命令看起来是这样的：
 
 ```cpp
 target_include_directories(
@@ -203,18 +201,18 @@ target_include_directories(
 $<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 ```
 
-            在最简单的形式下，结构为`$<condition:value>`。如果`condition`被设置（即存在），则提供`value`；否则，表达式的结果为空。生成器表达式有点像C或C++中的三元操作符（`<condition> ? <true> : <false>`）。它本质上是一种简洁、声明式的方式，用来在`CMakeLists.txt`脚本中编写条件，而不需要依赖更冗长的`if`/`else`分支，这种分支采用的是更命令式的编程风格。
+            在最简单的形式下，结构为`$<condition:value>`。如果`condition`被设置（即存在），则提供`value`；否则，表达式的结果为空。生成器表达式有点像 C 或 C++中的三元操作符（`<condition> ? <true> : <false>`）。它本质上是一种简洁、声明式的方式，用来在`CMakeLists.txt`脚本中编写条件，而不需要依赖更冗长的`if`/`else`分支，这种分支采用的是更命令式的编程风格。
 
-            使用生成器表达式时需要找到一个平衡点；它们可以方便并简化`CMakeLists.txt`文件，但如果过度使用，可能会让代码更难理解。要明智地使用它们，如果你认为使用显式的`if`/`else`语句更清晰，就应当选择这种方式。通过使用多个CMake变量将复杂的生成器表达式拆解开来也可以是一种有价值的方式，而不是试图将所有内容都写成一个单一的表达式。
+            使用生成器表达式时需要找到一个平衡点；它们可以方便并简化`CMakeLists.txt`文件，但如果过度使用，可能会让代码更难理解。要明智地使用它们，如果你认为使用显式的`if`/`else`语句更清晰，就应当选择这种方式。通过使用多个 CMake 变量将复杂的生成器表达式拆解开来也可以是一种有价值的方式，而不是试图将所有内容都写成一个单一的表达式。
 
-            命令`cmake -B build`中，CMake首先执行配置步骤，然后执行生成步骤。这时，生成器表达式会被求值，项目文件会被创建。如下所示，这是`cmake`命令的输出：
+            命令`cmake -B build`中，CMake 首先执行配置步骤，然后执行生成步骤。这时，生成器表达式会被求值，项目文件会被创建。如下所示，这是`cmake`命令的输出：
 
 ```cpp
 -- Configuring done (8.7s)
 -- Generating done (0.0s)
 ```
 
-            使用生成器表达式可能会很困难，能够调试表达式的结果是非常有用的。不幸的是，普通的CMake `message`语句无法与生成器表达式一起输出日志到控制台，因为它们的求值时间不同（配置时间与生成时间不同）。为了解决这个问题，可以通过以下方法将表达式的结果写入文件：
+            使用生成器表达式可能会很困难，能够调试表达式的结果是非常有用的。不幸的是，普通的 CMake `message`语句无法与生成器表达式一起输出日志到控制台，因为它们的求值时间不同（配置时间与生成时间不同）。为了解决这个问题，可以通过以下方法将表达式的结果写入文件：
 
 ```cpp
 file(GENERATE OUTPUT <filename> CONTENT "$<...>")
@@ -222,11 +220,11 @@ file(GENERATE OUTPUT <filename> CONTENT "$<...>")
 
             运行`cmake -B build`时，这将把生成器表达式（`"$<...>"`）的结果写入指定的文件名（如果提供了相对路径，它将位于`build/`文件夹内）。然后可以检查文件的内容，确认结果是否符合预期。
 
-            想要了解更多关于生成器表达式及其支持的多种变体，可以访问[https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
+            想要了解更多关于生成器表达式及其支持的多种变体，可以访问[`cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
 
             包含接口
 
-            我们已经讨论了为什么指定`target_include_directories`很重要以及什么是生成器表达式，但没有解释为什么特别需要`BUILD_LOCAL_INTERFACE`。原因在于，这使得我们能够根据是否在构建库或在安装后使用它来使用不同的包含路径。安装对库来说很重要，这是我们将在[*第7章*](B21152_07.xhtml#_idTextAnchor170)《*为你的库添加安装支持*》中详细讲解的内容，但现在，只需知道有这种替代方案即可。在库的`CMakeLists.txt`文件中，通常会看到类似这样的内容：
+            我们已经讨论了为什么指定`target_include_directories`很重要以及什么是生成器表达式，但没有解释为什么特别需要`BUILD_LOCAL_INTERFACE`。原因在于，这使得我们能够根据是否在构建库或在安装后使用它来使用不同的包含路径。安装对库来说很重要，这是我们将在*第七章*《*为你的库添加安装支持*》中详细讲解的内容，但现在，只需知道有这种替代方案即可。在库的`CMakeLists.txt`文件中，通常会看到类似这样的内容：
 
 ```cpp
 target_include_directories(
@@ -239,7 +237,7 @@ target_include_directories(
 
             BUILD_LOCAL_INTERFACE 与 BUILD_INTERFACE
 
-            你可能会遇到`BUILD_INTERFACE`，除此之外还有`BUILD_LOCAL_INTERFACE`。`BUILD_LOCAL_INTERFACE`是一个较新的生成表达式（在CMake `3.26`版本中添加），它仅在同一构建系统中的另一个目标使用时才会展开其内容，而`BUILD_INTERFACE`会在同一构建系统中的另一个目标使用时展开其内容，并且当属性通过`export`命令导出时也会展开。由于我们不打算从构建树中导出目标，因此我们选择了这两个命令中限制性更强的那个。
+            你可能会遇到`BUILD_INTERFACE`，除此之外还有`BUILD_LOCAL_INTERFACE`。`BUILD_LOCAL_INTERFACE`是一个较新的生成表达式（在 CMake `3.26`版本中添加），它仅在同一构建系统中的另一个目标使用时才会展开其内容，而`BUILD_INTERFACE`会在同一构建系统中的另一个目标使用时展开其内容，并且当属性通过`export`命令导出时也会展开。由于我们不打算从构建树中导出目标，因此我们选择了这两个命令中限制性更强的那个。
 
             最后，我们将编译特性设置为标准版本，以确保在不同编译器之间获得一致的行为：
 
@@ -284,7 +282,7 @@ target_link_libraries(
 
 ```cpp
 
-			This means we need to run our CMake configure and build commands (`cmake -B build` and `cmake --build build`) from `part-<n>/app`, instead of `part-<n>` (you could also use the `-S` option and pass the source folder explicitly, as discussed in [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello, CMake!* if preferred).
+			This means we need to run our CMake configure and build commands (`cmake -B build` and `cmake --build build`) from `part-<n>/app`, instead of `part-<n>` (you could also use the `-S` option and pass the source folder explicitly, as discussed in *Chapter 2*, *Hello, CMake!* if preferred).
 			A complete example is presented in `ch4/part-1/app` to show how everything fits together. A small detail to note is the use of `SOURCE_SUBDIR` in the `FetchContent_Declare` command. This lets us specify a subdirectory in the repository as the root to use for `FetchContent`. As we’ve extracted our `array` type to a library in the *Minimal CMake* repository, we can treat that folder as the root of the CMake project (for completeness, the full repository will be downloaded, but only the files specified under `SOURCE_SUBDIR` will be used in the build).
 			We can also use `SOURCE_DIR` and a relative path, which can be useful when we’re working on the library and application together. This would look like the following:
 
@@ -433,7 +431,7 @@ PUBLIC "$<BUILD_LOCAL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/build/mc_gol
 target_compile_definitions(
   ${PROJECT_NAME}
   PUBLIC $<$<NOT:$<BOOL:${MC_GOL_SHARED}>>:MC_GOL_STATIC_DEFINE, but only if we’re not building a shared library. This will guarantee that MC_GOL_EXPORT won’t be expanded when building as a static library (see ch4/part-5/lib/CMakeLists.txt for an example). This can be useful if you’re reusing a generated version of mc_gol_export.h that has MC_GOL_EXPORT set to something you don’t want. In our case, it’s not strictly necessary but it can be a good failsafe to keep in place.
-			To learn more about `GenerateExportHeader`, you can read the full documentation, which is available at [https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html](https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html).
+			To learn more about `GenerateExportHeader`, you can read the full documentation, which is available at [`cmake.org/cmake/help/latest/module/GenerateExportHeader.html`](https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html).
 			With `mc_gol_export.h` created, and our `target_include_directories` command updated, all that remains is to annotate our symbols (in the case of `gol.h`, our functions) with `MC_GOL_EXPORT`. Here’s an example:
 
 ```
@@ -526,7 +524,7 @@ endif()
 ```cpp
 
 			This sets up a custom command to run immediately after the build completes (`POST_BUILD`). The target the command is bound to is our application, and the command copies the target file (`$<TARGET_FILE:mc-gol>`) to the directory of our application’s target binary file (`$<TARGET_FILE_DIR:${PROJECT_NAME}>`). In this case, when `mc-gol.dll` is built, it is written to `build\_deps\minimal-cmake-gol-build\Debug\mc-gol.dll` first, after which it is copied to `build\Debug` once our application (`minimal-cmake_game-of-life_console`) has finished building.
-			One advantage of this approach over using the `set_target_properties(... RUNTIME_OUTPUT_DIRECTORY` method is that this works for libraries outside the current build (for example, installed libraries found using `find_package`, something we’ll cover in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and ExternalProject_Add*). This consistency is one reason to prefer this approach; however, it depends on the type of application you’re building. If you know the library will always be included in the main build using `FetchContent` or `add_subdirectory`, then sticking with setting `RUNTIME_OUTPUT_DIRECTORY` is a fine choice.
+			One advantage of this approach over using the `set_target_properties(... RUNTIME_OUTPUT_DIRECTORY` method is that this works for libraries outside the current build (for example, installed libraries found using `find_package`, something we’ll cover in *Chapter 6*, *Installing Dependencies and ExternalProject_Add*). This consistency is one reason to prefer this approach; however, it depends on the type of application you’re building. If you know the library will always be included in the main build using `FetchContent` or `add_subdirectory`, then sticking with setting `RUNTIME_OUTPUT_DIRECTORY` is a fine choice.
 			Making things relocatable on macOS and Linux
 			We spent a bit of time dealing with DLL loading issues on Windows, but both macOS and Linux also need some attention to work reliably across different locations. The reason we had to copy `mc-gol.dll` to the application folder on Windows was that our application wouldn’t start without it there. The good news is that on macOS and Linux, we don’t need to do that because when we build the project, our application will record the location of the shared library and know where to load it from.
 			This works great until we decide to move our library to another location. Suppose we want to zip up the contents of our project and share it with a friend, or just check it runs on another machine. If we try this as-is, chances are you’ll see the following error:
@@ -579,7 +577,7 @@ Load command 16
 
 0x..01d @loader_path 和 $ORIGIN 出现如预期。
 
-            要了解有关 `CMake` 中 `RPATH` 处理的更多信息，请访问 [https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling)。在配置共享库时，有许多不同的方法，我们只是初步探讨了一个可能的解决方案。这是一个可以继续探索的领域，具体取决于您将要创建的应用程序类型。在本书后面讨论安装库和打包项目时，我们一定会重新讨论这些主题。
+            要了解有关 `CMake` 中 `RPATH` 处理的更多信息，请访问 [`gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling`](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling)。在配置共享库时，有许多不同的方法，我们只是初步探讨了一个可能的解决方案。这是一个可以继续探索的领域，具体取决于您将要创建的应用程序类型。在本书后面讨论安装库和打包项目时，我们一定会重新讨论这些主题。
 
             最终跨平台增强
 
@@ -634,7 +632,7 @@ set_target_properties(
 
             为了更保险起见，如果我们不是以共享库的方式构建 `mc-gol`，我们还会添加 `MC_GOL_STATIC_DEFINE`（尽管在这种情况下，这并不是严格必要的，但这是一个很好的、低成本的防御性措施，可以避免将来可能出现的链接时问题，这取决于 `mc_gol_export.h` 的状态）。
 
-            若想查看所有内容，可以访问 [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake) 并查看 `ch4/part-5/lib/gol/CMakeLists.txt`。
+            若想查看所有内容，可以访问 [`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake) 并查看 `ch4/part-5/lib/gol/CMakeLists.txt`。
 
             这就完成了我们对 *生命游戏* 库的所有修改！在进入下一章之前，我们还有一个重要的主题尚未讨论。
 
@@ -658,7 +656,7 @@ target_compile_features(${PROJECT_NAME} INTERFACE c_std_17)
 
             该文件应该与我们之前看到的 `CMakeLists.txt` 文件非常相似。主要的不同点是添加了 `INTERFACE` 关键字，取代了 `add_library` 命令中的 `STATIC` 或 `SHARED`，以及特定的 `target_...` 命令中的 `PUBLIC` 或 `PRIVATE`。
 
-            `INTERFACE`关键字告知 CMake 这个目标没有源文件需要构建，也不会生成任何工件（库文件）。它所做的只是提供使用它的要求（在我们的例子中，我们指定了包含文件的位置，并要求使用 `c_std_17` 或更高版本）。`INTERFACE` 关键字还允许我们通过 `target_sources` 命令为依赖的目标指定一组源文件进行编译（我们将在[*第9章*](B21152_09.xhtml#_idTextAnchor195)中看到此用途，*为项目编写测试*）。
+            `INTERFACE`关键字告知 CMake 这个目标没有源文件需要构建，也不会生成任何工件（库文件）。它所做的只是提供使用它的要求（在我们的例子中，我们指定了包含文件的位置，并要求使用 `c_std_17` 或更高版本）。`INTERFACE` 关键字还允许我们通过 `target_sources` 命令为依赖的目标指定一组源文件进行编译（我们将在*第九章*中看到此用途，*为项目编写测试*）。
 
             上面的代码是一个人为的示例，我们提取了一个不特定于*生命游戏*的单一有用工具函数，未来可能会使用（并且可能会添加）。这个函数是 `try_wrap`，它本质上是一个更强大的取模函数，能在处理负数时更好地进行环绕运算。
 
@@ -677,17 +675,17 @@ target_link_libraries(<main-app> PRIVATE mc-utils)
 
             由于这仍然是一个 C 语言的仅头文件库，我们需要用 `static` 来注解我们的函数实现，以避免链接错误。这将导致在每个翻译单元（`.c` 文件）中生成函数的副本，这并不理想，但在这个简单的例子中是可行的。C++ 对仅头文件库的支持要好得多。在这种情况下，应该首选 `inline` 关键字（`inline` 在 C 语言中也受支持，但它在 C 中的含义与 C++ 中有所不同，使用起来也稍微复杂一些）。
 
-            以这种方式使用仅包含头文件的库提供了在[*第3章*](B21152_03.xhtml#_idTextAnchor065)中讨论的所有优势，*使用 FetchContent 处理外部依赖项*，包括将代码和依赖项分开，并使设置包含路径变得更加简单。
+            以这种方式使用仅包含头文件的库提供了在*第三章*中讨论的所有优势，*使用 FetchContent 处理外部依赖项*，包括将代码和依赖项分开，并使设置包含路径变得更加简单。
 
             你可以在 `ch4/part6/lib/utils/CMakeLists.txt` 和 `ch4/part6/app/CMakeLists.txt` 中找到完整的示例。
 
             摘要
 
-            如果你已经走到这一步，给自己一个值得的鼓励——你已经走了很长一段路！在本章中，我们讨论了如何使库与`FetchContent`兼容。这包括回顾项目的物理结构、如何创建库，以及如何使用生成器表达式来控制包含接口。接着，我们查看了如何使用我们的新库。在此基础上，我们将我们的*生命游戏*逻辑提取到一个具有新接口的独立库中。我们深入探讨了如何将其制作成共享库，以及在Windows、macOS和Linux之间需要考虑的许多问题，还探讨了CMake如何帮助我们（通过导出头文件、在Windows上为DLL复制创建自定义命令，以及如何定制目标属性以帮助在macOS和Linux上创建可移动的库）。最后，我们通过做一些小的改进来帮助避免跨平台问题，并查看了接口（或仅头文件）库以及如何使用CMake创建它们。
+            如果你已经走到这一步，给自己一个值得的鼓励——你已经走了很长一段路！在本章中，我们讨论了如何使库与`FetchContent`兼容。这包括回顾项目的物理结构、如何创建库，以及如何使用生成器表达式来控制包含接口。接着，我们查看了如何使用我们的新库。在此基础上，我们将我们的*生命游戏*逻辑提取到一个具有新接口的独立库中。我们深入探讨了如何将其制作成共享库，以及在 Windows、macOS 和 Linux 之间需要考虑的许多问题，还探讨了 CMake 如何帮助我们（通过导出头文件、在 Windows 上为 DLL 复制创建自定义命令，以及如何定制目标属性以帮助在 macOS 和 Linux 上创建可移动的库）。最后，我们通过做一些小的改进来帮助避免跨平台问题，并查看了接口（或仅头文件）库以及如何使用 CMake 创建它们。
 
-            如果你还没有，请花一些时间通过访问[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)来熟悉本章讨论的示例，并尝试配置和构建这些项目（请参见`ch4`中的逐步示例）。实际的示例对于构建对这些概念的理解和熟悉非常有帮助。希望其中一些示例应该很容易提取并用于你的项目。了解如何创建库是一个重要的里程碑，并且为编写别人可以轻松使用的代码提供了令人兴奋的机会。
+            如果你还没有，请花一些时间通过访问[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)来熟悉本章讨论的示例，并尝试配置和构建这些项目（请参见`ch4`中的逐步示例）。实际的示例对于构建对这些概念的理解和熟悉非常有帮助。希望其中一些示例应该很容易提取并用于你的项目。了解如何创建库是一个重要的里程碑，并且为编写别人可以轻松使用的代码提供了令人兴奋的机会。
 
-            现在你已经对创建库有了扎实的理解，是时候看看如何利用一些有用的CMake功能，使日常开发更快、更简单和更可靠了。我们将在下一章中做具体介绍。
+            现在你已经对创建库有了扎实的理解，是时候看看如何利用一些有用的 CMake 功能，使日常开发更快、更简单和更可靠了。我们将在下一章中做具体介绍。
 
 ```cpp
 

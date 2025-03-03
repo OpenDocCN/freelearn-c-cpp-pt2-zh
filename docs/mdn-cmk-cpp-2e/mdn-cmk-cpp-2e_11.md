@@ -1,6 +1,4 @@
-# 11
-
-# 测试框架
+# 第十一章：测试框架
 
 有经验的专业人士知道，测试必须自动化。几年前有人向他们解释过这一点，或者他们是通过吃了不少苦头才学到这一点。这种做法对没有经验的程序员来说并不那么显而易见；他们觉得这只是额外的、无意义的工作，似乎没有带来太多价值。可以理解：当一个人刚开始编写代码时，他们还没有创建真正复杂的解决方案，也没有在大型代码库上工作。很可能，他们是自己独立开发他们的个人项目。这些早期的项目很少超过几个月就能完成，因此几乎没有机会看到代码在较长时间内如何退化。
 
@@ -24,7 +22,7 @@
 
 # 技术要求
 
-您可以在 GitHub 上找到本章中出现的代码文件，地址是 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch11](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch11)。
+您可以在 GitHub 上找到本章中出现的代码文件，地址是 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch11`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch11)。
 
 要构建本书中提供的示例，请始终使用推荐的命令：
 
@@ -51,13 +49,13 @@ cmake --build <build tree>
 
 # 使用 CTest 标准化 CMake 中的测试
 
-从根本上说，自动化测试就是运行一个可执行文件，将你的**被测试系统**（**SUT**）置于特定状态，执行你想要测试的操作，并检查结果是否符合预期。你可以将它们视为完成句子`GIVEN_<CONDITION>_WHEN_<SCENARIO>_THEN_<EXPECTED-OUTCOME>`的结构化方式，并验证它是否对SUT成立。一些资源建议按照这种方式命名你的测试函数：例如，`GIVEN_4_and_2_WHEN_Sum_THEN_returns_6`。
+从根本上说，自动化测试就是运行一个可执行文件，将你的**被测试系统**（**SUT**）置于特定状态，执行你想要测试的操作，并检查结果是否符合预期。你可以将它们视为完成句子`GIVEN_<CONDITION>_WHEN_<SCENARIO>_THEN_<EXPECTED-OUTCOME>`的结构化方式，并验证它是否对 SUT 成立。一些资源建议按照这种方式命名你的测试函数：例如，`GIVEN_4_and_2_WHEN_Sum_THEN_returns_6`。
 
-实现和执行这些测试有很多方法，这取决于你选择的框架、如何将其与SUT连接以及其具体设置。对于首次与项目互动的用户来说，即使是像测试二进制文件的文件名这样的细节，也会影响他们的体验。因为没有标准的命名约定，一个开发者可能会将他们的测试可执行文件命名为`test_my_app`，另一个可能选择`unit_tests`，而第三个可能选择一个不太直接的名称或根本不进行测试。弄清楚要运行哪个文件、使用哪个框架、传递什么参数以及如何收集结果，都是用户宁愿避免的麻烦。
+实现和执行这些测试有很多方法，这取决于你选择的框架、如何将其与 SUT 连接以及其具体设置。对于首次与项目互动的用户来说，即使是像测试二进制文件的文件名这样的细节，也会影响他们的体验。因为没有标准的命名约定，一个开发者可能会将他们的测试可执行文件命名为`test_my_app`，另一个可能选择`unit_tests`，而第三个可能选择一个不太直接的名称或根本不进行测试。弄清楚要运行哪个文件、使用哪个框架、传递什么参数以及如何收集结果，都是用户宁愿避免的麻烦。
 
-CMake通过一个独立的`ctest`命令行工具解决了这个问题。通过项目作者通过列表文件配置，它提供了一种标准化的测试运行方式。这种统一的接口适用于每个使用CMake构建的项目。遵循这个标准，你将享受到其他好处：将项目集成到**持续集成/持续部署**（**CI/CD**）管道中变得更容易，并且测试结果能更方便地显示在像Visual Studio或CLion这样的IDE中。最重要的是，你只需付出最小的努力，就能获得一个强大的测试运行工具。
+CMake 通过一个独立的`ctest`命令行工具解决了这个问题。通过项目作者通过列表文件配置，它提供了一种标准化的测试运行方式。这种统一的接口适用于每个使用 CMake 构建的项目。遵循这个标准，你将享受到其他好处：将项目集成到**持续集成/持续部署**（**CI/CD**）管道中变得更容易，并且测试结果能更方便地显示在像 Visual Studio 或 CLion 这样的 IDE 中。最重要的是，你只需付出最小的努力，就能获得一个强大的测试运行工具。
 
-那么，如何在一个已经配置好的项目中使用CTest运行测试呢？你需要选择以下三种操作模式之一：
+那么，如何在一个已经配置好的项目中使用 CTest 运行测试呢？你需要选择以下三种操作模式之一：
 
 +   仪表板
 
@@ -65,7 +63,7 @@ CMake通过一个独立的`ctest`命令行工具解决了这个问题。通过�
 
 +   构建并测试
 
-**仪表板模式**允许你将测试结果发送到一个名为CDash的独立工具，也是Kitware开发的。CDash收集并展示软件质量测试结果，提供一个易于导航的仪表板。对于非常大的项目，这个话题非常有用，但超出了本书的讨论范围。
+**仪表板模式**允许你将测试结果发送到一个名为 CDash 的独立工具，也是 Kitware 开发的。CDash 收集并展示软件质量测试结果，提供一个易于导航的仪表板。对于非常大的项目，这个话题非常有用，但超出了本书的讨论范围。
 
 **测试模式**的命令行如下：
 
@@ -73,9 +71,9 @@ CMake通过一个独立的`ctest`命令行工具解决了这个问题。通过�
 ctest [<options>] 
 ```
 
-在这个模式下，CTest应该在你使用CMake构建项目后，在构建树中运行。这里有很多可用的选项，但在深入讨论之前，我们需要解决一个小小的不便：`ctest`二进制文件必须在构建树中运行，且只能在项目构建完成后运行。在开发周期中，这可能会有点尴尬，因为你需要运行多个命令并在目录之间切换。
+在这个模式下，CTest 应该在你使用 CMake 构建项目后，在构建树中运行。这里有很多可用的选项，但在深入讨论之前，我们需要解决一个小小的不便：`ctest`二进制文件必须在构建树中运行，且只能在项目构建完成后运行。在开发周期中，这可能会有点尴尬，因为你需要运行多个命令并在目录之间切换。
 
-为了简化这一过程，CTest提供了**构建并测试模式**。我们将首先探索这个模式，以便稍后能全神贯注地讨论**测试模式**。
+为了简化这一过程，CTest 提供了**构建并测试模式**。我们将首先探索这个模式，以便稍后能全神贯注地讨论**测试模式**。
 
 ## 构建并测试模式
 
@@ -94,7 +92,7 @@ ctest --build-and-test <source-tree> <build-tree>
 ctest --build-and-test project/source-tree /tmp/build-tree --build-generator "Unix Makefiles" --test-command ctest 
 ```
 
-在此命令中，我们指定了源路径和构建路径，并选择了一个构建生成器。所有三个都必须指定，并遵循`cmake`命令的规则，详细描述见*第1章*，*CMake初步使用指南*。
+在此命令中，我们指定了源路径和构建路径，并选择了一个构建生成器。所有三个都必须指定，并遵循`cmake`命令的规则，详细描述见*第一章*，*CMake 初步使用指南*。
 
 您可以添加更多参数，通常它们分为三类：配置控制、构建过程或测试设置。
 
@@ -102,7 +100,7 @@ ctest --build-and-test project/source-tree /tmp/build-tree --build-generator "Un
 
 +   `--build-options`—为`cmake`配置包含额外选项。将其放在`--test-command`之前，且`--test-command`必须位于最后。
 
-+   `--build-two-config`—为CMake运行两次配置阶段。
++   `--build-two-config`—为 CMake 运行两次配置阶段。
 
 +   `--build-nocmake`—跳过配置阶段。
 
@@ -110,7 +108,7 @@ ctest --build-and-test project/source-tree /tmp/build-tree --build-generator "Un
 
 +   `--build-generator-toolset`—提供一个特定于生成器的工具集。
 
-+   `--build-makeprogram`—为基于Make或Ninja的生成器指定一个`make`可执行文件。
++   `--build-makeprogram`—为基于 Make 或 Ninja 的生成器指定一个`make`可执行文件。
 
 构建阶段的参数如下：
 
@@ -128,15 +126,15 @@ ctest --build-and-test project/source-tree /tmp/build-tree --build-generator "Un
 
 ## 测试模式
 
-在构建项目后，您可以在构建目录中使用`ctest`命令来运行测试。如果您正在使用构建和测试模式，这将由系统为您完成。通常情况下，只运行不带任何额外标志的`ctest`就足够了。如果所有测试都成功，`ctest`将返回一个`0`的退出码（在类Unix系统上），您可以在CI/CD管道中验证此退出码，以防止将有缺陷的更改合并到生产分支。
+在构建项目后，您可以在构建目录中使用`ctest`命令来运行测试。如果您正在使用构建和测试模式，这将由系统为您完成。通常情况下，只运行不带任何额外标志的`ctest`就足够了。如果所有测试都成功，`ctest`将返回一个`0`的退出码（在类 Unix 系统上），您可以在 CI/CD 管道中验证此退出码，以防止将有缺陷的更改合并到生产分支。
 
-编写良好的测试与编写生产代码本身一样具有挑战性。我们将系统被测试单元（SUT）设置为特定状态，运行单个测试，然后销毁SUT实例。这个过程相当复杂，可能会产生各种问题：跨测试污染、时序和并发干扰、资源竞争、死锁导致的执行冻结等。
+编写良好的测试与编写生产代码本身一样具有挑战性。我们将系统被测试单元（SUT）设置为特定状态，运行单个测试，然后销毁 SUT 实例。这个过程相当复杂，可能会产生各种问题：跨测试污染、时序和并发干扰、资源竞争、死锁导致的执行冻结等。
 
-幸运的是，CTest提供了多种选项来缓解这些问题。您可以控制运行哪些测试、它们的执行顺序、它们生成的输出、时间限制、重复率等。以下部分将提供必要的背景信息，并简要概述最有用的选项。
+幸运的是，CTest 提供了多种选项来缓解这些问题。您可以控制运行哪些测试、它们的执行顺序、它们生成的输出、时间限制、重复率等。以下部分将提供必要的背景信息，并简要概述最有用的选项。
 
 ### 查询测试
 
-我们可能需要做的第一件事是了解哪些测试实际上已经为项目编写。CTest提供了`-N`选项，该选项禁用执行并只打印一个列表，如下所示：
+我们可能需要做的第一件事是了解哪些测试实际上已经为项目编写。CTest 提供了`-N`选项，该选项禁用执行并只打印一个列表，如下所示：
 
 ```cpp
 # ctest -N
@@ -148,9 +146,9 @@ Total Tests: 2
 
 你可能希望使用`-N`与下一节描述的过滤器来检查在应用过滤器时会执行哪些测试。
 
-如果你需要一种可以被自动化工具处理的JSON格式，可以使用`ctest`并加上`--show-only=json-v1`选项。
+如果你需要一种可以被自动化工具处理的 JSON 格式，可以使用`ctest`并加上`--show-only=json-v1`选项。
 
-CTest还提供了一种机制，通过`LABELS`关键字对测试进行分组。要列出所有可用的标签（但不实际执行任何测试），可以使用`--print-labels`。当测试通过`add_test(<name> <test-command>)`命令手动定义在列表文件中时，此选项非常有用，因为你可以通过测试属性指定单独的标签，像这样：
+CTest 还提供了一种机制，通过`LABELS`关键字对测试进行分组。要列出所有可用的标签（但不实际执行任何测试），可以使用`--print-labels`。当测试通过`add_test(<name> <test-command>)`命令手动定义在列表文件中时，此选项非常有用，因为你可以通过测试属性指定单独的标签，像这样：
 
 ```cpp
 set_tests_properties(<name> PROPERTIES LABELS "<label>") 
@@ -174,7 +172,7 @@ set_tests_properties(<name> PROPERTIES LABELS "<label>")
 
 高级场景可以通过`--tests-information`选项（或其简写形式`-I`）来实现。此选项接受用逗号分隔的格式`<start>,<end>,<step>,<test-IDs>`。你可以省略任何字段，但需要保留逗号。`<Test IDs>`选项是一个逗号分隔的测试序号列表。例如：
 
-+   `-I 3,,` 将跳过测试1和测试2（从第三个测试开始执行）
++   `-I 3,,` 将跳过测试 1 和测试 2（从第三个测试开始执行）
 
 +   `-I ,2,` 将只运行第一个和第二个测试
 
@@ -238,7 +236,7 @@ CTest 会存储失败测试的名称。为了节省时间在漫长的测试套�
 
 我根据经验知道，“足够的信息”通常是够用的，直到它不再足够。有时，我们可能希望查看通过测试的输出，也许是为了检查它们是否真正有效（而不是在没有错误的情况下悄无声息地停止）。要获取更详细的输出，添加 `-V` 选项（或者如果你想在自动化管道中明确显示，可以使用 `--verbose`）。如果这还不够，你可能需要使用 `-VV` 或 `--extra-verbose`。对于极为深入的调试，使用 `--debug`（但要准备好面对包含所有细节的海量文本）。
 
-如果你想要的是相反的效果，CTest 还提供了“Zen模式”，可以通过 `-Q` 或 `--quiet` 启用。启用后将不会打印任何输出（你可以停止担心并学会喜爱这个错误）。看起来这个选项除了让人困惑之外没有其他用途，但请注意，输出仍然会存储在测试文件中（默认存储在 `./Testing/Temporary`）。自动化管道可以检查退出代码是否为非零值，并收集日志文件进行进一步处理，而不会在主输出中堆积可能让不熟悉该产品的开发人员困惑的细节。
+如果你想要的是相反的效果，CTest 还提供了“Zen 模式”，可以通过 `-Q` 或 `--quiet` 启用。启用后将不会打印任何输出（你可以停止担心并学会喜爱这个错误）。看起来这个选项除了让人困惑之外没有其他用途，但请注意，输出仍然会存储在测试文件中（默认存储在 `./Testing/Temporary`）。自动化管道可以检查退出代码是否为非零值，并收集日志文件进行进一步处理，而不会在主输出中堆积可能让不熟悉该产品的开发人员困惑的细节。
 
 要将日志存储到特定路径，请使用 `-O <file>`，`--output-log <file>` 选项。如果你遇到输出过长的问题，可以使用两个限制选项，将其限制为每个测试的给定字节数：`--test-output-size-passed <size>` 和 `--test-output-size-failed <size>`。
 
@@ -250,13 +248,13 @@ CTest 会存储失败测试的名称。为了节省时间在漫长的测试套�
 
 +   `-j <jobs>, --parallel <jobs>`—设置并行执行的测试数量。这对于加速开发过程中执行长时间运行的测试非常有用。需要注意的是，在一个繁忙的环境中（共享测试运行器上），它可能会因为调度的原因产生不利影响。通过下一个选项可以稍微减轻这个问题。
 
-+   `--test-load <level>`—以一种不超过`<level>`值的方式调度并行测试，以避免CPU负载过高（按最佳努力）。
++   `--test-load <level>`—以一种不超过`<level>`值的方式调度并行测试，以避免 CPU 负载过高（按最佳努力）。
 
 +   `--timeout <seconds>`—指定单个测试的默认时间限制。
 
 现在我们理解了如何在不同的场景中执行`ctest`，接下来我们学习如何添加一个简单的测试。
 
-# 为CTest创建最基本的单元测试
+# 为 CTest 创建最基本的单元测试
 
 从技术上讲，即使没有任何框架，也可以编写单元测试。我们所需要做的就是创建我们要测试的类的实例，执行其中一个方法，然后检查新的状态或返回值是否符合我们的期望。然后，我们报告结果并删除测试对象。让我们试试吧。
 
@@ -289,7 +287,7 @@ int main() {
 } 
 ```
 
-没有什么太花哨的——`main.cpp`仅仅包含了`calc.h`头文件，并调用了`Calc`对象的两个方法。让我们快速浏览一下`Calc`的接口，这是我们的SUT：
+没有什么太花哨的——`main.cpp`仅仅包含了`calc.h`头文件，并调用了`Calc`对象的两个方法。让我们快速浏览一下`Calc`的接口，这是我们的 SUT：
 
 **ch11/01-no-framework/src/calc.h**
 
@@ -339,7 +337,7 @@ void MultiplyMultipliesTwoIntegers() {
 } 
 ```
 
-我们通过编写两个测试方法来开始`calc_test.cpp`文件，每个方法对应一个被测试的SUT方法。如果调用的方法返回的值与预期不符，每个函数都会调用`std::exit(1)`。我们本可以使用`assert()`、`abort()`或`terminate()`，但那样会导致在`ctest`输出中显示一个不太明确的`Subprocess aborted`消息，而不是更易读的`Failed`消息。
+我们通过编写两个测试方法来开始`calc_test.cpp`文件，每个方法对应一个被测试的 SUT 方法。如果调用的方法返回的值与预期不符，每个函数都会调用`std::exit(1)`。我们本可以使用`assert()`、`abort()`或`terminate()`，但那样会导致在`ctest`输出中显示一个不太明确的`Subprocess aborted`消息，而不是更易读的`Failed`消息。
 
 该是时候创建一个测试运行器了。我们的测试运行器将尽可能简单，以避免引入过多的工作量。看看我们为运行仅仅两个测试而必须编写的`main()`函数：
 
@@ -381,7 +379,7 @@ int main(int argc, char *argv[]) {
 ./unit_tests 2 
 ```
 
-我们尽可能简化了代码，但它仍然很难阅读。任何需要维护这一部分的人，在添加更多测试后都将面临不小的挑战。功能上还是很粗糙——调试这样的测试套件会很困难。不过，让我们看看如何与CTest一起使用它：
+我们尽可能简化了代码，但它仍然很难阅读。任何需要维护这一部分的人，在添加更多测试后都将面临不小的挑战。功能上还是很粗糙——调试这样的测试套件会很困难。不过，让我们看看如何与 CTest 一起使用它：
 
 **ch11/01-no-framework/CMakeLists.txt**
 
@@ -393,7 +391,7 @@ add_subdirectory(src **bin**)
 add_subdirectory(test) 
 ```
 
-我们从常见的头文件和`include(CTest)`开始。这启用了CTest，并且应该始终在顶层的`CMakeLists.txt`中完成。接下来，我们在每个子目录中包含两个嵌套的列表文件：`src`和`test`。指定的`bin`值表示我们希望将`src`子目录中的二进制输出放置在`<build_tree>/bin`中。否则，二进制文件会被放到`<build_tree>/src`中，这可能会让用户感到困惑，因为构建产物并不是源文件。
+我们从常见的头文件和`include(CTest)`开始。这启用了 CTest，并且应该始终在顶层的`CMakeLists.txt`中完成。接下来，我们在每个子目录中包含两个嵌套的列表文件：`src`和`test`。指定的`bin`值表示我们希望将`src`子目录中的二进制输出放置在`<build_tree>/bin`中。否则，二进制文件会被放到`<build_tree>/src`中，这可能会让用户感到困惑，因为构建产物并不是源文件。
 
 对于`src`目录，列表文件是直接的，包含一个简单的`main`目标定义：
 
@@ -423,7 +421,7 @@ target_include_directories(unit_tests PRIVATE ../src)
 
 +   `MultiplyMultipliesTwoInts`
 
-每个测试都将其ID作为参数传递给`add_test()`命令。CTest将简单地执行`COMMAND`关键字后提供的内容，并在子shell中执行，收集输出和退出代码。不要过于依赖`add_test()`方法；在稍后的*单元测试框架*部分，我们将发现一种更好的方法来处理测试用例。
+每个测试都将其 ID 作为参数传递给`add_test()`命令。CTest 将简单地执行`COMMAND`关键字后提供的内容，并在子 shell 中执行，收集输出和退出代码。不要过于依赖`add_test()`方法；在稍后的*单元测试框架*部分，我们将发现一种更好的方法来处理测试用例。
 
 要运行测试，请在构建树中执行`ctest`：
 
@@ -443,23 +441,23 @@ Output from these tests are in: /tmp/b/Testing/Temporary/LastTest.log
 Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely. 
 ```
 
-CTest执行了两个测试并报告说其中一个失败——`Calc::Multiply`返回的值没有达到预期。很好。我们现在知道代码有一个bug，应该有人修复它。
+CTest 执行了两个测试并报告说其中一个失败——`Calc::Multiply`返回的值没有达到预期。很好。我们现在知道代码有一个 bug，应该有人修复它。
 
-你可能注意到，在迄今为止的大多数示例中，我们并没有使用*第4章*中描述的项目结构，*设置第一个CMake项目*。这样做是为了简洁起见。本章讨论的是更高级的概念，因此，使用完整的结构是必要的。在你的项目中（无论项目多小），最好从一开始就遵循这个结构。正如一位智者曾经说过：“*你踏上了这条路，如果你不小心，谁也不知道你会被卷到哪里去。*”
+你可能注意到，在迄今为止的大多数示例中，我们并没有使用*第四章*中描述的项目结构，*设置第一个 CMake 项目*。这样做是为了简洁起见。本章讨论的是更高级的概念，因此，使用完整的结构是必要的。在你的项目中（无论项目多小），最好从一开始就遵循这个结构。正如一位智者曾经说过：“*你踏上了这条路，如果你不小心，谁也不知道你会被卷到哪里去。*”
 
 我希望现在已经明确，完全从头开始为你的项目构建一个测试框架并不可取。即便是最基本的示例，也不易阅读，开销较大，且没有什么价值。然而，在我们可以采用单元测试框架之前，我们需要重新思考项目的结构。
 
 # 为测试构建项目结构
 
-C++具有一些有限的反射能力，但无法提供像Java那样强大的回溯功能。这可能是为什么为C++代码编写测试和单元测试框架比在其他功能更丰富的环境中更具挑战性的原因之一。由于这种有限的方式，程序员需要更加参与编写可测试的代码。我们需要仔细设计接口并考虑实际的方面。例如，如何避免编译代码两次，并在测试和生产之间重用构件？
+C++具有一些有限的反射能力，但无法提供像 Java 那样强大的回溯功能。这可能是为什么为 C++代码编写测试和单元测试框架比在其他功能更丰富的环境中更具挑战性的原因之一。由于这种有限的方式，程序员需要更加参与编写可测试的代码。我们需要仔细设计接口并考虑实际的方面。例如，如何避免编译代码两次，并在测试和生产之间重用构件？
 
-对于较小的项目，编译时间可能不是大问题，但随着项目的增长，短编译循环的需求仍然存在。在前面的示例中，我们将所有SUT源代码包含在了单元测试可执行文件中，除了`main.cpp`文件。如果你仔细观察，可能会注意到该文件中的某些代码没有被测试（即`main()`本身的内容）。编译代码两次会引入一定的可能性，导致生成的构件*不完全相同*。这些差异可能随着时间的推移逐渐增加，尤其是在添加编译标志和预处理指令时，在贡献者匆忙、经验不足或不熟悉项目时可能会存在风险。
+对于较小的项目，编译时间可能不是大问题，但随着项目的增长，短编译循环的需求仍然存在。在前面的示例中，我们将所有 SUT 源代码包含在了单元测试可执行文件中，除了`main.cpp`文件。如果你仔细观察，可能会注意到该文件中的某些代码没有被测试（即`main()`本身的内容）。编译代码两次会引入一定的可能性，导致生成的构件*不完全相同*。这些差异可能随着时间的推移逐渐增加，尤其是在添加编译标志和预处理指令时，在贡献者匆忙、经验不足或不熟悉项目时可能会存在风险。
 
 这个问题有多种解决方案，但最直接的方法是将整个解决方案构建为一个库，并与单元测试链接。你可能会想知道那时该如何运行它。答案是创建一个引导可执行文件，它与库链接并执行其代码。
 
 首先，将你当前的`main()`函数重命名为`run()`或`start_program()`之类的名称。然后，创建另一个实现文件（`bootstrap.cpp`），其中只包含一个新的`main()`函数。这个函数充当适配器：它的唯一作用是提供一个入口点并调用`run()`，同时传递任何命令行参数。将所有内容链接在一起后，你就得到了一个可测试的项目。
 
-通过重命名`main()`，你现在可以将SUT与测试连接，并测试其主要功能。否则，你将违反在*第8章*、*链接可执行文件和库*中讨论的**单一定义规则**（**ODR**），因为测试运行器也需要它自己的`main()`函数。正如我们在*第8章*的*为测试分离main()*部分承诺的那样，我们将在这里深入讨论这个话题。
+通过重命名`main()`，你现在可以将 SUT 与测试连接，并测试其主要功能。否则，你将违反在*第八章*、*链接可执行文件和库*中讨论的**单一定义规则**（**ODR**），因为测试运行器也需要它自己的`main()`函数。正如我们在*第八章*的*为测试分离 main()*部分承诺的那样，我们将在这里深入讨论这个话题。
 
 还需要注意，测试框架可能默认会提供自己的`main()`函数，因此不一定需要自己编写。通常，它会自动检测所有已链接的测试，并根据你的配置运行它们。
 
@@ -475,11 +473,11 @@ C++具有一些有限的反射能力，但无法提供像Java那样强大的回�
 
 ![](img/B19844_11_01.png)
 
-图11.1：在测试和生产可执行文件之间共享工件
+图 11.1：在测试和生产可执行文件之间共享工件
 
 我们最终得到了六个实现文件，这些文件将生成各自的（`.o`）*目标文件*，如下所示：
 
-+   `calc.cpp`：要进行单元测试的`Calc`类。这个被称为**单元测试对象**（**UUT**），因为UUT是SUT的一个特例。
++   `calc.cpp`：要进行单元测试的`Calc`类。这个被称为**单元测试对象**（**UUT**），因为 UUT 是 SUT 的一个特例。
 
 +   `run.cpp`：原始的入口点重命名为`run()`，现在可以进行测试。
 
@@ -491,7 +489,7 @@ C++具有一些有限的反射能力，但无法提供像Java那样强大的回�
 
 +   `unit_tests.o`：单元测试的入口点，扩展为调用`run()`的测试。
 
-我们即将构建的库不一定非得是静态库或共享库。通过选择对象库，我们可以避免不必要的归档或链接。从技术上讲，使用动态链接来处理SUT是可能节省一些时间的，但我们经常发现自己在两个目标（测试和SUT）中都做了更改，这样就没有节省任何时间。
+我们即将构建的库不一定非得是静态库或共享库。通过选择对象库，我们可以避免不必要的归档或链接。从技术上讲，使用动态链接来处理 SUT 是可能节省一些时间的，但我们经常发现自己在两个目标（测试和 SUT）中都做了更改，这样就没有节省任何时间。
 
 让我们从文件名为`main.cpp`的文件开始，检查一下我们的文件是如何变化的：
 
@@ -535,7 +533,7 @@ add_executable(bootstrap bootstrap.cpp)
 target_link_libraries(bootstrap PRIVATE sut) 
 ```
 
-首先，我们创建一个SUT库并将`.`标记为`PUBLIC` *包含目录*，以便它将传递到所有与SUT链接的目标（即`bootstrap`和`unit_tests`）。请注意，*包含目录*是相对于列表文件的，这使我们可以使用点（`.`）来引用当前的`<source_tree>/src`目录。
+首先，我们创建一个 SUT 库并将`.`标记为`PUBLIC` *包含目录*，以便它将传递到所有与 SUT 链接的目标（即`bootstrap`和`unit_tests`）。请注意，*包含目录*是相对于列表文件的，这使我们可以使用点（`.`）来引用当前的`<source_tree>/src`目录。
 
 现在是时候更新我们的`unit_tests`目标了。我们将把对`../src/calc.cpp`文件的直接引用替换为对`sut`的链接引用，同时为`run_test.cpp`文件中的主函数添加一个新测试。为了简便起见，我们不在这里讨论，但如果你感兴趣，可以查看本书的仓库中的示例。
 
@@ -573,9 +571,9 @@ add_test(NAME MultiplyMultipliesTwoInts COMMAND unit_tests 2)
 
 在这一章中，我选择介绍两个单元测试框架，原因如下：
 
-+   **Catch2** 相对容易学习，并且有很好的支持和文档。虽然它提供了基本的测试用例，但它也包含了优雅的宏，支持**行为驱动开发**（**BDD**）。虽然它可能缺少一些功能，但在需要时可以通过外部工具进行补充。访问它的主页：[https://github.com/catchorg/Catch2](https://github.com/catchorg/Catch2)。
++   **Catch2** 相对容易学习，并且有很好的支持和文档。虽然它提供了基本的测试用例，但它也包含了优雅的宏，支持**行为驱动开发**（**BDD**）。虽然它可能缺少一些功能，但在需要时可以通过外部工具进行补充。访问它的主页：[`github.com/catchorg/Catch2`](https://github.com/catchorg/Catch2)。
 
-+   **GoogleTest (GTest)** 很方便，但也更高级。它提供了一套丰富的功能，如各种断言、死锁测试，以及值参数化和类型参数化测试。它甚至支持通过 GMock 模块生成 XML 测试报告和模拟。你可以在这里找到它：[https://github.com/google/googletest](https://github.com/google/googletest)。
++   **GoogleTest (GTest)** 很方便，但也更高级。它提供了一套丰富的功能，如各种断言、死锁测试，以及值参数化和类型参数化测试。它甚至支持通过 GMock 模块生成 XML 测试报告和模拟。你可以在这里找到它：[`github.com/google/googletest`](https://github.com/google/googletest)。
 
 框架的选择取决于你的学习偏好和项目规模。如果你喜欢循序渐进，并且不需要完整的功能集，Catch2 是一个不错的选择。那些喜欢一头扎进去，并且需要全面工具集的人会觉得 GoogleTest 更适合。
 
@@ -606,7 +604,7 @@ TEST_CASE("MultiplyMultipliesTwoInts", "[calc]") {
 
 在使用 Catch2 时，确保选择一个 Git 标签并将其固定在 listfile 中。通过 `main` 分支进行升级并不能保证是无缝的。
 
-在商业环境中，你可能需要在 CI 管道中运行测试。在这种情况下，请记得设置你的环境，以便系统中已经安装了所需的依赖项，并且每次构建时无需重新下载它们。正如在*第9章*《CMake中的依赖管理》中的*尽可能使用已安装的依赖*部分所提到的，你需要使用`FIND_PACKAGE_ARGS`关键字扩展`FetchContent_Declare()`命令，以便使用系统中的包。
+在商业环境中，你可能需要在 CI 管道中运行测试。在这种情况下，请记得设置你的环境，以便系统中已经安装了所需的依赖项，并且每次构建时无需重新下载它们。正如在*第九章*《CMake 中的依赖管理》中的*尽可能使用已安装的依赖*部分所提到的，你需要使用`FIND_PACKAGE_ARGS`关键字扩展`FetchContent_Declare()`命令，以便使用系统中的包。
 
 我们将像这样在我们的 listfile 中包含版本 3.4.0：
 
@@ -670,11 +668,11 @@ Catch2 能够将 `sut.Multiply(3, 4)` 表达式扩展为 `9`，为我们提供�
 
 Catch2 提供了诸如事件监听器、数据生成器和微基准测试等多种功能，但它缺少内置的模拟功能。如果你不熟悉模拟，我们将在下一节介绍。你可以通过以下模拟框架之一将模拟功能添加到 Catch2：
 
-+   FakeIt ([https://github.com/eranpeer/FakeIt](https://github.com/eranpeer/FakeIt))
++   FakeIt ([`github.com/eranpeer/FakeIt`](https://github.com/eranpeer/FakeIt))
 
-+   Hippomocks ([https://github.com/dascandy/hippomocks](https://github.com/dascandy/hippomocks))
++   Hippomocks ([`github.com/dascandy/hippomocks`](https://github.com/dascandy/hippomocks))
 
-+   Trompeloeil ([https://github.com/rollbear/trompeloeil](https://github.com/rollbear/trompeloeil))
++   Trompeloeil ([`github.com/rollbear/trompeloeil`](https://github.com/rollbear/trompeloeil))
 
 也就是说，如果你想要更精简和先进的体验，还有一个值得关注的框架——GoogleTest。
 
@@ -709,11 +707,11 @@ TEST_F(CalcTestSuite, MultiplyMultipliesTwoInts) {
 
 测试套件中的每个测试用例都使用 `TEST_F()` 宏声明。对于独立的测试，有一个更简单的 `TEST()` 宏。由于我们在类中定义了 `Calc sut_`，每个测试用例可以像访问 `CalcTestSuite` 的方法一样访问它。实际上，每个测试用例都在自己的实例中运行，这些实例继承自 `CalcTestSuite`，这就是为什么需要使用 `protected` 关键字的原因。请注意，可重用的字段并不意味着在连续的测试之间共享数据；它们的目的是保持代码的简洁性（DRY）。
 
-GTest 并不像 Catch2 那样提供自然的断言语法。相反，你需要使用显式的比较，例如 `EXPECT_EQ()`。根据约定，预期值放在前面，实际值放在后面。还有许多其他类型的断言、帮助器和宏值得探索。有关 GTest 的详细信息，请参阅官方参考资料（[https://google.github.io/googletest/](https://google.github.io/googletest/)）。
+GTest 并不像 Catch2 那样提供自然的断言语法。相反，你需要使用显式的比较，例如 `EXPECT_EQ()`。根据约定，预期值放在前面，实际值放在后面。还有许多其他类型的断言、帮助器和宏值得探索。有关 GTest 的详细信息，请参阅官方参考资料（[`google.github.io/googletest/`](https://google.github.io/googletest/)）。
 
 要将此依赖项添加到我们的项目中，我们需要决定使用哪个版本。与 Catch2 不同，GoogleTest 倾向于采用“始终保持最新”的理念（源自 GTest 依赖的 Abseil 项目）。它声明：“*如果你从源代码构建我们的依赖并遵循我们的 API，你不应该遇到任何问题。*”（有关更多详细信息，请参阅 *进一步阅读* 部分）。如果你能接受遵循这一规则（且从源代码构建不成问题），将 Git 标签设置为 `master` 分支。否则，从 GoogleTest 仓库中选择一个发布版本。
 
-在企业环境中，你很可能会在 CI 管道中运行测试。在这种情况下，记得设置你的环境，使其系统中已经安装了依赖项，并且每次构建时不需要再次获取它们。正如 *第 9 章 CMake 中的依赖管理* 中的 *尽可能使用已安装的依赖项* 部分所述，你需要扩展 `FetchContent_Declare()` 命令，使用 `FIND_PACKAGE_ARGS` 关键字来使用系统中的包。
+在企业环境中，你很可能会在 CI 管道中运行测试。在这种情况下，记得设置你的环境，使其系统中已经安装了依赖项，并且每次构建时不需要再次获取它们。正如 *第九章 CMake 中的依赖管理* 中的 *尽可能使用已安装的依赖项* 部分所述，你需要扩展 `FetchContent_Declare()` 命令，使用 `FIND_PACKAGE_ARGS` 关键字来使用系统中的包。
 
 无论如何，添加对 GTest 的依赖看起来是这样的：
 
@@ -779,7 +777,7 @@ Expected equality of these values:
 
 这样的测试替身在测试开始时创建，并作为参数传递给被测试类的构造函数，用来代替真实的对象。这种机制被称为**依赖注入**。
 
-简单的测试替身存在的问题是它们*过于简单*。为了模拟不同测试场景中的行为，我们将不得不提供许多不同的替身，每种替身对应耦合对象可能的每个状态。这并不实际，且会把测试代码分散到太多文件中。这就是GMock的作用：它允许开发人员为特定类创建通用的测试替身，并为每个测试在线定义其行为。GMock将这些替身称为“模拟”，但实际上，它们是所有前述测试替身的混合体，具体取决于场合。
+简单的测试替身存在的问题是它们*过于简单*。为了模拟不同测试场景中的行为，我们将不得不提供许多不同的替身，每种替身对应耦合对象可能的每个状态。这并不实际，且会把测试代码分散到太多文件中。这就是 GMock 的作用：它允许开发人员为特定类创建通用的测试替身，并为每个测试在线定义其行为。GMock 将这些替身称为“模拟”，但实际上，它们是所有前述测试替身的混合体，具体取决于场合。
 
 考虑以下示例：让我们在`Calc`类中添加一个功能，它会将一个随机数加到提供的参数上。它将通过一个`AddRandomNumber()`方法表示，并返回该和作为一个`int`类型的值。我们如何确认返回值确实是随机数与提供给类的值的准确和呢？正如我们所知，随机生成的数字是许多重要过程的关键，如果我们使用不当，可能会带来各种后果。检查所有随机数直到所有可能性耗尽并不实际。
 
@@ -902,7 +900,7 @@ public:
 }; 
 ```
 
-在添加`gmock.h`头文件后，我们可以声明我们的模拟对象。按计划，它是一个实现了`RandomNumberGenerator`接口的类。我们不需要自己编写方法，而是需要使用GMock提供的`MOCK_METHOD`宏。这些宏告知框架需要模拟接口中的哪些方法。请使用以下格式（大量括号是必需的）：
+在添加`gmock.h`头文件后，我们可以声明我们的模拟对象。按计划，它是一个实现了`RandomNumberGenerator`接口的类。我们不需要自己编写方法，而是需要使用 GMock 提供的`MOCK_METHOD`宏。这些宏告知框架需要模拟接口中的哪些方法。请使用以下格式（大量括号是必需的）：
 
 ```cpp
 MOCK_METHOD(<return type>, <method name>,
@@ -931,9 +929,9 @@ TEST_F(CalcTestSuite, AddRandomNumberAddsThree) {
 
 让我们分解一下这些改动：我们添加了新的头文件，并在测试套件中为`rng_mock_`创建了一个新的字段。接下来，模拟对象的地址传递给`sut_`的构造函数。我们之所以能这么做，是因为字段会按照声明顺序进行初始化（`rng_mock_`在`sut_`之前）。
 
-在我们的测试用例中，我们对`rng_mock_`的`Get()`方法调用GMock的`EXPECT_CALL`宏。这告诉框架，如果在执行过程中没有调用`Get()`方法，则测试将失败。链式调用的`Times`明确说明了测试通过所需的调用次数。`WillOnce`确定了方法被调用后模拟框架的行为（它返回`3`）。
+在我们的测试用例中，我们对`rng_mock_`的`Get()`方法调用 GMock 的`EXPECT_CALL`宏。这告诉框架，如果在执行过程中没有调用`Get()`方法，则测试将失败。链式调用的`Times`明确说明了测试通过所需的调用次数。`WillOnce`确定了方法被调用后模拟框架的行为（它返回`3`）。
 
-通过使用GMock，我们能够将模拟的行为与预期结果一起表达。这大大提高了可读性，并简化了测试的维护。最重要的是，它为每个测试用例提供了灵活性，因为我们可以通过一个简洁的表达式来区分不同的行为。
+通过使用 GMock，我们能够将模拟的行为与预期结果一起表达。这大大提高了可读性，并简化了测试的维护。最重要的是，它为每个测试用例提供了灵活性，因为我们可以通过一个简洁的表达式来区分不同的行为。
 
 最后，为了构建项目，我们需要确保`gmock`库与测试运行器进行链接。为此，我们将其添加到`target_link_libraries()`列表中：
 
@@ -958,33 +956,33 @@ include(GoogleTest)
 gtest_discover_tests(unit_tests) 
 ```
 
-现在，我们可以享受GoogleTest框架的所有好处了。GTest和GMock都是高级工具，提供了许多概念、工具和助手，适用于不同的情况。这个例子（尽管有点冗长）只是触及了它们的表面。我鼓励你将它们融入到你的项目中，因为它们会大大提升你工作的质量。开始使用GMock的一个好地方是官方文档中的“Mocking for Dummies”页面（你可以在*进一步阅读*部分找到该链接）。
+现在，我们可以享受 GoogleTest 框架的所有好处了。GTest 和 GMock 都是高级工具，提供了许多概念、工具和助手，适用于不同的情况。这个例子（尽管有点冗长）只是触及了它们的表面。我鼓励你将它们融入到你的项目中，因为它们会大大提升你工作的质量。开始使用 GMock 的一个好地方是官方文档中的“Mocking for Dummies”页面（你可以在*进一步阅读*部分找到该链接）。
 
 在有了测试之后，我们应该以某种方式衡量哪些部分已被测试，哪些没有，并努力改善这种情况。最好使用自动化工具来收集并报告这些信息。
 
 # 生成测试覆盖率报告
 
-向如此小的解决方案中添加测试并不算特别具有挑战性。真正的难点出现在稍微复杂一些和更长的程序中。多年来，我发现，当代码行数接近1,000行时，逐渐变得很难追踪哪些行和分支在测试中被执行，哪些没有。超过3,000行之后，几乎不可能再追踪了。大多数专业应用程序的代码量远远超过这个数。更重要的是，许多经理用来谈判解决技术债务的关键指标之一就是代码覆盖率百分比，因此了解如何生成有用的报告有助于获取那些讨论所需的实际数据。为了解决这个问题，我们可以使用一个工具来了解哪些代码行被测试用例“覆盖”。这种代码覆盖工具会与被测试系统（SUT）连接，并在测试期间收集每一行的执行情况，并将结果以方便的报告形式展示出来，就像这里展示的报告一样：
+向如此小的解决方案中添加测试并不算特别具有挑战性。真正的难点出现在稍微复杂一些和更长的程序中。多年来，我发现，当代码行数接近 1,000 行时，逐渐变得很难追踪哪些行和分支在测试中被执行，哪些没有。超过 3,000 行之后，几乎不可能再追踪了。大多数专业应用程序的代码量远远超过这个数。更重要的是，许多经理用来谈判解决技术债务的关键指标之一就是代码覆盖率百分比，因此了解如何生成有用的报告有助于获取那些讨论所需的实际数据。为了解决这个问题，我们可以使用一个工具来了解哪些代码行被测试用例“覆盖”。这种代码覆盖工具会与被测试系统（SUT）连接，并在测试期间收集每一行的执行情况，并将结果以方便的报告形式展示出来，就像这里展示的报告一样：
 
 ![](img/B19844_11_02.png)
 
-图11.2：LCOV生成的代码覆盖率报告
+图 11.2：LCOV 生成的代码覆盖率报告
 
 这些报告会显示哪些文件被测试覆盖，哪些没有。更重要的是，你还可以查看每个文件的详细信息，精确知道哪些代码行被执行了，以及执行了多少次。在下图中，**Line data**列显示`Calc`构造函数执行了`4`次，每个测试执行一次：
 
 ![](img/B19844_11_03.png)
 
-图11.3：代码覆盖率报告的详细视图
+图 11.3：代码覆盖率报告的详细视图
 
 生成类似报告的方式有很多，具体方法在不同平台和编译器之间有所不同，但一般都遵循相同的步骤：准备好待测系统，获取基线，进行测量并生成报告。
 
-最简单的工具叫做**LCOV**。它不是一个缩写，而是`gcov`的图形前端，`gcov`是**GNU编译器集合**（**GCC**）中的一个覆盖率工具。让我们看看如何在实践中使用它。
+最简单的工具叫做**LCOV**。它不是一个缩写，而是`gcov`的图形前端，`gcov`是**GNU 编译器集合**（**GCC**）中的一个覆盖率工具。让我们看看如何在实践中使用它。
 
-## 使用LCOV生成覆盖率报告
+## 使用 LCOV 生成覆盖率报告
 
-LCOV将生成HTML覆盖率报告，并内部使用`gcov`来测量覆盖率。如果你使用的是Clang，放心—Clang支持生成这种格式的度量。你可以从**Linux测试项目**的官方仓库获取LCOV（[https://github.com/linux-test-project/lcov](https://github.com/linux-test-project/lcov)），或者直接使用包管理器。顾名思义，它是一个面向Linux的工具。
+LCOV 将生成 HTML 覆盖率报告，并内部使用`gcov`来测量覆盖率。如果你使用的是 Clang，放心—Clang 支持生成这种格式的度量。你可以从**Linux 测试项目**的官方仓库获取 LCOV（[`github.com/linux-test-project/lcov`](https://github.com/linux-test-project/lcov)），或者直接使用包管理器。顾名思义，它是一个面向 Linux 的工具。
 
-虽然可以在macOS上运行它，但Windows平台不受支持。最终用户通常不关心测试覆盖率，因此通常可以在自己的构建环境中手动安装LCOV，而不是将其集成到项目中。
+虽然可以在 macOS 上运行它，但 Windows 平台不受支持。最终用户通常不关心测试覆盖率，因此通常可以在自己的构建环境中手动安装 LCOV，而不是将其集成到项目中。
 
 为了测量覆盖率，我们需要执行以下步骤：
 
@@ -1000,11 +998,11 @@ LCOV将生成HTML覆盖率报告，并内部使用`gcov`来测量覆盖率。如
 
 1.  生成一个（`.html`）报告。
 
-我们应该从解释为什么代码必须在`Debug`配置下编译开始。最重要的原因是，通常`Debug`配置会禁用所有优化，使用`-O0`标志。CMake默认在`CMAKE_CXX_FLAGS_DEBUG`变量中执行此操作（尽管文档中并未明确说明）。除非你决定覆盖此变量，否则你的`Debug`构建应该是未优化的。这是为了防止任何内联和其他类型的隐式代码简化。否则，追踪每条机器指令来源于哪一行源代码将变得困难。
+我们应该从解释为什么代码必须在`Debug`配置下编译开始。最重要的原因是，通常`Debug`配置会禁用所有优化，使用`-O0`标志。CMake 默认在`CMAKE_CXX_FLAGS_DEBUG`变量中执行此操作（尽管文档中并未明确说明）。除非你决定覆盖此变量，否则你的`Debug`构建应该是未优化的。这是为了防止任何内联和其他类型的隐式代码简化。否则，追踪每条机器指令来源于哪一行源代码将变得困难。
 
-在第一步中，我们需要指示编译器为我们的SUT添加必要的仪器。具体的标志因编译器而异；然而，两大主流编译器（GCC和Clang）提供相同的`--coverage`标志来启用覆盖率仪器，并生成GCC兼容的`gcov`格式数据。
+在第一步中，我们需要指示编译器为我们的 SUT 添加必要的仪器。具体的标志因编译器而异；然而，两大主流编译器（GCC 和 Clang）提供相同的`--coverage`标志来启用覆盖率仪器，并生成 GCC 兼容的`gcov`格式数据。
 
-这就是如何将覆盖率仪器添加到我们前一部分示例中的SUT：
+这就是如何将覆盖率仪器添加到我们前一部分示例中的 SUT：
 
 **ch11/06-coverage/src/CMakeLists.txt**
 
@@ -1028,11 +1026,11 @@ target_link_libraries(bootstrap PRIVATE sut)
 
 1.  将`--coverage`添加到`sut`库中所有*目标文件*的`PRIVATE`*编译选项*。
 
-1.  将`--coverage`添加到`PUBLIC`链接器选项：GCC和Clang将其解释为请求将`gcov`（或兼容的）库链接到所有依赖`sut`的目标（由于属性传播）。
+1.  将`--coverage`添加到`PUBLIC`链接器选项：GCC 和 Clang 将其解释为请求将`gcov`（或兼容的）库链接到所有依赖`sut`的目标（由于属性传播）。
 
-1.  引入`add_custom_command()`命令以清除任何过时的`.gcda`文件。添加此命令的原因在*避免SEGFAULT陷阱*部分中进行了详细讨论。
+1.  引入`add_custom_command()`命令以清除任何过时的`.gcda`文件。添加此命令的原因在*避免 SEGFAULT 陷阱*部分中进行了详细讨论。
 
-这已经足够生成代码覆盖率。如果你使用的是CLion等IDE，你将能够运行单元测试并查看覆盖率结果，并在内置报告视图中查看结果。然而，这在任何可能在CI/CD中运行的自动化管道中是行不通的。为了生成报告，我们需要使用LCOV自己生成。
+这已经足够生成代码覆盖率。如果你使用的是 CLion 等 IDE，你将能够运行单元测试并查看覆盖率结果，并在内置报告视图中查看结果。然而，这在任何可能在 CI/CD 中运行的自动化管道中是行不通的。为了生成报告，我们需要使用 LCOV 自己生成。
 
 为此，最好定义一个新的目标`coverage`。为了保持整洁，我们将在另一个文件中定义一个单独的函数`AddCoverage`，并在`test`列表文件中使用，具体如下：
 
@@ -1066,13 +1064,13 @@ lcov and genhtml (two command-line tools from the LCOV package). The REQUIRED ke
 
 1.  删除（`-r`）系统头文件（`'/usr/include/*'`）中的不需要的覆盖数据，并输出到另一个文件（`-o filtered.info`）。
 
-1.  在`coverage`目录中生成HTML报告，并添加`--legend`颜色。
+1.  在`coverage`目录中生成 HTML 报告，并添加`--legend`颜色。
 
 1.  删除临时的`.info`文件。
 
 1.  指定`WORKING_DIRECTORY`关键字会将二进制树设置为所有命令的工作目录。
 
-这些是GCC和Clang的通用步骤。需要注意的是，`gcov`工具的版本必须与编译器版本匹配：你不能使用GCC的`gcov`工具处理Clang编译的代码。为了将`lcov`指向Clang的`gcov`工具，我们可以使用`--gcov-tool`参数。唯一的问题是它必须是一个可执行文件。为了解决这个问题，我们可以提供一个简单的包装脚本（记得用`chmod +x`标记它为可执行），如下所示：
+这些是 GCC 和 Clang 的通用步骤。需要注意的是，`gcov`工具的版本必须与编译器版本匹配：你不能使用 GCC 的`gcov`工具处理 Clang 编译的代码。为了将`lcov`指向 Clang 的`gcov`工具，我们可以使用`--gcov-tool`参数。唯一的问题是它必须是一个可执行文件。为了解决这个问题，我们可以提供一个简单的包装脚本（记得用`chmod +x`标记它为可执行），如下所示：
 
 ```cpp
 # cmake/gcov-llvm-wrapper.sh
@@ -1130,13 +1128,13 @@ Overall coverage rate:
 
 接下来，在浏览器中打开`coverage/index.html`文件，享受报告吧！不过，有一个小问题…
 
-## 避免SEGFAULT问题
+## 避免 SEGFAULT 问题
 
 当我们开始编辑这样的已构建解决方案中的源代码时，可能会遇到问题。这是因为覆盖信息被分为两部分：
 
-+   `gcno`文件，或称**GNU覆盖注释**，在SUT的编译过程中生成。
++   `gcno`文件，或称**GNU 覆盖注释**，在 SUT 的编译过程中生成。
 
-+   `gcda`文件，或称**GNU覆盖数据**，在测试运行期间生成并**更新**。
++   `gcda`文件，或称**GNU 覆盖数据**，在测试运行期间生成并**更新**。
 
 “更新”功能是潜在的分段错误源。在我们初次运行测试后，会留下许多`gcda`文件，这些文件不会在任何时候被删除。如果我们对源代码进行一些修改并重新编译*目标文件*，新的`gcno`文件将会被创建。然而，并没有清除步骤——来自先前测试运行的`gcda`文件会与过时的源代码一起存在。当我们执行`unit_tests`二进制文件时（它发生在`gtest_discover_tests`宏中），覆盖信息文件将不匹配，并且我们会收到`SEGFAULT`（分段错误）错误。
 
@@ -1150,11 +1148,11 @@ Overall coverage rate:
 
 在本章中，我们概述了一些从一开始就进行测试的关键原因。最有说服力的一个原因是心理健康和良好的睡眠。没有一个开发者会躺在床上想：“*我真期待几小时后被叫醒，去处理生产中的问题和修复 bug*。”但说真的，在将错误部署到生产环境之前捕捉到它们，对你（以及公司）来说可能是救命稻草。
 
-在测试工具方面，CMake真正展现了它的强大之处。CTests能够在检测故障测试方面发挥奇效：隔离、洗牌、重复和超时。所有这些技术都非常方便，并可以通过一个方便的命令行标志来使用。我们学习了如何使用CTests列出测试、过滤测试，并控制测试用例的输出，但最重要的是，我们现在知道了在各个方面采用标准解决方案的真正力量。任何用CMake构建的项目都可以完全一样地进行测试，而无需调查其内部细节。
+在测试工具方面，CMake 真正展现了它的强大之处。CTests 能够在检测故障测试方面发挥奇效：隔离、洗牌、重复和超时。所有这些技术都非常方便，并可以通过一个方便的命令行标志来使用。我们学习了如何使用 CTests 列出测试、过滤测试，并控制测试用例的输出，但最重要的是，我们现在知道了在各个方面采用标准解决方案的真正力量。任何用 CMake 构建的项目都可以完全一样地进行测试，而无需调查其内部细节。
 
 接下来，我们结构化了我们的项目，以简化测试过程，并在生产代码和测试运行器之间重用相同的*目标文件*。写我们自己的测试运行器很有趣，但也许让我们专注于程序应该解决的实际问题，并投入时间采用流行的第三方测试框架。
 
-说到这里，我们学习了Catch2和GoogleTest的基础知识。我们进一步深入了解了GMock库，并理解了测试替身如何使真正的单元测试成为可能。最后，我们设置了LCOV报告。毕竟，没有什么比硬数据更能证明我们的解决方案已经完全测试过了。
+说到这里，我们学习了 Catch2 和 GoogleTest 的基础知识。我们进一步深入了解了 GMock 库，并理解了测试替身如何使真正的单元测试成为可能。最后，我们设置了 LCOV 报告。毕竟，没有什么比硬数据更能证明我们的解决方案已经完全测试过了。
 
 在下一章中，我们将讨论更多有用的工具，以提高源代码的质量，并发现我们甚至不知道存在的问题。
 
@@ -1162,32 +1160,32 @@ Overall coverage rate:
 
 更多信息，请参考以下链接：
 
-+   CMake文档中的CTests：[https://cmake.org/cmake/help/latest/manual/ctest.1.html](https://cmake.org/cmake/help/latest/manual/ctest.1.html)
++   CMake 文档中的 CTests：[`cmake.org/cmake/help/latest/manual/ctest.1.html`](https://cmake.org/cmake/help/latest/manual/ctest.1.html)
 
-+   Catch2文档：[https://github.com/catchorg/Catch2/blob/devel/docs/](https://github.com/catchorg/Catch2/blob/devel/docs/)
++   Catch2 文档：[`github.com/catchorg/Catch2/blob/devel/docs/`](https://github.com/catchorg/Catch2/blob/devel/docs/)
 
-+   GMock教程：[https://google.github.io/googletest/gmock_for_dummies.html](https://google.github.io/googletest/gmock_for_dummies.html)
++   GMock 教程：[`google.github.io/googletest/gmock_for_dummies.html`](https://google.github.io/googletest/gmock_for_dummies.html)
 
-+   Abseil：[https://abseil.io/](https://abseil.io/)
++   Abseil：[`abseil.io/`](https://abseil.io/)
 
-+   与 Abseil 一起保持更新：[https://abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head](https://abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head)
++   与 Abseil 一起保持更新：[`abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head`](https://abseil.io/about/philosophy#we-recommend-that-you-choose-to-live-at-head)
 
-+   为什么 Abseil 成为 GTest 的依赖：[https://github.com/google/googletest/issues/2883](https://github.com/google/googletest/issues/2883)
++   为什么 Abseil 成为 GTest 的依赖：[`github.com/google/googletest/issues/2883`](https://github.com/google/googletest/issues/2883)
 
-+   GCC 覆盖率：[https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html) [https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html) [https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html](https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html)
++   GCC 覆盖率：[`gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html`](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html) [`gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html`](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html) [`gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html`](https://gcc.gnu.org/onlinedocs/gcc/Gcov-Data-Files.html)
 
-+   Clang 覆盖率：[https://clang.llvm.org/docs/SourceBasedCodeCoverage.html](https://clang.llvm.org/docs/SourceBasedCodeCoverage.html)
++   Clang 覆盖率：[`clang.llvm.org/docs/SourceBasedCodeCoverage.html`](https://clang.llvm.org/docs/SourceBasedCodeCoverage.html)
 
-+   LCOV 命令行工具文档：[https://helpmanual.io/man1/lcov/](https://helpmanual.io/man1/lcov/)
++   LCOV 命令行工具文档：[`helpmanual.io/man1/lcov/`](https://helpmanual.io/man1/lcov/)
 
-+   LCOV 项目仓库：[https://github.com/linux-test-project/lcov](https://github.com/linux-test-project/lcov)
++   LCOV 项目仓库：[`github.com/linux-test-project/lcov`](https://github.com/linux-test-project/lcov)
 
-+   GCOV 更新功能：[https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
++   GCOV 更新功能：[`gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov`](https://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
 
 # 加入我们社区的 Discord
 
 加入我们社区的 Discord 讨论区，与作者和其他读者交流：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

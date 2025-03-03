@@ -1,8 +1,6 @@
-# 7
+# 第七章：为你的库添加安装支持
 
-# 为你的库添加安装支持
-
-在[*第6章*](B21152_06.xhtml#_idTextAnchor152)，《安装依赖项和ExternalProject_Add》中，我们讨论了如何安装现有库并在项目中使用它们。了解如何使用已安装的库非常有用，特别是当与`ExternalProject_Add`结合使用时。现在，我们将转变思路，看看如何为我们自己的库添加安装支持。这是一个庞大的话题，提供了许多不同的选项。我们无法涵盖所有内容，但我们将着重介绍CMake的`install`命令，它的作用以及如何使用它，还会介绍一些可用的配置选项。
+在*第六章*，《安装依赖项和 ExternalProject_Add》中，我们讨论了如何安装现有库并在项目中使用它们。了解如何使用已安装的库非常有用，特别是当与`ExternalProject_Add`结合使用时。现在，我们将转变思路，看看如何为我们自己的库添加安装支持。这是一个庞大的话题，提供了许多不同的选项。我们无法涵盖所有内容，但我们将着重介绍 CMake 的`install`命令，它的作用以及如何使用它，还会介绍一些可用的配置选项。
 
 在本章中你将学到的技能，如果你以后选择使自己的库可安装并通过`ExternalProject_Add`或将你的应用打包，都会非常有用。通过这样做，你将使其他开发者更容易使用你的库，并可能避免他们多次构建它。
 
@@ -20,19 +18,19 @@
 
 # 技术要求
 
-为了继续学习，请确保你已经满足[*第1章*](B21152_01.xhtml#_idTextAnchor019)，《入门》中列出的要求。包括以下内容：
+为了继续学习，请确保你已经满足*第一章*，《入门》中列出的要求。包括以下内容：
 
-+   一台运行最新**操作系统**(**OS**)的Windows、Mac或Linux机器
++   一台运行最新**操作系统**(**OS**)的 Windows、Mac 或 Linux 机器
 
-+   一个有效的C/C++编译器（如果你还没有，建议使用系统默认的编译器）
++   一个有效的 C/C++编译器（如果你还没有，建议使用系统默认的编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 # 为库添加安装支持
 
-为库添加安装支持时，一切都围绕着`install`命令。`install`命令是我们告诉CMake要安装什么内容，以及文件的相对布局。好消息是，我们现有的`CMakeLists.txt`文件几乎不需要做什么更改，并且在大多数情况下，也不需要添加太多内容。不过，第一次看到我们添加的内容时可能会有些困惑，我们将在这里尽量解释清楚。
+为库添加安装支持时，一切都围绕着`install`命令。`install`命令是我们告诉 CMake 要安装什么内容，以及文件的相对布局。好消息是，我们现有的`CMakeLists.txt`文件几乎不需要做什么更改，并且在大多数情况下，也不需要添加太多内容。不过，第一次看到我们添加的内容时可能会有些困惑，我们将在这里尽量解释清楚。
 
-与前几章一样，我们将通过一个具体的示例，展示如何为我们现有的最简单库之一`mc-array`添加安装支持。这个静态库提供了在C语言中支持可调整大小的数组（非常类似于C++中的`std::vector`）。我们在整个《生命游戏》应用中都使用了它，它是一个特别有用的工具。
+与前几章一样，我们将通过一个具体的示例，展示如何为我们现有的最简单库之一`mc-array`添加安装支持。这个静态库提供了在 C 语言中支持可调整大小的数组（非常类似于 C++中的`std::vector`）。我们在整个《生命游戏》应用中都使用了它，它是一个特别有用的工具。
 
 我们将从查看`ch7/part-1/lib/array/CMakeLists.txt`开始。第一个变化是，我们已经明确通过提供`STATIC`参数将这个库提交为静态库，来进行使用：
 
@@ -46,7 +44,7 @@ include(GNUInstallDirs)
 
 ```cpp
 
-			The `GNUInstallDirs` module provides variables for standard installation directories. Even though the name refers to `GNUInstallDirs` will give us a good standard directory structure on whatever platform we’re using. To learn more about `GNUInstallDirs`, please refer to [https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html).
+			The `GNUInstallDirs` module provides variables for standard installation directories. Even though the name refers to `GNUInstallDirs` will give us a good standard directory structure on whatever platform we’re using. To learn more about `GNUInstallDirs`, please refer to [`cmake.org/cmake/help/latest/module/GNUInstallDirs.html`](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html).
 			The next minor change is updating the `target_include_directories` command to handle providing the location of `.h` files for both the regular build (`BUILD_LOCAL_INTERFACE`) and when using the installed version of the library (`INSTALL_INTERFACE`):
 
 ```
@@ -100,9 +98,9 @@ install(
 
             请参见 `ch7/part-2/lib/array/CMakeLists.txt`，了解如何使用不同的库名称（目标），而不是重用项目名称。我们将在本章其余部分采用这种方法，帮助区分项目/包与各个目标/库。
 
-            我们传递给第一个`install`命令的第二个参数是`EXPORT ${PROJECT_NAME}-config`。导出意味着将目标提供给其他项目（通常通过`find_package`）。通过添加这行代码，我们通知CMake，我们希望导出这个目标，并将其与一个以我们项目命名的配置文件（`${PROJECT_NAME}-config`，在我们这里扩展为`mc-array-config`）关联。此步骤尚未创建导出文件，但允许我们在后续的`install`命令中引用该导出，以生成`<project-name>-config.cmake`文件（我们也可以选择`${PROJECT_NAME}Config`，让CMake为我们生成`<ProjectName>Config.cmake`文件）。
+            我们传递给第一个`install`命令的第二个参数是`EXPORT ${PROJECT_NAME}-config`。导出意味着将目标提供给其他项目（通常通过`find_package`）。通过添加这行代码，我们通知 CMake，我们希望导出这个目标，并将其与一个以我们项目命名的配置文件（`${PROJECT_NAME}-config`，在我们这里扩展为`mc-array-config`）关联。此步骤尚未创建导出文件，但允许我们在后续的`install`命令中引用该导出，以生成`<project-name>-config.cmake`文件（我们也可以选择`${PROJECT_NAME}Config`，让 CMake 为我们生成`<ProjectName>Config.cmake`文件）。
 
-            最后的参数是`ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}`。这告诉CMake我们希望安装静态库的`.a`/`.lib`文件的位置。这并不是严格必要的，因为CMake会选择一个默认的系统位置，但显式指定并使用`GNUInstallDirs`提供的有用变量`CMAKE_INSTALL_LIBDIR`会使我们的`CMakeLists.txt`文件更加自文档化。`${CMAKE_INSTALL_LIBDIR}`很可能会扩展为`lib`，但使用这种方式提供了一个自定义点，如果用户希望覆盖库安装目录，可以根据需要进行调整。
+            最后的参数是`ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}`。这告诉 CMake 我们希望安装静态库的`.a`/`.lib`文件的位置。这并不是严格必要的，因为 CMake 会选择一个默认的系统位置，但显式指定并使用`GNUInstallDirs`提供的有用变量`CMAKE_INSTALL_LIBDIR`会使我们的`CMakeLists.txt`文件更加自文档化。`${CMAKE_INSTALL_LIBDIR}`很可能会扩展为`lib`，但使用这种方式提供了一个自定义点，如果用户希望覆盖库安装目录，可以根据需要进行调整。
 
             只需将前面的`install`命令添加到我们的`CMakeLists.txt`文件中，如果我们从`ch7/part-1/lib/array`目录运行以下命令：
 
@@ -121,7 +119,7 @@ cmake --build build --target install
 
             （为提供上下文，`ch7/part-1/lib/array/CMakeLists.txt`已经包含了一个完整的安装示例，但可以随意注释掉后面的`install`命令，看看每个命令安装了什么，没安装什么。）
 
-            这是一个好的开始，但CMake仍然缺少足够的信息来找到并使用我们的库。现在库文件已经安装，导出目标也已经创建，我们可以查看下一个`install`命令：
+            这是一个好的开始，但 CMake 仍然缺少足够的信息来找到并使用我们的库。现在库文件已经安装，导出目标也已经创建，我们可以查看下一个`install`命令：
 
 ```cpp
 install(
@@ -136,7 +134,7 @@ install(
 install EXPORT given no DESTINATION!
 ```
 
-            这是通过`DESTINATION`参数实现的。我们再次依赖于`GNUInstallDirs`变量`CMAKE_INSTALL_LIBDIR`，然后指定一个名为`cmake`的文件夹，接着是我们的项目名称。CMake知道要搜索这个位置，如果需要，也可以调整`${PROJECT_NAME}`和`cmake`的顺序（如果安装到默认系统目录，这一点更为重要，它决定了CMake配置文件的组织方式）：
+            这是通过`DESTINATION`参数实现的。我们再次依赖于`GNUInstallDirs`变量`CMAKE_INSTALL_LIBDIR`，然后指定一个名为`cmake`的文件夹，接着是我们的项目名称。CMake 知道要搜索这个位置，如果需要，也可以调整`${PROJECT_NAME}`和`cmake`的顺序（如果安装到默认系统目录，这一点更为重要，它决定了 CMake 配置文件的组织方式）：
 
 ```cpp
 DESTINATION ${CMAKE_INSTALL_LIBDIR}/EXPORT install command is NAMESPACE. This adds a prefix to the target to be exported to reduce the chance of naming collisions with other libraries. It’s also a standard convention to disambiguate imported targets from regular targets within a CMake project (something we touched on in *Chapter 6*, *Installing Dependencies* *and ExternalProject_Add*).
@@ -217,7 +215,7 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/minimal-cmake/
 
             文件集
 
-            CMake `3.23` 引入了一个名为 `target_sources` 命令的新特性。指定一个文件集可以使头文件自动作为 `TARGET` 安装命令的一部分进行安装。我们在本书中坚持传统方法，但请查看 [https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets](https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets) 了解更多关于指定文件集的信息。
+            CMake `3.23` 引入了一个名为 `target_sources` 命令的新特性。指定一个文件集可以使头文件自动作为 `TARGET` 安装命令的一部分进行安装。我们在本书中坚持传统方法，但请查看 [`cmake.org/cmake/help/latest/command/target_sources.html#file-sets`](https://cmake.org/cmake/help/latest/command/target_sources.html#file-sets) 了解更多关于指定文件集的信息。
 
             有了 `.h` 文件，我们现在拥有了安装我们的库并在另一个项目中使用它所需的一切。
 
@@ -237,7 +235,7 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/minimal-cmake/
      └── libmc-arrayd.a
 ```
 
-            我们已经涵盖了很多内容，所以如果一切并不完全明了也不用担心。安装、导出和导入目标的概念随着你使用得越多会变得越清晰。一个积极的方面是，添加安装支持仅仅花了大约10行代码，在大局上看，这并不算太多。在`ch7/part-2/lib/array`中，除了将`mc-array`目标的名称更改为`dynamic-array`，我们还添加了一个`CMakePreset.json`文件来设置`install`目录（`"installDir"`）。只需运行`cmake --preset default`，然后运行`cmake --build build --target install`。
+            我们已经涵盖了很多内容，所以如果一切并不完全明了也不用担心。安装、导出和导入目标的概念随着你使用得越多会变得越清晰。一个积极的方面是，添加安装支持仅仅花了大约 10 行代码，在大局上看，这并不算太多。在`ch7/part-2/lib/array`中，除了将`mc-array`目标的名称更改为`dynamic-array`，我们还添加了一个`CMakePreset.json`文件来设置`install`目录（`"installDir"`）。只需运行`cmake --preset default`，然后运行`cmake --build build --target install`。
 
             现在让我们看看如何在我们的*生命游戏*应用中使用我们的数组库。
 
@@ -276,13 +274,13 @@ cmake --build build/shared-ninja --config Debug
 
             处理嵌套依赖
 
-            当我们说到嵌套依赖时，我们指的是我们想要依赖的库的依赖项（你可以把这些看作是间接依赖，也叫做**传递性依赖**）。例如，如果一个应用依赖于库A，而库A又依赖于库B，那么就应用而言，库B嵌套在库A中。无论这个依赖是私有的（对应用隐藏）还是公共的（对应用可见），都影响我们如何处理它。
+            当我们说到嵌套依赖时，我们指的是我们想要依赖的库的依赖项（你可以把这些看作是间接依赖，也叫做**传递性依赖**）。例如，如果一个应用依赖于库 A，而库 A 又依赖于库 B，那么就应用而言，库 B 嵌套在库 A 中。无论这个依赖是私有的（对应用隐藏）还是公共的（对应用可见），都影响我们如何处理它。
 
             在我们刚才看到的示例（`mc-array`）中，幸运的是，当提供安装支持时，我们不需要担心任何依赖项。如果有依赖项，事情会变得稍微复杂一些，但一旦我们理解了需要做什么以及为什么做，支持起来并不复杂。
 
-            为了更好地理解这一点，我们将注意力转向我们的*生命游戏*库，`mc-gol`，它位于`ch7/part-2/lib/gol`。最好为这个库以及`mc-array`添加安装支持，所以，如果我们复制刚才演示的三个CMake `install`命令，并将它们添加到`ch7/part-2/lib/gol/CMakeLists.txt`的底部，同时在顶部添加`include(GNUInstallDirs)`并更新`target_include_directories`与`INSTALL_INTERFACE`，我们可以看看会发生什么（请参阅`part-3`获取确切的更改）。
+            为了更好地理解这一点，我们将注意力转向我们的*生命游戏*库，`mc-gol`，它位于`ch7/part-2/lib/gol`。最好为这个库以及`mc-array`添加安装支持，所以，如果我们复制刚才演示的三个 CMake `install`命令，并将它们添加到`ch7/part-2/lib/gol/CMakeLists.txt`的底部，同时在顶部添加`include(GNUInstallDirs)`并更新`target_include_directories`与`INSTALL_INTERFACE`，我们可以看看会发生什么（请参阅`part-3`获取确切的更改）。
 
-            如果我们从`ch7/part-2/lib/gol`配置、构建并安装共享版本的库（通过设置`MC_GOL_SHARED=ON`），一切都会按预期工作，但如果我们尝试构建库的静态版本，我们会看到CMake报告三处错误：
+            如果我们从`ch7/part-2/lib/gol`配置、构建并安装共享版本的库（通过设置`MC_GOL_SHARED=ON`），一切都会按预期工作，但如果我们尝试构建库的静态版本，我们会看到 CMake 报告三处错误：
 
 ```cpp
 CMake Error: install(EXPORT "mc-gol-config" ...) includes target "mc-gol" which requires target "as-c-math" that is not in any export set.
@@ -309,7 +307,7 @@ game-of-life PRIVATE
 
 $<BUILD_LOCAL_INTERFACE:minimal-cmake::dynamic-array
 
-as-c-math 和 mc-utils）在BUILD_LOCAL_INTERFACE内，但将所有内容放入其中可以确保minimal-cmake::dynamic-array不会被添加到生成的mc-gol-config.cmake文件的INTERFACE_LINK_LIBRARIES中。
+as-c-math 和 mc-utils）在 BUILD_LOCAL_INTERFACE 内，但将所有内容放入其中可以确保 minimal-cmake::dynamic-array 不会被添加到生成的 mc-gol-config.cmake 文件的 INTERFACE_LINK_LIBRARIES 中。
 
             唯一需要的其他更改是确保我们安装共享库文件（在`mc-array`的情况下我们不需要这个，因为它只能构建为静态库）。现在，`install` `TARGET` 命令如下所示：
 
@@ -350,7 +348,7 @@ DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 
 NAMESPACE minimal-cmake::
 
-使用`find_package`命令首先定位`as-c-math`依赖项，然后再尝试定位依赖于`as-c-math`的draw库。
+使用`find_package`命令首先定位`as-c-math`依赖项，然后再尝试定位依赖于`as-c-math`的 draw 库。
 
             单独来看，所有前述的变更只是将原本会生成的`mc-draw-config.cmake`文件的名称更改为`mc-draw-targets.cmake`，但这是因为我们将自己制作配置文件，然后从那里引用这个生成的文件。为此，我们在与`CMakeLists.txt`文件相同的目录中创建一个新的文件，命名为`mc-draw-config.cmake.in`。这是一个模板文件，用于生成实际的`mc-draw-config.cmake`文件，其内容如下：
 
@@ -361,11 +359,11 @@ find_dependency(as-c-math)
 include(${CMAKE_CURRENT_LIST_DIR}/mc-draw-targets.cmake)
 ```
 
-            第一行在使用`configure_package_config_file`时是必需的（这是我们稍后会介绍的命令），然后我们引入一个CMake模块（`CMakeFindDependencyMacro`），以便我们能在`as-c-math`上调用`find_dependency`。`find_dependency`命令是`find_package`的包装器，专门设计用于在包配置文件中使用（有关`find_dependency`的更多信息，请参见[https://cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html](https://cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html)）。
+            第一行在使用`configure_package_config_file`时是必需的（这是我们稍后会介绍的命令），然后我们引入一个 CMake 模块（`CMakeFindDependencyMacro`），以便我们能在`as-c-math`上调用`find_dependency`。`find_dependency`命令是`find_package`的包装器，专门设计用于在包配置文件中使用（有关`find_dependency`的更多信息，请参见[`cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html`](https://cmake.org/cmake/help/latest/module/CMakeFindDependencyMacro.html)）。
 
-            即使我们使用`FetchContent`将`as-c-math`引入，并作为主构建的一部分进行构建，它也需要安装支持，以便我们能够将其作为导出集的一部分。这是为了让调用`find_package(mc-draw)`时首先能找到`as-c-math`，正如之前提到的（要查看如何添加此支持，请参考[https://github.com/pr0g/as-c-math](https://github.com/pr0g/as-c-math)并查看`bfdd853`提交）。最后一行包含了我们之前`install`的`EXPORT`命令生成的文件（`mc-draw-targets.cmake`）。
+            即使我们使用`FetchContent`将`as-c-math`引入，并作为主构建的一部分进行构建，它也需要安装支持，以便我们能够将其作为导出集的一部分。这是为了让调用`find_package(mc-draw)`时首先能找到`as-c-math`，正如之前提到的（要查看如何添加此支持，请参考[`github.com/pr0g/as-c-math`](https://github.com/pr0g/as-c-math)并查看`bfdd853`提交）。最后一行包含了我们之前`install`的`EXPORT`命令生成的文件（`mc-draw-targets.cmake`）。
 
-            剩下的就是手动使用此模板生成新的`mc-draw-config.cmake`文件。为此，我们使用前面提到的`configure_package_config_file`命令。我们需要先包含`CMakePackageConfigHelpers` CMake模块，然后调用代码如下：
+            剩下的就是手动使用此模板生成新的`mc-draw-config.cmake`文件。为此，我们使用前面提到的`configure_package_config_file`命令。我们需要先包含`CMakePackageConfigHelpers` CMake 模块，然后调用代码如下：
 
 ```cpp
 configure_package_config_file(
@@ -374,7 +372,7 @@ configure_package_config_file(
 install(FILES 
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   INSTALL_DESTINATION. The following install command just copies the config file to the right location as part of the install process (notice how the values passed to INSTALL_DESTINATION and DESTINATION match).
-			`configure_package_config_file` is used to ensure the config file is relocatable (it avoids the config file using hardcoded paths). For more information about `CMakePackageConfigHelpers`, please see [https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html).
+			`configure_package_config_file` is used to ensure the config file is relocatable (it avoids the config file using hardcoded paths). For more information about `CMakePackageConfigHelpers`, please see [`cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html`](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html).
 			With these changes made, we can now install our library and update our `CMakeLists.txt` application file. Looking at `ch7/part-4/app/CMakeLists.txt`, we can see we now have the obligatory `find_package` call to find the installed library:
 
 ```
@@ -392,11 +390,11 @@ find_package(mc-draw CONFIG REQUIRED)
 
 ../minimal-cmake/ch7/part-4/lib/draw/install/lib/cmake/mc-draw/mc-draw-config.cmake
 
-但它将mc-draw_FOUND设置为FALSE，因此包“mc-draw”被认为是未找到。包给出的原因是：
+但它将 mc-draw_FOUND 设置为 FALSE，因此包“mc-draw”被认为是未找到。包给出的原因是：
 
-以下导入的目标被引用，但缺失：在问题解决之前显示为NOT_FOUND。
+以下导入的目标被引用，但缺失：在问题解决之前显示为 NOT_FOUND。
 
-            一切应该已经正常工作，所以从`ch7/part-4/app`开始，如果我们配置并构建（使用CMake预设将使这变得更简单），我们可以启动我们更新后的应用程序：
+            一切应该已经正常工作，所以从`ch7/part-4/app`开始，如果我们配置并构建（使用 CMake 预设将使这变得更简单），我们可以启动我们更新后的应用程序：
 
 ```cpp
 cmake --preset multi-ninja
@@ -459,7 +457,7 @@ set(_draw_supported_components vertex line quad)
 
 foreach(component ${${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS})
 
-# 如果我们找不到组件，设置绘图库为no
+# 如果我们找不到组件，设置绘图库为 no
 
 # 找不到后，通知用户缺少的组件
 
@@ -495,20 +493,20 @@ find_package(mc-draw CONFIG REQUIRED COMPONENTS circle)
 
 ../minimal-cmake/ch7/part-5/lib/draw/install/lib/cmake/mc-draw/mc-draw-config.cmake
 
-但它将mc-draw_FOUND设置为FALSE，因此包“mc-draw”被认为未找到。包给出的原因是：
+但它将 mc-draw_FOUND 设置为 FALSE，因此包“mc-draw”被认为未找到。包给出的原因是：
 
 不支持的组件：circle
 
 ```cpp
 
 			This kind of error message is helpful to let a user know whether they’ve mistyped a component or are trying to use one that does not exist.
-			One other important detail to note is we do not need to have a component map directly to a single target as we’ve done so previously, with an individual component for `vertex`, `quad`, and `line`. In a larger package, we may choose to create a `geometry` component that contains all the geometric libraries in our application (e.g., `vertex`, `quad`, `line`, `circle`, etc.). For a simple example showing this technique, see [https://github.com/pr0g/cmake-examples/tree/main/examples/more/components](https://github.com/pr0g/cmake-examples/tree/main/examples/more/components), which shows grouping multiple libraries under a single component (two libraries, `hello` and `hey`, are made part of the `greetings` component, with `goodbye` made part of the `farewells` component).
+			One other important detail to note is we do not need to have a component map directly to a single target as we’ve done so previously, with an individual component for `vertex`, `quad`, and `line`. In a larger package, we may choose to create a `geometry` component that contains all the geometric libraries in our application (e.g., `vertex`, `quad`, `line`, `circle`, etc.). For a simple example showing this technique, see [`github.com/pr0g/cmake-examples/tree/main/examples/more/components`](https://github.com/pr0g/cmake-examples/tree/main/examples/more/components), which shows grouping multiple libraries under a single component (two libraries, `hello` and `hey`, are made part of the `greetings` component, with `goodbye` made part of the `farewells` component).
 			COMPONENT versus COMPONENTS
-			There is unfortunately another keyword in CMake called `COMPONENT` that also happens to be part of the `install` command. It bears no relation to the `COMPONENTS` keyword that’s part of `find_package`. It is used to split install artifacts based on how the library/package is to be used (`Runtime` and `Development` are commonly suggested components to separate runtime and development functionality, for example). We haven’t covered the `COMPONENT` keyword in the context of the `install` command, but to learn more about how to use it, see the CMake install documentation ([https://cmake.org/cmake/help/latest/command/install.html](https://cmake.org/cmake/help/latest/command/install.html)) and CMake `install` command documentation ([https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project](https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project)) (`cmake --install <build> --``component <comp>`).
+			There is unfortunately another keyword in CMake called `COMPONENT` that also happens to be part of the `install` command. It bears no relation to the `COMPONENTS` keyword that’s part of `find_package`. It is used to split install artifacts based on how the library/package is to be used (`Runtime` and `Development` are commonly suggested components to separate runtime and development functionality, for example). We haven’t covered the `COMPONENT` keyword in the context of the `install` command, but to learn more about how to use it, see the CMake install documentation ([`cmake.org/cmake/help/latest/command/install.html`](https://cmake.org/cmake/help/latest/command/install.html)) and CMake `install` command documentation ([`cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project`](https://cmake.org/cmake/help/latest/manual/cmake.1.html#install-a-project)) (`cmake --install <build> --``component <comp>`).
 			Whether you decide to use components or not will very much depend on the type and size of the library you’re building. One example of a library that relies heavily on components is the `s3`, `ec2`, etc.).
 			Supporting different versions of a library
-			Back in [*Chapter 2*](B21152_02.xhtml#_idTextAnchor032), *Hello, CMake!*, when we introduced the `project` command, we touched on the `VERSION` parameter, but haven’t yet had the opportunity to see how to apply it, and why it’s useful. In this section, we’ll show how to add a version to our `mc-draw` library and how to request the correct version from our `find_package` command.
-			Versioning for libraries is important for us to know what functionality and interface the library we’re currently using provides. Versioning is used to manage change, and, most importantly, handle API updates that may cause breaking changes. The software industry has largely adopted `<Major>.<Minor>.<Patch>` format (e.g., `1.45.23`) where numbers further to the left represent a more notable change. For a full introduction, see [https://semver.org/](https://semver.org/). Luckily, CMake supports this format, so it’s easy to integrate into our project.
+			Back in *Chapter 2*, *Hello, CMake!*, when we introduced the `project` command, we touched on the `VERSION` parameter, but haven’t yet had the opportunity to see how to apply it, and why it’s useful. In this section, we’ll show how to add a version to our `mc-draw` library and how to request the correct version from our `find_package` command.
+			Versioning for libraries is important for us to know what functionality and interface the library we’re currently using provides. Versioning is used to manage change, and, most importantly, handle API updates that may cause breaking changes. The software industry has largely adopted `<Major>.<Minor>.<Patch>` format (e.g., `1.45.23`) where numbers further to the left represent a more notable change. For a full introduction, see [`semver.org/`](https://semver.org/). Luckily, CMake supports this format, so it’s easy to integrate into our project.
 			If we look at `ch7/part-6/lib/draw/CMakeLists.txt`, we can see the changes needed to add version support by reviewing the differences between it and the corresponding file in `part-5`. The first change is adding `VERSION` to our project command:
 
 ```
@@ -547,11 +545,11 @@ CMake 错误位于 CMakeLists.txt 的第 16 行 (find_package)：
 
 以下配置文件被考虑过，但未被接受：
 
-../minimal-cmake/ch7/part-6/lib/draw/install/lib/cmake/mc-draw-3.5.4/mc-draw-config.cmake，AnyNewerVersion，当我们安装库时，要求 2.0 不会产生错误，因为已安装的版本 3.5.4 会大于请求的 2.0 版本。决定使用哪种方案可能会很困难，这将取决于你愿意支持的向后兼容性。有关不同兼容模式的更多信息，请参见 [https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file)。
+../minimal-cmake/ch7/part-6/lib/draw/install/lib/cmake/mc-draw-3.5.4/mc-draw-config.cmake，AnyNewerVersion，当我们安装库时，要求 2.0 不会产生错误，因为已安装的版本 3.5.4 会大于请求的 2.0 版本。决定使用哪种方案可能会很困难，这将取决于你愿意支持的向后兼容性。有关不同兼容模式的更多信息，请参见 [`cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file`](https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html#generating-a-package-version-file)。
 
             编写查找模块文件
 
-            在我们结束关于安装的讨论之前，还有一个话题是有用的。到目前为止，我们只讨论了使用配置模式查找依赖项，但也有一种模式，我们在 [*第 6 章*](B21152_06.xhtml#_idTextAnchor152) 中简单提到过，叫做 **模块模式**。模块模式在与没有使用 CMake 本地构建的库集成时很有用（因此无法为我们自动生成配置文件）。
+            在我们结束关于安装的讨论之前，还有一个话题是有用的。到目前为止，我们只讨论了使用配置模式查找依赖项，但也有一种模式，我们在 *第六章* 中简单提到过，叫做 **模块模式**。模块模式在与没有使用 CMake 本地构建的库集成时很有用（因此无法为我们自动生成配置文件）。
 
             在 `ch7/part-7/cmake` 目录中，添加了一个新的文件 `Findmc-gol.cmake`，它充当了我们将在 `ch7/part-7/lib/gol/install` 中安装的 `mc-gol` 库的查找模块文件。该查找模块文件从技术上讲是多余的，因为我们可以像以前一样使用生成的 `mc-gol-config.cmake` 文件进行配置模式，但假设我们使用一个单独的工具构建了这个库，并知道构建产物（库文件）和头文件的位置。
 
@@ -575,7 +573,7 @@ find_library(
 
             `NAMES` 参数要求提供我们库的精确名称（这里可以提供多个名称）。我们还必须包含带有 `d` 后缀的库的调试版本名称，因为我们使用 `CMAKE_DEBUG_POSTFIX` 来区分库的 `Debug` 和 `Release` 版本。如果我们不这么做，`find_library` 将找不到库的调试版本。还值得一提的是，`find_library` 并不递归查找，所以我们必须提供库文件存储的精确文件夹位置。
 
-            接下来是一个非常有用的 CMake 提供的工具，名为 `find_package_handle_standard_args`，用于在找不到前面提到的两个变量（`mc-gol_INCLUDE_DIR` 和 `mc-gol_LIBRARY`）时进行适当的消息处理。它还处理与 `find_package` 调用相关的其他细节，尽管目前我们不需要关注这些细节。如果你想了解更多关于该命令幕后做了什么，可以访问 [https://cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html](https://cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html) 获取更多信息。
+            接下来是一个非常有用的 CMake 提供的工具，名为 `find_package_handle_standard_args`，用于在找不到前面提到的两个变量（`mc-gol_INCLUDE_DIR` 和 `mc-gol_LIBRARY`）时进行适当的消息处理。它还处理与 `find_package` 调用相关的其他细节，尽管目前我们不需要关注这些细节。如果你想了解更多关于该命令幕后做了什么，可以访问 [`cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html`](https://cmake.org/cmake/help/latest/module/FindPackageHandleStandardArgs.html) 获取更多信息。
 
             最后，如果库文件被找到，我们会调用 `add_library` 并将 `minimal-cmake::game-of-life` 作为一个导入的目标，同时使用 `set_target_properties` 将我们填充的变量与 `minimal-cmake::game-of-life` 目标关联起来：
 

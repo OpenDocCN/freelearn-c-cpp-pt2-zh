@@ -1,6 +1,4 @@
-# 5
-
-# 使用目标
+# 第五章：使用目标
 
 在 CMake 中，整个应用程序可以从一个源代码文件（例如经典的 `helloworld.cpp`）构建。但同样，也可以创建一个项目，其中可执行文件由多个源文件构建：几十个甚至成千上万个。许多初学者遵循这种路径：他们只用几个文件来构建二进制文件，并让他们的项目自然发展，缺乏严格的规划。他们会根据需要不断添加文件，直到所有内容都直接链接到一个二进制文件，没有任何结构。
 
@@ -22,7 +20,7 @@
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中提到的代码文件，链接为 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05)。
+你可以在 GitHub 上找到本章中提到的代码文件，链接为 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch05)。
 
 为了构建本书中提供的示例，请始终使用推荐的命令：
 
@@ -69,7 +67,7 @@ add_executable(<name> [WIN32] [MACOSX_BUNDLE]
 
 如果我们为 Windows 编译，通过添加可选参数 `WIN32` 关键字，我们将生成一个不会显示默认控制台窗口的可执行文件（通常我们可以在控制台窗口中看到输出流 `std::cout`）。相反，应用程序将期望生成自己的图形用户界面（GUI）。
 
-下一个可选参数`MACOSX_BUNDLE`在某种程度上类似；它使得为macOS/iOS生成的应用程序可以从Finder中启动，作为GUI应用程序。
+下一个可选参数`MACOSX_BUNDLE`在某种程度上类似；它使得为 macOS/iOS 生成的应用程序可以从 Finder 中启动，作为 GUI 应用程序。
 
 `EXCLUDE_FROM_ALL`关键字在使用时，会阻止可执行目标在常规默认构建中被构建。这样的目标必须在*构建命令*中明确提到：
 
@@ -79,15 +77,15 @@ cmake --build -t <target>
 
 最后，我们需要提供将被编译成目标的源代码列表。支持以下扩展：
 
-+   对于C语言：`c`，`m`
++   对于 C 语言：`c`，`m`
 
-+   对于C++语言：`C`，`M`，`c++`，`cc`，`cpp`，`cxx`，`m`，`mm`，`mpp`，`CPP`，`ixx`，`cppm`，`ccm`，`cxxm`，`c++m`
++   对于 C++语言：`C`，`M`，`c++`，`cc`，`cpp`，`cxx`，`m`，`mm`，`mpp`，`CPP`，`ixx`，`cppm`，`ccm`，`cxxm`，`c++m`
 
-请注意，我们没有将任何**头文件**添加到源代码列表中。这可以通过提供包含这些文件的目录路径给`target_include_directories()`命令来隐式完成，或者通过使用`target_sources()`命令的`FILE_SET`功能（在CMake 3.23中新增）。这是可执行文件的重要话题，但由于其复杂且与目标相互独立，我们将在*第7章*，*使用CMake编译C++源代码*中深入探讨其细节。
+请注意，我们没有将任何**头文件**添加到源代码列表中。这可以通过提供包含这些文件的目录路径给`target_include_directories()`命令来隐式完成，或者通过使用`target_sources()`命令的`FILE_SET`功能（在 CMake 3.23 中新增）。这是可执行文件的重要话题，但由于其复杂且与目标相互独立，我们将在*第七章*，*使用 CMake 编译 C++源代码*中深入探讨其细节。
 
 ## 定义库目标
 
-定义库与定义可执行文件非常相似，但当然，它不需要定义如何处理GUI方面的关键字。以下是该命令的签名：
+定义库与定义可执行文件非常相似，但当然，它不需要定义如何处理 GUI 方面的关键字。以下是该命令的签名：
 
 ```cpp
 add_library(<name> [STATIC | SHARED | MODULE]
@@ -95,11 +93,11 @@ add_library(<name> [STATIC | SHARED | MODULE]
             [<source>...]) 
 ```
 
-关于名称、*排除所有* 和源代码匹配可执行目标的规则完全一致。唯一的区别在于`STATIC`、`SHARED`和`MODULE`关键字。如果你有使用库的经验，你会知道这些关键字定义了CMake将生成哪种类型的构件：静态链接库、共享（动态）库或模块。再一次，这确实是一个庞大的话题，将在*第8章*，*链接可执行文件和库*中深入讲解。
+关于名称、*排除所有* 和源代码匹配可执行目标的规则完全一致。唯一的区别在于`STATIC`、`SHARED`和`MODULE`关键字。如果你有使用库的经验，你会知道这些关键字定义了 CMake 将生成哪种类型的构件：静态链接库、共享（动态）库或模块。再一次，这确实是一个庞大的话题，将在*第八章*，*链接可执行文件和库*中深入讲解。
 
 ## 自定义目标
 
-自定义目标与可执行文件或库有所不同。它们通过执行明确给定的命令行，扩展了CMake默认提供的构建功能；例如，它们可以用于：
+自定义目标与可执行文件或库有所不同。它们通过执行明确给定的命令行，扩展了 CMake 默认提供的构建功能；例如，它们可以用于：
 
 +   计算其他二进制文件的校验和。
 
@@ -115,7 +113,7 @@ add_library(<name> [STATIC | SHARED | MODULE]
 add_custom_target(Name [ALL] [COMMAND command2 [args2...] ...]) 
 ```
 
-自定义目标有一些需要考虑的缺点。由于它们涉及Shell命令，可能是系统特定的，从而限制了可移植性。此外，自定义目标可能不会为CMake提供一种直接的方法来确定生成的具体构件或副产品（如果有的话）。
+自定义目标有一些需要考虑的缺点。由于它们涉及 Shell 命令，可能是系统特定的，从而限制了可移植性。此外，自定义目标可能不会为 CMake 提供一种直接的方法来确定生成的具体构件或副产品（如果有的话）。
 
 自定义目标与可执行文件和库不同，不会进行陈旧性检查（它们不会验证源文件是否比二进制文件更新），因为默认情况下，它们没有被添加到**依赖关系图**中（因此`ALL`关键字与`EXCLUDE_FROM_ALL`正好相反）。让我们来了解一下这个依赖关系图的内容。
 
@@ -125,9 +123,9 @@ add_custom_target(Name [ALL] [COMMAND command2 [args2...] ...])
 
 ![](img/B19844_05_01.png)
 
-图 5.1：BankApp项目中依赖关系构建的顺序
+图 5.1：BankApp 项目中依赖关系构建的顺序
 
-在这个项目中，我们有两个库、两个可执行文件和一个自定义目标。我们的用例是为用户提供一个带有良好图形界面的银行应用程序（**GuiApp**），以及一个命令行版本，作为自动化脚本的一部分（**TerminalApp**）。这两个可执行文件都依赖于相同的**Calculations**库，但只有其中一个需要**Drawing**库。为了确保我们的应用程序二进制文件是从可靠来源下载的，我们还会计算一个校验和，并通过单独的安全渠道分发它。CMake在为这样的解决方案编写list文件时非常灵活：
+在这个项目中，我们有两个库、两个可执行文件和一个自定义目标。我们的用例是为用户提供一个带有良好图形界面的银行应用程序（**GuiApp**），以及一个命令行版本，作为自动化脚本的一部分（**TerminalApp**）。这两个可执行文件都依赖于相同的**Calculations**库，但只有其中一个需要**Drawing**库。为了确保我们的应用程序二进制文件是从可靠来源下载的，我们还会计算一个校验和，并通过单独的安全渠道分发它。CMake 在为这样的解决方案编写 list 文件时非常灵活：
 
 **ch05/01-targets/CMakeLists.txt**
 
@@ -148,25 +146,25 @@ add_custom_target(checksum ALL
 ) 
 ```
 
-我们通过使用`target_link_libraries()`命令将我们的库与可执行文件链接。如果没有这个命令，生成可执行文件时将因为未定义的符号而失败。你有没有注意到我们在声明任何库之前就调用了这个命令？当CMake配置项目时，它会收集有关目标及其属性的信息——它们的名称、依赖关系、源文件以及其他细节。
+我们通过使用`target_link_libraries()`命令将我们的库与可执行文件链接。如果没有这个命令，生成可执行文件时将因为未定义的符号而失败。你有没有注意到我们在声明任何库之前就调用了这个命令？当 CMake 配置项目时，它会收集有关目标及其属性的信息——它们的名称、依赖关系、源文件以及其他细节。
 
-在解析所有文件之后，CMake将尝试构建一个依赖关系图。像所有有效的依赖关系图一样，它们是**有向无环图**（**DAGs**）。这意味着有明确的方向，指示哪个目标依赖于哪个，且这些依赖关系不能形成循环。
+在解析所有文件之后，CMake 将尝试构建一个依赖关系图。像所有有效的依赖关系图一样，它们是**有向无环图**（**DAGs**）。这意味着有明确的方向，指示哪个目标依赖于哪个，且这些依赖关系不能形成循环。
 
 当我们在构建模式下执行`cmake`时，生成的构建系统将检查我们定义了哪些顶级目标，并递归地构建它们的依赖关系。让我们考虑一下*图 5.1*中的示例：
 
-1.  从顶部开始，构建第1组中的两个库。
+1.  从顶部开始，构建第 1 组中的两个库。
 
-1.  当**Calculations**和**Drawing**库构建完成后，构建第2组——**GuiApp**和**TerminalApp**。
+1.  当**Calculations**和**Drawing**库构建完成后，构建第 2 组——**GuiApp**和**TerminalApp**。
 
-1.  构建一个校验和目标；运行指定的命令行以生成校验和（`cksum`是一个Unix的校验和工具，这意味着该示例在其他平台上无法构建）。
+1.  构建一个校验和目标；运行指定的命令行以生成校验和（`cksum`是一个 Unix 的校验和工具，这意味着该示例在其他平台上无法构建）。
 
-但是有一个小问题——上述解决方案并不能保证校验和目标在可执行文件之后构建。CMake不知道校验和依赖于可执行二进制文件的存在，因此它可以自由地先开始构建校验和。为了解决这个问题，我们可以将`add_dependencies()`命令放在文件的最后：
+但是有一个小问题——上述解决方案并不能保证校验和目标在可执行文件之后构建。CMake 不知道校验和依赖于可执行二进制文件的存在，因此它可以自由地先开始构建校验和。为了解决这个问题，我们可以将`add_dependencies()`命令放在文件的最后：
 
 ```cpp
 add_dependencies(checksum terminal_app gui_app) 
 ```
 
-这将确保CMake理解校验和目标与可执行文件之间的关系。
+这将确保 CMake 理解校验和目标与可执行文件之间的关系。
 
 这很好，但`target_link_libraries()`和`add_dependencies()`之间有什么区别？`target_link_libraries()`是用来与实际库配合使用的，并允许你控制属性传播。第二个则仅用于顶级目标，用来设置它们的构建顺序。
 
@@ -174,7 +172,7 @@ add_dependencies(checksum terminal_app gui_app)
 
 ## 可视化依赖关系
 
-即使是小型项目也可能很难理解并与其他开发人员共享。一个简洁的图表在这里会大有帮助。毕竟，一图胜千言。我们可以像我在*图 5.1*中做的那样，自己动手绘制图表。但这既繁琐又需要在项目变动时更新。幸运的是，CMake有一个很棒的模块，可以生成`dot/graphviz`格式的依赖图，并且它支持内部和外部依赖！
+即使是小型项目也可能很难理解并与其他开发人员共享。一个简洁的图表在这里会大有帮助。毕竟，一图胜千言。我们可以像我在*图 5.1*中做的那样，自己动手绘制图表。但这既繁琐又需要在项目变动时更新。幸运的是，CMake 有一个很棒的模块，可以生成`dot/graphviz`格式的依赖图，并且它支持内部和外部依赖！
 
 要使用它，我们可以简单地执行以下命令：
 
@@ -182,7 +180,7 @@ add_dependencies(checksum terminal_app gui_app)
 cmake --graphviz=test.dot . 
 ```
 
-该模块将生成一个文本文件，我们可以将其导入到Graphviz可视化软件中，Graphviz可以渲染图像或生成PDF或SVG文件，这些文件可以作为软件文档的一部分存储。每个人都喜欢出色的文档，但几乎没有人喜欢创建它——现在，你不需要做这件事了！
+该模块将生成一个文本文件，我们可以将其导入到 Graphviz 可视化软件中，Graphviz 可以渲染图像或生成 PDF 或 SVG 文件，这些文件可以作为软件文档的一部分存储。每个人都喜欢出色的文档，但几乎没有人喜欢创建它——现在，你不需要做这件事了！
 
 自定义目标默认不可见，我们需要创建一个特殊的配置文件`CMakeGraphVizOptions.cmake`，它将允许我们自定义图形。使用`set(GRAPHVIZ_CUSTOM_TARGETS TRUE)`命令可以在图形中启用自定义目标：
 
@@ -192,15 +190,15 @@ cmake --graphviz=test.dot .
 set(GRAPHVIZ_CUSTOM_TARGETS TRUE) 
 ```
 
-其他选项允许添加图表名称、标题和节点前缀，并配置哪些目标应包含或排除在输出中（按名称或类型）。有关`CMakeGraphVizOptions`模块的完整描述，请访问官方的CMake文档。
+其他选项允许添加图表名称、标题和节点前缀，并配置哪些目标应包含或排除在输出中（按名称或类型）。有关`CMakeGraphVizOptions`模块的完整描述，请访问官方的 CMake 文档。
 
-如果你很着急，你甚至可以直接通过浏览器在这个地址运行Graphviz：[https://dreampuf.github.io/GraphvizOnline/](https://dreampuf.github.io/GraphvizOnline/)。
+如果你很着急，你甚至可以直接通过浏览器在这个地址运行 Graphviz：[`dreampuf.github.io/GraphvizOnline/`](https://dreampuf.github.io/GraphvizOnline/)。
 
 你所需要做的就是将`test.dot`文件的内容复制并粘贴到左侧窗口，你的项目就会被可视化（*图 5.2*）。很方便，不是吗？
 
 ![](img/B19844_05_02.png)
 
-图 5.2：BankApp示例在Graphviz中的可视化
+图 5.2：BankApp 示例在 Graphviz 中的可视化
 
 使用这种方法，我们可以快速查看所有显式定义的目标。
 
@@ -237,7 +235,7 @@ set_property`(`TARGET `<target>` PROPERTY `<name> <value>)`
 
 会有这样的情况：当某个*被使用的目标*为自己设置了特定的*属性*或*依赖*，这些属性或依赖反过来成为*使用该目标的其他目标*的**需求**：链接一些库，包含一个目录，或者需要特定的编译器特性。
 
-我们难题的最后一部分，**传递性**，正确描述了行为（可能可以简化一点）。CMake将*被使用目标*的一些属性/需求附加到*使用目标*的属性中。可以说，一些属性可以隐式地在目标之间传递（或者简单地传播），因此更容易表达依赖关系。
+我们难题的最后一部分，**传递性**，正确描述了行为（可能可以简化一点）。CMake 将*被使用目标*的一些属性/需求附加到*使用目标*的属性中。可以说，一些属性可以隐式地在目标之间传递（或者简单地传播），因此更容易表达依赖关系。
 
 简化这个概念，我将其视为**传播的属性**，它们在**源目标**（被使用的目标）和**目标使用者**（使用其他目标的目标）之间传播。
 
@@ -247,7 +245,7 @@ set_property`(`TARGET `<target>` PROPERTY `<name> <value>)`
 target_compile_definitions(<source> <INTERFACE|PUBLIC|PRIVATE> [items1...]) 
 ```
 
-这个目标命令将填充`COMPILE_DEFINITIONS`属性到一个`<source>`目标中。**编译定义**就是传递给编译器的`-Dname=definition`标志，用于配置C++预处理器定义（我们将在*第七章*，*使用CMake编译C++源代码*中详细讲解）。这里有趣的部分是第二个参数。我们需要指定三个值中的一个，`INTERFACE`、`PUBLIC`或`PRIVATE`，来控制该属性应该传递给哪些目标。现在，别把这些和C++的访问控制符混淆——这是一个独立的概念。
+这个目标命令将填充`COMPILE_DEFINITIONS`属性到一个`<source>`目标中。**编译定义**就是传递给编译器的`-Dname=definition`标志，用于配置 C++预处理器定义（我们将在*第七章*，*使用 CMake 编译 C++源代码*中详细讲解）。这里有趣的部分是第二个参数。我们需要指定三个值中的一个，`INTERFACE`、`PUBLIC`或`PRIVATE`，来控制该属性应该传递给哪些目标。现在，别把这些和 C++的访问控制符混淆——这是一个独立的概念。
 
 传播关键字是这样工作的：
 
@@ -259,9 +257,9 @@ target_compile_definitions(<source> <INTERFACE|PUBLIC|PRIVATE> [items1...])
 
 当一个属性不需要传递给任何目标时，设置为`PRIVATE`。当需要进行这样的传递时，使用`PUBLIC`。如果你处在一种情况，源目标在其实现（`.cpp`文件）中并不使用该属性，而只在头文件中使用，并且这些头文件被传递给消费者目标，那么应该使用`INTERFACE`关键字。
 
-这在背后是如何工作的呢？为了管理这些属性，CMake提供了一些命令，比如前面提到的`target_compile_definitions()`。当你指定`PRIVATE`或`PUBLIC`关键字时，CMake会将提供的值存储到目标的属性中，在这个例子中是`COMPILE_DEFINITIONS`。此外，如果关键字是`INTERFACE`或`PUBLIC`，CMake会将值存储到带有`INTERFACE_`前缀的属性中——`INTERFACE_COMPILE_DEFINITIONS`。在配置阶段，CMake会读取源目标的接口属性，并将它们的内容附加到目标使用者上。就是这样——传播的属性，或者CMake所称的传递性使用需求。
+这在背后是如何工作的呢？为了管理这些属性，CMake 提供了一些命令，比如前面提到的`target_compile_definitions()`。当你指定`PRIVATE`或`PUBLIC`关键字时，CMake 会将提供的值存储到目标的属性中，在这个例子中是`COMPILE_DEFINITIONS`。此外，如果关键字是`INTERFACE`或`PUBLIC`，CMake 会将值存储到带有`INTERFACE_`前缀的属性中——`INTERFACE_COMPILE_DEFINITIONS`。在配置阶段，CMake 会读取源目标的接口属性，并将它们的内容附加到目标使用者上。就是这样——传播的属性，或者 CMake 所称的传递性使用需求。
 
-使用`set_target_properties()`命令管理的属性可以在[https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)中找到，位于*目标上的属性*部分（并非所有目标属性都是传递性的）。以下是最重要的属性：
+使用`set_target_properties()`命令管理的属性可以在[`cmake.org/cmake/help/latest/manual/cmake-properties.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)中找到，位于*目标上的属性*部分（并非所有目标属性都是传递性的）。以下是最重要的属性：
 
 +   `COMPILE_DEFINITIONS`
 
@@ -329,7 +327,7 @@ CMake Error: The INTERFACE_POSITION_INDEPENDENT_CODE property of "source_target"
 
 在少数情况下，这可能变得很重要——例如，如果你在多个目标中使用同一个库，然后将它们链接到一个单一的可执行文件。如果这些源目标使用的是不同版本的同一个库，你可能会遇到问题。
 
-为确保我们只使用相同的特定版本，我们可以创建一个自定义接口属性`INTERFACE_LIB_VERSION`，并将版本存储在其中。但这还不足以解决问题，因为CMake默认不会传播自定义属性（该机制仅适用于内建目标属性）。我们必须显式地将自定义属性添加到“兼容”属性列表中。
+为确保我们只使用相同的特定版本，我们可以创建一个自定义接口属性`INTERFACE_LIB_VERSION`，并将版本存储在其中。但这还不足以解决问题，因为 CMake 默认不会传播自定义属性（该机制仅适用于内建目标属性）。我们必须显式地将自定义属性添加到“兼容”属性列表中。
 
 每个目标都有四个这样的列表：
 
@@ -362,7 +360,7 @@ target_link_libraries(destination source1 source2)
 
 我们在这里创建了三个目标；为了简化起见，所有目标都使用相同的空源文件。在两个*源目标*上，我们指定了带有`INTERFACE_`前缀的自定义属性，并将它们设置为相同的匹配库版本。这两个*源目标*都链接到目标目标。最后，我们为`source1`指定了一个`STRING`兼容性要求作为属性（这里没有加`INTERFACE_`前缀）。
 
-CMake会将这个自定义属性传播到*目标目标*，并检查所有源目标的版本是否完全匹配（兼容性属性可以只设置在一个目标上）。
+CMake 会将这个自定义属性传播到*目标目标*，并检查所有源目标的版本是否完全匹配（兼容性属性可以只设置在一个目标上）。
 
 现在我们了解了常规目标是什么，让我们来看一看那些看起来像目标、闻起来像目标、有时也像目标但实际上并不是目标的其他事物。
 
@@ -380,7 +378,7 @@ CMake会将这个自定义属性传播到*目标目标*，并检查所有源目�
 
 ### 导入目标
 
-如果你浏览过本书的目录，你就会知道我们将讨论CMake如何管理外部依赖——其他项目、库等等。`IMPORTED`目标本质上是这个过程的产物。CMake可以通过`find_package()`命令定义它们。
+如果你浏览过本书的目录，你就会知道我们将讨论 CMake 如何管理外部依赖——其他项目、库等等。`IMPORTED`目标本质上是这个过程的产物。CMake 可以通过`find_package()`命令定义它们。
 
 你可以调整这种目标的目标属性：**编译定义**、**编译** **选项**、**包含目录**等——它们甚至支持传递性使用要求。然而，你应该将它们视为不可变的；不要更改它们的源代码或依赖关系。
 
@@ -424,7 +422,7 @@ generator expressions (these are indicated with dollar sign and angle brackets, 
 target_link_libraries(executable Eigen) 
 ```
 
-这里不会发生实际的链接，但CMake会将此命令理解为要求将所有`INTERFACE`属性传播到`executable`目标。
+这里不会发生实际的链接，但 CMake 会将此命令理解为要求将所有`INTERFACE`属性传播到`executable`目标。
 
 第二种用法完全利用相同的机制，但目的是不同的——它创建一个逻辑目标，可以作为传播属性的占位符。然后，我们可以将这个目标作为其他目标的依赖，并以干净、方便的方式设置属性。这里是一个例子：
 
@@ -463,9 +461,9 @@ add_executable(... $<TARGET_OBJECTS:objlib> ...)
 
 ## 构建目标
 
-“目标”这个术语可以根据项目中的上下文和生成的构建系统的不同而有不同的含义。在生成构建系统的上下文中，CMake将用CMake语言编写的列表文件“编译”成所选构建工具的语言，例如为GNU Make创建一个Makefile。这些生成的Makefile有自己的目标集合。部分目标是从列表文件中定义的目标直接转换而来，而其他目标则是作为构建系统生成过程的一部分隐式创建的。
+“目标”这个术语可以根据项目中的上下文和生成的构建系统的不同而有不同的含义。在生成构建系统的上下文中，CMake 将用 CMake 语言编写的列表文件“编译”成所选构建工具的语言，例如为 GNU Make 创建一个 Makefile。这些生成的 Makefile 有自己的目标集合。部分目标是从列表文件中定义的目标直接转换而来，而其他目标则是作为构建系统生成过程的一部分隐式创建的。
 
-一个这样的构建系统目标是`ALL`，这是CMake默认生成的，包含所有顶级列表文件目标，例如可执行文件和库（不一定是自定义目标）。当我们运行`cmake --build <build tree>`而不选择任何特定目标时，`ALL`会被构建。正如你在第一章中可能记得的，你可以通过在`cmake`构建命令中添加`--target <name>`参数来选择一个目标。
+一个这样的构建系统目标是`ALL`，这是 CMake 默认生成的，包含所有顶级列表文件目标，例如可执行文件和库（不一定是自定义目标）。当我们运行`cmake --build <build tree>`而不选择任何特定目标时，`ALL`会被构建。正如你在第一章中可能记得的，你可以通过在`cmake`构建命令中添加`--target <name>`参数来选择一个目标。
 
 有些可执行文件或库在每次构建中可能都不需要，但我们希望它们作为项目的一部分保留，以备在少数需要时使用。为了优化我们的默认构建，我们可以像这样将它们从`ALL`目标中排除：
 
@@ -474,9 +472,9 @@ add_executable(<name> **EXCLUDE_FROM_ALL** [<source>...])
 add_library(<name> **EXCLUDE_FROM_ALL** [<source>...]) 
 ```
 
-自定义目标的工作方式正好相反——默认情况下，它们会被排除在`ALL`目标之外，除非你显式地使用`ALL`关键字将它们添加进去，就像我们在BankApp示例中所做的那样。
+自定义目标的工作方式正好相反——默认情况下，它们会被排除在`ALL`目标之外，除非你显式地使用`ALL`关键字将它们添加进去，就像我们在 BankApp 示例中所做的那样。
 
-另一个隐式定义的构建目标是`clean`，它简单地从构建树中移除生成的产物。我们使用它来删除所有旧文件并从头开始构建。然而，重要的是要理解，它并不只是简单地删除构建目录中的所有内容。为了让`clean`正确工作，你需要手动指定你的自定义目标可能会创建的任何文件作为`BYPRODUCTS`（见BankApp示例）。
+另一个隐式定义的构建目标是`clean`，它简单地从构建树中移除生成的产物。我们使用它来删除所有旧文件并从头开始构建。然而，重要的是要理解，它并不只是简单地删除构建目录中的所有内容。为了让`clean`正确工作，你需要手动指定你的自定义目标可能会创建的任何文件作为`BYPRODUCTS`（见 BankApp 示例）。
 
 这就是我们探索目标及其不同方面的总结：我们知道如何创建目标，配置其属性，使用伪目标，并决定它们是否应该默认构建。此外，还有一种有趣的非目标机制，用于创建可以在所有实际目标中使用的自定义工件——**自定义命令**（不要与**自定义目标**混淆）。
 
@@ -486,7 +484,7 @@ add_library(<name> **EXCLUDE_FROM_ALL** [<source>...])
 
 +   生成另一个目标依赖的源代码文件
 
-+   将另一种语言翻译成C++
++   将另一种语言翻译成 C++
 
 +   在另一个目标构建之前或之后立即执行自定义操作
 
@@ -513,9 +511,9 @@ add_custom_command(OUTPUT output1 [output2 ...]
 
 ## 使用自定义命令作为生成器
 
-诚然，并不是每个项目都需要从其他文件生成C++代码。一个这样的情况可能是**Google的协议缓冲区**（**Protobuf**）的`.proto`文件编译。如果你不熟悉这个库，Protobuf是一个平台中立的二进制序列化工具，用于结构化数据。
+诚然，并不是每个项目都需要从其他文件生成 C++代码。一个这样的情况可能是**Google 的协议缓冲区**（**Protobuf**）的`.proto`文件编译。如果你不熟悉这个库，Protobuf 是一个平台中立的二进制序列化工具，用于结构化数据。
 
-换句话说：它可以用于在二进制流中编码对象：文件或网络连接。为了保持Protobuf的跨平台性和快速性，Google的工程师发明了他们自己的Protobuf语言，该语言在`.proto`文件中定义模型，如下所示：
+换句话说：它可以用于在二进制流中编码对象：文件或网络连接。为了保持 Protobuf 的跨平台性和快速性，Google 的工程师发明了他们自己的 Protobuf 语言，该语言在`.proto`文件中定义模型，如下所示：
 
 ```cpp
 message Person {
@@ -525,9 +523,9 @@ message Person {
 } 
 ```
 
-这样的文件可以用于在多种语言中编码数据——C++、Ruby、Go、Python、Java等。Google提供了一个编译器`protoc`，它读取`.proto`文件，并输出针对所选语言的结构和序列化源代码（稍后需要编译或解释）。聪明的工程师不会将这些生成的源文件提交到版本库，而是会使用原始的Protobuf格式，并在构建链中添加一步生成源文件的操作。
+这样的文件可以用于在多种语言中编码数据——C++、Ruby、Go、Python、Java 等。Google 提供了一个编译器`protoc`，它读取`.proto`文件，并输出针对所选语言的结构和序列化源代码（稍后需要编译或解释）。聪明的工程师不会将这些生成的源文件提交到版本库，而是会使用原始的 Protobuf 格式，并在构建链中添加一步生成源文件的操作。
 
-我们还不知道如何检测目标主机上是否存在（以及在哪里存在）Protobuf编译器（我们将在*第9章*，*CMake中的依赖管理*中学习这一点）。所以，目前我们暂时假设编译器的`protoc`命令位于系统已知的位置。我们已经准备了一个`person.proto`文件，并且知道Protobuf编译器将输出`person.pb.h`和`person.pb.cc`文件。下面是我们如何定义一个自定义命令来编译它们：
+我们还不知道如何检测目标主机上是否存在（以及在哪里存在）Protobuf 编译器（我们将在*第九章*，*CMake 中的依赖管理*中学习这一点）。所以，目前我们暂时假设编译器的`protoc`命令位于系统已知的位置。我们已经准备了一个`person.proto`文件，并且知道 Protobuf 编译器将输出`person.pb.h`和`person.pb.cc`文件。下面是我们如何定义一个自定义命令来编译它们：
 
 ```cpp
 add_custom_command(OUTPUT person.pb.h person.pb.cc
@@ -610,18 +608,18 @@ add_custom_command(TARGET main POST_BUILD
 
 若想了解本章涉及的更多内容，您可以参考以下资源：
 
-+   Graphviz 模块文档：[https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz)，[https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)
++   Graphviz 模块文档：[`gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz`](https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Graphviz)，[`cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html`](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)
 
-+   Graphviz 软件：[https://graphviz.org](https://graphviz.org)
++   Graphviz 软件：[`graphviz.org`](https://graphviz.org)
 
-+   CMake 目标属性：[https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets)
++   CMake 目标属性：[`cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets`](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#properties-on-targets)
 
-+   可传递使用要求：[https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements )
++   可传递使用要求：[`cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements`](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#transitive-usage-requirements )
 
 # 加入我们的 Discord 社区
 
 加入我们社区的 Discord 频道，与作者和其他读者讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

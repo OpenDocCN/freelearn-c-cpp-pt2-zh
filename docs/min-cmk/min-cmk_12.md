@@ -1,6 +1,4 @@
-# 9
-
-# 为项目编写测试
+# 第九章：为项目编写测试
 
 在本章中，我们将讨论 CMake 如何帮助我们处理软件开发中的一个极其重要的方面：**测试**。测试在任何广泛使用或长期存在的项目中都是至关重要的，它有助于建立对功能的信心，并在添加和改进新特性时帮助避免回归。在一个正常的项目中，强烈建议从一开始就考虑测试；之后引入测试会是一项挑战。幸运的是，借助我们通过将功能拆分为独立库的项目结构，测试变得更加简单。
 
@@ -20,19 +18,19 @@ CMake 提供了一个名为 **CTest** 的附加应用程序，旨在将多种类
 
 # 技术要求
 
-为了跟随本章内容，请确保你已满足 [*第 1 章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。这些要求包括以下内容：
+为了跟随本章内容，请确保你已满足 *第一章*《入门》的要求。这些要求包括以下内容：
 
 +   一台运行最新 **操作系统**（**OS**）的 Windows、Mac 或 Linux 计算机
 
 +   一个可工作的 C/C++ 编译器（如果你还没有，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 # 理解 CTest
 
 在我们开始查看如何将 CTest 添加到现有的 `CMakeLists.txt` 文件并使用 `ctest` 命令行应用程序之前，理解 CTest 是什么，以及，或许更重要的是，理解它不是什麽，十分重要。
 
-`CMakeLists.txt` 文件有两个组成部分，用于描述和添加测试，另一个是 `ctest` **命令行界面**（**CLI**），用于在编译测试后运行它们。CTest 本身并不是一个特定语言的测试库。完全可以在一个由 CMake 创建的项目中添加测试，而根本不使用 CTest（例如，通过创建一个依赖于著名测试库的单独测试可执行文件，如 Google Test ([https://github.com/google/googletest](https://github.com/google/googletest)) 或 Catch2 ([https://github.com/catchorg/Catch2](https://github.com/catchorg/Catch2))）。CTest 并不是这些库的替代品，后者在编写单元测试和集成测试方面提供了极好的支持。
+`CMakeLists.txt` 文件有两个组成部分，用于描述和添加测试，另一个是 `ctest` **命令行界面**（**CLI**），用于在编译测试后运行它们。CTest 本身并不是一个特定语言的测试库。完全可以在一个由 CMake 创建的项目中添加测试，而根本不使用 CTest（例如，通过创建一个依赖于著名测试库的单独测试可执行文件，如 Google Test ([`github.com/google/googletest`](https://github.com/google/googletest)) 或 Catch2 ([`github.com/catchorg/Catch2`](https://github.com/catchorg/Catch2))）。CTest 并不是这些库的替代品，后者在编写单元测试和集成测试方面提供了极好的支持。
 
 测试类型
 
@@ -44,7 +42,7 @@ CTest 是一个极其灵活的工具，支持多种不同类型的测试（甚�
 
 # 向库添加单元测试
 
-现在我们了解了CTest提供的功能，让我们来看一个具体的例子，展示如何向现有的两个库添加单元测试，我们从`mc-array`开始。首先要说明的是，我们可以选择几种不同的方式来构建项目以支持测试。一个选择是创建一个与根目录`CMakeLists.txt`文件解耦的子目录：
+现在我们了解了 CTest 提供的功能，让我们来看一个具体的例子，展示如何向现有的两个库添加单元测试，我们从`mc-array`开始。首先要说明的是，我们可以选择几种不同的方式来构建项目以支持测试。一个选择是创建一个与根目录`CMakeLists.txt`文件解耦的子目录：
 
 ```cpp
 .
@@ -55,15 +53,15 @@ CTest 是一个极其灵活的工具，支持多种不同类型的测试（甚�
     └── tests.cpp
 ```
 
-使用这种设置，用户需要进入子文件夹并运行标准的CMake配置和构建命令。测试项目将会链接到顶层应用程序，可能依赖于使用`SOURCE_DIR`的相对路径的`FetchContent`。
+使用这种设置，用户需要进入子文件夹并运行标准的 CMake 配置和构建命令。测试项目将会链接到顶层应用程序，可能依赖于使用`SOURCE_DIR`的相对路径的`FetchContent`。
 
 另一种选择是保持前述布局，但在启用测试选项时使用`add_subdirectory`来添加`tests`子文件夹。嵌套的`CMakeLists.txt`文件可以链接到库，因为在调用`add_subdirectory`时，库会在作用域内。如果库足够小，也可以完全省略`tests`文件夹，将测试可执行文件直接放在根级别的`CMakeLists.txt`文件中。
 
 在`ch9/part-1/lib/array/CMakeLists.txt`中，我们选择了将内容保持在一行，而在`ch9/part-1/lib/gol/CMakeLists.txt`中，我们使用了`add_subdirectory`。这只是为了给出两种版本的示例；内容几乎是相同的。唯一值得注意的区别是在引用项目中的测试文件时，在嵌套文件夹示例中指定了`CMAKE_SOURCE_DIR`。这是为了确保文件路径相对于根`CMakeLists.txt`文件，而不是`tests`子文件夹。此外，在调用`ctest`时，两个版本之间还需要一个细微的区别，我们将在本节后面讨论。
 
-## CMakeLists.txt的CTest更改
+## CMakeLists.txt 的 CTest 更改
 
-从`ch9/part-1/lib/array/CMakeLists.txt`开始，让我们一步步了解如何添加CTest支持。
+从`ch9/part-1/lib/array/CMakeLists.txt`开始，让我们一步步了解如何添加 CTest 支持。
 
 第一个更改是添加一个名为`MC_ARRAY_BUILD_TESTING`的新选项，用于启用或禁用构建测试：
 
@@ -71,9 +69,9 @@ CTest 是一个极其灵活的工具，支持多种不同类型的测试（甚�
 option(MC_ARRAY_BUILD_TESTING "Enable testing" OFF)
 ```
 
-请注意，我们使用`MC_ARRAY`前缀来减少与其他项目发生冲突的可能性。我们还将其默认为`OFF`（CMake常量表示假；我们也可以使用`0`、`NO`或`FALSE`，但在此上下文中`OFF`最为清晰。有关更多信息，请参见[https://cmake.org/cmake/help/latest/command/if.html#constant](https://cmake.org/cmake/help/latest/command/if.html#constant)）。我们这样做是为了成为一个负责任的公民，防止下游用户在忘记禁用`MC_ARRAY_BUILD_TESTING`时，不小心构建测试。
+请注意，我们使用`MC_ARRAY`前缀来减少与其他项目发生冲突的可能性。我们还将其默认为`OFF`（CMake 常量表示假；我们也可以使用`0`、`NO`或`FALSE`，但在此上下文中`OFF`最为清晰。有关更多信息，请参见[`cmake.org/cmake/help/latest/command/if.html#constant`](https://cmake.org/cmake/help/latest/command/if.html#constant)）。我们这样做是为了成为一个负责任的公民，防止下游用户在忘记禁用`MC_ARRAY_BUILD_TESTING`时，不小心构建测试。
 
-在`CMakeLists.txt`文件的底部，我们检查`MC_ARRAY_BUILD_TESTING`选项是否已定义，只有在其定义时，我们才会引入CTest模块：
+在`CMakeLists.txt`文件的底部，我们检查`MC_ARRAY_BUILD_TESTING`选项是否已定义，只有在其定义时，我们才会引入 CTest 模块：
 
 ```cpp
 include(CTest)
@@ -125,7 +123,7 @@ COMMAND dynamic-array-test)
 ```cpp
 
 			This registers our new `dynamic-array-test` executable with CTest so it can invoke it and report the outcome (this essentially means we can use `ctest` to run it). The first argument, `NAME`, allows us to provide a name for the test; this is what will be displayed in the output when running `ctest`. The next argument, `COMMAND`, is the test to run. In our case, this is an executable target, so we pass the target name of our test executable directly, but as we’ll see later, this can be one of many different commands.
-			Very briefly, one command we haven’t included is `enable_testing()`. You may spot this in other examples, but it is technically redundant as `enable_testing()` is called automatically by the `include(CTest)` command (there are some cases where it is required however, for example when splitting tests across different files and using `add_subdirectory`, see [*Chapter 11*](B21152_11.xhtml#_idTextAnchor228)*, Supporting Tools and Next Steps* for an example). To see the complete example, please refer to `ch9/part-1/lib/array/CMakeLists.txt`. It’s encouraged to use the Visual Studio Code `ch8/part-5/lib/array/CMakeLists.txt` to more easily see the differences.
+			Very briefly, one command we haven’t included is `enable_testing()`. You may spot this in other examples, but it is technically redundant as `enable_testing()` is called automatically by the `include(CTest)` command (there are some cases where it is required however, for example when splitting tests across different files and using `add_subdirectory`, see *Chapter 11**, Supporting Tools and Next Steps* for an example). To see the complete example, please refer to `ch9/part-1/lib/array/CMakeLists.txt`. It’s encouraged to use the Visual Studio Code `ch8/part-5/lib/array/CMakeLists.txt` to more easily see the differences.
 			Running the tests
 			We now have everything we need to build and run our tests. Navigate to `ch9/part-1/lib/array` and run the following commands:
 
@@ -179,15 +177,15 @@ ctest --test-dir build -C Debug ctest command has a bewildering number of option
 			We’ve covered how to add unit tests to some of our existing libraries and have seen how to invoke them using CTest. Next, we’re moving to the other end of the spectrum and will see an example of adding end-to-end tests for our *Game of* *Life* application.
 			Adding end-to-end tests to an application
 			Creating end-to-end tests for an application can be a challenge, and usually relies on an external tool or scripting language to send commands to the application to drive it. To support this, in our *Game of Life* application, we’re going to add one last library that will not only enhance our application but also make it testable end to end.
-			The library in question is called **Dear ImGui** ([https://github.com/ocornut/imgui](https://github.com/ocornut/imgui)), an open source (MIT licensed) immediate mode **graphical user interface** (**GUI**), originally designed for use in games, but now used across a wide variety of applications.
+			The library in question is called **Dear ImGui** ([`github.com/ocornut/imgui`](https://github.com/ocornut/imgui)), an open source (MIT licensed) immediate mode **graphical user interface** (**GUI**), originally designed for use in games, but now used across a wide variety of applications.
 			Immediate versus retained UI
 			There are two main styles of UI libraries, often referred to as retained mode and immediate mode. A **retained mode** UI tends to require its widgets to be created and managed explicitly. A popular example of this is the Qt (pronounced *cute*) UI library. **Immediate mode** libraries do not require widgets to be created; instead, simply calling a function will display a UI element. There are pros and cons to each approach. Retained mode tends to be favored for UI-heavy applications, while immediate mode is preferred for graphical overlays for games or developer tools (though there are exceptions to both). We’ve opted for Dear ImGui due to its ease of use and simple integration with SDL 2.
 			Integrating a UI library
 			Before we look at how we go about creating end-to-end tests for our application, we’re first going to add Dear ImGui to our project. The initial integration is shown in `ch9/part-2`. Dear ImGui, like `bgfx`, does not natively support CMake, however, because Dear ImGui is a relatively small library, it’s easy to add a CMake wrapper around it.
-			The repository we’ll use is [https://github.com/pr0g/imgui.cmake](https://github.com/pr0g/imgui.cmake), which takes a very similar approach to the `bgfx` CMake repository we saw in [*Chapter 6*](B21152_06.xhtml#_idTextAnchor152), *Installing Dependencies and ExternalProject_Add*. The main Dear ImGui repository is embedded as a Git submodule, and a `CMakeLists.txt` file is added at the root of the repository to aggregate the source files and produce a library using CMake (this makes integrating with `FetchContent` or `ExternalProject_Add` possible).
+			The repository we’ll use is [`github.com/pr0g/imgui.cmake`](https://github.com/pr0g/imgui.cmake), which takes a very similar approach to the `bgfx` CMake repository we saw in *Chapter 6*, *Installing Dependencies and ExternalProject_Add*. The main Dear ImGui repository is embedded as a Git submodule, and a `CMakeLists.txt` file is added at the root of the repository to aggregate the source files and produce a library using CMake (this makes integrating with `FetchContent` or `ExternalProject_Add` possible).
 			We add Dear ImGui as a new third-party dependency in `ch9/part-2/third-party/CMakeLists.txt` and update our super build project and main `CMakeLists.txt` file accordingly to link against the new dependency.
-			One other important change we’re going to make is to finally switch our application from using C to C++. This is to prepare it for being able to integrate the Dear ImGui Test Engine. Dear ImGui is written in C++, but C bindings do exist for it (see [https://github.com/cimgui/cimgui](https://github.com/cimgui/cimgui) for an example, which also comes with CMake support). They do not yet unfortunately exist for the testing library, so upgrading to C++ is a necessary step. The changes are minimal though, and as we’ve chosen to use C++ 20, we get to take advantage of designated initializers, which we’d been using in C (essentially a convenient way to initialize structs) with only a minor change in syntax.
-			There are a few small additions we need before we can integrate Dear ImGui (see `ch9/part-2/app/imgui`). The first is a render backend (as we’re using `bgfx`, we need it to implement a handful of functions required by Dear ImGui), and the second is a platform backend (in this case, we use the SDL 2 platform backend provided by the Dear ImGui repository available from [https://github.com/ocornut/imgui/tree/master/backends](https://github.com/ocornut/imgui/tree/master/backends)).
+			One other important change we’re going to make is to finally switch our application from using C to C++. This is to prepare it for being able to integrate the Dear ImGui Test Engine. Dear ImGui is written in C++, but C bindings do exist for it (see [`github.com/cimgui/cimgui`](https://github.com/cimgui/cimgui) for an example, which also comes with CMake support). They do not yet unfortunately exist for the testing library, so upgrading to C++ is a necessary step. The changes are minimal though, and as we’ve chosen to use C++ 20, we get to take advantage of designated initializers, which we’d been using in C (essentially a convenient way to initialize structs) with only a minor change in syntax.
+			There are a few small additions we need before we can integrate Dear ImGui (see `ch9/part-2/app/imgui`). The first is a render backend (as we’re using `bgfx`, we need it to implement a handful of functions required by Dear ImGui), and the second is a platform backend (in this case, we use the SDL 2 platform backend provided by the Dear ImGui repository available from [`github.com/ocornut/imgui/tree/master/backends`](https://github.com/ocornut/imgui/tree/master/backends)).
 			With these changes added, we can now add our Dear ImGui code. We’re going to add a few simple options to make interacting with our *Game of Life* application a bit easier. The changes include a simulation time control to adjust the amount of time between each update, the ability to pause and resume the simulation, to step the simulation a frame at a time when it’s paused, to clear the board, and to return the board to its original state. The results are shown in *Figure 9**.1*.
 			![Figure 9.1: Game of Life with Dear ImGui controls](img/B21152_09_1.jpg)
 
@@ -210,8 +208,8 @@ cmake --workflow --preset multi-ninja-super
 
 			Dear ImGui is incredibly powerful and comes with an enormous amount of functionality; our simple example is only scratching the surface. To see what else you can do with Dear ImGui, try adding a call to `ImGui::ShowDemoWindow()` right after `ImGui::NewFrame()` to see more of what it’s capable of.
 			Integrating end-to-end tests using Dear ImGui
-			With Dear ImGui integrated, we can now look at bringing in the Dear ImGui Test Engine (available from [https://github.com/ocornut/imgui_test_engine](https://github.com/ocornut/imgui_test_engine)). The Dear ImGui Test Engine has a slightly more restrictive license and requires obtaining a paid license in certain cases (see the `LICENSE.txt` file for more details). However, for derivative software released under an open source license (such as this book’s accompanying source code), it is free to use.
-			Turning our attention to `ch9/part-3/app`, we’re first going to upgrade our third-party dependency from `imgui.cmake` to `imgui-test-engine.cmake` (see [https://github.com/pr0g/imgui-test-engine.cmake](https://github.com/pr0g/imgui-test-engine.cmake) for reference; it follows the same pattern as the previous `imgui.cmake` library). The `imgui-test-engine.cmake` library publicly depends on `imgui.cmake` (`imgui.cmake` is a transitive dependency), so we can make this small change to our `CMakeLists.txt` files, and things will continue working as they did before.
+			With Dear ImGui integrated, we can now look at bringing in the Dear ImGui Test Engine (available from [`github.com/ocornut/imgui_test_engine`](https://github.com/ocornut/imgui_test_engine)). The Dear ImGui Test Engine has a slightly more restrictive license and requires obtaining a paid license in certain cases (see the `LICENSE.txt` file for more details). However, for derivative software released under an open source license (such as this book’s accompanying source code), it is free to use.
+			Turning our attention to `ch9/part-3/app`, we’re first going to upgrade our third-party dependency from `imgui.cmake` to `imgui-test-engine.cmake` (see [`github.com/pr0g/imgui-test-engine.cmake`](https://github.com/pr0g/imgui-test-engine.cmake) for reference; it follows the same pattern as the previous `imgui.cmake` library). The `imgui-test-engine.cmake` library publicly depends on `imgui.cmake` (`imgui.cmake` is a transitive dependency), so we can make this small change to our `CMakeLists.txt` files, and things will continue working as they did before.
 			The Dear ImGui Test Engine requires us to make changes to our source code to integrate it, and we only want this code to be compiled and executed when in test mode. To facilitate this, we can use a CMake `option` to determine whether we’re building a testable version of our application or a regular one. At the top of `ch9/part-3/app/CMakeLists.txt`, we have the following line:
 
 ```
@@ -246,7 +244,7 @@ target_link_libraries(
 
 ${PROJECT_NAME} PRIVATE 项目名称变量带有通用后缀，并将其标记为 INTERFACE。然后像之前一样添加源文件和库，只是我们不再直接将它们添加到可执行文件中，而是使用 INTERFACE 库。在通过 add_executable 创建可执行文件后，我们只需要链接 `${PROJECT_NAME}-common`，即可引入它所定义的所有使用要求。好消息是，我们随后可以对 `${PROJECT_NAME}-test` 可执行目标做同样的事情，而无需进一步重复。
 
-            目标属性仅适用于设置它们的目标，因此如果我们将它们设置在`${PROJECT_NAME}-common`上，它们不会传递到我们的主应用程序（`${PROJECT_NAME}`）或测试目标（`${PROJECT_NAME}-test`）。为了避免这两个目标之间的重复，一个解决方法是创建一个名为`set_common_target_properties`的CMake函数，它接受一个目标作为参数。我们可以将共享代码移到这个函数内，并为主应用程序和测试代码调用这个新函数。以下是这段代码的一个片段（完整示例见`ch9/part-3/app/CMakeLists.txt`）：
+            目标属性仅适用于设置它们的目标，因此如果我们将它们设置在`${PROJECT_NAME}-common`上，它们不会传递到我们的主应用程序（`${PROJECT_NAME}`）或测试目标（`${PROJECT_NAME}-test`）。为了避免这两个目标之间的重复，一个解决方法是创建一个名为`set_common_target_properties`的 CMake 函数，它接受一个目标作为参数。我们可以将共享代码移到这个函数内，并为主应用程序和测试代码调用这个新函数。以下是这段代码的一个片段（完整示例见`ch9/part-3/app/CMakeLists.txt`）：
 
 ```cpp
 function(set_common_target_properties TARGET_NAME)
@@ -260,7 +258,7 @@ set_common_target_properties(CMakeLists.txt file, when defining the new test tar
 
 target_compile_definitions(
 
-${PROJECT_NAME}-test PRIVATE main.cpp文件，我们可以在其中包装我们的测试初始化代码，并用`#ifdef`进行条件编译：
+${PROJECT_NAME}-test PRIVATE main.cpp 文件，我们可以在其中包装我们的测试初始化代码，并用`#ifdef`进行条件编译：
 
 ```cpp
 #ifdef MC_GOL_APP_BUILD_TESTING
@@ -348,7 +346,7 @@ NAME "生命游戏端到端测试"
 
 COMMAND ${PROJECT_NAME}-test
 
-我们在本章之前看到的`add_test`命令用于注册我们的库测试，这一次，我们传递了一个额外的参数`WORKING_DIRECTORY`，并将其设置为`CMAKE_SOURCE_DIR`，以确保我们的应用程序使用CMake根目录，从而确保着色器文件可以在预期的相对位置访问。
+我们在本章之前看到的`add_test`命令用于注册我们的库测试，这一次，我们传递了一个额外的参数`WORKING_DIRECTORY`，并将其设置为`CMAKE_SOURCE_DIR`，以确保我们的应用程序使用 CMake 根目录，从而确保着色器文件可以在预期的相对位置访问。
 
             另一种选择是将编译后的着色器文件从`app/shader/build`复制到与编译后的测试应用程序相同的文件夹中，然后将`WORKING_DIRECTORY`设置为`${CMAKE_BINARY_DIR}/$<CONFIG>`（这在单配置生成器和多配置生成器中都能正确工作，因为在单配置生成器中，`$<CONFIG>`会解析为空字符串）。
 
@@ -360,7 +358,7 @@ cmake --build build/multi-ninja-super-test
 ctest --test-dir build/multi-ninja-super-test -C Debug
 ```
 
-            在我们结束这一部分之前，值得注意的是，我们可以通过在`CMakePreset.json`文件中添加对测试预设的支持进一步改进这一点。我们可以添加一个名为`"testPresets"`的键，并使用如下所示的JSON对象：
+            在我们结束这一部分之前，值得注意的是，我们可以通过在`CMakePreset.json`文件中添加对测试预设的支持进一步改进这一点。我们可以添加一个名为`"testPresets"`的键，并使用如下所示的 JSON 对象：
 
 ```cpp
 {
@@ -370,7 +368,7 @@ ctest --test-dir build/multi-ninja-super-test -C Debug
 }
 ```
 
-            然后，我们只需要在配置和构建完成后运行`ctest --preset multi-ninja-super-test`来启动我们的测试（这样可以存储许多我们原本需要在命令行中传递给`ctest`的配置选项）。有关`testPresets`提供的不同选项的更多信息，请参阅[https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset)。
+            然后，我们只需要在配置和构建完成后运行`ctest --preset multi-ninja-super-test`来启动我们的测试（这样可以存储许多我们原本需要在命令行中传递给`ctest`的配置选项）。有关`testPresets`提供的不同选项的更多信息，请参阅[`cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset`](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html#test-preset)。
 
             最后一步是为之前的所有代码包含一个 CMake 工作流预设，这样我们就可以通过以下命令配置、构建和测试所有内容：
 
@@ -382,13 +380,13 @@ cmake --workflow --preset multi-ninja-super-test
 
             添加其他类型的测试
 
-            测试是一个非常广泛的话题，通常应用程序需要多种类型的测试来有效地覆盖其行为和功能。CTest的一个优点是它可以与这些多样化的测试类型集成，并允许它们一起管理和运行。在本节中，我们将讨论 CTest 支持的另外两种类型的测试。
+            测试是一个非常广泛的话题，通常应用程序需要多种类型的测试来有效地覆盖其行为和功能。CTest 的一个优点是它可以与这些多样化的测试类型集成，并允许它们一起管理和运行。在本节中，我们将讨论 CTest 支持的另外两种类型的测试。
 
             内部测试
 
             我们将讨论的第一个示例仍然严格来说是单元测试，但我们将它添加到应用程序的上下文中，而不是通过提取功能到单独的库来进行。这在短期内很有用，特别是当某些功能无法或不应该被提取时。我们选择的示例是视口投影函数，它将从世界空间映射到屏幕空间，然后再返回。以前，这些函数是添加到我们的`main.c`（现在是`main.cpp`）文件中的，无法在其他文件中使用。我们可以将这两个函数提取到新的文件对中，命名为`screen.h`和`screen.cpp`，并在`main.cpp`中包含`screen.h`。
 
-            这种重构使我们能够添加测试，以验证函数的行为，并帮助捕捉回归问题，以防将来我们决定重构或优化内部实现。为了添加测试，我们可以遵循与本章开始时看到的库示例相同的方法，新增一个名为`screen.test.cpp`的文件来保存我们的测试。我们将使用著名的C++测试库Catch2来进行测试。我们选择使用Catch2而不是本章开始时介绍的Unity测试库的原因是，Catch2是专为C++构建的，并且拥有许多有用的功能（如函数重载和不需要手动调用测试，也叫自动测试注册，等等）。我们可以通过`FetchContent`或`ExternalProject_Add`将其作为依赖项添加。由于Catch2构建需要一些时间，我们选择了第二种方法。我们在`ch9/part-4/app/third-party`中的更新后的第三方`CMakeLists.txt`文件现在包含以下内容：
+            这种重构使我们能够添加测试，以验证函数的行为，并帮助捕捉回归问题，以防将来我们决定重构或优化内部实现。为了添加测试，我们可以遵循与本章开始时看到的库示例相同的方法，新增一个名为`screen.test.cpp`的文件来保存我们的测试。我们将使用著名的 C++测试库 Catch2 来进行测试。我们选择使用 Catch2 而不是本章开始时介绍的 Unity 测试库的原因是，Catch2 是专为 C++构建的，并且拥有许多有用的功能（如函数重载和不需要手动调用测试，也叫自动测试注册，等等）。我们可以通过`FetchContent`或`ExternalProject_Add`将其作为依赖项添加。由于 Catch2 构建需要一些时间，我们选择了第二种方法。我们在`ch9/part-4/app/third-party`中的更新后的第三方`CMakeLists.txt`文件现在包含以下内容：
 
 ```cpp
 if(MC_GOL_APP_BUILD_TESTING)
@@ -411,11 +409,11 @@ if(SUPERBUILD AND NOT PROJECT_IS_TOP_LEVEL)
 endif()
 ```
 
-            首先，我们只有在构建应用程序的测试时才会包含Catch2。然后我们引入了一个变量`TEST_DEPENDENCIES`，如果未设置`MC_GOL_APP_BUILD_TESTING`，它将评估为空字符串，如果设置了，则为`Catch2`。然后我们确保将这个变量传递给`ExternalProject_Add`调用中的`DEPENDS`参数，用于我们的超级构建。
+            首先，我们只有在构建应用程序的测试时才会包含 Catch2。然后我们引入了一个变量`TEST_DEPENDENCIES`，如果未设置`MC_GOL_APP_BUILD_TESTING`，它将评估为空字符串，如果设置了，则为`Catch2`。然后我们确保将这个变量传递给`ExternalProject_Add`调用中的`DEPENDS`参数，用于我们的超级构建。
 
-            如果你查看`ch9/part-4/app/third-party/CMakeLists.txt`，在文件的顶部，我们还添加了`MC_GOL_APP_BUILD_TESTING` CMake选项，它出现在`ch9/part-4/app/CMakeLists.txt`中。严格来说，这个设置是多余的，但它确保在单独构建第三方依赖项或作为超级构建时的一致性。
+            如果你查看`ch9/part-4/app/third-party/CMakeLists.txt`，在文件的顶部，我们还添加了`MC_GOL_APP_BUILD_TESTING` CMake 选项，它出现在`ch9/part-4/app/CMakeLists.txt`中。严格来说，这个设置是多余的，但它确保在单独构建第三方依赖项或作为超级构建时的一致性。
 
-            现在Catch2作为第三方依赖项可用后，我们可以返回到应用程序的`CMakeLists.txt`文件，并检查需要在那里进行的更改。在`if(MC_GOL_APP_BUILD_TESTING)`块内，在我们的端到端测试可执行文件配置之后，我们添加了测试重构后的`screen.cpp`代码所需的命令。首先，我们使用`find_package`命令来引入我们在前面部分中添加的Catch2库：
+            现在 Catch2 作为第三方依赖项可用后，我们可以返回到应用程序的`CMakeLists.txt`文件，并检查需要在那里进行的更改。在`if(MC_GOL_APP_BUILD_TESTING)`块内，在我们的端到端测试可执行文件配置之后，我们添加了测试重构后的`screen.cpp`代码所需的命令。首先，我们使用`find_package`命令来引入我们在前面部分中添加的 Catch2 库：
 
 ```cpp
 find_package(Catch2 REQUIRED CONFIG)
@@ -438,7 +436,7 @@ target_compile_features(
   ${PROJECT_NAME}-unit-test PRIVATE cxx_std_20)
 ```
 
-            我们首先创建一个新的可执行文件 `${PROJECT_NAME}-unit-test`（它会扩展为 `minimal-cmake_game-of-life_window-unit-test`）。接下来，我们添加构建和运行测试所需编译的文件（`screen.cpp` 和 `screen.test.cpp`）。我们必须链接 Catch2（`Catch2WithMain` 有助于避免为测试创建自定义的 `main()` 入口点；有关更多信息，请参见 [https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets)）和 `as-c-math`，这是 `screen.h/cpp` 接口和实现所依赖的。最后，我们确保明确设置语言版本（在此情况下为 C++ `20`），以确保在不同编译器和平台之间使用一致的语言版本。
+            我们首先创建一个新的可执行文件 `${PROJECT_NAME}-unit-test`（它会扩展为 `minimal-cmake_game-of-life_window-unit-test`）。接下来，我们添加构建和运行测试所需编译的文件（`screen.cpp` 和 `screen.test.cpp`）。我们必须链接 Catch2（`Catch2WithMain` 有助于避免为测试创建自定义的 `main()` 入口点；有关更多信息，请参见 [`github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets`](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#cmake-targets)）和 `as-c-math`，这是 `screen.h/cpp` 接口和实现所依赖的。最后，我们确保明确设置语言版本（在此情况下为 C++ `20`），以确保在不同编译器和平台之间使用一致的语言版本。
 
             最后的步骤就是使用这里显示的 `add_test` 命令将测试可执行文件注册到 CTest：
 
@@ -528,13 +526,13 @@ PROPERTIES --label-regex (-L) 和与 ctest 匹配的模式：
 
 ```cpp
 ctest --test-dir build/multi-ninja-super-test --label-exclude (-LE) to do the opposite, and not run any tests that match the label (in the preceding example, using -LE slow would run all tests that are not labeled slow).
-			There are many more command-line arguments available for `ctest`, which are worth reviewing. They can be found by visiting [https://cmake.org/cmake/help/latest/manual/ctest.1.html](https://cmake.org/cmake/help/latest/manual/ctest.1.html).
+			There are many more command-line arguments available for `ctest`, which are worth reviewing. They can be found by visiting [`cmake.org/cmake/help/latest/manual/ctest.1.html`](https://cmake.org/cmake/help/latest/manual/ctest.1.html).
 			Using CDash with CTest
 			One last topic to cover in the context of testing is integrating with another CMake tool called CDash. **CDash** is a web-based software testing server that can be used to present the results of running CTest. CDash displays a dashboard showing which tests are passing and which are failing and can also be used to display the current code coverage, as well as any build warnings or errors.
 			The good news is adding CDash support to our project requires minimal effort. We’ll briefly walk through the changes required and look at adding code coverage support on macOS and Linux to be displayed from CDash.
 			Creating a CDash project
-			The first step we need to take is to create an account and a new project with CDash. While it’s possible to self-host a CDash server, using the CDash service provided by Kitware is a quick and easy way to get set up. This can be achieved by visiting [https://my.cdash.org/](https://my.cdash.org/), creating an account, and then navigating to [https://my.cdash.org/user](https://my.cdash.org/user) and scrolling down to the **Administrator** section. Here, there is then a **Start a new** **project** option.
-			When creating a project, there are several options to provide, including the project name, description, whether the project is private, protected, or public, and whether submissions should be authenticated or not. For *Minimal CMake*, we have created a new public project, which can be found by visiting [https://my.cdash.org/index.php?project=minimal-cmake](https://my.cdash.org/index.php?project=minimal-cmake).
+			The first step we need to take is to create an account and a new project with CDash. While it’s possible to self-host a CDash server, using the CDash service provided by Kitware is a quick and easy way to get set up. This can be achieved by visiting [`my.cdash.org/`](https://my.cdash.org/), creating an account, and then navigating to [`my.cdash.org/user`](https://my.cdash.org/user) and scrolling down to the **Administrator** section. Here, there is then a **Start a new** **project** option.
+			When creating a project, there are several options to provide, including the project name, description, whether the project is private, protected, or public, and whether submissions should be authenticated or not. For *Minimal CMake*, we have created a new public project, which can be found by visiting [`my.cdash.org/index.php?project=minimal-cmake`](https://my.cdash.org/index.php?project=minimal-cmake).
 			Once your project has been created, the next step is to connect your local project to CDash. To do this, we add a new file to the root of our CMake project (in our case, this is `ch9/part-5/app`) called `CTestConfig.cmake`. Its contents are as follows:
 
 ```
@@ -549,27 +547,27 @@ https://my.cdash.org/submit.php?project=minimal-cmake)
 
 ```cpp
 
-			There are many more options you can set, but for our purposes, we’re simply specifying the project name, and where the build artifacts should be uploaded to. For more complex cases, it’s possible to specify nightly build times, the maximum number of warnings or errors to be detected, and memory checks. For a full list of variables, please see [https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html#variables-for-ctest](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html#variables-for-ctest).
+			There are many more options you can set, but for our purposes, we’re simply specifying the project name, and where the build artifacts should be uploaded to. For more complex cases, it’s possible to specify nightly build times, the maximum number of warnings or errors to be detected, and memory checks. For a full list of variables, please see [`cmake.org/cmake/help/latest/manual/cmake-variables.7.html#variables-for-ctest`](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html#variables-for-ctest).
 			Uploading test results
 			With the CDash project created and `CTestConfig.cmake` added to our project, we can run the following CTest command to run our tests and upload the results to CDash:
 
 ```
 
-ctest --test-dir <build-dir> -C Debug -D选项在此上下文中与我们之前使用的方式略有不同（用于设置CMake缓存变量）；在这里，-D指的是CDash Web仪表板（--dashboard），并告知CTest充当CDash客户端。这基本上意味着在运行完测试后，结果将上传到我们在CTestConfig.cmake文件中设置的CDash项目。
+ctest --test-dir <build-dir> -C Debug -D 选项在此上下文中与我们之前使用的方式略有不同（用于设置 CMake 缓存变量）；在这里，-D 指的是 CDash Web 仪表板（--dashboard），并告知 CTest 充当 CDash 客户端。这基本上意味着在运行完测试后，结果将上传到我们在 CTestConfig.cmake 文件中设置的 CDash 项目。
 
             在这里，`Experimental`指的是模式，`Experimental`是供个人开发者测试本地更改的模式。还有多个其他模式（`Nightly`，`Continuous`）可以独立配置，并在不同的上下文中使用。
 
-            通过此更改，我们可以查看CDash Web界面，了解哪些测试已运行以及它们是否成功或失败。
+            通过此更改，我们可以查看 CDash Web 界面，了解哪些测试已运行以及它们是否成功或失败。
 
-            ![图9.2：CDash测试结果](img/B21152_09_2.jpg)
+            ![图 9.2：CDash 测试结果](img/B21152_09_2.jpg)
 
-            图9.2：CDash测试结果
+            图 9.2：CDash 测试结果
 
             增强的可视性可以让开发团队清楚地知道哪些测试通过或失败，这对于及时发现问题和早期检测回归非常有帮助。
 
             添加代码覆盖率
 
-            CDash提供的另一个有用功能是一个干净的界面，用于报告在运行测试时执行的代码行。不幸的是，这仅在**GNU编译器集合**（**GCC**）和Clang编译器中受支持，因此默认情况下在Windows上无法使用（尽管在Windows环境中设置Clang并不困难，如果你有决心的话）。
+            CDash 提供的另一个有用功能是一个干净的界面，用于报告在运行测试时执行的代码行。不幸的是，这仅在**GNU 编译器集合**（**GCC**）和 Clang 编译器中受支持，因此默认情况下在 Windows 上无法使用（尽管在 Windows 环境中设置 Clang 并不困难，如果你有决心的话）。
 
             为了支持捕获代码覆盖率信息，我们需要在`CMakeLists.txt`文件中做一些小的修改。完整示例请参见`ch9/part-5/app/CMakeLists.txt`，但关键的代码行如下所示：
 
@@ -596,23 +594,23 @@ configure_file(
 
 CTestCustom.cmake.in
 
-${CMAKE_BINARY_DIR}/CTestCustom.cmake COPYONLY，表示不应进行任何变量替换。现在，当我们运行之前看到的ctest命令时，覆盖率信息也会被上传，并与测试结果一起提交。可以查看文件的整体测试覆盖率百分比，并逐行查看在运行测试时执行了哪些代码：
+${CMAKE_BINARY_DIR}/CTestCustom.cmake COPYONLY，表示不应进行任何变量替换。现在，当我们运行之前看到的 ctest 命令时，覆盖率信息也会被上传，并与测试结果一起提交。可以查看文件的整体测试覆盖率百分比，并逐行查看在运行测试时执行了哪些代码：
 
-            ![图9.3：CDash覆盖率结果](img/B21152_09_3.jpg)
+            ![图 9.3：CDash 覆盖率结果](img/B21152_09_3.jpg)
 
-            图9.3：CDash覆盖率结果
+            图 9.3：CDash 覆盖率结果
 
-            这只是对CDash的一个非常简短的介绍，仅仅触及了它的表面。除了使用默认的`ctest`功能外，还可以完全脚本化`ctest`的执行（请参阅[https://cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands](https://cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands)以查看`ctest`命令的完整列表）。还可以设置定期的夜间构建和各种类型的报告，以及启用几种形式的静态分析（源代码错误检测）。如果你决定选择其他工具或不需要可视化功能，也完全可以不使用CDash；CTests可以独立使用。
+            这只是对 CDash 的一个非常简短的介绍，仅仅触及了它的表面。除了使用默认的`ctest`功能外，还可以完全脚本化`ctest`的执行（请参阅[`cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands`](https://cmake.org/cmake/help/latest/manual/cmake-commands.7.html#ctest-commands)以查看`ctest`命令的完整列表）。还可以设置定期的夜间构建和各种类型的报告，以及启用几种形式的静态分析（源代码错误检测）。如果你决定选择其他工具或不需要可视化功能，也完全可以不使用 CDash；CTests 可以独立使用。
 
             摘要
 
-            这标志着我们第一次涉足测试的结束。虽然我们没有涵盖很多内容，但希望这已经让你对CTests的功能有所了解，并且理解它如何将多种不同的测试方法结合起来。
+            这标志着我们第一次涉足测试的结束。虽然我们没有涵盖很多内容，但希望这已经让你对 CTests 的功能有所了解，并且理解它如何将多种不同的测试方法结合起来。
 
-            在本章中，我们介绍了CTest，以理解它是什么以及它如何帮助我们管理跨库和应用程序的各种测试。测试至关重要，理解CTest在测试生态系统中的定位非常重要。我们展示了如何在我们的基础库中添加单元测试时使用CTest，如何在应用程序内结构化单元测试，以及如何创建一个独立的可测试可执行文件来运行完整的端到端测试。我们还展示了如何编写CMake脚本来测试项目的其他部分。所有这些都通过CTest进行协调和连接。这些技能将帮助你构建成功且可靠的软件项目。
+            在本章中，我们介绍了 CTest，以理解它是什么以及它如何帮助我们管理跨库和应用程序的各种测试。测试至关重要，理解 CTest 在测试生态系统中的定位非常重要。我们展示了如何在我们的基础库中添加单元测试时使用 CTest，如何在应用程序内结构化单元测试，以及如何创建一个独立的可测试可执行文件来运行完整的端到端测试。我们还展示了如何编写 CMake 脚本来测试项目的其他部分。所有这些都通过 CTest 进行协调和连接。这些技能将帮助你构建成功且可靠的软件项目。
 
-            接着，我们简要浏览了CDash，了解它提供了哪些功能以及它如何与CTest集成。我们查看了测试结果和代码覆盖率报告，了解了像CDash这样的工具如何帮助软件团队更有效地协作。
+            接着，我们简要浏览了 CDash，了解它提供了哪些功能以及它如何与 CTest 集成。我们查看了测试结果和代码覆盖率报告，了解了像 CDash 这样的工具如何帮助软件团队更有效地协作。
 
-            在下一章，我们将把注意力转向CMake的另一个配套工具——CPack。我们将使用它来打包我们的应用程序，使其准备好进行分发，并探讨一些与平台特定差异处理相关的挑战。
+            在下一章，我们将把注意力转向 CMake 的另一个配套工具——CPack。我们将使用它来打包我们的应用程序，使其准备好进行分发，并探讨一些与平台特定差异处理相关的挑战。
 
 ```cpp
 

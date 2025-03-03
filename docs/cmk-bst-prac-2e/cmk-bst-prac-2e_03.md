@@ -1,6 +1,4 @@
-# 2
-
-# 以最佳方式访问 CMake
+# 第二章：以最佳方式访问 CMake
 
 在上一章中，我们已经了解了 CMake 并学习了它的基本概念。现在，我们将学习如何与它交互。学习如何与 CMake 交互非常重要。在开始使用 CMake 构建你的软件项目之前，你必须先学会如何配置、构建和安装现有项目。这将使你能够与 CMake 项目进行交互。
 
@@ -18,9 +16,9 @@
 
 在深入详细内容之前，有一些要求需要满足，才能跟上示例的步伐：
 
-+   **CMake 最佳实践库**：这是包含本书所有示例内容的主要库。可以在线访问：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
++   **CMake 最佳实践库**：这是包含本书所有示例内容的主要库。可以在线访问：[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
 
-+   后续章节中关于打包和依赖管理的一些示例使用了 OpenSSL 来说明如何与第三方库一起工作。要安装它，可以使用操作系统提供的包管理器，例如 `apt-get`、`chocolatey` 或 `brew`，或者从 OpenSSL wiki 中提供的任何链接下载：[https://wiki.openssl.org/index.php/Binaries](https://wiki.openssl.org/index.php/Binaries)。选择 OpenSSL 是因为它可以在多种平台上免费使用，并且易于安装。
++   后续章节中关于打包和依赖管理的一些示例使用了 OpenSSL 来说明如何与第三方库一起工作。要安装它，可以使用操作系统提供的包管理器，例如 `apt-get`、`chocolatey` 或 `brew`，或者从 OpenSSL wiki 中提供的任何链接下载：[`wiki.openssl.org/index.php/Binaries`](https://wiki.openssl.org/index.php/Binaries)。选择 OpenSSL 是因为它可以在多种平台上免费使用，并且易于安装。
 
 # 通过命令行界面使用 CMake
 
@@ -32,7 +30,7 @@
 
 图 2.1 – 调用 cmake 命令
 
-如果您的终端提示缺少命令，您应该安装 CMake（在 [*第 1 章*](B30947_01.xhtml#_idTextAnchor015)，*启动 CMake* 中有详细说明），或通过将其添加到系统的 `PATH` 变量中使其可被发现。请参考您的操作系统指南，了解如何将路径添加到系统的 `PATH` 变量。
+如果您的终端提示缺少命令，您应该安装 CMake（在 *第一章*，*启动 CMake* 中有详细说明），或通过将其添加到系统的 `PATH` 变量中使其可被发现。请参考您的操作系统指南，了解如何将路径添加到系统的 `PATH` 变量。
 
 安装 CMake 并将其添加到 `PATH` 变量中（如果需要），之后您应该测试 CMake 是否可用。您可以在命令行中执行的最基本命令是 `cmake --version`，该命令可以让您检查 CMake 的版本：
 
@@ -204,7 +202,7 @@ cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS="-Wall -Werror" -
 
 #### 快捷方式 – 使用 CMake 预设
 
-在命令行中使用 CMake 提供了大量的配置选项，这给予了对构建过程的很多控制。然而，它也可能变得相当困难，因为需要跟踪项目的各种配置所需的标志和参数组合。在 CMake 3.21 引入 *CMake 预设* 之前，跟踪构建项目所需的所有不同标志可能是一个相当大的挑战。但幸运的是，CMake 预设简化了很多繁琐的工作，因为几乎所有通过命令行传递给 CMake 的选项都可以在预设中表示。这就是为什么它们成为预先配置各种 CMake 选项组合的好方法。我们将在 [*第 9 章*](B30947_09.xhtml#_idTextAnchor146) 中深入探讨 CMake 预设，*创建可复现的构建环境*，但如今越来越多的项目已经预先提供了预设。
+在命令行中使用 CMake 提供了大量的配置选项，这给予了对构建过程的很多控制。然而，它也可能变得相当困难，因为需要跟踪项目的各种配置所需的标志和参数组合。在 CMake 3.21 引入 *CMake 预设* 之前，跟踪构建项目所需的所有不同标志可能是一个相当大的挑战。但幸运的是，CMake 预设简化了很多繁琐的工作，因为几乎所有通过命令行传递给 CMake 的选项都可以在预设中表示。这就是为什么它们成为预先配置各种 CMake 选项组合的好方法。我们将在 *第九章* 中深入探讨 CMake 预设，*创建可复现的构建环境*，但如今越来越多的项目已经预先提供了预设。
 
 要列出所有可用的预设，请使用以下命令：
 
@@ -266,7 +264,7 @@ cmake --build ./build/ --parallel $(($(nproc)-1))
 
 +   **操作系统**: Ubuntu 22.04
 
-+   **CPU**: 第11代 Intel i9-11900H @2.5GHz
++   **CPU**: 第 11 代 Intel i9-11900H @2.5GHz
 
 +   **内存**: 32 GB
 
@@ -329,7 +327,7 @@ cmake --build ./build/ -- --trace
 
 如果需要，CMake 本身允许将产物安装到环境中。为了做到这一点，CMake 代码必须已经使用 CMake `install()` 指令指定在调用 `cmake --install`（或构建系统等效命令）时要安装的内容。`chapter_2` 的内容已经以这种方式配置，以展示该命令。
 
-我们将在 [*第 4 章*](B30947_04.xhtml#_idTextAnchor071)中学习如何使 CMake 目标可安装，*打包、部署和安装 CMake 项目*。
+我们将在 *第四章*中学习如何使 CMake 目标可安装，*打包、部署和安装 CMake 项目*。
 
 `cmake --install` 命令需要一个已经配置并构建过的项目。如果你还没有配置并构建 CMake 项目，请先配置并构建它。然后，发出 `cmake --install <project_binary_dir>` 命令来安装 CMake 项目。由于在我们的示例中 `build` 用作项目的二进制目录，`<project_binary_dir>` 将被替换为 `build`。
 
@@ -439,45 +437,45 @@ ccmake -S . -B ./build
 
 以下是前面命令的示例输出：
 
-![图 2.21 – ccmake主屏幕](img/B30947_02_21.jpg)
+![图 2.21 – ccmake 主屏幕](img/B30947_02_21.jpg)
 
-图 2.21 – ccmake主屏幕
+图 2.21 – ccmake 主屏幕
 
-执行命令后，将出现基于终端的UI。初始页面是主页面，可以在其中编辑CMake变量。`EMPTY CACHE`表示没有进行过先前的配置，CMake缓存文件（`CMakeCache.txt`）目前为空。要开始编辑变量，必须首先进行项目配置。按键盘上的*C*键即可进行配置，如`Keys:`部分所示。
+执行命令后，将出现基于终端的 UI。初始页面是主页面，可以在其中编辑 CMake 变量。`EMPTY CACHE`表示没有进行过先前的配置，CMake 缓存文件（`CMakeCache.txt`）目前为空。要开始编辑变量，必须首先进行项目配置。按键盘上的*C*键即可进行配置，如`Keys:`部分所示。
 
-按下*C*键后，将执行CMake配置步骤，并显示带有配置输出的日志输出屏幕：
+按下*C*键后，将执行 CMake 配置步骤，并显示带有配置输出的日志输出屏幕：
 
-![图 2.22 – 配置后ccmake日志屏幕](img/B30947_02_22.jpg)
+![图 2.22 – 配置后 ccmake 日志屏幕](img/B30947_02_22.jpg)
 
-图 2.22 – 配置后ccmake日志屏幕
+图 2.22 – 配置后 ccmake 日志屏幕
 
 要关闭日志输出屏幕并返回主屏幕，请按*E*键。返回后，你会发现`EMPTY CACHE`已被`CMakeCache.txt`文件中的变量名替换。要选择一个变量，使用键盘上的上下箭头键。当前选中的变量会以白色高亮显示，如下图所示：
 
-![图 2.23 – 配置后ccmake主屏幕](img/B30947_02_23.jpg)
+![图 2.23 – 配置后 ccmake 主屏幕](img/B30947_02_23.jpg)
 
-图 2.23 – 配置后ccmake主屏幕
+图 2.23 – 配置后 ccmake 主屏幕
 
-在前面的截图中，选择了`CMAKE_BUILD_TYPE`变量。在右侧，显示了CMake变量的当前值。对于`CMAKE_BUILD_TYPE`，目前它是空的。变量值旁边的星号表示该变量的值在先前的配置中刚刚发生了变化。你可以按*Enter*键编辑它，或者按键盘上的*D*键删除它。下图展示了更改变量后的`ccmake`主屏幕：
+在前面的截图中，选择了`CMAKE_BUILD_TYPE`变量。在右侧，显示了 CMake 变量的当前值。对于`CMAKE_BUILD_TYPE`，目前它是空的。变量值旁边的星号表示该变量的值在先前的配置中刚刚发生了变化。你可以按*Enter*键编辑它，或者按键盘上的*D*键删除它。下图展示了更改变量后的`ccmake`主屏幕：
 
-![图 2.24 – 变量更改后的ccmake主屏幕](img/B30947_02_24.jpg)
+![图 2.24 – 变量更改后的 ccmake 主屏幕](img/B30947_02_24.jpg)
 
-图 2.24 – 变量更改后的ccmake主屏幕
+图 2.24 – 变量更改后的 ccmake 主屏幕
 
 让我们将`CMAKE_BUILD_TYPE`设置为`Release`并重新配置：
 
-![图 2.25 – ccmake配置输出（Release）](img/B30947_02_25.jpg)
+![图 2.25 – ccmake 配置输出（Release）](img/B30947_02_25.jpg)
 
-图 2.25 – ccmake配置输出（Release）
+图 2.25 – ccmake 配置输出（Release）
 
 我们可以观察到，构建类型现在已设置为`Release`。返回上一屏幕，按下`g`（生成）按钮以保存更改。按下`q`（不生成，退出）按钮可以丢弃更改。
 
-要编辑其他变量，例如`CMAKE_CXX_COMPILER`和`CMAKE_CXX_FLAGS`，需要启用高级模式。通过调用`mark_as_advanced()` CMake函数，这些变量默认被标记为高级标志，因此它们在图形界面中默认是隐藏的。在主屏幕上，按`t`键切换到高级模式：
+要编辑其他变量，例如`CMAKE_CXX_COMPILER`和`CMAKE_CXX_FLAGS`，需要启用高级模式。通过调用`mark_as_advanced()` CMake 函数，这些变量默认被标记为高级标志，因此它们在图形界面中默认是隐藏的。在主屏幕上，按`t`键切换到高级模式：
 
-![图 2.26 – 高级模式下的ccmake](img/B30947_02_26.jpg)
+![图 2.26 – 高级模式下的 ccmake](img/B30947_02_26.jpg)
 
-图 2.26 – 高级模式下的ccmake
+图 2.26 – 高级模式下的 ccmake
 
-启用高级模式后，一整套新选项会变得可见。你可以像普通变量一样观察和修改它们的值。你可能已经注意到，之前隐藏的变量`CHAPTER2_BUILD_DRIVER_APPLICATION`现在出现了。这是一个用户定义的CMake变量。该变量定义如下：
+启用高级模式后，一整套新选项会变得可见。你可以像普通变量一样观察和修改它们的值。你可能已经注意到，之前隐藏的变量`CHAPTER2_BUILD_DRIVER_APPLICATION`现在出现了。这是一个用户定义的 CMake 变量。该变量定义如下：
 
 ```cpp
 # Option to exclude driver application from build.
@@ -489,23 +487,23 @@ mark_as_advanced(CHAPTER2_BUILD_DRIVER_APPLICATION)
 
 `CHAPTER2_BUILD_DRIVER_APPLICATION`变量被定义为布尔类型的缓存变量，默认值为`true`。它被标记为高级选项，因此在非高级模式下不会显示。
 
-## 通过cmake-gui使用CMake
+## 通过 cmake-gui 使用 CMake
 
-如果你是那种觉得命令行界面（CLI）不直观，或者你更喜欢GUI而不是CLI的人，CMake也提供了一个跨平台的GUI。与`ccmake`相比，`cmake-gui`提供了更多功能，如**环境编辑器**和**正则表达式资源管理器**。
+如果你是那种觉得命令行界面（CLI）不直观，或者你更喜欢 GUI 而不是 CLI 的人，CMake 也提供了一个跨平台的 GUI。与`ccmake`相比，`cmake-gui`提供了更多功能，如**环境编辑器**和**正则表达式资源管理器**。
 
-CMake GUI并不总是默认包含在CMake安装中；根据使用的操作系统，它可能需要单独安装。它的主要目的是允许用户配置CMake项目。要启动`cmake-gui`，可以在终端中输入`cmake-gui`命令。在Windows上，它也可以从开始菜单找到。如果这些方法都无法工作，请进入CMake安装路径，它应该位于`bin\`目录中。
+CMake GUI 并不总是默认包含在 CMake 安装中；根据使用的操作系统，它可能需要单独安装。它的主要目的是允许用户配置 CMake 项目。要启动`cmake-gui`，可以在终端中输入`cmake-gui`命令。在 Windows 上，它也可以从开始菜单找到。如果这些方法都无法工作，请进入 CMake 安装路径，它应该位于`bin\`目录中。
 
 注意
 
-如果你在Windows环境下启动`cmake-gui`，并打算使用Visual Studio提供的工具链，请从IDE的相应“本地工具命令提示符”启动`cmake-gui`。如果你有多个版本的IDE，请确保使用正确的本地工具命令提示符。否则，CMake可能无法找到所需的工具（如编译器），或者可能会找到错误的工具。有关详细信息，请参考[https://docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019](https://docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019)。
+如果你在 Windows 环境下启动`cmake-gui`，并打算使用 Visual Studio 提供的工具链，请从 IDE 的相应“本地工具命令提示符”启动`cmake-gui`。如果你有多个版本的 IDE，请确保使用正确的本地工具命令提示符。否则，CMake 可能无法找到所需的工具（如编译器），或者可能会找到错误的工具。有关详细信息，请参考[`docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019`](https://docs.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2019)。
 
-这是CMake GUI的主窗口：
+这是 CMake GUI 的主窗口：
 
-![图 2.27 – CMake GUI主窗口](img/B30947_02_27.jpg)
+![图 2.27 – CMake GUI 主窗口](img/B30947_02_27.jpg)
 
-图 2.27 – CMake GUI主窗口
+图 2.27 – CMake GUI 主窗口
 
-CMake GUI的主屏幕基本包含以下内容：
+CMake GUI 的主屏幕基本包含以下内容：
 
 +   源代码路径字段
 
@@ -519,29 +517,29 @@ CMake GUI的主屏幕基本包含以下内容：
 
 这些是我们将要交互的四个基本内容。要开始配置项目，请通过点击**浏览源代码...**按钮选择项目的根目录。然后，通过点击**浏览构建...**按钮选择项目的输出目录。此路径将是通过所选生成器生成的输出文件的路径。
 
-如果项目包含CMake预设，可以从预设列表中选择预设。任何由预设修改的缓存变量将显示在缓存变量列表中。在以下示例中，选择了一个配置Clang 13作为编译器，并将**调试**作为构建类型的预设：
+如果项目包含 CMake 预设，可以从预设列表中选择预设。任何由预设修改的缓存变量将显示在缓存变量列表中。在以下示例中，选择了一个配置 Clang 13 作为编译器，并将**调试**作为构建类型的预设：
 
 ![图 2.28 – 从 CMake GUI 选择预设](img/B30947_02_28.jpg)
 
 图 2.28 – 从 CMake GUI 选择预设
 
-设置源路径和输出路径后，点击**配置**以开始配置选定的项目。CMake GUI将允许你选择生成器、平台选择（如果生成器支持）、工具集和编译器等详细信息，如下图所示：
+设置源路径和输出路径后，点击**配置**以开始配置选定的项目。CMake GUI 将允许你选择生成器、平台选择（如果生成器支持）、工具集和编译器等详细信息，如下图所示：
 
 ![图 2.29 – CMake GUI 生成器选择界面](img/B30947_02_29.jpg)
 
 图 2.29 – CMake GUI 生成器选择界面
 
-根据你的环境填写这些详细信息后，点击**完成**继续。CMake GUI将开始使用给定的详细信息配置你的项目，并在日志区域报告输出。成功配置后，你还应该能在缓存变量列表区域看到缓存变量：
+根据你的环境填写这些详细信息后，点击**完成**继续。CMake GUI 将开始使用给定的详细信息配置你的项目，并在日志区域报告输出。成功配置后，你还应该能在缓存变量列表区域看到缓存变量：
 
 ![图 2.30 – 配置后的 CMake GUI](img/B30947_02_30.jpg)
 
 图 2.30 – 配置后的 CMake GUI
 
-如果一切正常，点击`.sln`和`.cxxproj`以及其他文件。生成项目后，`makefiles`），然后会显示生成的文件。之后，你可以使用IDE来构建项目。
+如果一切正常，点击`.sln`和`.cxxproj`以及其他文件。生成项目后，`makefiles`），然后会显示生成的文件。之后，你可以使用 IDE 来构建项目。
 
 重要提示
 
-请注意，生成的项目只是生成器的产物，对生成的项目文件（`.sln`，`.cxxproj`）所做的更改不会被保存，并将在下次生成时丢失。修改`CMakeLists.txt`文件或编辑`CMakeCache.txt`文件（无论是直接还是间接）时，别忘了重新生成项目文件。对于版本控制，应该将生成的项目文件视为构建产物，不应将其添加到版本控制中。你可以通过适当的生成器在CMake中重新生成项目，随时从头开始获取它们。
+请注意，生成的项目只是生成器的产物，对生成的项目文件（`.sln`，`.cxxproj`）所做的更改不会被保存，并将在下次生成时丢失。修改`CMakeLists.txt`文件或编辑`CMakeCache.txt`文件（无论是直接还是间接）时，别忘了重新生成项目文件。对于版本控制，应该将生成的项目文件视为构建产物，不应将其添加到版本控制中。你可以通过适当的生成器在 CMake 中重新生成项目，随时从头开始获取它们。
 
 有时，项目可能需要调整某些缓存变量，或者你可能决定使用不同的构建类型。例如，要更改任何缓存变量，点击所需缓存变量的值；它应变为可编辑。根据变量类型，可能会显示复选框而不是字符串。如果所需变量未在列表中显示，它可能是*高级*变量，只有在`cmake-gui`处于高级模式时才能看到。
 
@@ -591,29 +589,29 @@ CMake GUI 提供了一个便捷的环境变量编辑器，允许对环境变量�
 
 # 在 Visual Studio、VSCode 和 Qt Creator 中使用 CMake
 
-作为软件开发中的常用工具，CMake与各种IDE和源代码编辑器都有集成。在使用IDE或编辑器时，利用这些集成可能对用户来说更加方便。本节将介绍CMake如何与一些流行的IDE和编辑器集成。
+作为软件开发中的常用工具，CMake 与各种 IDE 和源代码编辑器都有集成。在使用 IDE 或编辑器时，利用这些集成可能对用户来说更加方便。本节将介绍 CMake 如何与一些流行的 IDE 和编辑器集成。
 
-如果你期待的是如何使用IDE或编辑器的指南，那么这一部分不涉及这方面的内容。本节的重点是探索并了解CMake与这些工具的集成。假设你已经具备与将要交互的IDE/编辑器的使用经验。
+如果你期待的是如何使用 IDE 或编辑器的指南，那么这一部分不涉及这方面的内容。本节的重点是探索并了解 CMake 与这些工具的集成。假设你已经具备与将要交互的 IDE/编辑器的使用经验。
 
-让我们从Visual Studio开始。
+让我们从 Visual Studio 开始。
 
 ## Visual Studio
 
-**Visual Studio**是支持CMake的后来的参与者之一。与其他流行的IDE不同，Visual Studio直到2017年才开始原生支持CMake。在那一年，微软决定行动，推出了内置支持CMake项目的功能，并随Visual Studio 2017一起发布。从那时起，这成为了Visual Studio IDE的一个重要功能。
+**Visual Studio**是支持 CMake 的后来的参与者之一。与其他流行的 IDE 不同，Visual Studio 直到 2017 年才开始原生支持 CMake。在那一年，微软决定行动，推出了内置支持 CMake 项目的功能，并随 Visual Studio 2017 一起发布。从那时起，这成为了 Visual Studio IDE 的一个重要功能。
 
-要开始使用，请获取Visual Studio 2017或更高版本的副本。对于旧版本的Visual Studio，这个功能完全不可用。在我们的示例中，我们将使用Visual Studio 2022社区版。
+要开始使用，请获取 Visual Studio 2017 或更高版本的副本。对于旧版本的 Visual Studio，这个功能完全不可用。在我们的示例中，我们将使用 Visual Studio 2022 社区版。
 
-### 从头开始创建CMake项目
+### 从头开始创建 CMake 项目
 
-Visual Studio的项目创建功能基于项目模板。从Visual Studio 2017及以后版本，项目模板中也包含了CMake项目模板。我们将学习如何使用这个模板来创建新的CMake项目。
+Visual Studio 的项目创建功能基于项目模板。从 Visual Studio 2017 及以后版本，项目模板中也包含了 CMake 项目模板。我们将学习如何使用这个模板来创建新的 CMake 项目。
 
-要使用Visual Studio创建一个新的CMake项目，请点击欢迎页面上的**创建新项目**按钮。或者，你也可以通过点击**文件** | **新建** | **项目**来访问，或者使用*Ctrl* + *Shift* + *N*（**新建项目**）快捷键。Visual Studio 2022的欢迎屏幕如下所示：
+要使用 Visual Studio 创建一个新的 CMake 项目，请点击欢迎页面上的**创建新项目**按钮。或者，你也可以通过点击**文件** | **新建** | **项目**来访问，或者使用*Ctrl* + *Shift* + *N*（**新建项目**）快捷键。Visual Studio 2022 的欢迎屏幕如下所示：
 
 ![图 2.34 – Visual Studio 2022 欢迎屏幕](img/B30947_02_34.jpg)
 
 图 2.34 – Visual Studio 2022 欢迎屏幕
 
-在**创建新项目**屏幕上，双击项目模板列表中的**CMake项目**。你可以通过使用位于列表顶部的搜索栏来筛选项目模板：
+在**创建新项目**屏幕上，双击项目模板列表中的**CMake 项目**。你可以通过使用位于列表顶部的搜索栏来筛选项目模板：
 
 ![图 2.35 – Visual Studio 2022 创建新项目屏幕](img/B30947_02_35.jpg)
 
@@ -625,13 +623,13 @@ Visual Studio的项目创建功能基于项目模板。从Visual Studio 2017及�
 
 图 2.36 – Visual Studio 2022 新项目配置屏幕
 
-填写完详细信息后，点击`CMakeLists.txt`文件、C++源文件和一个C++头文件，文件名与选择的项目名称相同。新创建的项目布局如下图所示：
+填写完详细信息后，点击`CMakeLists.txt`文件、C++源文件和一个 C++头文件，文件名与选择的项目名称相同。新创建的项目布局如下图所示：
 
-![图 2.37 – 使用Visual Studio创建新CMake项目后的第一印象](img/B30947_02_37.jpg)
+![图 2.37 – 使用 Visual Studio 创建新 CMake 项目后的第一印象](img/B30947_02_37.jpg)
 
-图 2.37 – 使用Visual Studio创建新CMake项目后的第一印象
+图 2.37 – 使用 Visual Studio 创建新 CMake 项目后的第一印象
 
-### 打开现有CMake项目
+### 打开现有 CMake 项目
 
 要打开一个现有的 CMake 项目，请转到项目的 `CMakeLists.txt` 文件。下图显示了 **Open** 菜单的样子：
 
@@ -677,53 +675,53 @@ VSCode 是微软开发的开源代码编辑器。它不是一个 IDE，但通过
 
 本节我们将学习如何安装扩展并使用它执行基本的 CMake 任务。
 
-在继续之前，VSCode 必须已经安装在你的环境中。如果没有，请访问 [https://code.visualstudio.com/learn/get-started/basics](https://code.visualstudio.com/learn/get-started/basics) 获取下载和安装的详细信息。
+在继续之前，VSCode 必须已经安装在你的环境中。如果没有，请访问 [`code.visualstudio.com/learn/get-started/basics`](https://code.visualstudio.com/learn/get-started/basics) 获取下载和安装的详细信息。
 
 同时，我们将频繁访问命令面板。强烈建议经常使用它，以便熟悉它。对于那些问*“命令面板到底是什么？”*的人，下面是一个截图：
 
-![图2.41 – VSCode命令面板](img/B30947_02_41.jpg)
+![图 2.41 – VSCode 命令面板](img/B30947_02_41.jpg)
 
-图2.41 – VSCode命令面板
+图 2.41 – VSCode 命令面板
 
-是的，*就是*那个东西。说实话，直到现在我才知道它有个名字。访问命令面板的快捷键是*F1*和*Ctrl* + *Shift* + *P*。命令面板是VSCode的核心，它能加速VSCode的工作流程。
+是的，*就是*那个东西。说实话，直到现在我才知道它有个名字。访问命令面板的快捷键是*F1*和*Ctrl* + *Shift* + *P*。命令面板是 VSCode 的核心，它能加速 VSCode 的工作流程。
 
 ### 安装扩展
 
-安装扩展是相当简单的。你可以通过CLI安装，使用以下命令（如果你使用的是Insiders版本，请将`code`替换为`code-insiders`）：
+安装扩展是相当简单的。你可以通过 CLI 安装，使用以下命令（如果你使用的是 Insiders 版本，请将`code`替换为`code-insiders`）：
 
 ```cpp
 code --install-extension ms-vscode.cmake-tools
 ```
 
-另外，你也可以通过VSCode的图形界面做同样的操作。打开VSCode并在扩展搜索框中输入`CMake Tools`，然后选择**CMake Tools**（由**Microsoft**提供）。要小心不要与CMake扩展混淆。点击**安装**按钮来安装：
+另外，你也可以通过 VSCode 的图形界面做同样的操作。打开 VSCode 并在扩展搜索框中输入`CMake Tools`，然后选择**CMake Tools**（由**Microsoft**提供）。要小心不要与 CMake 扩展混淆。点击**安装**按钮来安装：
 
-![图2.42 – VSCode扩展市场](img/B30947_02_42.jpg)
+![图 2.42 – VSCode 扩展市场](img/B30947_02_42.jpg)
 
-图2.42 – VSCode扩展市场
+图 2.42 – VSCode 扩展市场
 
 安装完成后，扩展就可以使用了。
 
 ### 快速开始项目
 
-VSCode CMake Tools扩展提供了一个`cmake quick start`。选择**CMake: Quick Start**并按下键盘上的*Enter*键。
+VSCode CMake Tools 扩展提供了一个`cmake quick start`。选择**CMake: Quick Start**并按下键盘上的*Enter*键。
 
-![图2.43 – 命令面板 – 定位CMake: Quick Start](img/B30947_02_43.jpg)
+![图 2.43 – 命令面板 – 定位 CMake: Quick Start](img/B30947_02_43.jpg)
 
-图2.43 – 命令面板 – 定位CMake: Quick Start
+图 2.43 – 命令面板 – 定位 CMake: Quick Start
 
 首先，扩展会询问使用哪个工具链。选择适合你新项目的工具链。关于工具链的更多信息将在*处理工具链*部分中讨论。
 
-在选择好工具链后，系统会提示你输入项目名称。这将是你顶级CMake项目的名称。输入你选择的名称。
+在选择好工具链后，系统会提示你输入项目名称。这将是你顶级 CMake 项目的名称。输入你选择的名称。
 
-最后，将显示一个示例应用程序代码的选择。在此选择中，你将被要求创建一个可执行应用程序项目或一个库项目。选择其中之一，瞧！你就拥有了一个工作中的CMake项目。选择后，`CMakeLists.txt`和`main.cpp`文件将被生成。这些文件的内容在可执行文件和库的选择之间稍有不同。
+最后，将显示一个示例应用程序代码的选择。在此选择中，你将被要求创建一个可执行应用程序项目或一个库项目。选择其中之一，瞧！你就拥有了一个工作中的 CMake 项目。选择后，`CMakeLists.txt`和`main.cpp`文件将被生成。这些文件的内容在可执行文件和库的选择之间稍有不同。
 
 ### 打开现有项目
 
-在VSCode中打开CMake项目并没有什么特别的。只需打开包含项目顶级`CMakeLists.txt`文件的文件夹。CMake Tools扩展将自动识别该文件夹为CMake项目，所有与CMake相关的命令将会在VSCode的命令面板上可用。打开现有项目时，系统会询问是否配置该项目。
+在 VSCode 中打开 CMake 项目并没有什么特别的。只需打开包含项目顶级`CMakeLists.txt`文件的文件夹。CMake Tools 扩展将自动识别该文件夹为 CMake 项目，所有与 CMake 相关的命令将会在 VSCode 的命令面板上可用。打开现有项目时，系统会询问是否配置该项目。
 
-![图2.44 – VSCode询问是否配置现有项目](img/B30947_02_44.jpg)
+![图 2.44 – VSCode 询问是否配置现有项目](img/B30947_02_44.jpg)
 
-图2.44 – VSCode询问是否配置现有项目
+图 2.44 – VSCode 询问是否配置现有项目
 
 如果项目支持 CMake 预设，你将自动被询问选择哪个预设。如果项目不支持预设，那么你将被要求选择一个编译器工具链，稍后在本章的*处理 kits* 部分将对此进行解释。
 
@@ -804,7 +802,7 @@ CMake Tools 扩展中的 kit 代表了一组可用于构建项目的工具组合
 
 请记住，如果您的工具包名称与 CMake Tools 自动生成的名称冲突，CMake Tools 在扫描时会覆盖您的条目。因此，请始终为您的工具包定义提供唯一的名称。
 
-有关工具包的更多信息，请参阅 [https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md](https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md)。
+有关工具包的更多信息，请参阅 [`github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md`](https://github.com/microsoft/vscode-cmake-tools/blob/dev/gcampbell/KitCmakePath/docs/kits.md)。
 
 ## Qt Creator
 
@@ -966,18 +964,18 @@ Qt Creator 是另一个支持 CMake 项目的 IDE。CMake 支持相当不错，�
 
 本章讨论的主题有很多相关的指南和文档。你可以在这里找到一份不完全的推荐阅读材料清单：
 
-+   CMake CLI 文档：[https://cmake.org/cmake/help/latest/manual/cmake.1.html](https://cmake.org/cmake/help/latest/manual/cmake.1.html)。
++   CMake CLI 文档：[`cmake.org/cmake/help/latest/manual/cmake.1.html`](https://cmake.org/cmake/help/latest/manual/cmake.1.html)。
 
-+   Visual Studio 中的 CMake 项目：[https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160)。
++   Visual Studio 中的 CMake 项目：[`docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160`](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160)。
 
-+   Visual Studio 中的 CMake 支持：[https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/](https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/)。
++   Visual Studio 中的 CMake 支持：[`devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/`](https://devblogs.microsoft.com/cppblog/cmake-support-in-visual-studio/)。
 
-+   VSCode 的 CMake Tools 扩展：[https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/](https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/)。
++   VSCode 的 CMake Tools 扩展：[`devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/`](https://devblogs.microsoft.com/cppblog/cmake-tools-extension-for-visual-studio-code/)。
 
-+   VSCode CMake Tools 文档：[https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation](https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation)
++   VSCode CMake Tools 文档：[`github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation`](https://github.com/microsoft/vscode-cmake-tools/tree/main/docs#cmake-tools-for-visual-studio-code-documentation)
 
-+   在 VSCode 中调试：[https://code.visualstudio.com/docs/editor/debugging](https://code.visualstudio.com/docs/editor/debugging)。
++   在 VSCode 中调试：[`code.visualstudio.com/docs/editor/debugging`](https://code.visualstudio.com/docs/editor/debugging)。
 
-+   Qt Creator 定位器指南：[https://doc.qt.io/qtcreator/creator-editor-locator.html](https://doc.qt.io/qtcreator/creator-editor-locator.html)。
++   Qt Creator 定位器指南：[`doc.qt.io/qtcreator/creator-editor-locator.html`](https://doc.qt.io/qtcreator/creator-editor-locator.html)。
 
-+   Qt Creator 用户界面：[https://doc.qt.io/qtcreator/creator-quick-tour.html](https://doc.qt.io/qtcreator/creator-quick-tour.html)。
++   Qt Creator 用户界面：[`doc.qt.io/qtcreator/creator-quick-tour.html`](https://doc.qt.io/qtcreator/creator-quick-tour.html)。

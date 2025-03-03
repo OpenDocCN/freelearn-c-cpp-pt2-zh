@@ -1,6 +1,4 @@
-# 1
-
-# 启动 CMake
+# 第一章：启动 CMake
 
 如果你正在使用 C++ 或 C 开发软件，可能已经听说过 CMake。过去 20 年，CMake 已经发展成为构建 C++ 应用程序的行业标准。但 CMake 不仅仅是一个构建系统——它是一个构建系统生成器，这意味着它为其他构建系统（如 Makefile、Ninja、Visual Studio、QtCreator、Android Studio 和 XCode）生成指令。CMake 不止于构建软件——它还包括支持安装、打包和测试软件的功能。
 
@@ -36,13 +34,13 @@
 
 +   **macOS**: AppleClang 10 或更新版本
 
-本章中使用的完整示例可以在 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01) 找到
+本章中使用的完整示例可以在 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter01) 找到
 
 注意
 
 为了尝试本书中的任何示例，我们提供了一个现成的 Docker 容器，包含所有必要的依赖。
 
-你可以在 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition) 找到它。
+你可以在 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition) 找到它。
 
 # CMake 简介
 
@@ -60,45 +58,45 @@ CMake 包含三个命令行工具：
 
 +   `cmake-gui`: 一个图形界面前端，帮助配置项目
 
-+   `ccmake`：用于配置CMake的交互式终端UI
++   `ccmake`：用于配置 CMake 的交互式终端 UI
 
-`cmake-gui`工具可以方便地配置CMake构建并选择要使用的编译器：
+`cmake-gui`工具可以方便地配置 CMake 构建并选择要使用的编译器：
 
-![图1.1 – 配置项目后的cmake-gui界面](img/B30947_01_01.jpg)
+![图 1.1 – 配置项目后的 cmake-gui 界面](img/B30947_01_01.jpg)
 
-图1.1 – 配置项目后的cmake-gui界面
+图 1.1 – 配置项目后的 cmake-gui 界面
 
-如果你在控制台工作，但仍希望拥有交互式配置CMake的功能，那么`ccmake`是合适的工具。虽然它没有`cmake-gui`那么方便，但提供了相同的功能。当你必须通过`ssh` shell或类似方式远程配置CMake时，这尤其有用：
+如果你在控制台工作，但仍希望拥有交互式配置 CMake 的功能，那么`ccmake`是合适的工具。虽然它没有`cmake-gui`那么方便，但提供了相同的功能。当你必须通过`ssh` shell 或类似方式远程配置 CMake 时，这尤其有用：
 
-![图1.2 – 使用ccmake配置项目](img/B30947_01_02.jpg)
+![图 1.2 – 使用 ccmake 配置项目](img/B30947_01_02.jpg)
 
-图1.2 – 使用ccmake配置项目
+图 1.2 – 使用 ccmake 配置项目
 
-CMake相比于常规构建系统有许多优势。首先是跨平台特性。使用CMake，你可以更容易地为各种编译器和平台创建构建指令，而无需深入了解各自构建系统的具体细节。
+CMake 相比于常规构建系统有许多优势。首先是跨平台特性。使用 CMake，你可以更容易地为各种编译器和平台创建构建指令，而无需深入了解各自构建系统的具体细节。
 
-另外，CMake能够发现系统库和依赖，这大大减少了寻找正确库文件来构建软件的麻烦。额外的好处是，CMake与包管理器如Conan和vcpkg的集成非常顺畅。
+另外，CMake 能够发现系统库和依赖，这大大减少了寻找正确库文件来构建软件的麻烦。额外的好处是，CMake 与包管理器如 Conan 和 vcpkg 的集成非常顺畅。
 
-CMake不仅具备为多个平台构建软件的能力，还原生支持软件的测试、安装和打包，这使得CMake在构建软件时比单一构建系统更具优势。能够在一个统一的地方定义从构建、过度测试到打包的所有内容，对于长期维护项目极为有帮助。
+CMake 不仅具备为多个平台构建软件的能力，还原生支持软件的测试、安装和打包，这使得 CMake 在构建软件时比单一构建系统更具优势。能够在一个统一的地方定义从构建、过度测试到打包的所有内容，对于长期维护项目极为有帮助。
 
-CMake本身对系统的依赖非常少，且可以在命令行上无须用户交互地运行，这使得它非常适合用于CI/CD流水线中的构建系统自动化。
+CMake 本身对系统的依赖非常少，且可以在命令行上无须用户交互地运行，这使得它非常适合用于 CI/CD 流水线中的构建系统自动化。
 
-现在我们已经简要介绍了CMake的功能，接下来让我们学习如何安装CMake。
+现在我们已经简要介绍了 CMake 的功能，接下来让我们学习如何安装 CMake。
 
-# 安装CMake
+# 安装 CMake
 
-CMake可以从[https://cmake.org/download/](https://cmake.org/download/)免费下载。它提供了预编译的二进制文件或源代码。对于大多数使用场景，预编译的二进制文件已经完全足够，但由于CMake本身依赖很少，构建一个版本也是可能的。
+CMake 可以从[`cmake.org/download/`](https://cmake.org/download/)免费下载。它提供了预编译的二进制文件或源代码。对于大多数使用场景，预编译的二进制文件已经完全足够，但由于 CMake 本身依赖很少，构建一个版本也是可能的。
 
-任何主要的Linux发行版都提供了CMake的安装包。虽然预打包的CMake版本通常不是最新发布版本，但如果系统经常更新，这些安装包通常足以使用。另一种方便的安装方式是使用Python包管理器`pip`。
+任何主要的 Linux 发行版都提供了 CMake 的安装包。虽然预打包的 CMake 版本通常不是最新发布版本，但如果系统经常更新，这些安装包通常足以使用。另一种方便的安装方式是使用 Python 包管理器`pip`。
 
 注意
 
-本书中示例所需使用的最低CMake版本为`3.23`。我们建议你手动下载适当版本的CMake，以确保获得正确的版本。
+本书中示例所需使用的最低 CMake 版本为`3.23`。我们建议你手动下载适当版本的 CMake，以确保获得正确的版本。
 
-## 从源代码构建CMake
+## 从源代码构建 CMake
 
 CMake 是用 C++ 编写的，并使用 Make 构建自身。从零开始构建 CMake 是可能的，但对于大多数使用场景，使用二进制下载版本就足够了。
 
-从 [https://cmake.org/download/](https://cmake.org/download/) 下载源代码包后，将其解压到一个文件夹，并运行以下命令：
+从 [`cmake.org/download/`](https://cmake.org/download/) 下载源代码包后，将其解压到一个文件夹，并运行以下命令：
 
 ```cpp
 ./configure make
@@ -215,7 +213,7 @@ CMake 的构建过程分为两个步骤，如下图所示。首先，如果没�
 cmake .. -G Ninja
 ```
 
-这将生成供 Ninja 使用的文件（[https://ninja-build.org/](https://ninja-build.org/)），Ninja 是一种替代的构建生成器。CMake 有许多可用的生成器。可以在 CMake 的官方网站上找到支持的生成器列表：[https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)。
+这将生成供 Ninja 使用的文件（[`ninja-build.org/`](https://ninja-build.org/)），Ninja 是一种替代的构建生成器。CMake 有许多可用的生成器。可以在 CMake 的官方网站上找到支持的生成器列表：[`cmake.org/cmake/help/latest/manual/cmake-generators.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)。
 
 生成器主要分为两类——一种是有多种 Makefile 版本和 Ninja 生成器，通常从命令行使用，另一种是为 Visual Studio 或 Xcode 等 IDE 创建构建文件。
 
@@ -271,21 +269,21 @@ CMake 区分 *单配置生成器* 和 *多配置生成器*。使用单配置生�
 
 对于多配置生成器，一个构建目录可以包含多个配置，选择哪个配置仅在构建步骤中指定。
 
-是否选择单配置生成器或多配置生成器，通常取决于个人偏好或某个操作系统中工具的便捷性。作为一个经验法则，可以说单配置生成器在命令行和CI环境中稍微更容易使用，而多配置生成器可能在IDE中有更好的集成。目前，我们已经使用现有的`CMakeLists.txt`来了解CMake的构建过程。我们学习了配置和构建步骤，以及生成器，并了解到我们需要`CMakeLists.txt`文件将必要的信息传递给CMake。那么，接下来让我们更进一步，看看`CMakeLists.txt`文件的样子以及CMake语言是如何工作的。
+是否选择单配置生成器或多配置生成器，通常取决于个人偏好或某个操作系统中工具的便捷性。作为一个经验法则，可以说单配置生成器在命令行和 CI 环境中稍微更容易使用，而多配置生成器可能在 IDE 中有更好的集成。目前，我们已经使用现有的`CMakeLists.txt`来了解 CMake 的构建过程。我们学习了配置和构建步骤，以及生成器，并了解到我们需要`CMakeLists.txt`文件将必要的信息传递给 CMake。那么，接下来让我们更进一步，看看`CMakeLists.txt`文件的样子以及 CMake 语言是如何工作的。
 
-# 编写CMake文件
+# 编写 CMake 文件
 
-当你编写CMake文件时，有一些核心概念和语言特性是你需要了解的。我们在这里不会涵盖语言的每个细节，因为CMake的文档已经做得相当不错，尤其是在全面性方面。接下来的章节将提供核心概念和语言特性的概述，后续章节会深入探讨不同方面的细节。
+当你编写 CMake 文件时，有一些核心概念和语言特性是你需要了解的。我们在这里不会涵盖语言的每个细节，因为 CMake 的文档已经做得相当不错，尤其是在全面性方面。接下来的章节将提供核心概念和语言特性的概述，后续章节会深入探讨不同方面的细节。
 
-语言的完整文档可以在[https://cmake.org/cmake/help/latest/manual/cmake-language.7.html](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)找到。
+语言的完整文档可以在[`cmake.org/cmake/help/latest/manual/cmake-language.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)找到。
 
-## CMake语言 – 一个10000英尺的概览
+## CMake 语言 – 一个 10000 英尺的概览
 
-CMake使用名为`CMakeLists.txt`的配置文件来确定构建规范。这些文件是用一种脚本语言编写的，通常也叫做CMake。该语言本身简单，支持变量、字符串函数、宏、函数定义和导入其他CMake文件。
+CMake 使用名为`CMakeLists.txt`的配置文件来确定构建规范。这些文件是用一种脚本语言编写的，通常也叫做 CMake。该语言本身简单，支持变量、字符串函数、宏、函数定义和导入其他 CMake 文件。
 
-除了列表外，没有对结构体或类等数据结构的支持。但正是这种相对简单性，使得CMake项目在正确执行时本质上更容易维护。
+除了列表外，没有对结构体或类等数据结构的支持。但正是这种相对简单性，使得 CMake 项目在正确执行时本质上更容易维护。
 
-语法基于关键字和空格分隔的参数。例如，以下命令告诉CMake哪些文件需要添加到库中：
+语法基于关键字和空格分隔的参数。例如，以下命令告诉 CMake 哪些文件需要添加到库中：
 
 ```cpp
 target_sources(MyLibrary
@@ -295,7 +293,7 @@ target_sources(MyLibrary
 
 `PUBLIC`和`PRIVATE`关键字表示文件在与此库链接时的可见性，并且充当文件列表之间的分隔符。
 
-此外，CMake语言还支持所谓的“生成器表达式”，这些表达式在构建系统生成时进行评估。它们通常用于在项目的配置阶段，为每个生成的构建配置指定特定信息。它们将在本章后面的*生成器* *表达式*部分进行详细介绍。
+此外，CMake 语言还支持所谓的“生成器表达式”，这些表达式在构建系统生成时进行评估。它们通常用于在项目的配置阶段，为每个生成的构建配置指定特定信息。它们将在本章后面的*生成器* *表达式*部分进行详细介绍。
 
 ### 项目
 
@@ -386,7 +384,7 @@ ${outer_${inner_variable}_variable}
 
 将`PARENT_SCOPE`选项传递给`set()`会使变量在父作用域中可见。
 
-CMake 提供了多种预定义变量。这些变量以`CMAKE_`为前缀。完整列表可在[https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)查看。
+CMake 提供了多种预定义变量。这些变量以`CMAKE_`为前缀。完整列表可在[`cmake.org/cmake/help/latest/manual/cmake-variables.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)查看。
 
 #### 列表
 
@@ -428,7 +426,7 @@ CMake 会缓存某些变量，以便在随后的构建中运行得更快。这�
 
 图 1.4 – 左侧 – cmake-gui 不显示标记为高级的变量。右侧 – 标记“高级”复选框会显示所有标记为高级的变量
 
-一条经验法则是，任何用户不应更改的选项或变量应标记为高级。标记变量为高级的常见情况是在编写 CMake 模块或查找依赖项时，正如我们在[*第 5 章*](B30947_05.xhtml#_idTextAnchor084)《集成第三方库和依赖管理》和[*第 13 章*](B30947_13.xhtml#_idTextAnchor198)《重用 CMake 代码》中所见。
+一条经验法则是，任何用户不应更改的选项或变量应标记为高级。标记变量为高级的常见情况是在编写 CMake 模块或查找依赖项时，正如我们在*第五章*《集成第三方库和依赖管理》和*第十三章*《重用 CMake 代码》中所见。
 
 对于简单的布尔缓存变量，CMake 还提供了 `option` 关键字，默认值为 `OFF`，除非另行指定。这些变量也可以通过 `CMakeDependentOption` 模块相互依赖：
 
@@ -474,13 +472,13 @@ set_property(<Scope> <EntityName>
 
 +   `CACHE <entry>`：设置缓存变量的属性。最常见的包括将变量设置为高级选项或为其添加文档字符串。
 
-支持的属性完整列表，按其不同实体排序，可以在[https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)找到。
+支持的属性完整列表，按其不同实体排序，可以在[`cmake.org/cmake/help/latest/manual/cmake-properties.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html)找到。
 
 在修改属性时，使用诸如`set_target_properties`和`set_test_properties`等直接函数比使用更通用的`set_property`命令更好。使用显式命令可以避免错误和属性名称混淆，通常更具可读性。还有`define_property`函数，它创建一个没有设置值的属性。我们建议你不要使用它，因为属性应该始终有一个合理的默认值。
 
 ### 循环和条件
 
-像任何编程语言一样，CMake支持条件和循环块。条件块位于`if()`、`elseif()`、`else()`和`endif()`语句之间。条件使用各种关键字表达。
+像任何编程语言一样，CMake 支持条件和循环块。条件块位于`if()`、`elseif()`、`else()`和`endif()`语句之间。条件使用各种关键字表达。
 
 一元关键字位于值之前，如下所示：
 
@@ -536,7 +534,7 @@ while(MYVAR LESS "5")
 endwhile()
 ```
 
-除了`while`循环，CMake还提供了用于遍历列表或范围的循环：
+除了`while`循环，CMake 还提供了用于遍历列表或范围的循环：
 
 ```cpp
 foreach(ITEM IN LISTS MYLIST)
@@ -568,19 +566,19 @@ endfunction()
 foo("bar")
 ```
 
-函数是让你的CMake部分可重用的好方法，通常在处理较大项目时非常有用。
+函数是让你的 CMake 部分可重用的好方法，通常在处理较大项目时非常有用。
 
 ### 宏
 
-CMake宏通过`macro()`/`endmacro()`命令定义。它们有点像函数，不同之处在于函数中的参数是真正的变量，而宏中的参数是字符串替换。这意味着宏的所有参数必须使用花括号访问。
+CMake 宏通过`macro()`/`endmacro()`命令定义。它们有点像函数，不同之处在于函数中的参数是真正的变量，而宏中的参数是字符串替换。这意味着宏的所有参数必须使用花括号访问。
 
 另一个区别是通过调用函数，控制权会转移到函数中。宏的执行方式像是将宏的主体粘贴到调用位置一样。这意味着宏不会创建与变量和控制流相关的作用域。因此，强烈建议避免在宏中调用`return()`，因为这会阻止宏调用位置的作用域执行。
 
 ### 目标
 
-CMake的构建系统是作为一组逻辑目标组织的，这些目标对应于可执行文件、库或自定义命令或工件，例如文档或类似的内容。
+CMake 的构建系统是作为一组逻辑目标组织的，这些目标对应于可执行文件、库或自定义命令或工件，例如文档或类似的内容。
 
-在CMake中有三种主要方式来创建目标——`add_executable`、`add_library`和`add_custom_target`。前两个用于创建可执行文件和静态或共享库，而第三个则可以包含几乎任何自定义命令来执行。
+在 CMake 中有三种主要方式来创建目标——`add_executable`、`add_library`和`add_custom_target`。前两个用于创建可执行文件和静态或共享库，而第三个则可以包含几乎任何自定义命令来执行。
 
 目标可以相互依赖，以确保一个目标在另一个目标之前构建。
 
@@ -599,7 +597,7 @@ target_compile_definitions(my_target PRIVATE
 )
 ```
 
-这个示例告诉CMake评估`CONFIG`变量，值可以是`Debug`或`Release`，如果匹配其中一个，则为`my_target`目标定义`MY_DEBUG_FLAG`或`MY_RELEASE_FLAG`。生成器表达式在编写平台和编译器独立的CMake文件时非常有用。除了查询值之外，生成器表达式还可以用来转换字符串和列表：
+这个示例告诉 CMake 评估`CONFIG`变量，值可以是`Debug`或`Release`，如果匹配其中一个，则为`my_target`目标定义`MY_DEBUG_FLAG`或`MY_RELEASE_FLAG`。生成器表达式在编写平台和编译器独立的 CMake 文件时非常有用。除了查询值之外，生成器表达式还可以用来转换字符串和列表：
 
 ```cpp
 $<LOWER_CASE:CMake>
@@ -607,19 +605,19 @@ $<LOWER_CASE:CMake>
 
 这将输出`cmake`。
 
-你可以在[https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)了解更多关于生成器表达式的信息。
+你可以在[`cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)了解更多关于生成器表达式的信息。
 
-大多数CMake命令都能处理生成器表达式，但有一些显著的例外，如用于文件操作的`file()`命令和在配置步骤中调用第三方程序的`execute_process()`命令。
+大多数 CMake 命令都能处理生成器表达式，但有一些显著的例外，如用于文件操作的`file()`命令和在配置步骤中调用第三方程序的`execute_process()`命令。
 
-另一个需要注意的事项是，在配置或生成步骤的哪个阶段可以使用哪些生成器表达式。例如，对于多配置生成器，`$<CONFIG:...>`在配置步骤期间可能未设置，因为构建配置通常只在构建步骤期间传递。在下一节中，我们将学习如何告诉CMake使用哪个工具链，以及如何配置不同的构建类型，如调试或发布。
+另一个需要注意的事项是，在配置或生成步骤的哪个阶段可以使用哪些生成器表达式。例如，对于多配置生成器，`$<CONFIG:...>`在配置步骤期间可能未设置，因为构建配置通常只在构建步骤期间传递。在下一节中，我们将学习如何告诉 CMake 使用哪个工具链，以及如何配置不同的构建类型，如调试或发布。
 
-### CMake策略
+### CMake 策略
 
-对于顶层的`CMakeLists.txt`文件，`cmake_minimum_required`必须在任何项目调用之前调用，因为它还设置了用于构建项目的CMake内部策略。
+对于顶层的`CMakeLists.txt`文件，`cmake_minimum_required`必须在任何项目调用之前调用，因为它还设置了用于构建项目的 CMake 内部策略。
 
-策略用于在多个CMake版本之间保持向后兼容性。它们可以配置为使用`OLD`行为，这意味着`cmake`表现出向后兼容性，或者使用`NEW`，这意味着新策略生效。由于每个新版本都会引入新规则和新特性，策略将用于警告你可能存在的向后兼容性问题。策略可以通过`cmake_policy`调用进行禁用或启用。
+策略用于在多个 CMake 版本之间保持向后兼容性。它们可以配置为使用`OLD`行为，这意味着`cmake`表现出向后兼容性，或者使用`NEW`，这意味着新策略生效。由于每个新版本都会引入新规则和新特性，策略将用于警告你可能存在的向后兼容性问题。策略可以通过`cmake_policy`调用进行禁用或启用。
 
-在下面的示例中，`CMP0121`策略已设置为向后兼容的值。`CMP0121`是在CMake 3.21版本中引入的，它检查`list()`命令的索引变量是否符合有效格式——即它们是否为整数：
+在下面的示例中，`CMP0121`策略已设置为向后兼容的值。`CMP0121`是在 CMake 3.21 版本中引入的，它检查`list()`命令的索引变量是否符合有效格式——即它们是否为整数：
 
 ```cpp
 cmake_minimum_required(VERSION 3.21)
@@ -630,7 +628,7 @@ list(GET MYLIST "any" OUT_VAR)
 
 通过设置`cmake_policy(SET CMP0121 OLD)`，启用了向后兼容性，尽管前面的代码访问了`MYLIST`的`"any"`索引（不是整数），但不会产生警告。
 
-将策略设置为`NEW`将在CMake配置步骤中抛出一个错误——`[build] list index: any is not a valid index`。
+将策略设置为`NEW`将在 CMake 配置步骤中抛出一个错误——`[build] list index: any is not a valid index`。
 
 除非你正在包含遗留项目，否则避免设置单一策略。
 
@@ -694,7 +692,7 @@ CMake 原生提供四种构建类型：
 
 +   `MinSizeRel`：与 `Release` 相同，但针对小二进制文件大小进行了优化，而不是优化速度，这通常对应 `-Os -DNDEBUG`。注意，并非所有生成器在所有平台上都支持此配置。
 
-请注意，构建类型必须在配置阶段传递给单配置生成器，例如 CMake 或 Ninja。对于多目标生成器，如 MSVC，它们不会在配置步骤中使用，而是在构建步骤中指定。也可以创建自定义构建类型，这可以方便地用于指定生成代码覆盖的构建，但通常并非所有编译器都能支持，因此需要一些谨慎。有关自定义构建类型的示例，请参见 [*第 7 章*](B30947_07.xhtml#_idTextAnchor113)，*无缝集成代码质量工具与 CMake*。由于 CMake 支持各种各样的工具链、生成器和语言，一个常见的问题是如何找到并维护这些选项的有效组合。在这里，预设可以提供帮助。
+请注意，构建类型必须在配置阶段传递给单配置生成器，例如 CMake 或 Ninja。对于多目标生成器，如 MSVC，它们不会在配置步骤中使用，而是在构建步骤中指定。也可以创建自定义构建类型，这可以方便地用于指定生成代码覆盖的构建，但通常并非所有编译器都能支持，因此需要一些谨慎。有关自定义构建类型的示例，请参见 *第七章*，*无缝集成代码质量工具与 CMake*。由于 CMake 支持各种各样的工具链、生成器和语言，一个常见的问题是如何找到并维护这些选项的有效组合。在这里，预设可以提供帮助。
 
 # 使用预设保持良好的构建配置
 
@@ -723,15 +721,15 @@ CMake 原生提供四种构建类型：
 
 要查看项目中已配置的预设，可以运行 `cmake --list-presets` 查看可用预设的列表。要使用预设进行构建，运行 `cmake --build --``preset name`。
 
-要查看 JSON 模式的完整规格，请访问 [https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html](https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html)。
+要查看 JSON 模式的完整规格，请访问 [`cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html`](https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html)。
 
-预设是共享如何以非常明确的方式构建项目知识的好方法。撰写本文时，越来越多的 IDE 和编辑器原生支持 CMake 预设，尤其是在处理跨编译和工具链时。在这里，我们只为你提供了 CMake 预设的简要概述；它们将在 [*第 9 章*](B30947_09.xhtml#_idTextAnchor146) 中更深入地介绍，*创建可重复的* *构建* *环境*。
+预设是共享如何以非常明确的方式构建项目知识的好方法。撰写本文时，越来越多的 IDE 和编辑器原生支持 CMake 预设，尤其是在处理跨编译和工具链时。在这里，我们只为你提供了 CMake 预设的简要概述；它们将在 *第九章* 中更深入地介绍，*创建可重复的* *构建* *环境*。
 
 # 总结
 
 在本章中，我们为你提供了 CMake 的简要概述。首先，你学习了如何安装并运行一个简单的构建。接着，你了解了 CMake 的两阶段构建过程以及单配置生成器和多配置生成器。
 
-到现在为止，你应该能够构建本书 GitHub 仓库中提供的示例：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。你学习了 CMake 语言的核心功能，如变量、目标和策略。我们简要介绍了函数和宏，以及用于流程控制的条件语句和循环。随着你继续阅读本书，你将运用到目前为止所学的内容，探索更多好的实践和技巧，将从简单的单目标项目过渡到复杂的软件项目，并通过良好的 CMake 配置保持其可维护性。
+到现在为止，你应该能够构建本书 GitHub 仓库中提供的示例：[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。你学习了 CMake 语言的核心功能，如变量、目标和策略。我们简要介绍了函数和宏，以及用于流程控制的条件语句和循环。随着你继续阅读本书，你将运用到目前为止所学的内容，探索更多好的实践和技巧，将从简单的单目标项目过渡到复杂的软件项目，并通过良好的 CMake 配置保持其可维护性。
 
 在下一章中，我们将学习如何执行 CMake 中一些最常见的任务，以及 CMake 如何与各种 IDE 配合工作。
 
@@ -739,9 +737,9 @@ CMake 原生提供四种构建类型：
 
 要了解更多关于本章中讨论的主题，请参考以下资源：
 
-+   官方 CMake 文档: [https://cmake.org/cmake/help/latest/](https://cmake.org/cmake/help/latest/)
++   官方 CMake 文档: [`cmake.org/cmake/help/latest/`](https://cmake.org/cmake/help/latest/)
 
-+   官方 CMake 教程: [https://cmake.org/cmake/help/latest/guide/tutorial/index.html](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
++   官方 CMake 教程: [`cmake.org/cmake/help/latest/guide/tutorial/index.html`](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)
 
 # 问题
 

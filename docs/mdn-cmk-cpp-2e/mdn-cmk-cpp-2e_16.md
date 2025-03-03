@@ -1,6 +1,4 @@
-# 16
-
-# 编写 CMake 预设
+# 第十六章：编写 CMake 预设
 
 预设是在 CMake 3.19 版本中加入的，旨在简化项目设置的管理。在有了预设之前，用户必须记住冗长的命令行配置，或者直接在项目文件中设置覆盖项，这样的做法容易出错并且变得复杂。使用预设后，用户可以更加简便地处理项目配置时所使用的生成器、并行构建任务的数量，以及需要构建或测试的项目组件等设置。使用预设后，CMake 变得更加易用。用户只需配置一次预设，之后可以随时使用它们，这使得每次执行 CMake 时更加一致，且更容易理解。预设还帮助标准化不同用户和计算机之间的设置，简化了协作项目的工作。
 
@@ -20,7 +18,7 @@
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中出现的代码文件，地址为[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16)。
+你可以在 GitHub 上找到本章中出现的代码文件，地址为[`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch16)。
 
 本章中执行示例所需的命令将在每个部分中提供。
 
@@ -73,11 +71,11 @@ Executing workflow step 1 of 4: configure preset "myConfigure"
 
 # 编写预设文件
 
-CMake会在顶层目录中查找`CMakePresets.json`和`CMakeUserPresets.json`文件。这两个文件使用相同的JSON结构来定义预设，因此它们之间没有太大的区别可以讨论。该格式是一个包含以下键的JSON对象：
+CMake 会在顶层目录中查找`CMakePresets.json`和`CMakeUserPresets.json`文件。这两个文件使用相同的 JSON 结构来定义预设，因此它们之间没有太大的区别可以讨论。该格式是一个包含以下键的 JSON 对象：
 
-+   `version`：这是一个必需的整数，指定预设JSON架构的版本。
++   `version`：这是一个必需的整数，指定预设 JSON 架构的版本。
 
-+   `cmakeMinimumRequired`：这是一个对象，指定了所需的CMake版本。
++   `cmakeMinimumRequired`：这是一个对象，指定了所需的 CMake 版本。
 
 +   `include`：这是一个字符串数组，包含从数组中提供的文件路径加载的外部预设（自 schema 版本 4 起）。
 
@@ -91,9 +89,9 @@ CMake会在顶层目录中查找`CMakePresets.json`和`CMakeUserPresets.json`文
 
 +   `workflowPresets`：这是一个对象数组，特定于工作流模式的预设。
 
-+   `vendor`：这是一个包含由IDE和其他供应商定义的自定义设置的对象；CMake不会处理此字段。
++   `vendor`：这是一个包含由 IDE 和其他供应商定义的自定义设置的对象；CMake 不会处理此字段。
 
-在编写预设时，CMake要求`version`条目必须存在；其他值是可选的。这里有一个预设文件示例（实际的预设将在后续章节中添加）：
+在编写预设时，CMake 要求`version`条目必须存在；其他值是可选的。这里有一个预设文件示例（实际的预设将在后续章节中添加）：
 
 **ch16/01-presets/CMakePresets.json**
 
@@ -117,7 +115,7 @@ CMake会在顶层目录中查找`CMakePresets.json`和`CMakeUserPresets.json`文
 } 
 ```
 
-不需要像前面的示例那样添加空数组；除了`version`之外的条目是可选的。说到这，CMake 3.26的适用架构版本是`6`。
+不需要像前面的示例那样添加空数组；除了`version`之外的条目是可选的。说到这，CMake 3.26 的适用架构版本是`6`。
 
 现在我们了解了预设文件的结构，让我们来实际学习如何定义这些预设。
 
@@ -175,7 +173,7 @@ CMake会在顶层目录中查找`CMakePresets.json`和`CMakeUserPresets.json`文
 
 与你可能想到的不同，这种关联并不意味着 CMake 会在你决定运行任何后续预设时自动执行配置预设。你仍然需要手动执行每个预设，或者使用工作流预设（稍后我们会讨论这个）。
 
-在掌握了这些基础概念后，我们可以继续进入单个阶段的预设细节，首先是配置阶段。随着进展，我们将探索这些预设如何相互作用，以及它们如何帮助简化CMake中的项目配置和构建过程。
+在掌握了这些基础概念后，我们可以继续进入单个阶段的预设细节，首先是配置阶段。随着进展，我们将探索这些预设如何相互作用，以及它们如何帮助简化 CMake 中的项目配置和构建过程。
 
 ## 定义配置阶段预设
 
@@ -203,11 +201,11 @@ cmake --preset myConfigurationPreset
 
 +   `cacheVariables`：定义缓存变量的映射；值支持宏
 
-在定义`cacheVariables`映射时，请记住项目中变量解析的顺序。如*图16.1*所示，任何通过命令行定义的缓存变量将覆盖预设变量。任何缓存或环境预设变量将覆盖来自缓存文件或主机环境的变量。
+在定义`cacheVariables`映射时，请记住项目中变量解析的顺序。如*图 16.1*所示，任何通过命令行定义的缓存变量将覆盖预设变量。任何缓存或环境预设变量将覆盖来自缓存文件或主机环境的变量。
 
 ![](img/B19844_16_01.png)
 
-图16.1：预设如何覆盖CMakeCache.txt和系统环境变量
+图 16.1：预设如何覆盖 CMakeCache.txt 和系统环境变量
 
 让我们声明一个简单的`myConfigure`配置预设，指定生成器、构建树和安装路径：
 
@@ -310,7 +308,7 @@ ctest --preset myTestPreset
 
 +   `quiet`: 布尔值；抑制所有输出
 
-对于exclude，一些接受的条目包括：
+对于 exclude，一些接受的条目包括：
 
 +   `name`: 一个字符串，用于排除名称匹配正则表达式模式的测试，并支持宏
 
@@ -423,7 +421,7 @@ ctest --preset myTestPreset
 
 ## 定义包阶段预设
 
-包预设在模式版本`6`中被引入，这意味着你需要至少CMake 3.25版本才能使用它们。这些预设应包含在`packagePresets`数组中。你也可以通过在命令行中添加`--list-presets`参数来显示它们，这对于特定的测试阶段有效：
+包预设在模式版本`6`中被引入，这意味着你需要至少 CMake 3.25 版本才能使用它们。这些预设应包含在`packagePresets`数组中。你也可以通过在命令行中添加`--list-presets`参数来显示它们，这对于特定的测试阶段有效：
 
 ```cpp
 cpack --list-presets 
@@ -439,7 +437,7 @@ cpack --preset myTestPreset
 
 +   `generators`: 一个字符串数组，设置用于创建包的生成器（`ZIP`、`7Z`、`DEB`等）
 
-+   `configuration`: 一个字符串数组，确定CMake打包时所使用的构建类型列表（`Debug`、`Release`等）
++   `configuration`: 一个字符串数组，确定 CMake 打包时所使用的构建类型列表（`Debug`、`Release`等）
 
 +   `filter`: 一个对象，指定要运行的测试
 
@@ -669,12 +667,12 @@ cmake --workflow --preset myWorkflow
 
 如需更多信息，您可以参考以下资源：
 
-+   预设的官方文档：[https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
++   预设的官方文档：[`cmake.org/cmake/help/latest/manual/cmake-presets.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 
 # 加入我们的社区 Discord
 
 加入我们社区的 Discord 空间，与作者和其他读者进行讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

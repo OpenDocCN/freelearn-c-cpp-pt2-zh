@@ -1,6 +1,4 @@
-# 11
-
-# 为 Apple 系统创建软件
+# 第十一章：为 Apple 系统创建软件
 
 在软件开发领域，为 Apple 平台——macOS、iOS、watchOS 和 tvOS——构建应用程序具有一套独特的要求和最佳实践。由于封闭的生态系统，Apple 平台有一些独特的构建特点，尤其是对于具有图形用户界面和更复杂库框架的应用程序。针对这些情况，Apple 使用了名为应用程序包（app bundle）和框架（framework）的特定格式。本章深入探讨了如何有效地使用 CMake 这一强大的跨平台构建系统，针对 Apple 生态系统进行开发。无论你是希望简化工作流程的资深开发者，还是渴望探索 Apple 特定开发的新人，本章将为你提供掌握这一过程所需的知识和工具。
 
@@ -24,7 +22,7 @@
 
 有些示例要求你已为 Xcode 设置了代码签名，这需要一个已加入开发者计划的 Apple ID。
 
-所有示例和源代码可以在本书的 GitHub 仓库中找到：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。
+所有示例和源代码可以在本书的 GitHub 仓库中找到：[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。
 
 如果缺少任何软件，相应的示例将从构建中排除。
 
@@ -46,19 +44,19 @@ cmake --build ./build
 
 如果项目已由 CMake 更新，Xcode 将检测到更改并重新加载项目。
 
-虽然Xcode是首选的IDE，但并非唯一的选择。例如，**Visual Studio Code**（**VS Code**）是一个广受欢迎的替代方案，许多开发者使用它，因为它的多功能性和丰富的扩展生态系统。
+虽然 Xcode 是首选的 IDE，但并非唯一的选择。例如，**Visual Studio Code**（**VS Code**）是一个广受欢迎的替代方案，许多开发者使用它，因为它的多功能性和丰富的扩展生态系统。
 
-虽然Xcode是推荐的macOS生成器，但也可以选择其他生成器，如Ninja或Makefile。尽管它们缺乏一些Apple集成的特性，但它们轻量且也可以用于构建简单的应用程序和库。
+虽然 Xcode 是推荐的 macOS 生成器，但也可以选择其他生成器，如 Ninja 或 Makefile。尽管它们缺乏一些 Apple 集成的特性，但它们轻量且也可以用于构建简单的应用程序和库。
 
-CMake中的Xcode生成器会创建可以直接在Xcode中打开和管理的项目文件。这确保了构建过程能够利用Xcode的功能，如优化的构建设置、资源管理以及与macOS特性的无缝集成。
+CMake 中的 Xcode 生成器会创建可以直接在 Xcode 中打开和管理的项目文件。这确保了构建过程能够利用 Xcode 的功能，如优化的构建设置、资源管理以及与 macOS 特性的无缝集成。
 
-Xcode支持各种构建设置，这些设置可以通过CMake使用`XCODE_ATTRIBUTE_<SETTING>`属性进行配置。要获取所有可能设置的列表，可以参考Apple的开发者文档，或者运行以下构建目录调用：
+Xcode 支持各种构建设置，这些设置可以通过 CMake 使用`XCODE_ATTRIBUTE_<SETTING>`属性进行配置。要获取所有可能设置的列表，可以参考 Apple 的开发者文档，或者运行以下构建目录调用：
 
 ```cpp
 xcodebuild -showBuildSettings
 ```
 
-Xcode属性可以全局设置，也可以针对每个目标进行设置，如下例所示：
+Xcode 属性可以全局设置，也可以针对每个目标进行设置，如下例所示：
 
 ```cpp
 set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
@@ -70,11 +68,11 @@ set_target_properties(ch11_hello_world_apple PROPERTIES
 )
 ```
 
-如示例所示，Xcode属性也可以仅为特定的构建变体设置，通过在`[variant=ConfigName]`后缀中指定，其中配置是常见的CMake构建变体，如`Debug`和`Release`。如果使用不同于Xcode的生成器来构建项目，这些属性将无效。要创建简单的应用程序，选择Xcode生成器并设置适当的属性就足够了。然而，要为Apple构建和分发更复杂的软件，就必须深入研究应用程序包和Apple框架。
+如示例所示，Xcode 属性也可以仅为特定的构建变体设置，通过在`[variant=ConfigName]`后缀中指定，其中配置是常见的 CMake 构建变体，如`Debug`和`Release`。如果使用不同于 Xcode 的生成器来构建项目，这些属性将无效。要创建简单的应用程序，选择 Xcode 生成器并设置适当的属性就足够了。然而，要为 Apple 构建和分发更复杂的软件，就必须深入研究应用程序包和 Apple 框架。
 
-# Apple应用程序包
+# Apple 应用程序包
 
-Apple应用程序包是macOS和iOS中用于打包和组织应用程序所需所有文件的目录结构。这些文件包括可执行二进制文件、资源文件（如图片和声音）、元数据（如应用程序的`Info.plist`文件）等。应用程序包使得分发和管理应用程序变得更加容易，因为它们将所有必要的组件封装在一个单独的目录中，用户可以像处理单个文件一样移动、复制或删除该目录。应用程序包在Finder中显示为单个文件，但实际上它们是具有特定结构的目录，如下所示：
+Apple 应用程序包是 macOS 和 iOS 中用于打包和组织应用程序所需所有文件的目录结构。这些文件包括可执行二进制文件、资源文件（如图片和声音）、元数据（如应用程序的`Info.plist`文件）等。应用程序包使得分发和管理应用程序变得更加容易，因为它们将所有必要的组件封装在一个单独的目录中，用户可以像处理单个文件一样移动、复制或删除该目录。应用程序包在 Finder 中显示为单个文件，但实际上它们是具有特定结构的目录，如下所示：
 
 ```cpp
 MyApp.app
@@ -90,7 +88,7 @@ MyApp.app
         └── ...
 ```
 
-值得注意的是，这个结构被扁平化处理，适用于iOS、tvOS和watchOS目标平台，这由CMake本身处理。要将可执行文件标记为一个应用包，需要将`MACOSX_BUNDLE`关键字添加到目标中，如下所示：
+值得注意的是，这个结构被扁平化处理，适用于 iOS、tvOS 和 watchOS 目标平台，这由 CMake 本身处理。要将可执行文件标记为一个应用包，需要将`MACOSX_BUNDLE`关键字添加到目标中，如下所示：
 
 ```cpp
 add_executable(myApp MACOSX_BUNDLE)
@@ -104,7 +102,7 @@ set_target_properties(hello_world PROPERTIES
 )
 ```
 
-模板文件使用与`configure_file`相同的语法，如[*第 8 章*](B30947_08.xhtml#_idTextAnchor132)所述，*使用 CMake 执行自定义任务*。一些标识符会从 CMake 自动设置。下面是一个自定义`Info.plist.in`模板的示例：
+模板文件使用与`configure_file`相同的语法，如*第八章*所述，*使用 CMake 执行自定义任务*。一些标识符会从 CMake 自动设置。下面是一个自定义`Info.plist.in`模板的示例：
 
 ```cpp
 <?xml version="1.0" encoding="UTF-8"?>
@@ -213,17 +211,17 @@ set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development" CACHE STRING ""
 set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "12345ABC" CACHE STRING "")
 ```
 
-签名身份表示证书提供者，通常可以保持为 `"Apple Development"`，这将使 Xcode 选择适当的签名身份。在 Xcode 11 之前，签名身份必须设置为 `"Mac Developer"`（用于 macOS）或 `"iPhone Developer"`（用于 iOS、tvOS 或 watchOS 应用程序）。团队 ID 是一个 10 位的代码，分配给 Apple 开发者帐户，可以在 Apple 的开发者门户网站上创建 ([https://developer.apple.com](https://developer.apple.com))。可以通过 Xcode 下载签名证书。
+签名身份表示证书提供者，通常可以保持为 `"Apple Development"`，这将使 Xcode 选择适当的签名身份。在 Xcode 11 之前，签名身份必须设置为 `"Mac Developer"`（用于 macOS）或 `"iPhone Developer"`（用于 iOS、tvOS 或 watchOS 应用程序）。团队 ID 是一个 10 位的代码，分配给 Apple 开发者帐户，可以在 Apple 的开发者门户网站上创建 ([`developer.apple.com`](https://developer.apple.com))。可以通过 Xcode 下载签名证书。
 
 # 总结
 
-苹果生态系统在处理上有些特殊，因为其封闭的设计与Linux甚至Windows相比有很大不同，但尤其是在移动市场，如果不想失去一个重要市场，通常无法避免为Apple构建应用。通过本章中的信息，如创建应用程序包和框架以及签署软件，你应该能够开始为Apple部署应用程序。虽然为Apple构建应用需要使用Xcode，并且可能还需要拥有Apple硬件，但这并不是所有其他平台的情况。CMake擅长于平台独立性并能够跨不同平台构建软件，这正是我们将在下一章讨论的内容。
+苹果生态系统在处理上有些特殊，因为其封闭的设计与 Linux 甚至 Windows 相比有很大不同，但尤其是在移动市场，如果不想失去一个重要市场，通常无法避免为 Apple 构建应用。通过本章中的信息，如创建应用程序包和框架以及签署软件，你应该能够开始为 Apple 部署应用程序。虽然为 Apple 构建应用需要使用 Xcode，并且可能还需要拥有 Apple 硬件，但这并不是所有其他平台的情况。CMake 擅长于平台独立性并能够跨不同平台构建软件，这正是我们将在下一章讨论的内容。
 
 # 问题
 
-1.  哪种生成器最适合为Apple构建软件？
+1.  哪种生成器最适合为 Apple 构建软件？
 
-1.  如何设置Xcode属性？
+1.  如何设置 Xcode 属性？
 
 1.  关于不同版本，应用程序包和框架之间有什么区别？
 
@@ -231,10 +229,10 @@ set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "12345ABC" CACHE STRING "")
 
 # 答案
 
-1.  尽管不同的生成器可以用于Apple，推荐使用Xcode。
+1.  尽管不同的生成器可以用于 Apple，推荐使用 Xcode。
 
 1.  通过设置`CMAKE_XCODE_ATTRIBUTE_<ATTRIBUTE>`变量或`XCODE_ATTRIBUTE_<ATTRIBUTE>`属性来实现。
 
 1.  每次只能安装一个版本的应用程序包，而可以同时安装多个版本的框架。
 
-1.  要为Apple签署软件，你需要一个已注册开发者计划的Apple ID和Xcode。
+1.  要为 Apple 签署软件，你需要一个已注册开发者计划的 Apple ID 和 Xcode。

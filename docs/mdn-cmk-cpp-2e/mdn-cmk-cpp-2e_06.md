@@ -1,6 +1,4 @@
-# 6
-
-# 使用生成器表达式  
+# 第六章：使用生成器表达式  
 
 许多 CMake 用户在私下学习时并未遇到生成器表达式，因为它们是相对高级的概念。然而，它们对于那些准备进入广泛发布阶段或首次发布给更广泛观众的项目至关重要，因为它们在导出、安装和打包中扮演着重要角色。如果你只是想快速学习 CMake 的基础知识，并专注于 C++ 方面，可以暂时跳过本章，稍后再回来。另一方面，我们现在讨论生成器表达式，是因为接下来的章节将在解释 CMake 的更深层次内容时引用这些知识。  
 
@@ -24,7 +22,7 @@
 
 # 技术要求  
 
-你可以在 GitHub 上找到本章中涉及的代码文件，网址为：[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06)。  
+你可以在 GitHub 上找到本章中涉及的代码文件，网址为：[`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch06)。  
 
 要构建本书提供的示例，请始终使用推荐的命令：  
 
@@ -37,7 +35,7 @@ cmake --build <build tree>
 
 # 生成器表达式是什么？
 
-CMake在三个阶段构建解决方案：配置、生成和运行构建工具。通常，在配置阶段所有所需的数据都是可用的。然而，有时我们会遇到类似“先有鸡还是先有蛋”这种悖论的情况。举个例子，来自*第5章*中*使用自定义命令作为目标钩子*部分——某个目标需要知道另一个目标的二进制工件路径。不幸的是，这些信息只有在所有列表文件解析完毕并且配置阶段完成后才会变得可用。
+CMake 在三个阶段构建解决方案：配置、生成和运行构建工具。通常，在配置阶段所有所需的数据都是可用的。然而，有时我们会遇到类似“先有鸡还是先有蛋”这种悖论的情况。举个例子，来自*第五章*中*使用自定义命令作为目标钩子*部分——某个目标需要知道另一个目标的二进制工件路径。不幸的是，这些信息只有在所有列表文件解析完毕并且配置阶段完成后才会变得可用。
 
 那么，我们如何解决这样的问题呢？一种解决方案是为该信息创建一个占位符，并将其评估延迟到下一个阶段——**生成阶段**。
 
@@ -45,13 +43,13 @@ CMake在三个阶段构建解决方案：配置、生成和运行构建工具。
 
 生成器表达式将在生成阶段进行评估（即配置完成并创建构建系统时），这意味着将它们的输出捕获到变量中并打印到控制台并不直接。
 
-生成器表达式有很多种，从某种意义上说，它们构成了自己的一种领域特定语言——一种支持条件表达式、逻辑运算、比较、转换、查询和排序的语言。使用生成器表达式可以操作和查询字符串、列表、版本号、shell路径、配置和构建目标。在本章中，我们将简要概述这些概念，重点介绍基础知识，因为在大多数情况下它们不是必需的。我们主要关注生成器表达式的主要应用，即从生成的目标配置和构建环境的状态中获取信息。欲了解完整参考资料，最好在线阅读官方CMake手册（请参阅*进一步阅读*部分以获取网址）。
+生成器表达式有很多种，从某种意义上说，它们构成了自己的一种领域特定语言——一种支持条件表达式、逻辑运算、比较、转换、查询和排序的语言。使用生成器表达式可以操作和查询字符串、列表、版本号、shell 路径、配置和构建目标。在本章中，我们将简要概述这些概念，重点介绍基础知识，因为在大多数情况下它们不是必需的。我们主要关注生成器表达式的主要应用，即从生成的目标配置和构建环境的状态中获取信息。欲了解完整参考资料，最好在线阅读官方 CMake 手册（请参阅*进一步阅读*部分以获取网址）。
 
 一切通过示例解释更为清晰，因此我们直接进入，描述生成器表达式的语法。
 
 # 学习常规表达式语法的基本规则
 
-要使用生成器表达式，我们需要通过支持生成器表达式评估的命令将其添加到CMake列表文件中。大多数特定目标的命令都支持生成器表达式评估，还有许多其他命令（可以查看特定命令的官方文档了解更多）。一个常与生成器表达式一起使用的命令是`target_compile_definitions()`。要使用生成器表达式，我们需要将其作为命令参数提供，如下所示：
+要使用生成器表达式，我们需要通过支持生成器表达式评估的命令将其添加到 CMake 列表文件中。大多数特定目标的命令都支持生成器表达式评估，还有许多其他命令（可以查看特定命令的官方文档了解更多）。一个常与生成器表达式一起使用的命令是`target_compile_definitions()`。要使用生成器表达式，我们需要将其作为命令参数提供，如下所示：
 
 ```cpp
 target_compile_definitions(foo PUBLIC BAR=$<TARGET_FILE:baz>) 
@@ -63,9 +61,9 @@ target_compile_definitions(foo PUBLIC BAR=$<TARGET_FILE:baz>)
 
 ![](img/B19844_06_01.png)
 
-图6.1：生成器表达式的语法
+图 6.1：生成器表达式的语法
 
-如*图6.1*所示，结构看起来相当简单且易于阅读：
+如*图 6.1*所示，结构看起来相当简单且易于阅读：
 
 +   以美元符号和括号（`$<`）打开。
 
@@ -146,13 +144,13 @@ $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClan
 
 +   `$<NOT:arg>`：这个表达式用于否定布尔参数。
 
-+   `$<AND:arg1,arg2,arg3...>`：如果所有参数都为真，则返回true。
++   `$<AND:arg1,arg2,arg3...>`：如果所有参数都为真，则返回 true。
 
-+   `$<OR:arg1,arg2,arg3...>`：如果任意一个参数为真，则返回true。
++   `$<OR:arg1,arg2,arg3...>`：如果任意一个参数为真，则返回 true。
 
 +   `$<BOOL:string_arg>`：此操作将字符串类型的参数转换为布尔类型。
 
-使用`$<BOOL>`进行字符串转换时，如果未满足以下条件，则会计算为布尔值true（`1`）：
+使用`$<BOOL>`进行字符串转换时，如果未满足以下条件，则会计算为布尔值 true（`1`）：
 
 +   字符串为空。
 
@@ -172,7 +170,7 @@ $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClan
 
 +   `$<VERSION_EQUAL:v1,v2>`、`$<VERSION_LESS:v1,v2>`、`$<VERSION_GREATER:v1,v2>`、`$<VERSION_LESS_EQUAL:v1,v2>`和`$<VERSION_GREATER_EQUAL:v1,v2>`按组件逐一比较版本。
 
-+   `$<PATH_EQUAL:path1,path2>`：此操作比较两个路径的词法表示，而不进行任何规范化（自CMake 3.24起）。
++   `$<PATH_EQUAL:path1,path2>`：此操作比较两个路径的词法表示，而不进行任何规范化（自 CMake 3.24 起）。
 
 ### 查询
 
@@ -182,7 +180,7 @@ $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClan
 $<TARGET_EXISTS:arg> 
 ```
 
-如你所料，如果目标在配置阶段已定义，则返回true。
+如你所料，如果目标在配置阶段已定义，则返回 true。
 
 现在，你已经知道如何应用条件展开、使用逻辑运算符、比较以及基本查询来计算布尔值。单单这些就很有用，但生成器表达式能提供更多，特别是在查询的上下文中：它们可以在`IF`条件展开中使用，或者单独作为命令的参数使用。是时候在适当的上下文中介绍它们了。
 
@@ -196,9 +194,9 @@ $<TARGET_EXISTS:arg>
 
 +   `$<LOWER_CASE:string>`、`$<UPPER_CASE:string>`：此操作将`string`转换为所需的大小写。
 
-列表操作直到最近才得到了很大的扩展。从CMake 3.15开始，以下操作可用：
+列表操作直到最近才得到了很大的扩展。从 CMake 3.15 开始，以下操作可用：
 
-+   `$<IN_LIST:string,list>`：如果`list`中包含`string`值，则返回true。
++   `$<IN_LIST:string,list>`：如果`list`中包含`string`值，则返回 true。
 
 +   `$<JOIN:list,d>`：此表达式使用`d`分隔符连接一个以分号分隔的`list`。
 
@@ -206,7 +204,7 @@ $<TARGET_EXISTS:arg>
 
 +   `$<FILTER:list,INCLUDE|EXCLUDE,regex>`：此操作使用`regex`包含或排除`list`中的项。
 
-从3.27版本开始，添加了`$<LIST:OPERATION>`生成器表达式，其中`OPERATION`可以是以下之一：
+从 3.27 版本开始，添加了`$<LIST:OPERATION>`生成器表达式，其中`OPERATION`可以是以下之一：
 
 +   `LENGTH`
 
@@ -244,7 +242,7 @@ $<TARGET_EXISTS:arg>
 
 在生成器表达式中处理列表的情况比较少见，因此我们仅指示可能的情况。如果你遇到这些情况，请查看在线手册，了解如何使用这些操作。
 
-最后，我们可以查询和变换系统路径。这是一个有用的补充，因为它在不同操作系统之间具有可移植性。自CMake 3.24起，以下简单查询已经可以使用：
+最后，我们可以查询和变换系统路径。这是一个有用的补充，因为它在不同操作系统之间具有可移植性。自 CMake 3.24 起，以下简单查询已经可以使用：
 
 +   `$<PATH:HAS_ROOT_NAME,path>`
 
@@ -266,9 +264,9 @@ $<TARGET_EXISTS:arg>
 
 +   `$<PATH:IS_RELATIVE,path>`
 
-+   `$<PATH:IS_PREFIX[,NORMALIZE],prefix,path>`：如果前缀是路径的前缀，则返回true。
++   `$<PATH:IS_PREFIX[,NORMALIZE],prefix,path>`：如果前缀是路径的前缀，则返回 true。
 
-类似地，我们可以检索我们能够检查的所有路径组件（自CMake 3.27起，可以提供路径列表，而不仅仅是一个路径）：
+类似地，我们可以检索我们能够检查的所有路径组件（自 CMake 3.27 起，可以提供路径列表，而不仅仅是一个路径）：
 
 +   `$<PATH:GET_ROOT_NAME,path...>`
 
@@ -286,7 +284,7 @@ $<TARGET_EXISTS:arg>
 
 +   `$<PATH:GET_PARENT_PATH,path...>`
 
-此外，3.24版本引入了一些变换操作；我们将列出它们以供完整性参考：
+此外，3.24 版本引入了一些变换操作；我们将列出它们以供完整性参考：
 
 +   `$<PATH:CMAKE_PATH[,NORMALIZE],path...>`
 
@@ -306,23 +304,23 @@ $<TARGET_EXISTS:arg>
 
 +   `$<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>`
 
-还有一个路径操作，它将提供的路径格式化为主机的shell支持的样式：`$<SHELL_PATH:path...>`。
+还有一个路径操作，它将提供的路径格式化为主机的 shell 支持的样式：`$<SHELL_PATH:path...>`。
 
 再次说明，之前介绍的表达式是为了以后参考，并不是现在就需要记住的信息。推荐的实际应用知识详细信息在随后的章节中。
 
 ## 参数化构建配置和平台
 
-CMake用户在构建项目时提供的关键信息之一是所需的构建配置。在大多数情况下，它将是`Debug`或`Release`。我们可以使用生成器表达式通过以下语句访问这些值：
+CMake 用户在构建项目时提供的关键信息之一是所需的构建配置。在大多数情况下，它将是`Debug`或`Release`。我们可以使用生成器表达式通过以下语句访问这些值：
 
 +   `$<CONFIG>`：此表达式返回当前构建配置的字符串：`Debug`、`Release`或其他。
 
-+   `$<CONFIG:configs>`：如果`configs`包含当前构建配置（不区分大小写比较），则返回true。
++   `$<CONFIG:configs>`：如果`configs`包含当前构建配置（不区分大小写比较），则返回 true。
 
-我们在*第4章*，*设置你的第一个CMake项目*中的*理解构建环境*部分讨论了平台。我们可以像读取配置一样阅读相关信息：
+我们在*第四章*，*设置你的第一个 CMake 项目*中的*理解构建环境*部分讨论了平台。我们可以像读取配置一样阅读相关信息：
 
-+   `$<PLATFORM_ID>`：这将返回当前平台ID的字符串形式：`Linux`、`Windows`或`Darwin`（针对macOS）。
++   `$<PLATFORM_ID>`：这将返回当前平台 ID 的字符串形式：`Linux`、`Windows`或`Darwin`（针对 macOS）。
 
-+   `$<PLATFORM_ID:platform>` 如果`platform`包含当前平台ID，则为真。
++   `$<PLATFORM_ID:platform>` 如果`platform`包含当前平台 ID，则为真。
 
 这种特定于配置或平台的参数化是我们工具箱中的强大补充。我们可以将其与之前讨论的条件展开一起使用：
 
@@ -346,21 +344,21 @@ target_compile_definitions(my_target PRIVATE
 
 生成器表达式在这里通过提供一系列查询来帮助缓解问题，并在可能的情况下改善用户体验。
 
-与构建配置和平台一样，有多个表达式返回关于工具链的信息，无论是字符串还是布尔值。然而，我们需要指定我们感兴趣的语言（将`#LNG`替换为`C`、`CXX`、`CUDA`、`OBJC`、`OBJCXX`、`Fortran`、`HIP`或`ISPC`之一）。对`HIP`的支持在3.21版本中添加。
+与构建配置和平台一样，有多个表达式返回关于工具链的信息，无论是字符串还是布尔值。然而，我们需要指定我们感兴趣的语言（将`#LNG`替换为`C`、`CXX`、`CUDA`、`OBJC`、`OBJCXX`、`Fortran`、`HIP`或`ISPC`之一）。对`HIP`的支持在 3.21 版本中添加。
 
-+   `$<#LNG_COMPILER_ID>`：这将返回所使用的`#LNG`编译器的CMake编译器ID。
++   `$<#LNG_COMPILER_ID>`：这将返回所使用的`#LNG`编译器的 CMake 编译器 ID。
 
-+   `$<#LNG_COMPILER_VERSION>`：这将返回所使用的`#LNG`编译器的CMake编译器版本。
++   `$<#LNG_COMPILER_VERSION>`：这将返回所使用的`#LNG`编译器的 CMake 编译器版本。
 
-要检查C++将使用哪个编译器，我们应该使用`$<CXX_COMPILER_ID>`生成器表达式。返回的值，即CMake的编译器ID，是为每个支持的编译器定义的常量。你可能会遇到诸如`AppleClang`、`ARMCC`、`Clang`、`GNU`、`Intel`和`MSVC`等值。完整列表请参考官方文档（*进一步阅读*部分中的URL）。
+要检查 C++将使用哪个编译器，我们应该使用`$<CXX_COMPILER_ID>`生成器表达式。返回的值，即 CMake 的编译器 ID，是为每个支持的编译器定义的常量。你可能会遇到诸如`AppleClang`、`ARMCC`、`Clang`、`GNU`、`Intel`和`MSVC`等值。完整列表请参考官方文档（*进一步阅读*部分中的 URL）。
 
 类似于上一节，我们还可以在条件表达式中利用工具链信息。有多个查询可以返回`true`，如果任何提供的参数与特定值匹配：
 
-+   `$<#LNG_COMPILER_ID:ids>`：如果`ids`包含CMake的`#LNG`编译器ID，则返回true。
++   `$<#LNG_COMPILER_ID:ids>`：如果`ids`包含 CMake 的`#LNG`编译器 ID，则返回 true。
 
-+   `$<#LNG_COMPILER_VERSION:vers>`：如果`vers`包含CMake的`#LNG`编译器版本，则返回true。
++   `$<#LNG_COMPILER_VERSION:vers>`：如果`vers`包含 CMake 的`#LNG`编译器版本，则返回 true。
 
-+   `$<COMPILE_FEATURES:features>`：如果`features`中列出的所有特性都被此目标的编译器支持，则返回true。
++   `$<COMPILE_FEATURES:features>`：如果`features`中列出的所有特性都被此目标的编译器支持，则返回 true。
 
 在需要目标参数的命令中，如`target_compile_definitions()`，我们可以使用其中一种特定于目标的表达式来获取字符串值：
 
@@ -370,7 +368,7 @@ target_compile_definitions(my_target PRIVATE
 
 评估一个简单的布尔查询：
 
-+   `$<COMPILE_LANGUAGE:langs>`：如果`langs`包含用于编译该目标的语言，则返回true。可以使用此表达式为编译器提供特定语言的标志。例如，为了使用`-fno-exceptions`标志编译目标的C++源文件：
++   `$<COMPILE_LANGUAGE:langs>`：如果`langs`包含用于编译该目标的语言，则返回 true。可以使用此表达式为编译器提供特定语言的标志。例如，为了使用`-fno-exceptions`标志编译目标的 C++源文件：
 
     ```cpp
     target_compile_options(myapp
@@ -378,11 +376,11 @@ target_compile_definitions(my_target PRIVATE
     ) 
     ```
 
-+   `$<LINK_LANGUAGE:langs>` – 它遵循与`COMPILE_LANGUAGE`相同的规则，如果`langs`包含用于该目标链接的语言，则返回true。
++   `$<LINK_LANGUAGE:langs>` – 它遵循与`COMPILE_LANGUAGE`相同的规则，如果`langs`包含用于该目标链接的语言，则返回 true。
 
 或者，查询更复杂的场景：
 
-+   `$<COMPILE_LANG_AND_ID:lang,compiler_ids...>`：如果`lang`语言用于此目标，并且`compiler_ids`列表中的某个编译器将用于此编译，则返回true。这个表达式对于为特定编译器指定编译定义非常有用：
++   `$<COMPILE_LANG_AND_ID:lang,compiler_ids...>`：如果`lang`语言用于此目标，并且`compiler_ids`列表中的某个编译器将用于此编译，则返回 true。这个表达式对于为特定编译器指定编译定义非常有用：
 
     ```cpp
     target_compile_definitions(myapp PRIVATE
@@ -392,17 +390,17 @@ target_compile_definitions(my_target PRIVATE
     ) 
     ```
 
-+   在这个示例中，对于使用`AppleClang`或`Clang`编译的C++源文件（`CXX`），将设置`-DCXX_CLANG`定义。对于使用`Intel`编译器编译的C++源文件，将设置`-DCXX_INTEL`定义标志。最后，对于使用`Clang`编译器编译的C源文件（`C`），将设置`-DC_CLANG`定义。
++   在这个示例中，对于使用`AppleClang`或`Clang`编译的 C++源文件（`CXX`），将设置`-DCXX_CLANG`定义。对于使用`Intel`编译器编译的 C++源文件，将设置`-DCXX_INTEL`定义标志。最后，对于使用`Clang`编译器编译的 C 源文件（`C`），将设置`-DC_CLANG`定义。
 
 +   `$<LINK_LANG_AND_ID:lang,compiler_ids...>`：它的作用类似于`COMPILE_LANG_AND_ID`，但检查的是链接步骤中使用的语言。使用此表达式可以指定特定语言和链接器组合的链接库、链接选项、链接目录和链接依赖项。
 
-这里需要注意的是，一个单独的目标可以由多种语言的源文件组成。例如，可以将C语言的产物与C++链接（但我们应该在`project()`命令中声明这两种语言）。因此，引用特定语言的生成器表达式将用于某些源文件，但不会用于其他源文件。
+这里需要注意的是，一个单独的目标可以由多种语言的源文件组成。例如，可以将 C 语言的产物与 C++链接（但我们应该在`project()`命令中声明这两种语言）。因此，引用特定语言的生成器表达式将用于某些源文件，但不会用于其他源文件。
 
 让我们继续讨论下一个重要类别：与目标相关的生成器表达式。
 
 ## 查询与目标相关的信息
 
-有许多生成器表达式可以查询目标属性并检查与目标相关的信息。请注意，直到CMake 3.19，许多引用另一个目标的目标表达式会自动在它们之间创建依赖关系。但在CMake的最新版本中，这种情况不再发生。
+有许多生成器表达式可以查询目标属性并检查与目标相关的信息。请注意，直到 CMake 3.19，许多引用另一个目标的目标表达式会自动在它们之间创建依赖关系。但在 CMake 的最新版本中，这种情况不再发生。
 
 一些生成器表达式会从被调用的命令中推断目标；最常用的是返回目标属性值的基本查询：
 
@@ -410,9 +408,9 @@ target_compile_definitions(my_target PRIVATE
 $<TARGET_PROPERTY:prop> 
 ```
 
-+   一个较少为人知，但在`target_link_libraries()`命令中非常有用的生成器表达式是`$<LINK_ONLY:deps>`。它允许我们存储`PRIVATE`链接依赖项，这些依赖项不会通过传递的使用要求传播；这些依赖项用于接口库，我们在*第5章*、*与目标的工作*中的*理解传递使用要求*部分已经讨论过。
++   一个较少为人知，但在`target_link_libraries()`命令中非常有用的生成器表达式是`$<LINK_ONLY:deps>`。它允许我们存储`PRIVATE`链接依赖项，这些依赖项不会通过传递的使用要求传播；这些依赖项用于接口库，我们在*第五章*、*与目标的工作*中的*理解传递使用要求*部分已经讨论过。
 
-还有一组与安装和导出相关的表达式，它们通过上下文推断出目标。我们将在*第14章*，*安装与打包*中深入讨论这些表达式，因此现在我们只做一个简短的介绍：
+还有一组与安装和导出相关的表达式，它们通过上下文推断出目标。我们将在*第十四章*，*安装与打包*中深入讨论这些表达式，因此现在我们只做一个简短的介绍：
 
 +   `$<INSTALL_PREFIX>`：当目标通过`install(EXPORT)`导出，或在`INSTALL_NAME_DIR`中评估时，这返回安装前缀；否则，它为空。
 
@@ -454,7 +452,7 @@ $<TARGET_PROPERTY:prop>
 
 +   `TARGET_PDB_FILE`：这查询链接器生成的程序数据库文件（`.pdb`）的路径。
 
-管理库是一个复杂的话题，CMake 提供了许多生成器表达式来帮助解决。我们将在*第8章*，*链接可执行文件和库*中引入它们，直到它们变得相关。
+管理库是一个复杂的话题，CMake 提供了许多生成器表达式来帮助解决。我们将在*第八章*，*链接可执行文件和库*中引入它们，直到它们变得相关。
 
 最后，还有一些特定于 Apple 包的表达式：
 
@@ -515,7 +513,7 @@ target_compile_definitions(myProject PRIVATE
                            $<$<CMAKE_SYSTEM_NAME:LINUX>:LINUX=1>) 
 ```
 
-这样的代码运行良好，但你能放入生成器表达式中的内容是有限的，一旦超过了这个限度，就会变得难以阅读。此外，许多CMake用户推迟学习生成器表达式，导致他们难以跟上发生的事情。幸运的是，完成本章后，我们将不再遇到这些问题。
+这样的代码运行良好，但你能放入生成器表达式中的内容是有限的，一旦超过了这个限度，就会变得难以阅读。此外，许多 CMake 用户推迟学习生成器表达式，导致他们难以跟上发生的事情。幸运的是，完成本章后，我们将不再遇到这些问题。
 
 ## 带有特定编译器标志的接口库
 
@@ -536,7 +534,7 @@ target_compile_options(enable_rtti INTERFACE
 
 +   如果`OR`的值被评估为`1`，则将`-rtti`添加到`enable_rtti` **编译选项**中。否则，什么也不做。
 
-接下来，我们可以将我们的库和可执行文件与`enable_rtti`接口库进行链接。如果编译器支持，它会添加`-rtti`标志。顺便提一下，**RTTI**代表**运行时类型信息**，在C++中使用`typeid`等关键字来确定对象的类；除非你的代码使用了这个功能，否则不需要启用该标志。
+接下来，我们可以将我们的库和可执行文件与`enable_rtti`接口库进行链接。如果编译器支持，它会添加`-rtti`标志。顺便提一下，**RTTI**代表**运行时类型信息**，在 C++中使用`typeid`等关键字来确定对象的类；除非你的代码使用了这个功能，否则不需要启用该标志。
 
 ## 嵌套的生成器表达式
 
@@ -558,7 +556,7 @@ file(GENERATE OUTPUT nesting CONTENT "
 ") 
 ```
 
-按照本章*技术要求*部分的描述构建此项目后，我们可以使用Unix `cat`命令读取生成的`nesting`文件：
+按照本章*技术要求*部分的描述构建此项目后，我们可以使用 Unix `cat`命令读取生成的`nesting`文件：
 
 ```cpp
 # cat nesting
@@ -583,7 +581,7 @@ file(GENERATE OUTPUT nesting CONTENT "
 
 换句话说，要意识到变量的内容可能会影响生成器表达式扩展的行为。如果需要在变量中使用尖括号，请使用`$<ANGLE-R>`。
 
-## 条件表达式与BOOL操作符评估之间的区别
+## 条件表达式与 BOOL 操作符评估之间的区别
 
 在评估布尔类型为字符串时，生成器表达式可能有些令人困惑。理解它们与常规条件表达式的不同之处是很重要的，从显式的`IF`关键字开始：
 
@@ -640,11 +638,11 @@ file(GENERATE OUTPUT boolean CONTENT "
 
 有关本章所涵盖主题的更多信息，您可以参考以下内容：
 
-+   官方文档中的生成器表达式：[https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)
++   官方文档中的生成器表达式：[`cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)
 
-+   支持的编译器ID：[https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html](https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html)
++   支持的编译器 ID：[`cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html`](https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html)
 
-+   在CMake中混合语言：[https://stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake](https://stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake)
++   在 CMake 中混合语言：[`stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake`](https://stackoverflow.com/questions/8096887/mixing-c-and-c-with-cmake)
 
 # 留下评论！
 

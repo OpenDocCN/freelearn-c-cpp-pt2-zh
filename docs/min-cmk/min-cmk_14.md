@@ -1,44 +1,42 @@
-# 11
+# 第十一章：支持工具和后续步骤
 
-# 支持工具和后续步骤
+本章将介绍一些与 CMake 核心生态系统相辅相成的出色工具，帮助使 CMake 开发更加容易、快速和愉快。许多出色的项目扩展和增强了 CMake，了解这些工具可以显著改善你的开发体验。我们还将介绍一些其他流行的**集成开发环境**（**IDE**），并了解如何让它们与 CMake 兼容。
 
-本章将介绍一些与CMake核心生态系统相辅相成的出色工具，帮助使CMake开发更加容易、快速和愉快。许多出色的项目扩展和增强了CMake，了解这些工具可以显著改善你的开发体验。我们还将介绍一些其他流行的**集成开发环境**（**IDE**），并了解如何让它们与CMake兼容。
-
-除此之外，我们还将介绍一些关于开发C/C++应用程序的推荐实践，以及CMake如何帮助实现这些目标，最后还会提供一些关于如何组织CMake脚本的建议。最后，我们将展望未来，介绍一些本书未能涵盖的CMake话题，并告诉你可以在哪里深入学习这些内容。
+除此之外，我们还将介绍一些关于开发 C/C++应用程序的推荐实践，以及 CMake 如何帮助实现这些目标，最后还会提供一些关于如何组织 CMake 脚本的建议。最后，我们将展望未来，介绍一些本书未能涵盖的 CMake 话题，并告诉你可以在哪里深入学习这些内容。
 
 本章将覆盖以下主要内容：
 
-+   Visual Studio Code的CMake工具
++   Visual Studio Code 的 CMake 工具
 
-+   Visual Studio Code附加功能
++   Visual Studio Code 附加功能
 
-+   CMake与其他IDE的配合
++   CMake 与其他 IDE 的配合
 
 +   C/C++构建建议
 
-+   CMake脚本结构
++   CMake 脚本结构
 
 +   未来的主题
 
 # 技术要求
 
-要跟随本书的内容，请确保你已经满足[*第1章*](B21152_01.xhtml#_idTextAnchor019)《入门》中列出的要求。包括以下内容：
+要跟随本书的内容，请确保你已经满足*第一章*《入门》中列出的要求。包括以下内容：
 
-+   一台运行最新**操作系统**（**OS**）的Windows、Mac或Linux机器
++   一台运行最新**操作系统**（**OS**）的 Windows、Mac 或 Linux 机器
 
-+   一款可用的C/C++编译器（如果你尚未安装，建议使用平台的系统默认编译器）
++   一款可用的 C/C++编译器（如果你尚未安装，建议使用平台的系统默认编译器）
 
 本章中的代码示例可以通过以下链接找到：https://github.com/PacktPublishing/Minimal-CMake。
 
-# Visual Studio Code的CMake工具
+# Visual Studio Code 的 CMake 工具
 
-在本书开头，我们推荐使用**Visual Studio Code**作为首选编辑器，以确保无论你是在Windows、macOS还是Linux上开发，都能获得一致的体验。这完全是可选的，但使用CMake与Visual Studio Code结合起来有很多优点。在本节中，我们将讨论如何最好地使用本书中的示例，并展示如何在Visual Studio Code中配置、构建和调试项目。
+在本书开头，我们推荐使用**Visual Studio Code**作为首选编辑器，以确保无论你是在 Windows、macOS 还是 Linux 上开发，都能获得一致的体验。这完全是可选的，但使用 CMake 与 Visual Studio Code 结合起来有很多优点。在本节中，我们将讨论如何最好地使用本书中的示例，并展示如何在 Visual Studio Code 中配置、构建和调试项目。
 
-如果你按照[*第1章*](B21152_01.xhtml#_idTextAnchor019)《入门》中的*Visual Studio Code设置*部分进行操作，你将已经通过**C/C++扩展包**安装了**CMake Tools**。
+如果你按照*第一章*《入门》中的*Visual Studio Code 设置*部分进行操作，你将已经通过**C/C++扩展包**安装了**CMake Tools**。
 
-## 导航Minimal CMake源代码
+## 导航 Minimal CMake 源代码
 
-为了能够在*Minimal CMake*源代码中进行导航，建议从仓库的根目录打开一个Visual Studio Code项目。这可以通过克隆仓库，然后从该目录打开Visual Studio Code来实现：
+为了能够在*Minimal CMake*源代码中进行导航，建议从仓库的根目录打开一个 Visual Studio Code 项目。这可以通过克隆仓库，然后从该目录打开 Visual Studio Code 来实现：
 
 ```cpp
 cd <your-dev-folder>
@@ -46,11 +44,11 @@ git clone https://github.com/PacktPublishing/Minimal-CMake.git mc
 code mc
 ```
 
-你也可以切换到`mc`文件夹（`cd mc`），然后运行`code .`从该目录打开Visual Studio Code。
+你也可以切换到`mc`文件夹（`cd mc`），然后运行`code .`从该目录打开 Visual Studio Code。
 
 这对于浏览示例以及比较各部分之间的差异和更新非常有用，但遗憾的是，它不适合构建和运行各个示例。为了获得更具代表性的使用 CMake Tools 在 Visual Studio Code 中配置、构建和调试示例的体验，最好为每个包含根级 `CMakeLists.txt` 文件的目录打开一个新的 Visual Studio Code 实例。例如，在某些后续示例的情况下，你可以在终端中切换到 `ch10/part-5/app` 目录，然后从该文件夹输入 `code .` （或者如果你在仓库根目录，可以直接输入 `code ch10/part-5/app`）；这就是你通常与 CMake 项目合作的方式。随附的源代码由多个随着时间演变的嵌套项目组成；每个 `ch<n>/part-<n>` 的 `README.md` 文件列出了要打开的根文件夹作为参考。
 
-除了之前描述的工作流外，Visual Studio Code 还支持多根工作区（有关更多信息，请参见 [https://code.visualstudio.com/docs/editor/multi-root-workspaces](https://code.visualstudio.com/docs/editor/multi-root-workspaces)）。要激活多根工作区，你可以通过命令面板使用 **工作区：添加文件夹到工作区…** 选项，或者导航到 **文件** 菜单并选择 **添加文件夹到工作区...**。
+除了之前描述的工作流外，Visual Studio Code 还支持多根工作区（有关更多信息，请参见 [`code.visualstudio.com/docs/editor/multi-root-workspaces`](https://code.visualstudio.com/docs/editor/multi-root-workspaces)）。要激活多根工作区，你可以通过命令面板使用 **工作区：添加文件夹到工作区…** 选项，或者导航到 **文件** 菜单并选择 **添加文件夹到工作区...**。
 
 ![图 11.1：添加文件夹到工作区… 选项](img/B21152_11_1.jpg)
 
@@ -200,13 +198,13 @@ Visual Studio Code 在配置和构建阶段的处理方式与 CMake 从命令行
 
 ![图 11.7: CMake Tools 中列出的包预设](img/B21152_11_8.jpg)
 
-图11.7：CMake Tools 中列出的包预设
+图 11.7：CMake Tools 中列出的包预设
 
 点击铅笔图标，你将可以选择一个可用的预设：
 
-![图11.8：从命令面板选择包预设](img/B21152_11_9.jpg)
+![图 11.8：从命令面板选择包预设](img/B21152_11_9.jpg)
 
-图11.8：从命令面板选择包预设
+图 11.8：从命令面板选择包预设
 
 这是一个小小的不便，希望在未来版本的 CMake Tools 中修复。有关我们项目的示例，已做了小调整以使其完全兼容 CMake Tools，请参见`ch11/part-1/app`。
 
@@ -214,15 +212,15 @@ Visual Studio Code 在配置和构建阶段的处理方式与 CMake 从命令行
 
 另一个值得简要提及的优秀功能是支持调试`CMakeLists.txt`文件。大多数情况下，`CMakeLists.txt`文件应该足够简单和声明性，不需要调试，但无疑会有一些情况，通过逐步执行代码来查看发生了什么非常有用。打开包含`CMakeLists.txt`文件的目录中的 Visual Studio Code 后，打开命令面板（*F1* 或 *Cmd* + *Shift* + *P* 在 macOS 上，*Ctrl* + *Shift* + *P* 在 Windows/Linux 上），搜索`CMake Debugger`；这将显示**CMake：使用 CMake 调试器配置**选项。在此之前，如果你添加了一些断点（要添加断点，点击 Visual Studio Code 文本编辑器的左侧边距，位于行号左侧，或位于侧边栏的右侧），执行将在此停止，你可以使用**变量**和**观察**窗口更好地了解脚本处理时的状态。
 
-*图11.9* 显示了你可以期待的一个例子。在其中，我们在一个 `APPLE` 检查的断点处停止。我们可以看到已经添加的几个观察变量的值，**局部**部分包含所有相关的缓存变量、局部变量、目录和目标。
+*图 11.9* 显示了你可以期待的一个例子。在其中，我们在一个 `APPLE` 检查的断点处停止。我们可以看到已经添加的几个观察变量的值，**局部**部分包含所有相关的缓存变量、局部变量、目录和目标。
 
-![图11.9：Visual Studio Code CMake 调试器](img/B21152_11_10.jpg)
+![图 11.9：Visual Studio Code CMake 调试器](img/B21152_11_10.jpg)
 
-图11.9：Visual Studio Code CMake 调试器
+图 11.9：Visual Studio Code CMake 调试器
 
 请注意，调试我们的主`CMakeLists.txt`文件在超级构建中并不完全有效，因为对`ExternalProject_Add`命令的调用无法直接处理我们的文件。为了解决这个问题，只需创建另一个常规构建（使用常规 CMake 预设之一，如`multi-ninja`），然后使用该构建进行调试。
 
-你可以通过访问[https://github.com/microsoft/vscode-cmake-tools](https://github.com/microsoft/vscode-cmake-tools)并浏览文档来了解更多关于 CMake Tools 的信息。还可以通过访问[https://code.visualstudio.com/docs/cpp/cmake-linux](https://code.visualstudio.com/docs/cpp/cmake-linux)来获取另一个关于如何设置 CMake 和 Visual Studio Code 的视角。
+你可以通过访问[`github.com/microsoft/vscode-cmake-tools`](https://github.com/microsoft/vscode-cmake-tools)并浏览文档来了解更多关于 CMake Tools 的信息。还可以通过访问[`code.visualstudio.com/docs/cpp/cmake-linux`](https://code.visualstudio.com/docs/cpp/cmake-linux)来获取另一个关于如何设置 CMake 和 Visual Studio Code 的视角。
 
 # Visual Studio Code 附加功能
 
@@ -230,7 +228,7 @@ Visual Studio Code 在配置和构建阶段的处理方式与 CMake 从命令行
 
 ## 语法高亮
 
-第一个是一个有用的扩展，它提供了 `CMakeLists.txt` 和 `.cmake` 文件的语法高亮。该扩展名为 `twxs.cmake`。你可以从 [https://marketplace.visualstudio.com/items?itemName=twxs.cmake](https://marketplace.visualstudio.com/items?itemName=twxs.cmake) 下载，或者从 Visual Studio Code 的侧边栏扩展管理器中下载。它不仅提供语法高亮，还提供有用的代码片段和自动补全功能。
+第一个是一个有用的扩展，它提供了 `CMakeLists.txt` 和 `.cmake` 文件的语法高亮。该扩展名为 `twxs.cmake`。你可以从 [`marketplace.visualstudio.com/items?itemName=twxs.cmake`](https://marketplace.visualstudio.com/items?itemName=twxs.cmake) 下载，或者从 Visual Studio Code 的侧边栏扩展管理器中下载。它不仅提供语法高亮，还提供有用的代码片段和自动补全功能。
 
 ## 生成 compile_commands.json
 
@@ -264,8 +262,8 @@ cmake -B build -G Ninja compile_commands.json, is a compilation database, which 
 
 			When using CMake Tools, this shouldn’t be strictly necessary, as the IntelliSense support from the `"ms-vscode.cmake-tools"` provider should work out of the box. However, knowing how to generate a `compile_commands.json` file is useful, as well as how to set it in Visual Studio Code to get improved suggestions/completions and navigation support.
 			Code auto-formatting
-			To make formatting your `CMakeLists.txt` files much easier, there is an application to automatically format your CMake files available called `cmake-format` (the repository is hosted on GitHub and can be found here: [https://github.com/cheshirekow/cmake_format](https://github.com/cheshirekow/cmake_format)).
-			It comes bundled as part of a Python package called `cmakelang`. To install it, first, ensure you have a recent version of Python installed on your system (to download the latest version of Python, please see [https://www.python.org/downloads/](https://www.python.org/downloads/)). On Linux/Ubuntu, you may wish to use a package manager to do this; it may also be necessary to run `sudo apt install python3-pip` before trying to install `cmake-format`.
+			To make formatting your `CMakeLists.txt` files much easier, there is an application to automatically format your CMake files available called `cmake-format` (the repository is hosted on GitHub and can be found here: [`github.com/cheshirekow/cmake_format`](https://github.com/cheshirekow/cmake_format)).
+			It comes bundled as part of a Python package called `cmakelang`. To install it, first, ensure you have a recent version of Python installed on your system (to download the latest version of Python, please see [`www.python.org/downloads/`](https://www.python.org/downloads/)). On Linux/Ubuntu, you may wish to use a package manager to do this; it may also be necessary to run `sudo apt install python3-pip` before trying to install `cmake-format`.
 			Once Python and Pip (Python’s package manager) are downloaded and available in your path, you can run the following commands:
 
 ```
@@ -292,7 +290,7 @@ cmake-format CMakeLists.txt -i
 
 ```cpp
 
-			To take advantage of `cmake-format` inside of Visual Studio Code, you need to install the `cmake-format` Visual Studio Code extension. This can be installed either through Visual Studio Marketplace ([https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format](https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format)) or through the integrated Visual Studio Code extension manager. Once `cmake-format` is installed, running the `cmake-format` will process the open file. Unfortunately, at the time of writing, this does not seem to work reliably on Linux but should work on macOS and Windows.
+			To take advantage of `cmake-format` inside of Visual Studio Code, you need to install the `cmake-format` Visual Studio Code extension. This can be installed either through Visual Studio Marketplace ([`marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format`](https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format)) or through the integrated Visual Studio Code extension manager. Once `cmake-format` is installed, running the `cmake-format` will process the open file. Unfortunately, at the time of writing, this does not seem to work reliably on Linux but should work on macOS and Windows.
 			There are several configuration options to control how the formatting looks; these are added to a file called `.cmake-format.yaml` that lives at the root of the project. (`cmake-format` will search up the folder structure until it finds a `.cmake-format.yaml` file. In the case of *Minimal CMake*, there’s just one file at the root of the repo used to format all examples.) The contents of the *Minimal CMake* `.cmake-format.yml` file are as follows:
 
 ```
@@ -315,7 +313,7 @@ line_ending: 'auto'
 
 ```cpp
 
-			Feel free to experiment with different settings to find a style that works for you. To learn more about `cmake-format`, see the documentation available at [https://cmake-format.readthedocs.io/en/latest/index.html](https://cmake-format.readthedocs.io/en/latest/index.html). Regrettably, `cmake-format` is no longer under active maintenance, so it’s possible that if issues are discovered, fixes may not be forthcoming, and it may not be updated to handle newer versions of CMake. Even with that being the case, it’s still an incredibly useful tool, and infinitely superior to formatting things manually. There is also an alternative tool called `gersemi` ([https://github.com/BlankSpruce/gersemi](https://github.com/BlankSpruce/gersemi)), which also formats CMake code and is under active development; it may be worth exploring in the future.
+			Feel free to experiment with different settings to find a style that works for you. To learn more about `cmake-format`, see the documentation available at [`cmake-format.readthedocs.io/en/latest/index.html`](https://cmake-format.readthedocs.io/en/latest/index.html). Regrettably, `cmake-format` is no longer under active maintenance, so it’s possible that if issues are discovered, fixes may not be forthcoming, and it may not be updated to handle newer versions of CMake. Even with that being the case, it’s still an incredibly useful tool, and infinitely superior to formatting things manually. There is also an alternative tool called `gersemi` ([`github.com/BlankSpruce/gersemi`](https://github.com/BlankSpruce/gersemi)), which also formats CMake code and is under active development; it may be worth exploring in the future.
 			Diff Folders
 			One last tool worth briefly mentioning is an extension called `build`, `build-third-party`, `install`, `package`, and `.vscode` folders to the Diff Folders exclude list (`l13Diff.exclude` in `settings.json`). The diff panel allows you to clearly view changes between multiple files at once.
 			![Figure 11.10: Diff panel display in Diff Folders](img/B21152_11_11.jpg)
@@ -325,8 +323,8 @@ line_ending: 'auto'
 			CMake with other IDEs
 			Throughout this book, we’ve focused exclusively on Visual Studio Code, primarily because it provides a consistent experience across Windows, macOS, and Linux. It is sometimes necessary and useful to use an editor or IDE for a specific platform and knowing how to configure it to play nicely with CMake can be helpful. We’ll briefly cover a few useful settings for Visual Studio, Xcode, and CLion.
 			Visual Studio
-			If developing on Windows, using the fully-fledged Visual Studio development environment can be especially useful at times. *Visual Studio Community Edition* is completely free and comes with a host of useful features when developing in C++ (see [*Chapter 1*](B21152_01.xhtml#_idTextAnchor019), *Getting Started*, for instructions on how to install it).
-			When trying to run projects from within Visual Studio (especially examples from earlier parts of this book), things unfortunately might not work as expected. The reason for this is, by default, the working directory Visual Studio uses is the folder of the executable, not the project root that we relied on up until [*Chapter 10*](B21152_10.xhtml#_idTextAnchor214), *Packaging the Project for Sharing* (this is because we’d normally launch our executable from the command line).
+			If developing on Windows, using the fully-fledged Visual Studio development environment can be especially useful at times. *Visual Studio Community Edition* is completely free and comes with a host of useful features when developing in C++ (see *Chapter 1*, *Getting Started*, for instructions on how to install it).
+			When trying to run projects from within Visual Studio (especially examples from earlier parts of this book), things unfortunately might not work as expected. The reason for this is, by default, the working directory Visual Studio uses is the folder of the executable, not the project root that we relied on up until *Chapter 10*, *Packaging the Project for Sharing* (this is because we’d normally launch our executable from the command line).
 			To try things out, configure the project using the Visual Studio generator. This can either be done by using the `vs` preset in later chapters, or by specifying the generator directly:
 
 ```
@@ -375,7 +373,7 @@ PROPERTY VS_ 特定项。
 
             记得选择与我们为第三方依赖项构建的配置相匹配的配置，如果你使用本书后面的示例。若你在 `Debug` 模式下构建依赖项，然后尝试在 `Release` 模式下构建应用程序（或反之），可能会遇到链接器错误。
 
-            一旦所有构建完成，并且你可以运行可执行文件，在从 [*第 2 章*](B21152_02.xhtml#_idTextAnchor032) 到 [*第 9 章*](B21152_09.xhtml#_idTextAnchor195) 的所有示例中，你将看到以下错误信息：
+            一旦所有构建完成，并且你可以运行可执行文件，在从 *第二章* 到 *第九章* 的所有示例中，你将看到以下错误信息：
 
 ```cpp
 Shaders not found. Have you built them using compile-shader-<platform>.sh/bat script?
@@ -383,17 +381,17 @@ Shaders not found. Have you built them using compile-shader-<platform>.sh/bat sc
 
             这是因为应用程序正在 `build/vs/<config>` 文件夹中寻找资源（着色器）文件，而不是项目的根文件夹，通常我们会从终端在其中运行程序。
 
-            我们在 [*第 10 章*](B21152_10.xhtml#_idTextAnchor214)中看到了解决这一问题的一种方式，*为共享项目打包*，但是如果我们还没有达到那个阶段，一个有用的解决方法是提供一个名为 `CMAKE_VS_DEBUGGER_WORKING_DIRECTORY` 的 CMake 缓存变量，用于设置 Visual Studio 中工作目录的位置。这可以通过为整个项目设置 `CMAKE_VS_DEBUGGER_WORKING_DIRECTORY`，或者为特定目标在 `CMakeLists.txt` 文件中添加以下命令来实现：
+            我们在 *第十章*中看到了解决这一问题的一种方式，*为共享项目打包*，但是如果我们还没有达到那个阶段，一个有用的解决方法是提供一个名为 `CMAKE_VS_DEBUGGER_WORKING_DIRECTORY` 的 CMake 缓存变量，用于设置 Visual Studio 中工作目录的位置。这可以通过为整个项目设置 `CMAKE_VS_DEBUGGER_WORKING_DIRECTORY`，或者为特定目标在 `CMakeLists.txt` 文件中添加以下命令来实现：
 
 ```cpp
 set_target_properties(
   ${PROJECT_NAME}
   PROPERTIES
     cmake --preset vs), and if it’s open, Visual Studio will show a popup letting us know the solution has been changed and needs to be reloaded.
-			Select **Reload All** and then build and run again from within Visual Studio. The application should now run successfully as it will be looking for the shader files in the location we expect. This isn’t something to use when reaching the stage of making your application sharable; the technique outlined in [*Chapter 10*](B21152_10.xhtml#_idTextAnchor214), *Packaging the Project for Sharing*, is more appropriate, but this can be a useful tool in the initial stages of development.
-			Visual Studio is a great tool and well worth exploring if you’re developing on Windows. The debugging features, profiling tools, and code analysis support are all high quality and provide a lot of utility while developing larger more complex projects. Visual Studio also provides the ability to debug CMake scripts just as Visual Studio Code does (see [https://learn.microsoft.com/en-us/cpp/build/configure-cmake-debugging-sessions](https://learn.microsoft.com/en-us/cpp/build/configure-cmake-debugging-sessions) for more information).
+			Select **Reload All** and then build and run again from within Visual Studio. The application should now run successfully as it will be looking for the shader files in the location we expect. This isn’t something to use when reaching the stage of making your application sharable; the technique outlined in *Chapter 10*, *Packaging the Project for Sharing*, is more appropriate, but this can be a useful tool in the initial stages of development.
+			Visual Studio is a great tool and well worth exploring if you’re developing on Windows. The debugging features, profiling tools, and code analysis support are all high quality and provide a lot of utility while developing larger more complex projects. Visual Studio also provides the ability to debug CMake scripts just as Visual Studio Code does (see [`learn.microsoft.com/en-us/cpp/build/configure-cmake-debugging-sessions`](https://learn.microsoft.com/en-us/cpp/build/configure-cmake-debugging-sessions) for more information).
 			Xcode
-			`Info.plist` file, which were discussed in [*Chapter 10*](B21152_10.xhtml#_idTextAnchor214), *Packaging the Project* *for Sharing*.
+			`Info.plist` file, which were discussed in *Chapter 10*, *Packaging the Project* *for Sharing*.
 			To generate a project for Xcode, either use the existing CMake preset we defined or name the generator manually (Xcode will need to be installed before trying this):
 
 ```
@@ -424,8 +422,8 @@ XCODE_SCHEME_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 			![Figure 11.15: Custom working directory in Xcode](img/B21152_11_16.jpg)
 
 			Figure 11.15: Custom working directory in Xcode
-			There are a lot more `XCODE_SCHEME_` variables that can also be set to configure a scheme outside of Xcode; for a full list, please see [https://cmake.org/cmake/help/latest/prop_tgt/XCODE_GENERATE_SCHEME.html](https://cmake.org/cmake/help/latest/prop_tgt/XCODE_GENERATE_SCHEME.html). To view other `Info.plist` options that can be configured, click the top-level project in the left-hand sidebar and click the **Build Settings** tab from the top bar. Either scroll down or use the filter to search for the **Info.plist** **Values** section.
-			Xcode is necessary when it comes to publishing your app on macOS or iOS. The code signing functionality must be used for this; see [https://developer.apple.com/documentation/xcode/distribution](https://developer.apple.com/documentation/xcode/distribution) for more information on this topic. Xcode also comes bundled with an application called **Instruments**, which includes a suite of tools to perform memory tracking, profiling, and more.
+			There are a lot more `XCODE_SCHEME_` variables that can also be set to configure a scheme outside of Xcode; for a full list, please see [`cmake.org/cmake/help/latest/prop_tgt/XCODE_GENERATE_SCHEME.html`](https://cmake.org/cmake/help/latest/prop_tgt/XCODE_GENERATE_SCHEME.html). To view other `Info.plist` options that can be configured, click the top-level project in the left-hand sidebar and click the **Build Settings** tab from the top bar. Either scroll down or use the filter to search for the **Info.plist** **Values** section.
+			Xcode is necessary when it comes to publishing your app on macOS or iOS. The code signing functionality must be used for this; see [`developer.apple.com/documentation/xcode/distribution`](https://developer.apple.com/documentation/xcode/distribution) for more information on this topic. Xcode also comes bundled with an application called **Instruments**, which includes a suite of tools to perform memory tracking, profiling, and more.
 			CLion
 			`CMakeLists.txt` file of your project. CLion then stores project-specific settings in a hidden `.idea` folder. Very much like Visual Studio Code, one of the most convenient ways to use CLion with CMake is by using our existing CMake presets. CLion currently only supports CMake presets up to version `6`, so we need to drop our version from `8` to `6` for things to work correctly. With that change applied, it’s possible to load the CMake presets we’ve already defined with all the right settings. CLion doesn’t handle super builds by default so it’s recommended to build a super build configuration separately outside of CLion, and then use a normal preset when working with CLion.
 			IDEs can be a huge productivity boost once they’re configured, but they take time to master and can come with a relatively steep learning curve, along with their own quirks and idiosyncrasies. Knowing how to get by without them is useful but don’t be afraid to try them out and see what they have to offer.
@@ -469,7 +467,7 @@ target_compile_options(
   ${PROJECT_NAME} PRIVATE ${compile_options})
 ```
 
-            在上面的片段中，我们使用 CMake 变量来保存我们希望看到的各种编译标志，然后通过 `target_compile_options` 命令应用它们。你决定启用或禁用的警告将取决于你希望采用的项目和编码实践。从 `cppbestpractices` GitHub 页面（[https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers](https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers)）可以找到一个关于警告及其含义的优秀列表。要查看完整的警告集示例，请参见 `ch11/part-2/app/CMakeLists.txt`。尝试编译项目，看看在 *Minimal CMake* 示例代码中可以检测到多少警告（当然，这些警告的数量是为了演示目的）。
+            在上面的片段中，我们使用 CMake 变量来保存我们希望看到的各种编译标志，然后通过 `target_compile_options` 命令应用它们。你决定启用或禁用的警告将取决于你希望采用的项目和编码实践。从 `cppbestpractices` GitHub 页面（[`github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers`](https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers)）可以找到一个关于警告及其含义的优秀列表。要查看完整的警告集示例，请参见 `ch11/part-2/app/CMakeLists.txt`。尝试编译项目，看看在 *Minimal CMake* 示例代码中可以检测到多少警告（当然，这些警告的数量是为了演示目的）。
 
             Unity 构建
 
@@ -479,7 +477,7 @@ target_compile_options(
 
             确保项目在启用和不启用 Unity 构建的情况下都能正常工作可能是一个挑战，除非定期启用这两种构建方式。Unity 构建的另一个缺点是，在某些情况下，它们的使用可能会减慢迭代时间。这是因为对一个 `.cpp` 文件进行更改时，会触发该文件所在的 Unity 文件中所有其他文件的重新编译（因为该 Unity 文件是作为一个整体进行编译的）。构建时间的变化取决于 Unity 文件的分组方式，但对于小的更改，它可能会导致更长的编译时间。在迭代开发时，最好禁用 Unity 构建，并仅在持续集成构建时启用它们，以减少外部资源的使用。
 
-            通过排除可能无法干净编译的文件，确实可以微调 Unity 构建，但这可能是一个繁琐的过程。尝试为一个已经成熟的项目启用 Unity 构建可能会是一个挑战；因此，如果你认为它们会带来好处，最好在开发早期就启用它们。这也非常重要，要衡量和分析节省的时间（如果有的话），以了解它们带来的影响。要了解更多关于 Unity 构建的信息，请参阅 [https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html)。
+            通过排除可能无法干净编译的文件，确实可以微调 Unity 构建，但这可能是一个繁琐的过程。尝试为一个已经成熟的项目启用 Unity 构建可能会是一个挑战；因此，如果你认为它们会带来好处，最好在开发早期就启用它们。这也非常重要，要衡量和分析节省的时间（如果有的话），以了解它们带来的影响。要了解更多关于 Unity 构建的信息，请参阅 [`cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html`](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html)。
 
             CMake 脚本结构
 
@@ -495,7 +493,7 @@ endif()
 add_subdirectory(packaging)
 ```
 
-            但是，在进行这些更改时，我们需要注意一些细微之处，特别是在`tests`子文件夹的情况下。通过将逻辑从`app/CMakeLists.txt`移动到`app/tests/CMakeLists.txt`，我们之前使用的任何相对路径将不再有效；因此，我们需要处理这些路径（在我们的情况下，我们需要更新`shaders-compiled.cmake`的路径，并显式地使用`CMAKE_SOURCE_DIR`来包含完整路径）。我们还需要记住从顶层的`CMakeLists.txt`文件中调用`enable_testing()`，否则当使用CTest时，子文件夹中的测试将无法被发现。
+            但是，在进行这些更改时，我们需要注意一些细微之处，特别是在`tests`子文件夹的情况下。通过将逻辑从`app/CMakeLists.txt`移动到`app/tests/CMakeLists.txt`，我们之前使用的任何相对路径将不再有效；因此，我们需要处理这些路径（在我们的情况下，我们需要更新`shaders-compiled.cmake`的路径，并显式地使用`CMAKE_SOURCE_DIR`来包含完整路径）。我们还需要记住从顶层的`CMakeLists.txt`文件中调用`enable_testing()`，否则当使用 CTest 时，子文件夹中的测试将无法被发现。
 
             由于我们也在`tests`文件夹中创建了一个可执行目标，默认情况下，它将位于`build`文件夹中的`tests`子文件夹中。这将破坏我们的`RPATH`加载；因此，为了保持简单，我们确保它进入与之前相同的输出目录。我们可以通过在`app/tests/CMakeLists.txt`中使用以下命令来实现这一点：
 
@@ -507,7 +505,7 @@ set_target_properties(
 
             幸运的是，如果我们使用单配置或多配置生成器，`CMAKE_BINARY_DIR`将会正确工作（在多配置生成器的情况下，它将映射到正确的配置文件夹）。要查看完整的上下文，请参阅`ch11/part-3/app`。
 
-            我们可以进一步将安装逻辑移动到一个单独的`CMakeLists.txt`文件中，或者将我们的工具函数提取到新的`.cmake`文件中，并使用`include`将其引入。我们还可以使用在[*第9章*](B21152_09.xhtml#_idTextAnchor195)中讨论的接口目标技术，*为项目编写测试*，创建一个单独的目标，其中包含所有设置的C/C++编译警告标志，然后让我们的应用程序和测试链接到该目标。CMake在脚本结构方面提供了很大的自由度和灵活性，通过时间和经验（并且通过阅读其他`CMakeLists.txt`文件），你将会找到最适合自己的方法。
+            我们可以进一步将安装逻辑移动到一个单独的`CMakeLists.txt`文件中，或者将我们的工具函数提取到新的`.cmake`文件中，并使用`include`将其引入。我们还可以使用在*第九章*中讨论的接口目标技术，*为项目编写测试*，创建一个单独的目标，其中包含所有设置的 C/C++编译警告标志，然后让我们的应用程序和测试链接到该目标。CMake 在脚本结构方面提供了很大的自由度和灵活性，通过时间和经验（并且通过阅读其他`CMakeLists.txt`文件），你将会找到最适合自己的方法。
 
             未来的主题
 
@@ -517,7 +515,7 @@ set_target_properties(
 
             我们没有讨论如何在我们的项目中使用完备的包管理器。值得探索的是开源包管理器 `vcpkg`，它会下载你想使用的库的预构建二进制文件（如果它们适用于你使用的平台/架构的话）（它们也因此使用工具链文件；因此，理解它们的工作原理及其必要性将有所帮助）。
 
-            还有一个有用的工具叫做 `CPM.cmake` ([https://github.com/cpm-cmake/CPM.cmake](https://github.com/cpm-cmake/CPM.cmake))，它是 CMake 的 `FetchContent` 命令的封装器。它提供了一种更简洁的方式来定义依赖项（它们的位置、名称和版本）。例如，使用 Catch2 的代码如下：
+            还有一个有用的工具叫做 `CPM.cmake` ([`github.com/cpm-cmake/CPM.cmake`](https://github.com/cpm-cmake/CPM.cmake))，它是 CMake 的 `FetchContent` 命令的封装器。它提供了一种更简洁的方式来定义依赖项（它们的位置、名称和版本）。例如，使用 Catch2 的代码如下：
 
 ```cpp
 include(cmake/CPM.cmake)
@@ -528,13 +526,13 @@ target_link_libraries(
 
             还有一个问题是关于持续交付和持续集成，用于在每次变更时自动构建，从而尽早发现问题。深入探讨这一点超出了本书的范围，但如果你想看一个简单的示例，展示如何使用 GitHub Actions 构建、测试和打包代码，可以查看 *Minimal* *CMake* 仓库根目录下的 `.github/workflows/cmake.yml` 文件。
 
-            还有更多资源可以帮助你继续学习 CMake。首先可以查看 CMake 官方文档（[https://cmake.org/cmake/help/latest/](https://cmake.org/cmake/help/latest/)）。它不是完美的，但它在不断改进，且在查找特定功能或属性的细节时是一个重要的资源。如果你遇到困难并需要寻求帮助，CMake 论坛社区（[https://discourse.cmake.org/](https://discourse.cmake.org/)）是一个很好的资源，里面有许多 CMake 专家随时准备回答你的问题（通过搜索问题存档也能找到很多有用的信息）。除了 CMake 论坛社区，你还可以访问 C++ Slack 工作区（[https://cpplang.slack.com/](https://cpplang.slack.com/)）获得更多帮助。那里有一个专门的 CMake 频道，很多友好且乐于助人的人拥有丰富的 CMake 知识，可以为你提供帮助。
+            还有更多资源可以帮助你继续学习 CMake。首先可以查看 CMake 官方文档（[`cmake.org/cmake/help/latest/`](https://cmake.org/cmake/help/latest/)）。它不是完美的，但它在不断改进，且在查找特定功能或属性的细节时是一个重要的资源。如果你遇到困难并需要寻求帮助，CMake 论坛社区（[`discourse.cmake.org/`](https://discourse.cmake.org/)）是一个很好的资源，里面有许多 CMake 专家随时准备回答你的问题（通过搜索问题存档也能找到很多有用的信息）。除了 CMake 论坛社区，你还可以访问 C++ Slack 工作区（[`cpplang.slack.com/`](https://cpplang.slack.com/)）获得更多帮助。那里有一个专门的 CMake 频道，很多友好且乐于助人的人拥有丰富的 CMake 知识，可以为你提供帮助。
 
-            另一个你可能会觉得有用的资源是*《掌握 CMake》*，这本书最初由 Ken Martin 和 Bill Hoffman 编写，现在可以在网上免费阅读，网址是[https://cmake.org/cmake/help/book/mastering-cmake/](https://cmake.org/cmake/help/book/mastering-cmake/)。虽然有些过时，但里面有很多有价值的信息。说到书籍，Craig Scott 编写的*《专业 CMake：实用指南》*（[https://crascit.com/professional-cmake/](https://crascit.com/professional-cmake/)）是一本非常详细的 CMake 参考书，几乎涵盖了你需要了解的所有内容。
+            另一个你可能会觉得有用的资源是*《掌握 CMake》*，这本书最初由 Ken Martin 和 Bill Hoffman 编写，现在可以在网上免费阅读，网址是[`cmake.org/cmake/help/book/mastering-cmake/`](https://cmake.org/cmake/help/book/mastering-cmake/)。虽然有些过时，但里面有很多有价值的信息。说到书籍，Craig Scott 编写的*《专业 CMake：实用指南》*（[`crascit.com/professional-cmake/`](https://crascit.com/professional-cmake/)）是一本非常详细的 CMake 参考书，几乎涵盖了你需要了解的所有内容。
 
             如果你喜欢本书并希望了解更多关于 CMake 的内容，Packt 出版的几本关于 CMake 的书值得一看，包括*《现代 CMake for C++：探索更好的构建、测试和打包软件的方法》*，*《CMake 最佳实践：用 CMake 升级你的 C++ 构建，达到最大效率和可扩展性》*，以及*《CMake 烹饪书：使用现代 CMake 构建、测试和打包模块化软件》*。
 
-            最后，为了查看更多实际案例，GitHub 上有一些有用的资源库，提供了设置 CMake 项目的建议和经过验证的方法。这些包括来自`cppbestpractices`的`cmake_template`（参见[https://github.com/cpp-best-practices/cmake_template](https://github.com/cpp-best-practices/cmake_template)）以及本书作者的[https://github.com/pr0g/cmake-examples](https://github.com/pr0g/cmake-examples)（这就是整个项目的起源）。此外，`awesome-cmake` GitHub 仓库上列出了大量链接和资源，涵盖了库、书籍和文章（[https://github.com/onqtam/awesome-cmake](https://github.com/onqtam/awesome-cmake)）。
+            最后，为了查看更多实际案例，GitHub 上有一些有用的资源库，提供了设置 CMake 项目的建议和经过验证的方法。这些包括来自`cppbestpractices`的`cmake_template`（参见[`github.com/cpp-best-practices/cmake_template`](https://github.com/cpp-best-practices/cmake_template)）以及本书作者的[`github.com/pr0g/cmake-examples`](https://github.com/pr0g/cmake-examples)（这就是整个项目的起源）。此外，`awesome-cmake` GitHub 仓库上列出了大量链接和资源，涵盖了库、书籍和文章（[`github.com/onqtam/awesome-cmake`](https://github.com/onqtam/awesome-cmake)）。
 
             摘要
 

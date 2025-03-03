@@ -1,40 +1,38 @@
-# 5
+# 第五章：精简 CMake 配置
 
-# 精简CMake配置
-
-在本章中，我们将从项目中退一步，解决一些使用CMake时的日常痛点。我们将重点讨论如何消除使用CMake时的一些粗糙细节，以使日常开发更加轻松，并讨论一些工具和技术来减少手动操作。这些方法还将帮助不熟悉你的项目的用户更快上手，而无需知道所有正确的配置选项。
+在本章中，我们将从项目中退一步，解决一些使用 CMake 时的日常痛点。我们将重点讨论如何消除使用 CMake 时的一些粗糙细节，以使日常开发更加轻松，并讨论一些工具和技术来减少手动操作。这些方法还将帮助不熟悉你的项目的用户更快上手，而无需知道所有正确的配置选项。
 
 在本章中，我们将讨论以下主要主题：
 
-+   回顾我们如何使用CMake
++   回顾我们如何使用 CMake
 
 +   使用脚本避免重复命令
 
-+   转向CMake预设
++   转向 CMake 预设
 
-+   进一步使用CMake预设
++   进一步使用 CMake 预设
 
-+   返回CMake图形界面
++   返回 CMake 图形界面
 
 # 技术要求
 
-为了跟上进度，请确保你已经满足[*第一章*](B21152_01.xhtml#_idTextAnchor019)《入门》的要求。包括以下内容：
+为了跟上进度，请确保你已经满足*第一章*《入门》的要求。包括以下内容：
 
-+   一台运行最新**操作** **系统**（**OS**）的Windows、Mac或Linux机器
++   一台运行最新**操作** **系统**（**OS**）的 Windows、Mac 或 Linux 机器
 
-+   一个可用的C/C++编译器（如果你还没有，建议使用每个平台的系统默认编译器）
++   一个可用的 C/C++编译器（如果你还没有，建议使用每个平台的系统默认编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
-# 回顾我们如何使用CMake
+# 回顾我们如何使用 CMake
 
-在本书的第一部分，我们故意专注于直接从终端运行所有CMake命令。这是熟悉CMake并理解其工作原理的一个很好的方法，但随着你对CMake的熟悉，反复输入这些命令会变得让人厌烦。如果你的项目开始添加几个不同的配置选项，尤其是如果你有一个演示或项目希望分享，期待不熟悉的用户输入冗长且容易出错的命令是不可行的。
+在本书的第一部分，我们故意专注于直接从终端运行所有 CMake 命令。这是熟悉 CMake 并理解其工作原理的一个很好的方法，但随着你对 CMake 的熟悉，反复输入这些命令会变得让人厌烦。如果你的项目开始添加几个不同的配置选项，尤其是如果你有一个演示或项目希望分享，期待不熟悉的用户输入冗长且容易出错的命令是不可行的。
 
 第一个看起来可能是一个有前景的想法是直接在你的`CMakeLists.txt`文件中设置变量，并提示用户在那里更改值。这样做的主要问题是它会变成维护噩梦，并且使得同时支持不同的构建配置变得极其困难。你能从`CMakeLists.txt`文件中提取的设置越多越好，这样可以为自己和其他人将来使用时提供更多的自定义点。
 
 如果我们最好将设置保存在`CMakeLists.txt`文件之外，那么我们需要用户通过熟悉的`-D<variable>=<value>`格式在命令行上传递它们。这种灵活性非常好，但如果用户每次配置时都必须提供多个变量，可能会变得混乱且容易出错。
 
-例如，如果我们拿我们的*生命游戏*项目来举例，我们已经有了相当多的选项可以在命令行传递，其中一些是我们自己设置的，有些是CMake提供的。一个正常的命令可能如下所示：
+例如，如果我们拿我们的*生命游戏*项目来举例，我们已经有了相当多的选项可以在命令行传递，其中一些是我们自己设置的，有些是 CMake 提供的。一个正常的命令可能如下所示：
 
 ```cpp
 cmake -B build -G "Ninja Multi-Config" -DMC_GOL_SHARED=ON
@@ -109,7 +107,7 @@ cmake --build build --config RelWithDebInfo
 
 如果你使用的是单配置生成器，为每种构建类型指定自己的子文件夹可能会很方便（尽管实际上，多配置生成器提供的功能非常优秀，能便捷地为你处理这些复杂性）。
 
-如果你愿意，也可以包含一个调用来运行应用程序，尽管这取决于你正在构建的应用程序类型，并且如果在 `README` 或 `CMakeLists.txt` 文件中提供了关于输出文件所在位置的清晰指示，则不应有必要。工作目录（你从中运行应用程序的目录）在这里可能很重要，所以如果加载其他资源时，请记住这一点（我们将在 [*第10章*](B21152_10.xhtml#_idTextAnchor214)*，打包项目* *以供共享* 中介绍如何处理这个问题）。
+如果你愿意，也可以包含一个调用来运行应用程序，尽管这取决于你正在构建的应用程序类型，并且如果在 `README` 或 `CMakeLists.txt` 文件中提供了关于输出文件所在位置的清晰指示，则不应有必要。工作目录（你从中运行应用程序的目录）在这里可能很重要，所以如果加载其他资源时，请记住这一点（我们将在 *第十章**，打包项目* *以供共享* 中介绍如何处理这个问题）。
 
 拥有这些脚本对你以及任何希望查看或贡献你项目的用户或维护者来说可能是有帮助的，但维护起来可能会变得很麻烦。如果你正在构建一个跨平台项目，支持单独的 `.bat` 和 `.sh` 脚本也会让人感到沮丧。另一个缺点是，这些脚本需要从它们所在的终端运行。试图从操作系统文件浏览器中运行它们可能不起作用，因为工作目录通常会被设置为用户的主目录（在 macOS/Linux 上是`~/`，在 Windows 上是 `C:\Users\<username>`）。
 
@@ -147,7 +145,7 @@ cmake --build build --config RelWithDebInfo
 }
 ```
 
-在打开的 JSON 对象大括号后，我们必须首先提供一个数字，表示模式的版本（截至目前，`8` 是最新版本，并且适用于 CMake `3.28` 及以上版本）。如果你查阅 CMake 关于预设的文档（参见 [https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)），功能通常与特定的模式版本相关联。
+在打开的 JSON 对象大括号后，我们必须首先提供一个数字，表示模式的版本（截至目前，`8` 是最新版本，并且适用于 CMake `3.28` 及以上版本）。如果你查阅 CMake 关于预设的文档（参见 [`cmake.org/cmake/help/latest/manual/cmake-presets.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)），功能通常与特定的模式版本相关联。
 
 下一个键是 `configurePresets`，它映射到不同配置的值数组（这就像我们可能有一个或多个 `.bat` 或 `.sh` 脚本，提供不同的配置选项）。目前我们只提供了一个，但将来添加更多非常简单。该对象的第一个键是 `name` 字段；这是唯一必需的字段，其他键是可选的（为了简洁起见，我们省略了更多字段）。
 
@@ -321,7 +319,7 @@ CMake 预设中另一个有用的功能是 `condition` 字段。它用于决定�
 }
 ```
 
-`Darwin` 是 CMake 用来识别 macOS 的方式。有关 CMake 如何确定其运行的操作系统的更多信息，请参见 [https://cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html](https://cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html)。
+`Darwin` 是 CMake 用来识别 macOS 的方式。有关 CMake 如何确定其运行的操作系统的更多信息，请参见 [`cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html`](https://cmake.org/cmake/help/latest/variable/CMAKE_HOST_SYSTEM_NAME.html)。
 
 上述代码确保当我们运行 `cmake --list-presets` 时，在 macOS 以外的平台上不会看到 `xcode-static`。如果我们尝试运行 `cmake --preset xcode-static`，我们会得到以下错误信息：
 
@@ -337,7 +335,7 @@ CMake Error: Could not use disabled preset "xcode-static"
 
 到目前为止，我们关于 CMake 预设所涵盖的内容主要集中在 CMake 配置（使用 `configurePresets`）上。配置预设通常是最常用的，我们只是触及了可用设置的表面。在我们继续之前，看看其他类型的预设是有用的。这些预设包括构建、测试、打包和工作流预设。现在，我们只介绍构建和工作流预设，但随着我们将测试和打包引入到应用程序中，我们将继续回到预设。
 
-`buildPresets` 字段。它们可以通过调用 `cmake --build --list-presets` 来显示，并且在某些工具中也可见（例如，在 Visual Studio Code 的 CMake Tools 插件中，我们将在[*第 11 章*](B21152_11.xhtml#_idTextAnchor228)，*支持工具和下一步*中介绍）。构建预设不像配置预设那样对日常开发有如此大的影响，但它们也有自己的用途。在我们简化的示例中，我们展示了 `buildPresets` 可能如何配置：
+`buildPresets` 字段。它们可以通过调用 `cmake --build --list-presets` 来显示，并且在某些工具中也可见（例如，在 Visual Studio Code 的 CMake Tools 插件中，我们将在*第十一章*，*支持工具和下一步*中介绍）。构建预设不像配置预设那样对日常开发有如此大的影响，但它们也有自己的用途。在我们简化的示例中，我们展示了 `buildPresets` 可能如何配置：
 
 ```cpp
 "buildPresets": [
@@ -352,7 +350,7 @@ CMake Error: Could not use disabled preset "xcode-static"
 ]
 ```
 
-构建预设之间可以共享的内容通常较少，因此我们暂时省略了一个隐藏的基础构建预设。每个构建预设必须映射到一个`configurePreset`；因此，我们将每个构建预设映射到一个配置预设，该配置预设对应我们应用程序的版本，使用的是静态或共享版本的*生命游戏*库。我们还可以添加另一个字段，称为`configuration`，它相当于从命令行调用CMake时传递的`--config`。这看起来像如下所示：
+构建预设之间可以共享的内容通常较少，因此我们暂时省略了一个隐藏的基础构建预设。每个构建预设必须映射到一个`configurePreset`；因此，我们将每个构建预设映射到一个配置预设，该配置预设对应我们应用程序的版本，使用的是静态或共享版本的*生命游戏*库。我们还可以添加另一个字段，称为`configuration`，它相当于从命令行调用 CMake 时传递的`--config`。这看起来像如下所示：
 
 ```cpp
 {
@@ -362,7 +360,7 @@ CMake Error: Could not use disabled preset "xcode-static"
 }
 ```
 
-这样做的问题是，我们需要`shared-debug`、`shared-release`、`static-debug`、`static-release`等等。这可能是必要的，当我们开始实现如**持续集成**（**CI**）构建脚本时，它也会派上用场，但现在来看可能有些过头（值得一提的是，如何避免构建预设的组合爆炸是CMake维护者Kitware正在研究的一个开放问题）。
+这样做的问题是，我们需要`shared-debug`、`shared-release`、`static-debug`、`static-release`等等。这可能是必要的，当我们开始实现如**持续集成**（**CI**）构建脚本时，它也会派上用场，但现在来看可能有些过头（值得一提的是，如何避免构建预设的组合爆炸是 CMake 维护者 Kitware 正在研究的一个开放问题）。
 
 要调用一个构建预设，我们运行`cmake --build --preset <build-preset-name>`（首先运行`cmake --preset <configure-preset-name>`），如以下示例所示：
 
@@ -432,7 +430,7 @@ Available workflow presets:
 
 要查看构建和工作流预设的示例，可以花点时间访问附带的*Minimal* *CMake*库中的`ch5/part-4/app/CMakePresets.json`。
 
-CMake 预设是保持 `CMakeLists.txt` 文件简洁、不含配置细节的绝佳机制。它们需要小心处理，因为随着设置的组合爆炸，预设的数量可能会呈指数增长。从最常见的预设开始是一个不错的起点；它们可以在未来扩展，以处理更复杂的配置，帮助跨团队协作和项目维护。它们与 CMake 工具也能够很好地集成。在 [*第 11 章*](B21152_11.xhtml#_idTextAnchor228)，*支持工具与后续步骤*中，我们将讨论 CMake 预设如何使在 Visual Studio Code 中的构建与调试变得轻松。
+CMake 预设是保持 `CMakeLists.txt` 文件简洁、不含配置细节的绝佳机制。它们需要小心处理，因为随着设置的组合爆炸，预设的数量可能会呈指数增长。从最常见的预设开始是一个不错的起点；它们可以在未来扩展，以处理更复杂的配置，帮助跨团队协作和项目维护。它们与 CMake 工具也能够很好地集成。在 *第十一章*，*支持工具与后续步骤*中，我们将讨论 CMake 预设如何使在 Visual Studio Code 中的构建与调试变得轻松。
 
 在这一节中，我们了解了如何创建配置 CMake 预设以避免重复，如何将 CMake 预设与命令行重写结合使用，以及构建和工作流预设的作用。CMake 预设还能做更多事情，稍后我们将在测试和打包部分回顾它们的用法。接下来，我们将重新熟悉 CMake GUI。
 
@@ -444,29 +442,29 @@ CMake 预设是保持 `CMakeLists.txt` 文件简洁、不含配置细节的绝�
 
 打开 CMake GUI 最可靠的方法是从项目根目录运行`cmake-gui .`。这样可以确保工具继承你从终端配置的相同环境变量。这在 Windows 上尤其重要，因为我们使用的是*Visual Studio 命令提示符*，而在 macOS 上，从*Finder*打开时，环境变量与从终端打开时不同。如果不这样做，CMake GUI 可能无法找到 CMake、C/C++ 编译器或我们想要使用的生成器（例如，在 Windows 上使用 Ninja）。
 
-Windows和macOS上的CMake安装程序会添加一个快捷方式/图标用于打开CMake GUI，但不幸的是，通过这种方式打开并不总是能成功。如果你想在Linux桌面上打开CMake GUI，你可以导航到`/opt/cmake-3.28.1-linux-<arch>/bin/`并双击`cmake-gui`，或者为CMake GUI添加一个桌面图标（如果你是按照[*第1章*](B21152_01.xhtml#_idTextAnchor019)的方式安装CMake，*入门*部分）。使用`cmake-gui .`命令启动CMake GUI是最可靠的跨平台方法，可以在正确的地方打开CMake GUI。文档中说明了可以传递`-S`和`-B`来指定源目录和构建目录；然而，根据个人经验，这在所有平台上并不总是有效。一旦项目配置完成，仅运行`cmake-gui`（不带`.`）将会打开你上次离开的地方。如果没有提供起始目录，你可以从工具内部选择源目录和构建目录，尽管这个过程可能有点繁琐。也可以结合使用CMake预设和CMake GUI，直接在命令行提供预设，或者在工具内选择一个预设。
+Windows 和 macOS 上的 CMake 安装程序会添加一个快捷方式/图标用于打开 CMake GUI，但不幸的是，通过这种方式打开并不总是能成功。如果你想在 Linux 桌面上打开 CMake GUI，你可以导航到`/opt/cmake-3.28.1-linux-<arch>/bin/`并双击`cmake-gui`，或者为 CMake GUI 添加一个桌面图标（如果你是按照*第一章*的方式安装 CMake，*入门*部分）。使用`cmake-gui .`命令启动 CMake GUI 是最可靠的跨平台方法，可以在正确的地方打开 CMake GUI。文档中说明了可以传递`-S`和`-B`来指定源目录和构建目录；然而，根据个人经验，这在所有平台上并不总是有效。一旦项目配置完成，仅运行`cmake-gui`（不带`.`）将会打开你上次离开的地方。如果没有提供起始目录，你可以从工具内部选择源目录和构建目录，尽管这个过程可能有点繁琐。也可以结合使用 CMake 预设和 CMake GUI，直接在命令行提供预设，或者在工具内选择一个预设。
 
-第一次打开CMake GUI时，你会看到类似于以下的界面：
+第一次打开 CMake GUI 时，你会看到类似于以下的界面：
 
 ![图 5.2：CMake GUI](img/B21152_05_2.jpg)
 
 图 5.2：CMake GUI
 
-顶部区域显示源目录、预设（如果选择了）和构建目录。中间区域显示配置后的所有CMake变量，底部区域则显示你通常在终端运行CMake时看到的输出。
+顶部区域显示源目录、预设（如果选择了）和构建目录。中间区域显示配置后的所有 CMake 变量，底部区域则显示你通常在终端运行 CMake 时看到的输出。
 
-CMake GUI被设置为更好地与可以在某种`CMakeLists.txt`文件中打开的项目文件一起工作，且这些工具可以处理配置（例如微软的Visual Studio Code或JetBrains的CLion）。`ch5/part-5/app`中有一个更新版的`CMakePreset.json`文件，展示了Xcode、Visual Studio和Ninja Multi-Config的配置。
+CMake GUI 被设置为更好地与可以在某种`CMakeLists.txt`文件中打开的项目文件一起工作，且这些工具可以处理配置（例如微软的 Visual Studio Code 或 JetBrains 的 CLion）。`ch5/part-5/app`中有一个更新版的`CMakePreset.json`文件，展示了 Xcode、Visual Studio 和 Ninja Multi-Config 的配置。
 
-一旦源目录和构建文件夹设置完成，点击**配置**将显示所有新的（或更改的）CMake变量。这些变量会以红色显示，刚开始可能会让人感到有些困惑，但这并不是错误。再次按下**配置**按钮检查是否有任何CMake变量发生变化；所有红色高亮应随之消失：
+一旦源目录和构建文件夹设置完成，点击**配置**将显示所有新的（或更改的）CMake 变量。这些变量会以红色显示，刚开始可能会让人感到有些困惑，但这并不是错误。再次按下**配置**按钮检查是否有任何 CMake 变量发生变化；所有红色高亮应随之消失：
 
-![图 5.3：初始配置后的CMake GUI](img/B21152_05_3.jpg)
+![图 5.3：初始配置后的 CMake GUI](img/B21152_05_3.jpg)
 
-图 5.3：初始配置后的CMake GUI
+图 5.3：初始配置后的 CMake GUI
 
-CMake GUI明确区分了**配置**和**生成**步骤，而这两个步骤通常在命令行运行时是一起完成的。配置完成后，点击**生成**按钮来创建项目文件。在之前的示例中，我们使用了Visual Studio生成器，因此点击**打开项目**将会打开Visual Studio解决方案。此时可以直接使用Visual Studio构建项目。
+CMake GUI 明确区分了**配置**和**生成**步骤，而这两个步骤通常在命令行运行时是一起完成的。配置完成后，点击**生成**按钮来创建项目文件。在之前的示例中，我们使用了 Visual Studio 生成器，因此点击**打开项目**将会打开 Visual Studio 解决方案。此时可以直接使用 Visual Studio 构建项目。
 
 切换 `MC_GOL_SHARED` 到一个未分组的部分，但将来，所有以 `MC_` 开头的条目将会被分组在一起。
 
-查看我们在[ *第 3 章* ](B21152_03.xhtml#_idTextAnchor065)中看到的`list_cmake_variables`函数，*使用 FetchContent 和外部依赖*，虽然它是一个不错的起点，并且通常足够用。
+查看我们在 *第三章* 中看到的`list_cmake_variables`函数，*使用 FetchContent 和外部依赖*，虽然它是一个不错的起点，并且通常足够用。
 
 最后一个有用的功能是**添加条目**按钮。点击它会提供一个表单，用于将新的 CMake 变量添加到 CMake 缓存中。这个界面比从命令行添加变量要友好一些。记得在添加新变量后重新运行**配置**（它会以红色出现在工具的中央部分，作为提醒）。还有一个相应的**移除条目**按钮，它会将 CMake 变量从缓存中移除。
 

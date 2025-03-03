@@ -1,28 +1,26 @@
-# 3
-
-# 在流行的IDE中使用CMake
+# 第三章：在流行的 IDE 中使用 CMake
 
 编程既是一门艺术，也是一项深具技术性的过程，正如我们都深知的，它是非常困难的。因此，我们应该尽可能优化这一过程。虽然我们很少能通过简单的开关来获得更好的结果，但使用**集成开发环境（IDE）**绝对是其中少数的例外之一。
 
-如果你以前没有使用过合适的IDE（或者你认为像Emacs或Vim这样的文本处理器已经是你能得到的最好工具），那么本章就是为你准备的。如果你是经验丰富的专业人士，已经熟悉这个话题，你可以将本章作为当前热门选择的快速概览，或者考虑换一个工具，甚至更好的是，确认你当前使用的工具就是最好的选择。
+如果你以前没有使用过合适的 IDE（或者你认为像 Emacs 或 Vim 这样的文本处理器已经是你能得到的最好工具），那么本章就是为你准备的。如果你是经验丰富的专业人士，已经熟悉这个话题，你可以将本章作为当前热门选择的快速概览，或者考虑换一个工具，甚至更好的是，确认你当前使用的工具就是最好的选择。
 
-本章以强调为新手提供可访问性的方式，轻松介绍了选择IDE这一关键问题。我们将讨论为什么你需要一个IDE以及如何选择最适合你需求的IDE。虽然市场上有许多选择，但像往常一样，有些选择显然比其他的更好。不幸的是，这并不是一个通用的、一刀切的解决方案。许多因素会影响你选择合适IDE后的生产力水平。我们将讨论一些在某些规模的组织中可能很重要的考虑因素，确保你能够掌握细微差别而不至于陷入复杂性。接下来，我们会快速介绍工具链，在那里我们将讨论可用的选择。
+本章以强调为新手提供可访问性的方式，轻松介绍了选择 IDE 这一关键问题。我们将讨论为什么你需要一个 IDE 以及如何选择最适合你需求的 IDE。虽然市场上有许多选择，但像往常一样，有些选择显然比其他的更好。不幸的是，这并不是一个通用的、一刀切的解决方案。许多因素会影响你选择合适 IDE 后的生产力水平。我们将讨论一些在某些规模的组织中可能很重要的考虑因素，确保你能够掌握细微差别而不至于陷入复杂性。接下来，我们会快速介绍工具链，在那里我们将讨论可用的选择。
 
-然后，我们将重点介绍几种流行IDE的独特特点，如复杂的CLion、灵活的Visual Studio Code，以及强大的Visual Studio IDE。每一节都将展示这些环境的优点和高级功能，帮助你了解如何迈出使用IDE的第一步。此外，我们还将介绍一个从众多功能中主观挑选出的高级功能，让你知道如果决定使用这套工具时，可能会遇到哪些亮点。
+然后，我们将重点介绍几种流行 IDE 的独特特点，如复杂的 CLion、灵活的 Visual Studio Code，以及强大的 Visual Studio IDE。每一节都将展示这些环境的优点和高级功能，帮助你了解如何迈出使用 IDE 的第一步。此外，我们还将介绍一个从众多功能中主观挑选出的高级功能，让你知道如果决定使用这套工具时，可能会遇到哪些亮点。
 
 本章将涵盖以下主要内容：
 
 +   了解集成开发环境（IDE）
 
-+   从CLion IDE开始
++   从 CLion IDE 开始
 
-+   从Visual Studio Code开始
++   从 Visual Studio Code 开始
 
-+   从Visual Studio IDE开始
++   从 Visual Studio IDE 开始
 
 # 了解集成开发环境（IDE）
 
-在本节中，我们将讨论IDE及其如何显著提高开发速度和代码质量。让我们先为那些对这个话题不熟悉的人解释一下什么是IDE。
+在本节中，我们将讨论 IDE 及其如何显著提高开发速度和代码质量。让我们先为那些对这个话题不熟悉的人解释一下什么是 IDE。
 
 为什么以及如何选择一个 IDE？IDE（集成开发环境）是一种综合工具，它将各种专业工具结合起来，以简化软件开发过程。创建一个专业项目的过程包含多个步骤：设计、编码、构建、测试、打包、发布和维护。每个步骤都包含许多小任务，复杂性可能会让人感到压倒性。IDE 提供了解决方案，通过提供一个由 IDE 创建者策划和配置的工具平台，使你能够无缝使用这些工具，而无需为每个项目单独设置它们。
 
@@ -30,7 +28,7 @@ IDE 主要围绕代码编辑器、编译器和调试器设计。它们旨在提�
 
 更高级的 IDE 提供了非常复杂的功能，如热重载调试（在 Visual Studio 2022 中可用；继续阅读以了解更多）。这个功能允许你在调试器中运行代码，编辑它，并继续执行而无需重新启动程序。你还会发现重构工具，可以重命名符号或将代码提取到单独的函数中，以及静态分析工具，可以在编译之前识别错误。此外，IDE 还提供了与 Git 和其他版本控制系统的工具，这些工具对于解决冲突等问题非常有价值。
 
-我相信你现在可以看到，早期学习如何使用 IDE 并在组织中标准化这种使用方式是多么有益。接下来，让我们了解一下为什么选择一个*适合你的*IDE如此重要。
+我相信你现在可以看到，早期学习如何使用 IDE 并在组织中标准化这种使用方式是多么有益。接下来，让我们了解一下为什么选择一个*适合你的*IDE 如此重要。
 
 ## 选择 IDE
 
@@ -38,23 +36,23 @@ IDE 主要围绕代码编辑器、编译器和调试器设计。它们旨在提�
 
 在我几年的企业经验中，IDE 提供的功能足够吸引人，让人从一个 IDE 切换到另一个 IDE 的情况并不常见。开发人员的习惯几乎是第二天性，不能忽视。记住，一旦你在某个 IDE 中感到舒适，它很可能会成为你未来相当长时间的首选工具。这就是为什么你仍然会看到开发者使用 Vim（一个 1991 年发布的基于控制台的文本编辑器），并通过一堆插件扩展它，使它与现代的、基于 GUI 的 IDE 一样强大。所以不必感到压力。
 
-程序员选择一个IDE而不是另一个IDE的原因各不相同；其中一些原因非常重要（速度、可靠性、全面性、完整性），而另一些则…没那么重要。我想分享一下我对这个选择的主观看法，希望你也能觉得有用。
+程序员选择一个 IDE 而不是另一个 IDE 的原因各不相同；其中一些原因非常重要（速度、可靠性、全面性、完整性），而另一些则…没那么重要。我想分享一下我对这个选择的主观看法，希望你也能觉得有用。
 
-### 选择一个全面的IDE
+### 选择一个全面的 IDE
 
-如果你刚刚开始，你可能会考虑使用一个简单的文本编辑器并通过运行几个命令来构建代码。这种方法完全可行，尤其是在你尝试理解基础知识时（我鼓励你在本书中使用实际命令来跟踪你的进度）。它还帮助你理解没有IDE时初学者可能遇到的情况。
+如果你刚刚开始，你可能会考虑使用一个简单的文本编辑器并通过运行几个命令来构建代码。这种方法完全可行，尤其是在你尝试理解基础知识时（我鼓励你在本书中使用实际命令来跟踪你的进度）。它还帮助你理解没有 IDE 时初学者可能遇到的情况。
 
-另一方面，IDE是为了特定的目的而创建的。它们简化了开发人员在项目生命周期中处理的众多流程，这非常有价值。虽然最初可能会让人感到不知所措，但选择一个包括所有必要功能的综合IDE。确保它尽可能完整，但要留意成本，因为IDE对于小型企业或个人开发者来说可能非常昂贵。这是一个在手动管理花费的时间和IDE提供的功能成本之间的平衡。
+另一方面，IDE 是为了特定的目的而创建的。它们简化了开发人员在项目生命周期中处理的众多流程，这非常有价值。虽然最初可能会让人感到不知所措，但选择一个包括所有必要功能的综合 IDE。确保它尽可能完整，但要留意成本，因为 IDE 对于小型企业或个人开发者来说可能非常昂贵。这是一个在手动管理花费的时间和 IDE 提供的功能成本之间的平衡。
 
-无论价格如何，总是选择一个有强大社区支持的IDE，以便在遇到问题时获得帮助。浏览社区论坛和像[StackOverflow.com](http://StackOverflow.com)这样的热门问答网站，看看用户是否能得到他们问题的答案。此外，选择一个由有声望的公司积极开发的IDE。你不想浪费时间在一个已经很久没有更新、可能会在不久的将来被弃用或停产的工具上。例如，不久前，GitHub创建的编辑器Atom，在发布7年后被停用。
+无论价格如何，总是选择一个有强大社区支持的 IDE，以便在遇到问题时获得帮助。浏览社区论坛和像[StackOverflow.com](http://StackOverflow.com)这样的热门问答网站，看看用户是否能得到他们问题的答案。此外，选择一个由有声望的公司积极开发的 IDE。你不想浪费时间在一个已经很久没有更新、可能会在不久的将来被弃用或停产的工具上。例如，不久前，GitHub 创建的编辑器 Atom，在发布 7 年后被停用。
 
-### 选择一个在你的组织中得到广泛支持的IDE
+### 选择一个在你的组织中得到广泛支持的 IDE
 
-出乎意料的是，这可能并不符合每个开发者的偏好。你可能已经习惯了来自大学、之前工作或个人项目中的其他工具。正如前面提到的，这样的习惯可能会诱使你忽视公司的建议，固守自己熟悉的工具。抵制这种诱惑。随着时间的推移，这样的选择会变得越来越具有挑战性。根据我在爱立信、亚马逊和思科的经历，只有一次，我努力配置和维护一个非标准IDE是值得的。那是因为我成功获得了足够的组织支持，能够共同解决问题。
+出乎意料的是，这可能并不符合每个开发者的偏好。你可能已经习惯了来自大学、之前工作或个人项目中的其他工具。正如前面提到的，这样的习惯可能会诱使你忽视公司的建议，固守自己熟悉的工具。抵制这种诱惑。随着时间的推移，这样的选择会变得越来越具有挑战性。根据我在爱立信、亚马逊和思科的经历，只有一次，我努力配置和维护一个非标准 IDE 是值得的。那是因为我成功获得了足够的组织支持，能够共同解决问题。
 
-你的主要目标应该是编写代码，而不是在一个不受支持的IDE中挣扎。学习推荐的软件可能需要一些努力，但它所需的精力少于违背常规的做法（是的，Vim输了这一战；是时候继续前进了）。
+你的主要目标应该是编写代码，而不是在一个不受支持的 IDE 中挣扎。学习推荐的软件可能需要一些努力，但它所需的精力少于违背常规的做法（是的，Vim 输了这一战；是时候继续前进了）。
 
-### 不要根据目标操作系统和平台选择IDE
+### 不要根据目标操作系统和平台选择 IDE
 
 你可能认为如果你在为 Linux 开发软件，你需要使用一台 Linux 机器和基于 Linux 的 IDE。然而，C++ 是一种可移植的语言，这意味着只要你编写正确，它应该能够在任何平台上以相同的方式编译和运行。当然，你可能会遇到库的问题，因为并不是所有的库都是默认安装的，有些可能是特定于你的平台的。
 
@@ -70,33 +68,33 @@ IDE 主要围绕代码编辑器、编译器和调试器设计。它们旨在提�
 
 当然，有人认为交叉编译提供了更大的开发环境控制，使得可以为测试做临时性更改。它不需要带宽进行代码传输，支持低端的互联网连接或离线工作。然而，考虑到大多数软件开发都需要上网获取信息，这可能就不是一个特别重要的优势。使用像 Docker 这样的虚拟化环境可以运行本地生产副本并设置远程开发连接，提供安全性、可定制性，以及构建和部署容器的能力。
 
-这里提到的考虑因素稍微倾向于在大型公司工作的情况，在这些公司中，事务进展较慢，且很难做出高影响力的改变。如果你决定根据你的使用场景优先考虑其他IDE的方面，这些建议并不否定使用CMake时能获得一个完全完整的体验的可能性。
+这里提到的考虑因素稍微倾向于在大型公司工作的情况，在这些公司中，事务进展较慢，且很难做出高影响力的改变。如果你决定根据你的使用场景优先考虑其他 IDE 的方面，这些建议并不否定使用 CMake 时能获得一个完全完整的体验的可能性。
 
 ## 安装工具链
 
-正如我们之前讨论的，IDE整合了所有必要的工具来简化软件开发。这个过程的一个关键部分是构建二进制文件，有时在后台或即时构建，以为开发人员提供附加信息。工具链是由编译器、链接器、归档工具、优化器、调试器和C++标准库实现等工具组成的集合。它们还可能包括其他实用的工具，如`bash`、`make`、`gawk`、`grep`等，这些工具用于构建程序。
+正如我们之前讨论的，IDE 整合了所有必要的工具来简化软件开发。这个过程的一个关键部分是构建二进制文件，有时在后台或即时构建，以为开发人员提供附加信息。工具链是由编译器、链接器、归档工具、优化器、调试器和 C++标准库实现等工具组成的集合。它们还可能包括其他实用的工具，如`bash`、`make`、`gawk`、`grep`等，这些工具用于构建程序。
 
-一些IDE自带工具链或工具链下载器，而其他IDE则没有。最好直接运行已安装的IDE，并检查是否能够编译一个基础的测试程序。CMake通常会在配置阶段默认执行此操作，大多数IDE会在初始化新项目时作为一部分执行此过程。如果此过程失败，IDE或操作系统的包管理器可能会提示你安装所需的工具。只需按照提示操作，因为这个流程通常已经做好了充分准备。
+一些 IDE 自带工具链或工具链下载器，而其他 IDE 则没有。最好直接运行已安装的 IDE，并检查是否能够编译一个基础的测试程序。CMake 通常会在配置阶段默认执行此操作，大多数 IDE 会在初始化新项目时作为一部分执行此过程。如果此过程失败，IDE 或操作系统的包管理器可能会提示你安装所需的工具。只需按照提示操作，因为这个流程通常已经做好了充分准备。
 
 如果没有提示，或者如果你想使用特定的工具链，这里有一些根据平台不同的选项：
 
-+   **GNU GCC** ([https://gcc.gnu.org/](https://gcc.gnu.org/)) 用于Linux、Windows（通过MinGW或Cygwin）、macOS及其他多个平台。GCC是最受欢迎且广泛使用的C++编译器之一，支持多种平台和架构。
++   **GNU GCC** ([`gcc.gnu.org/`](https://gcc.gnu.org/)) 用于 Linux、Windows（通过 MinGW 或 Cygwin）、macOS 及其他多个平台。GCC 是最受欢迎且广泛使用的 C++编译器之一，支持多种平台和架构。
 
-+   **Clang/LLVM** ([https://clang.llvm.org/](https://clang.llvm.org/)) 用于Linux、Windows、macOS等多个平台。Clang是C、C++和Objective-C编程语言的编译器前端，利用LLVM作为其后端。
++   **Clang/LLVM** ([`clang.llvm.org/`](https://clang.llvm.org/)) 用于 Linux、Windows、macOS 等多个平台。Clang 是 C、C++和 Objective-C 编程语言的编译器前端，利用 LLVM 作为其后端。
 
-+   **Microsoft Visual Studio/MSVC** ([https://visualstudio.microsoft.com/](https://visualstudio.microsoft.com/)) 主要用于Windows，同时通过Visual Studio Code和CMake提供跨平台支持。MSVC是由微软提供的C++编译器，通常在Visual Studio IDE中使用。
++   **Microsoft Visual Studio/MSVC** ([`visualstudio.microsoft.com/`](https://visualstudio.microsoft.com/)) 主要用于 Windows，同时通过 Visual Studio Code 和 CMake 提供跨平台支持。MSVC 是由微软提供的 C++编译器，通常在 Visual Studio IDE 中使用。
 
-+   **MinGW-w64** ([http://mingw-w64.org/](http://mingw-w64.org/)) 用于Windows。MinGW-w64是原MinGW项目的一个改进版，旨在提供对64位Windows和新API的更好支持。
++   **MinGW-w64** ([`mingw-w64.org/`](http://mingw-w64.org/)) 用于 Windows。MinGW-w64 是原 MinGW 项目的一个改进版，旨在提供对 64 位 Windows 和新 API 的更好支持。
 
-+   **Apple Clang** ([https://developer.apple.com/xcode/cpp/](https://developer.apple.com/xcode/cpp/)) 用于macOS、iOS、iPadOS、watchOS和tvOS。Apple版Clang，经过针对Apple硬件和软件生态系统的优化，已集成在Xcode中。
++   **Apple Clang** ([`developer.apple.com/xcode/cpp/`](https://developer.apple.com/xcode/cpp/)) 用于 macOS、iOS、iPadOS、watchOS 和 tvOS。Apple 版 Clang，经过针对 Apple 硬件和软件生态系统的优化，已集成在 Xcode 中。
 
-+   **Cygwin** ([https://www.cygwin.com/](https://www.cygwin.com/)) 用于Windows。Cygwin为Windows提供了一个与POSIX兼容的环境，允许使用GCC和其他GNU工具。
++   **Cygwin** ([`www.cygwin.com/`](https://www.cygwin.com/)) 用于 Windows。Cygwin 为 Windows 提供了一个与 POSIX 兼容的环境，允许使用 GCC 和其他 GNU 工具。
 
 如果你想快速开始，而不深入研究每个工具链的细节，你可以按照我的个人偏好：如果 IDE 没有提供工具链，可以选择在 Windows 上使用 MinGW，在 Linux 上使用 Clang/LLVM，在 macOS 上使用 Apple Clang。每种工具链都非常适合其主要平台，并通常提供最佳体验。
 
 ## 使用本书的示例与 IDE 配合
 
-本书附带了一套丰富的 CMake 项目示例，已上传至官方 GitHub 仓库，链接如下：[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E)。
+本书附带了一套丰富的 CMake 项目示例，已上传至官方 GitHub 仓库，链接如下：[`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E)。
 
 自然地，当我们探索 IDE 的主题时，出现了一个问题：我们如何在这里介绍的所有 IDE 中使用这个仓库呢？嗯，我们需要认识到，这本教你如何创建专业项目的书本身并不是一个专业项目。它是一个由多个不同完成度的项目组成的集合，在可能的情况下做了适当的简化。不幸的是（或者说，或许幸运的是？），IDE 并不是为加载成百上千的项目并方便管理它们而设计的。它们通常将功能集中于加载一个正在编辑的项目。
 
@@ -128,7 +126,7 @@ CLion 是一款付费的跨平台 IDE，适用于 Windows、macOS 和 Linux，�
 
 ## 踏出你的第一步
 
-从官方网站下载 CLion（[https://www.jetbrains.com/clion](https://www.jetbrains.com/clion)）后，你可以按照你所使用平台的常规安装流程进行安装。CLion 在 Windows（*图 3.2*）和 macOS（*图 3.3*）上都提供了一个足够直观的可视化安装程序。
+从官方网站下载 CLion（[`www.jetbrains.com/clion`](https://www.jetbrains.com/clion)）后，你可以按照你所使用平台的常规安装流程进行安装。CLion 在 Windows（*图 3.2*）和 macOS（*图 3.3*）上都提供了一个足够直观的可视化安装程序。
 
 ![](img/B19844_03_02.png)
 
@@ -159,43 +157,43 @@ CLion 的调试能力确实是前沿的，特别是为 C++ 设计的。我非常
 
 对于 C++ 调试，你将获得由**GNU 项目调试器**（**GDB**）提供的许多标准功能，如汇编视图、断点、逐步调试、监视点等，但也有一些重要的增强功能。在 CLion 中，你会发现一个并行堆栈视图，它可以让你以图形化的方式查看所有线程，并显示每个线程的当前堆栈帧。此外，还有一个高级内存视图功能，允许你查看正在运行的程序在 RAM 中的布局，并即时修改内存。CLion 提供了多个其他工具，帮助你了解程序的运行情况：寄存器视图、代码反汇编、调试控制台、核心转储调试、任意可执行文件的调试等。
 
-作为补充，CLion拥有一项非常出色的**评估表达式**功能，它可以大显身手，甚至允许在程序执行过程中修改对象。只需右键点击一行代码，并从菜单中选择此功能。
+作为补充，CLion 拥有一项非常出色的**评估表达式**功能，它可以大显身手，甚至允许在程序执行过程中修改对象。只需右键点击一行代码，并从菜单中选择此功能。
 
-关于CLion的介绍就到这里；现在是时候看看另一个IDE了。
+关于 CLion 的介绍就到这里；现在是时候看看另一个 IDE 了。
 
-# 开始使用Visual Studio Code
+# 开始使用 Visual Studio Code
 
-**Visual Studio Code**（**VS Code**）是由Microsoft开发的一款免费的跨平台集成开发环境，适用于Windows、macOS和Linux。不要将它与另一款Microsoft产品——Visual Studio IDE混淆（通常以发布年份命名，例如Visual Studio 2022）。
+**Visual Studio Code**（**VS Code**）是由 Microsoft 开发的一款免费的跨平台集成开发环境，适用于 Windows、macOS 和 Linux。不要将它与另一款 Microsoft 产品——Visual Studio IDE 混淆（通常以发布年份命名，例如 Visual Studio 2022）。
 
-VS Code因其庞大的扩展生态系统和对数百种编程语言的支持而受到青睐（据估计，支持的语言超过220种！）。当GitHub被Microsoft收购时，VS Code被推出作为Atom的替代品。
+VS Code 因其庞大的扩展生态系统和对数百种编程语言的支持而受到青睐（据估计，支持的语言超过 220 种！）。当 GitHub 被 Microsoft 收购时，VS Code 被推出作为 Atom 的替代品。
 
-该IDE的整体设计非常出色，正如*图3.4*所示。
+该 IDE 的整体设计非常出色，正如*图 3.4*所示。
 
 ![](img/B19844_03_04.png)
 
-图3.4：VS Code的主窗口
+图 3.4：VS Code 的主窗口
 
-现在，让我们来看看是什么让VS Code如此特别。
+现在，让我们来看看是什么让 VS Code 如此特别。
 
 ## 为什么你可能会喜欢它
 
-C++虽然不是VSC支持的语言优先项，但由于有许多复杂的语言扩展，它离榜单前列很近。这个权衡带来了在同一环境下按需切换多种语言的能力。
+C++虽然不是 VSC 支持的语言优先项，但由于有许多复杂的语言扩展，它离榜单前列很近。这个权衡带来了在同一环境下按需切换多种语言的能力。
 
-使用这个工具需要一些学习曲线，因为大多数扩展遵循基础UI功能，而不是实现独立的高级接口。许多功能可以通过命令面板访问（按*F1*键即可）。命令面板需要你输入命令名称，而不是点击图标或按钮。为了保持VSC简洁、快速且免费，这是一个合理的取舍。事实上，这款IDE加载速度非常快，即使在我不进行项目开发时，我也更愿意将它用作通用文本编辑器。
+使用这个工具需要一些学习曲线，因为大多数扩展遵循基础 UI 功能，而不是实现独立的高级接口。许多功能可以通过命令面板访问（按*F1*键即可）。命令面板需要你输入命令名称，而不是点击图标或按钮。为了保持 VSC 简洁、快速且免费，这是一个合理的取舍。事实上，这款 IDE 加载速度非常快，即使在我不进行项目开发时，我也更愿意将它用作通用文本编辑器。
 
-尽管如此，VS Code凭借庞大的优秀扩展库而真正强大，其中绝大多数都是免费的。对于C++和CMake，特别提供了专用扩展，接下来我们将看看如何配置它们。
+尽管如此，VS Code 凭借庞大的优秀扩展库而真正强大，其中绝大多数都是免费的。对于 C++和 CMake，特别提供了专用扩展，接下来我们将看看如何配置它们。
 
 ## 开始你的第一步
 
-VSC可以从官方网站获取：[https://code.visualstudio.com/](https://code.visualstudio.com/)。该网站提供了适用于Windows和macOS的下载链接，还涵盖了多个Linux发行版：Debian、Ubuntu、Red Hat、Fedora和SUSE。根据你平台的常规安装流程安装软件。之后，你可以通过访问**扩展市场**（*Ctrl*/*Command + Shift + X*）来安装一系列扩展。以下是推荐的初始扩展：
+VSC 可以从官方网站获取：[`code.visualstudio.com/`](https://code.visualstudio.com/)。该网站提供了适用于 Windows 和 macOS 的下载链接，还涵盖了多个 Linux 发行版：Debian、Ubuntu、Red Hat、Fedora 和 SUSE。根据你平台的常规安装流程安装软件。之后，你可以通过访问**扩展市场**（*Ctrl*/*Command + Shift + X*）来安装一系列扩展。以下是推荐的初始扩展：
 
-+   Microsoft的C/C++
++   Microsoft 的 C/C++
 
-+   Microsoft的C/C++扩展包
++   Microsoft 的 C/C++扩展包
 
-+   twxs的CMake
++   twxs 的 CMake
 
-+   Microsoft的CMake工具
++   Microsoft 的 CMake 工具
 
 它们将提供常规的代码高亮、编译、运行和调试代码的能力，但你可能需要自己安装工具链。通常，当你开始打开相关文件时，VS Code 会在弹出窗口中建议安装扩展，因此你不一定需要自己去找。
 
@@ -211,11 +209,11 @@ VSC可以从官方网站获取：[https://code.visualstudio.com/](https://code.v
 
 直到最近，在容器中开发涉及手动构建、运行并通过 IDE 与远程会话连接到容器。这个过程并不难，但它需要手动操作，而这些操作可能会因不同开发者而有所不同。
 
-近年来，微软发布了一个开源标准——开发容器（[https://containers.dev/](https://containers.dev/)），以帮助解决这个小小的不便。该规范主要由一个`devcontainer.json`文件组成，你可以将其放入你的项目仓库，指示 IDE 如何在容器中设置开发环境。
+近年来，微软发布了一个开源标准——开发容器（[`containers.dev/`](https://containers.dev/)），以帮助解决这个小小的不便。该规范主要由一个`devcontainer.json`文件组成，你可以将其放入你的项目仓库，指示 IDE 如何在容器中设置开发环境。
 
 要使用此功能，只需安装 **Dev Containers by Microsoft** 扩展，并将其指向一个准备好的项目的仓库。如果你不介意修改主`CMakeLists.txt`，可以尝试使用本书的仓库：
 
-[git@github.com:PacktPublishing/Modern-CMake-for-Cpp-2E.git](mailto:git@github.com:PacktPublishing/Modern-CMake-for-Cpp-2E.git)
+git@github.com:PacktPublishing/Modern-CMake-for-Cpp-2E.git
 
 我可以确认，其他 IDE，如 CLion，正在采用这一标准，所以如果你面临上述情况，采用这个标准似乎是一个不错的做法。接下来是微软家族的下一个产品。
 
@@ -245,7 +243,7 @@ VS 提供几种版本：社区版、专业版和企业版。社区版是免费�
 
 ## 开始你的第一步
 
-这款 IDE 仅适用于 Windows，并遵循标准的安装流程。首先从 [https://visualstudio.microsoft.com/free-developer-offers/](https://visualstudio.microsoft.com/free-developer-offers/) 下载安装程序。运行安装程序后，你将被要求选择版本（社区版、专业版或企业版）并选择你需要的工作负载：
+这款 IDE 仅适用于 Windows，并遵循标准的安装流程。首先从 [`visualstudio.microsoft.com/free-developer-offers/`](https://visualstudio.microsoft.com/free-developer-offers/) 下载安装程序。运行安装程序后，你将被要求选择版本（社区版、专业版或企业版）并选择你需要的工作负载：
 
 ![](img/B19844_03_06.png)
 
@@ -285,7 +283,7 @@ Hello CMake.
 
 Hot Reload 的幕后机制可能看起来像是魔法，但它是一个非常实用的功能。虽然存在一些限制，比如全局/静态数据的更改、对象布局的调整，或是“时间旅行”式的更改（比如修改已经构造好的对象的构造函数）。
 
-你可以在官方文档中找到更多关于 Hot Reload 的信息，链接地址：[https://learn.microsoft.com/en-us/visualstudio/debugger/hot-reload](https://learn.microsoft.com/en-us/visualstudio/debugger/hot-reload)。
+你可以在官方文档中找到更多关于 Hot Reload 的信息，链接地址：[`learn.microsoft.com/en-us/visualstudio/debugger/hot-reload`](https://learn.microsoft.com/en-us/visualstudio/debugger/hot-reload)。
 
 本章节总结了三大主要的 IDE。虽然初学时可能会感到学习曲线陡峭，但我保证，当你进入更高级的任务时，投入的学习努力会很快得到回报。
 
@@ -305,18 +303,18 @@ Hot Reload 的幕后机制可能看起来像是魔法，但它是一个非常实
 
 有关本章内容的更多信息，您可以参考以下资源：
 
-+   Qt Creator IDE，另一个支持 CMake 的选项：[https://www.qt.io/product/development-tools](https://www.qt.io/product/development-tools)
++   Qt Creator IDE，另一个支持 CMake 的选项：[`www.qt.io/product/development-tools`](https://www.qt.io/product/development-tools)
 
-+   Eclipse IDE 适用于 C/C++ 开发者，也支持 CMake：[https://www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-cc-developers](https://www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-cc-developers)
++   Eclipse IDE 适用于 C/C++ 开发者，也支持 CMake：[`www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-cc-developers`](https://www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-cc-developers)
 
-+   macOS 的 Xcode 也可以与 CMake 一起使用：[https://medium.com/practical-coding/migrating-to-cmake-in-c-and-getting-it-working-with-xcode-50b7bb80ae3d](https://medium.com/practical-coding/migrating-to-cmake-in-c-and-getting-it-working-with-xcode-50b7bb80ae3d)
++   macOS 的 Xcode 也可以与 CMake 一起使用：[`medium.com/practical-coding/migrating-to-cmake-in-c-and-getting-it-working-with-xcode-50b7bb80ae3d`](https://medium.com/practical-coding/migrating-to-cmake-in-c-and-getting-it-working-with-xcode-50b7bb80ae3d)
 
-+   CodeLite 是另一个选择，感谢其 CMake 插件：[https://docs.codelite.org/plugins/cmake/](https://docs.codelite.org/plugins/cmake/)
++   CodeLite 是另一个选择，感谢其 CMake 插件：[`docs.codelite.org/plugins/cmake/`](https://docs.codelite.org/plugins/cmake/)
 
 # 加入我们的 Discord 社区
 
 加入我们社区的 Discord 频道，与作者及其他读者进行讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

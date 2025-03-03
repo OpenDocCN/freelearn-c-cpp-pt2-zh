@@ -1,6 +1,4 @@
-# 5
-
-# 集成第三方库和依赖管理
+# 第五章：集成第三方库和依赖管理
 
 迄今为止，在本书中，我们已经介绍了如何使用**CMake**构建和安装我们自己的代码。在本章中，我们将探讨如何使用那些不是 CMake 项目一部分的文件、库和程序。本章的第一部分将讲解如何一般性地查找这些内容，而后半部分将专注于如何管理依赖关系，以便构建你的 CMake 项目。
 
@@ -28,13 +26,13 @@
 
 +   MSVC 19 或更新版本
 
-此外，一些示例需要安装 OpenSSL 3 才能编译。某些示例从各种在线位置拉取依赖项，因此还需要互联网连接。所有示例和源代码都可以从本书的 GitHub 仓库获得，地址是 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
+此外，一些示例需要安装 OpenSSL 3 才能编译。某些示例从各种在线位置拉取依赖项，因此还需要互联网连接。所有示例和源代码都可以从本书的 GitHub 仓库获得，地址是 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
 
 外部包管理器的示例需要在系统上安装 Conan（版本 1.40 或更新）和 vcpkg 才能运行。你可以在这里获取这些软件：
 
-+   **Conan**: [https://conan.io/](https://conan.io/)
++   **Conan**: [`conan.io/`](https://conan.io/)
 
-+   **Vcpkg**: [https://github.com/microsoft/vcpkg](https://github.com/microsoft/vcpkg)
++   **Vcpkg**: [`github.com/microsoft/vcpkg`](https://github.com/microsoft/vcpkg)
 
 # 使用 CMake 查找文件、程序和路径
 
@@ -138,7 +136,7 @@ find_file (
 
         1.  `C:\yourfolder\`
 
-+   `CMAKE_SYSTEM_PREFIX_PATH` 和 `CMAKE_SYSTEM_FRAMEWORK_PATH` 变量的作用类似于 CMake 特定的缓存变量。这些变量不应由开发者修改，而是当 CMake 设置平台工具链时进行配置。唯一的例外是当提供了工具链文件时，例如使用 sysroot 或进行交叉编译时，如在 [*第 12 章*](B30947_12.xhtml#_idTextAnchor182) 中解释的，*跨平台编译与* *自定义工具链*。
++   `CMAKE_SYSTEM_PREFIX_PATH` 和 `CMAKE_SYSTEM_FRAMEWORK_PATH` 变量的作用类似于 CMake 特定的缓存变量。这些变量不应由开发者修改，而是当 CMake 设置平台工具链时进行配置。唯一的例外是当提供了工具链文件时，例如使用 sysroot 或进行交叉编译时，如在 *第十二章* 中解释的，*跨平台编译与* *自定义工具链*。
 
 +   除了 `NO_CMAKE_SYSTEM_PATH` 选项，`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH` 变量可以设置为 `false`，以跳过系统特定缓存变量提供的位置。
 
@@ -152,9 +150,9 @@ find_file (
 
 进行交叉编译时，查找文件的过程通常有所不同，因为交叉编译工具链被收集在其自身的独立目录结构下，这与系统工具链不混合。通常，首先你会想要在工具链的目录中查找文件。通过设置 `CMAKE_FIND_ROOT` 变量，可以将所有查找的源更改为新位置。
 
-此外，`CMAKE_SYSROOT`、`CMAKE_SYSROOT_COMPILE`和`CMAKE_SYSROOT_LINK`变量会影响搜索位置，但它们只应在工具链文件中设置，而不是由项目本身设置。如果任何常规搜索位置已经在sysroot中或由`CMAKE_FIND_ROOT`指定的位置下，它们将不会被更改。任何以波浪号（`~`）开头的路径，并传递给`find_`命令时，不会被更改，以避免跳过位于用户主目录下的目录。
+此外，`CMAKE_SYSROOT`、`CMAKE_SYSROOT_COMPILE`和`CMAKE_SYSROOT_LINK`变量会影响搜索位置，但它们只应在工具链文件中设置，而不是由项目本身设置。如果任何常规搜索位置已经在 sysroot 中或由`CMAKE_FIND_ROOT`指定的位置下，它们将不会被更改。任何以波浪号（`~`）开头的路径，并传递给`find_`命令时，不会被更改，以避免跳过位于用户主目录下的目录。
 
-默认情况下，CMake首先在前述段落中提供的任何变量指定的位置进行搜索，然后继续搜索主机系统。通过将`CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`变量设置为`BOTH`、`NEVER`或`ONLY`，可以全局更改此行为。或者，您可以将`find_file`的`CMAKE_FIND_ROOT_PATH_BOTH`选项、`ONLY_CMAKE_FIND_ROOT_PATH`选项或`NO_CMAKE_FIND_ROOT_PATH`选项进行设置。
+默认情况下，CMake 首先在前述段落中提供的任何变量指定的位置进行搜索，然后继续搜索主机系统。通过将`CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`变量设置为`BOTH`、`NEVER`或`ONLY`，可以全局更改此行为。或者，您可以将`find_file`的`CMAKE_FIND_ROOT_PATH_BOTH`选项、`ONLY_CMAKE_FIND_ROOT_PATH`选项或`NO_CMAKE_FIND_ROOT_PATH`选项进行设置。
 
 下表显示了在不同搜索模式下设置任何选项或变量时的搜索顺序：
 
@@ -193,13 +191,13 @@ find_file (
 
 |
 
-`CMAKE_STAGING_PREFIX`变量用于为交叉编译提供安装路径。通过安装内容到其中，`CMAKE_SYSROOT`不应被更改。关于交叉编译工具链的设置，我们将在[*第12章*](B30947_12.xhtml#_idTextAnchor182)，“*跨平台编译与自定义工具链*”中详细讨论。
+`CMAKE_STAGING_PREFIX`变量用于为交叉编译提供安装路径。通过安装内容到其中，`CMAKE_SYSROOT`不应被更改。关于交叉编译工具链的设置，我们将在*第十二章*，“*跨平台编译与自定义工具链*”中详细讨论。
 
 ## 查找程序
 
 查找可执行文件与查找文件和路径非常相似，`find_program`命令的签名几乎与`find_file`相同。此外，`find_program`有`NAMES_PER_DIR`选项，指示命令一次只搜索一个目录，并在每个目录中搜索所有提供的文件名，而不是在每个文件中搜索每个目录。
 
-在Windows上，`.exe`和`.com`文件扩展名会自动添加到提供的文件名中，但`.bat`或`.cmd`不会。
+在 Windows 上，`.exe`和`.com`文件扩展名会自动添加到提供的文件名中，但`.bat`或`.cmd`不会。
 
 `find_program`使用的缓存变量与`find_file`使用的缓存变量略有不同：
 
@@ -213,11 +211,11 @@ find_file (
 
 +   `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM`用于更改查找程序的模式
 
-与其他`find`命令一样，`find_program`会在CMake无法找到程序时设置`<varname>-NOTFOUND`变量。这通常对于判断是否启用某个依赖特定外部程序的自定义构建步骤非常有用。
+与其他`find`命令一样，`find_program`会在 CMake 无法找到程序时设置`<varname>-NOTFOUND`变量。这通常对于判断是否启用某个依赖特定外部程序的自定义构建步骤非常有用。
 
 ## 查找库
 
-查找库是查找文件的一种特殊情况，因此`find_library`命令支持与`find_file`相同的选项集。此外，与`find_program`命令类似，它还有额外的`NAMES_PER_DIR`选项，该选项会首先检查所有文件名，然后再进入下一个目录。查找常规文件和查找库之间的区别在于，`find_library`会自动根据平台特定的命名约定来处理文件名。在Unix平台上，文件名前会加上`lib`，而在Windows上，会添加`.dll`或`.lib`扩展名。
+查找库是查找文件的一种特殊情况，因此`find_library`命令支持与`find_file`相同的选项集。此外，与`find_program`命令类似，它还有额外的`NAMES_PER_DIR`选项，该选项会首先检查所有文件名，然后再进入下一个目录。查找常规文件和查找库之间的区别在于，`find_library`会自动根据平台特定的命名约定来处理文件名。在 Unix 平台上，文件名前会加上`lib`，而在 Windows 上，会添加`.dll`或`.lib`扩展名。
 
 同样，缓存变量与`find_file`和`find_program`中使用的变量略有不同：
 
@@ -227,11 +225,11 @@ find_file (
 
 +   `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY`用于更改搜索库的模式。
 
-CMake通常会识别32位和64位搜索位置的命名约定，例如某些平台使用`lib32`和`lib64`文件夹来存放同名的不同库。此行为由`FIND_LIBRARY_USE_LIB[32|64|X32]_PATHS`变量控制，该变量决定了应先搜索什么。项目还可以使用`CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX`变量定义自己的后缀，从而覆盖其他变量的行为。然而，通常情况下不需要这样做，修改`CMakeLists.txt`文件中的搜索顺序会迅速使项目变得难以维护，并且对不同系统之间的可移植性产生重大影响。
+CMake 通常会识别 32 位和 64 位搜索位置的命名约定，例如某些平台使用`lib32`和`lib64`文件夹来存放同名的不同库。此行为由`FIND_LIBRARY_USE_LIB[32|64|X32]_PATHS`变量控制，该变量决定了应先搜索什么。项目还可以使用`CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX`变量定义自己的后缀，从而覆盖其他变量的行为。然而，通常情况下不需要这样做，修改`CMakeLists.txt`文件中的搜索顺序会迅速使项目变得难以维护，并且对不同系统之间的可移植性产生重大影响。
 
 ### 查找静态库或共享库
 
-在大多数情况下，直接将库的基本名称传递给CMake就足够了，但有时需要覆盖默认行为。这样做的原因之一是，在某些平台上，应该优先使用库的静态版本而不是共享版本，或者反之。最好的方法是将`find_library`调用拆分为两个调用，而不是试图在一个调用中实现此目标。如果静态库和动态库位于不同的目录中，这样的做法更为稳健：
+在大多数情况下，直接将库的基本名称传递给 CMake 就足够了，但有时需要覆盖默认行为。这样做的原因之一是，在某些平台上，应该优先使用库的静态版本而不是共享版本，或者反之。最好的方法是将`find_library`调用拆分为两个调用，而不是试图在一个调用中实现此目标。如果静态库和动态库位于不同的目录中，这样的做法更为稳健：
 
 ```cpp
 find_library(MYSTUFF_LIBRARY libmystuff.a)
@@ -296,13 +294,13 @@ cmake --help-module <mod> #< prints the documentation for module
 cmake --help-modules #< lists all modules and their documentation
 ```
 
-可以在 [https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html) 找到一系列与 CMake 一起提供的模块。
+可以在 [`cmake.org/cmake/help/latest/manual/cmake-modules.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html) 找到一系列与 CMake 一起提供的模块。
 
 查找单独的库和文件
 
 可以查找单独的库和文件，但首选方式是使用包。在 *编写您自己的查找模块* 部分将介绍如何查找单独的文件并使其可用于 CMake。
 
-在模块模式下运行时，`find_package` 命令会查找名为 `Find<PackageName>.cmake` 的文件；首先在由 `CMAKE_MODULE_PATH` 指定的路径中查找，然后在 CMake 安装提供的 `find` 模块中查找。如果你想了解如何创建 CMake 包，可以查看 [*第4章*](B30947_04.xhtml#_idTextAnchor071)，*CMake项目的打包、部署与安装*。
+在模块模式下运行时，`find_package` 命令会查找名为 `Find<PackageName>.cmake` 的文件；首先在由 `CMAKE_MODULE_PATH` 指定的路径中查找，然后在 CMake 安装提供的 `find` 模块中查找。如果你想了解如何创建 CMake 包，可以查看 *第四章*，*CMake 项目的打包、部署与安装*。
 
 在配置模式下运行时，`find_package` 会按照以下模式查找文件：
 
@@ -319,8 +317,8 @@ cmake --help-modules #< lists all modules and their documentation
 | **位置** | **命令中的跳过选项** |
 | --- | --- |
 | 包根变量 | `NO_PACKAGE_ROOT_PATH` |
-| CMake特定缓存变量 | `NO_CMAKE_PATH` |
-| CMake特定环境变量 | `NO_CMAKE_ENVIRONMENT_PATH` |
+| CMake 特定缓存变量 | `NO_CMAKE_PATH` |
+| CMake 特定环境变量 | `NO_CMAKE_ENVIRONMENT_PATH` |
 | 在 `HINTS` 选项中指定的路径 |  |
 | 系统特定环境变量 | `NO_SYSTEM_ENVIRONMENT_PATH` |
 | 用户包注册表 | `NO_CMAKE_PACKAGE_REGISTRY` |
@@ -344,21 +342,21 @@ cmake --help-modules #< lists all modules and their documentation
 
 +   `PATH` 环境变量用于查找包和文件，并且会去除末尾的 `bin` 和 `sbin` 目录。此时，系统的默认位置，如 `/usr`、`/lib` 等，通常会被搜索。
 
-+   `CMAKE_PREFIX_PATH`选项。包注册表是告诉CMake在哪里查找依赖项的另一种方式。包注册表是包含一组包的特殊位置。用户注册表对当前用户账户有效，而系统包注册表在系统范围内有效。在Windows上，用户包注册表的位置存储在Windows注册表中，路径如下：
++   `CMAKE_PREFIX_PATH`选项。包注册表是告诉 CMake 在哪里查找依赖项的另一种方式。包注册表是包含一组包的特殊位置。用户注册表对当前用户账户有效，而系统包注册表在系统范围内有效。在 Windows 上，用户包注册表的位置存储在 Windows 注册表中，路径如下：
 
     +   `HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<packageName>\`
 
-+   在Unix平台上，它被存储在用户的主目录中，路径如下：
++   在 Unix 平台上，它被存储在用户的主目录中，路径如下：
 
     +   `~/.``cmake/packages/<PackageName>`
 
-+   `find_package`、平台特定的`CMAKE_SYSTEM_PREFIX_PATH`、`CMAKE_SYSTEM_FRAMEWORK_PATH`和`CMAKE_SYSTEM_APPBUNDLE_PATH`缓存变量的工作方式与其他查找调用类似。它们由CMake本身设置，不应由项目修改。
++   `find_package`、平台特定的`CMAKE_SYSTEM_PREFIX_PATH`、`CMAKE_SYSTEM_FRAMEWORK_PATH`和`CMAKE_SYSTEM_APPBUNDLE_PATH`缓存变量的工作方式与其他查找调用类似。它们由 CMake 本身设置，不应由项目修改。
 
 +   `HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<packageName>\`
 
-+   Unix系统不提供系统包注册表。* `PATHS`来自`find_package`，是传递给`find_package`的可选路径。通常，`HINTS`选项是根据其他值计算的，或者依赖于变量，而`PATHS`选项是固定路径。
++   Unix 系统不提供系统包注册表。* `PATHS`来自`find_package`，是传递给`find_package`的可选路径。通常，`HINTS`选项是根据其他值计算的，或者依赖于变量，而`PATHS`选项是固定路径。
 
-具体来说，在配置模式下查找包时，CMake将会在各种前缀下查找以下文件结构：
+具体来说，在配置模式下查找包时，CMake 将会在各种前缀下查找以下文件结构：
 
 ```cpp
 <prefix>/
@@ -375,7 +373,7 @@ cmake --help-modules #< lists all modules and their documentation
   (cmake|CMake)/
 ```
 
-在macOS平台上，还会搜索以下文件夹：
+在 macOS 平台上，还会搜索以下文件夹：
 
 ```cpp
 <prefix>/<packageName>.framework/Resources/
@@ -386,19 +384,19 @@ cmake --help-modules #< lists all modules and their documentation
 <prefix>/<packageName>.app/Contents/Resources/CMake/
 ```
 
-您可以在官方CMake文档中了解有关包的更多信息，链接：[https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)。
+您可以在官方 CMake 文档中了解有关包的更多信息，链接：[`cmake.org/cmake/help/latest/manual/cmake-packages.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)。
 
-就模块而言，到目前为止，我们只讨论了如何查找现有的模块。但是如果我们想查找那些既没有集成到CMake中，也不在标准位置，或者没有为CMake提供配置说明的依赖项怎么办呢？好吧，让我们在下一节中了解一下。
+就模块而言，到目前为止，我们只讨论了如何查找现有的模块。但是如果我们想查找那些既没有集成到 CMake 中，也不在标准位置，或者没有为 CMake 提供配置说明的依赖项怎么办呢？好吧，让我们在下一节中了解一下。
 
 ## 编写您自己的查找模块
 
-尽管CMake几乎已成为行业标准，但仍然有许多库没有使用CMake进行管理，或者虽然使用CMake管理，但没有导出CMake包。如果它们能够安装到系统的默认位置或使用包管理器时，这些库通常不成问题。不幸的是，这并非总是可行。一个常见的情况是使用专有的第三方库，该库只为某个特定项目所需，或者使用与系统包管理器安装的版本不同的库进行构建，或者该包在包管理器中不可用。
+尽管 CMake 几乎已成为行业标准，但仍然有许多库没有使用 CMake 进行管理，或者虽然使用 CMake 管理，但没有导出 CMake 包。如果它们能够安装到系统的默认位置或使用包管理器时，这些库通常不成问题。不幸的是，这并非总是可行。一个常见的情况是使用专有的第三方库，该库只为某个特定项目所需，或者使用与系统包管理器安装的版本不同的库进行构建，或者该包在包管理器中不可用。
 
-如果你正在同时开发多个项目，可能希望为每个项目在本地处理依赖项。无论哪种方式，最好将项目设置成这样：依赖项在本地管理，而不是过度依赖系统中已安装的内容。因此，使用包管理工具（如Conan或vcpkg），如*在CMake中使用包管理工具*章节中所述，优于自己编写`find`模块。
+如果你正在同时开发多个项目，可能希望为每个项目在本地处理依赖项。无论哪种方式，最好将项目设置成这样：依赖项在本地管理，而不是过度依赖系统中已安装的内容。因此，使用包管理工具（如 Conan 或 vcpkg），如*在 CMake 中使用包管理工具*章节中所述，优于自己编写`find`模块。
 
-创建完全可重现的构建在[*第12章*](B30947_12.xhtml#_idTextAnchor182)中有描述，*跨平台编译与自定义工具链*；不过，了解如何编写自己的`find`模块很有用，并且能帮助我们深入了解CMake的包如何工作。如果没有模块或配置文件用于某个依赖项，通常编写自己的所谓`find`模块是最快的解决方法。目标是提供足够的信息，以便稍后我们可以通过`find_package`使用任何包。
+创建完全可重现的构建在*第十二章*中有描述，*跨平台编译与自定义工具链*；不过，了解如何编写自己的`find`模块很有用，并且能帮助我们深入了解 CMake 的包如何工作。如果没有模块或配置文件用于某个依赖项，通常编写自己的所谓`find`模块是最快的解决方法。目标是提供足够的信息，以便稍后我们可以通过`find_package`使用任何包。
 
-`find`模块是CMake的指令，告诉它如何找到库所需的头文件和二进制文件，并创建供CMake使用的导入目标。如本章前面所述，在模块模式下调用`find_package`时，CMake会在`CMAKE_MODULE_PATH`中搜索名为`Find<PackageName>.cmake`的文件。
+`find`模块是 CMake 的指令，告诉它如何找到库所需的头文件和二进制文件，并创建供 CMake 使用的导入目标。如本章前面所述，在模块模式下调用`find_package`时，CMake 会在`CMAKE_MODULE_PATH`中搜索名为`Find<PackageName>.cmake`的文件。
 
 假设我们正在构建一个项目，其中依赖项已经被下载或构建，并已放入一个名为`dep`的文件夹中，然后再使用它们。在这个示例中，假设我们使用一个名为`obscure`的库；在这种情况下，`find`模块将被命名为`FindObscure.cmake`。因此，项目结构可能如下所示：
 
@@ -418,7 +416,7 @@ cmake --help-modules #< lists all modules and their documentation
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 ```
 
-这告诉CMake，它应该在`cmake`文件夹中查找`find`模块。通常，`find`模块按以下顺序执行：
+这告诉 CMake，它应该在`cmake`文件夹中查找`find`模块。通常，`find`模块按以下顺序执行：
 
 1.  它查找属于该包的文件。
 
@@ -468,7 +466,7 @@ endif()
 
 1.  接下来，`find`模块尝试定位`include`路径。这是通过找到库的已知路径模式来完成的，通常是公共头文件之一。结果存储在`OBSCURE_INCLUDE_DIR`变量中。同样的，常见做法是将该变量命名为`<PACKAGENAME>_INCLUDE_DIR`。
 
-1.  由于处理`find`模块的所有要求可能会非常繁琐且重复，CMake提供了`FindPackageHandleStandardArgs`模块，它提供了一个便捷的函数来处理所有常见情况。它提供了`find_package_handle_standard_args`函数，处理`REQUIRED`、`QUIET`以及`find_package`的版本相关参数。`find_package_handle_standard_args`有简短签名和长签名两种形式。在这个例子中，使用了简短签名：
+1.  由于处理`find`模块的所有要求可能会非常繁琐且重复，CMake 提供了`FindPackageHandleStandardArgs`模块，它提供了一个便捷的函数来处理所有常见情况。它提供了`find_package_handle_standard_args`函数，处理`REQUIRED`、`QUIET`以及`find_package`的版本相关参数。`find_package_handle_standard_args`有简短签名和长签名两种形式。在这个例子中，使用了简短签名：
 
     ```cpp
     find_package_handle_standard_args(<PackageName>
@@ -502,7 +500,7 @@ target_link_libraries(find_module_example PRIVATE  Obscure::Obscure)
 
 现在，我们了解了如何将其他库添加到项目中，如果它们已经可用。那么，我们如何将这些库首先引入到系统中呢？我们将在下一节中解决这个问题。
 
-# 使用CMake的包管理器
+# 使用 CMake 的包管理器
 
 将依赖项加入项目的最简单方法是通过 `apt-get`、brew 或 Chocolatey 定期安装它们。安装所有内容的缺点是，你可能会污染系统，导致存在多个不同版本的库，并且你需要的版本可能根本无法找到。特别是在你同时处理多个具有不同依赖要求的项目时，这种情况尤为严重。开发者通常会为每个项目本地下载依赖项，以确保每个项目能够独立工作。处理依赖项的一个非常好的方法是使用像 Conan 或 vcpkg 这样的包管理器。
 
@@ -600,7 +598,7 @@ target_link_libraries(conan_example PRIVATE fmt::fmt)
 
 请注意，使用 Conan 包与使用“常规” CMake 包没有区别，不需要在 `CMakeLists.txt` 中添加任何特定于 Conan 的代码，这有助于在不同系统之间保持可移植性。
 
-到这里，我们差不多准备好了。接下来需要告诉 CMake 使用 Conan 作为依赖项提供程序。为此，CMake 依赖项提供程序的定义文件可以从这里获取：[https://github.com/conan-io/cmake-conan](https://github.com/conan-io/cmake-conan)
+到这里，我们差不多准备好了。接下来需要告诉 CMake 使用 Conan 作为依赖项提供程序。为此，CMake 依赖项提供程序的定义文件可以从这里获取：[`github.com/conan-io/cmake-conan`](https://github.com/conan-io/cmake-conan)
 
 在这个仓库中，有一个 `conan_provider.cmake` 文件，可以手动下载该文件，或者可以将 Git 仓库用作子模块，选择最适合你的方式。在包含示例的 GitHub 仓库中，文件作为子模块包含。你可以通过克隆该仓库并调用 `git submodule update --init --recursive` 来获取它。
 
@@ -642,7 +640,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 这样，CMake 项目就可以构建，并且可以使用依赖项。在大多数情况下，`CMakeDeps` 生成器是您希望使用的，因为它在交叉编译时利用了 CMake 的优势，同时又能享受 Conan 管理包的便利。
 
-如果您希望将构建配置完全交给 Conan 处理，可以使用 Conan 的 `CMakeToolchain` 生成器。这个生成器不仅会创建包信息，还会生成一个 CMake 工具链定义和用于使用它们的预设。CMake 工具链的详细内容可以参考 [*第 9 章*](B30947_09.xhtml#_idTextAnchor146)，*创建可重复的构建环境*。
+如果您希望将构建配置完全交给 Conan 处理，可以使用 Conan 的 `CMakeToolchain` 生成器。这个生成器不仅会创建包信息，还会生成一个 CMake 工具链定义和用于使用它们的预设。CMake 工具链的详细内容可以参考 *第九章*，*创建可重复的构建环境*。
 
 同样，安装 Conan 包的命令如下：
 
@@ -658,17 +656,17 @@ cmake --preset conan-debug
 
 这将使用从 Conan 生成的工具链配置 CMake 项目。虽然这看起来非常方便，但它的缺点是所有构建环境的配置都必须通过 Conan 配置文件或 `conan install` 命令的标志来完成。使用现有的 CMake 配置选项变得更加困难。特别是，如果项目或开发人员已经定义了自己的预设，这些预设会被 Conan 生成的预设覆盖。因此，建议仅在具有相对简单构建环境要求的小型独立项目中使用 `CMakeToolchain` 生成器。
 
-尽管Conan是一个非常强大的包管理器，并且与CMake的集成非常好，但它并不是唯一的选择。另一个常用的包管理器是来自微软的vcpkg。让我们更详细地了解一下它。
+尽管 Conan 是一个非常强大的包管理器，并且与 CMake 的集成非常好，但它并不是唯一的选择。另一个常用的包管理器是来自微软的 vcpkg。让我们更详细地了解一下它。
 
-## 使用vcpkg进行依赖管理
+## 使用 vcpkg 进行依赖管理
 
-另一个流行的开源包管理器是**vcpkg**，来自微软。它的工作方式类似于Conan，都是以客户端/服务器架构的形式进行设置。最初，它是为与Visual Studio编译器环境一起使用而构建的，后来才添加了CMake支持。包可以通过手动安装，调用vcpkg的所谓**经典模式**，或者直接通过CMake以**清单模式**安装。使用vcpkg经典模式安装包的命令如下：
+另一个流行的开源包管理器是**vcpkg**，来自微软。它的工作方式类似于 Conan，都是以客户端/服务器架构的形式进行设置。最初，它是为与 Visual Studio 编译器环境一起使用而构建的，后来才添加了 CMake 支持。包可以通过手动安装，调用 vcpkg 的所谓**经典模式**，或者直接通过 CMake 以**清单模式**安装。使用 vcpkg 经典模式安装包的命令如下：
 
 ```cpp
 vcpkg install [packages]
 ```
 
-当以清单模式运行时，项目的依赖项在项目根目录下的`vcpkg.json`文件中定义。清单模式有一个很大的优势，就是它与CMake的集成更加顺畅，因此在可能的情况下，建议使用清单模式。一个vcpkg清单可能如下所示：
+当以清单模式运行时，项目的依赖项在项目根目录下的`vcpkg.json`文件中定义。清单模式有一个很大的优势，就是它与 CMake 的集成更加顺畅，因此在可能的情况下，建议使用清单模式。一个 vcpkg 清单可能如下所示：
 
 ```cpp
 {
@@ -682,17 +680,17 @@ vcpkg install [packages]
 }
 ```
 
-为了让CMake找到包，必须将vcpkg工具链文件传递给CMake，因此调用CMake的命令如下所示：
+为了让 CMake 找到包，必须将 vcpkg 工具链文件传递给 CMake，因此调用 CMake 的命令如下所示：
 
 ```cpp
 cmake -S . -B ./build --toolchain=~/.local/opt/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
-如果以清单模式运行，`vcpkg.json`文件中指定的包将会自动下载并本地安装。如果以经典模式运行，则必须在运行CMake之前手动安装这些包。当传递vcpkg工具链文件时，已安装的包可以像往常一样使用，方法是使用`find_package`和`target_link_libraries`。
+如果以清单模式运行，`vcpkg.json`文件中指定的包将会自动下载并本地安装。如果以经典模式运行，则必须在运行 CMake 之前手动安装这些包。当传递 vcpkg 工具链文件时，已安装的包可以像往常一样使用，方法是使用`find_package`和`target_link_libraries`。
 
-微软建议将vcpkg安装为与CMake根项目处于同一级别的子模块，但它几乎可以安装在任何地方。
+微软建议将 vcpkg 安装为与 CMake 根项目处于同一级别的子模块，但它几乎可以安装在任何地方。
 
-设置工具链文件可能会在交叉编译时导致问题，因为`CMAKE_TOOLCHAIN_FILE`可能已经指向了另一个文件。在这种情况下，可以通过`VCPKG_CHAINLOAD_TOOLCHAIN_FILE`变量传递第二个工具链文件。然后，调用CMake的命令可能如下所示：
+设置工具链文件可能会在交叉编译时导致问题，因为`CMAKE_TOOLCHAIN_FILE`可能已经指向了另一个文件。在这种情况下，可以通过`VCPKG_CHAINLOAD_TOOLCHAIN_FILE`变量传递第二个工具链文件。然后，调用 CMake 的命令可能如下所示：
 
 ```cpp
 cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_FILE=[vcpkg
@@ -700,9 +698,9 @@ root]/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_
 FILE=/path/to/other/toolchain.cmake
 ```
 
-Conan和vcpkg只是C++和CMake中流行的两个包管理器。当然，还有许多其他包管理器，但要描述它们所有，恐怕需要一本专门的书。特别是当项目变得更加复杂时，我们强烈建议使用包管理器。
+Conan 和 vcpkg 只是 C++和 CMake 中流行的两个包管理器。当然，还有许多其他包管理器，但要描述它们所有，恐怕需要一本专门的书。特别是当项目变得更加复杂时，我们强烈建议使用包管理器。
 
-选择哪个包管理器取决于项目开发的背景和个人偏好。Conan 相比 vcpkg 有一个轻微的优势，因为它在更多平台上受支持，因为它可以在所有 Python 支持的地方运行。在功能和跨编译能力方面，两者大致相等。总体来说，Conan 提供了更多的高级配置选项和对包的控制，但代价是需要更复杂的处理。另一种处理本地依赖的方法是通过使用容器、sysroot 等创建完全隔离的环境。这将在[*第9章*](B30947_09.xhtml#_idTextAnchor146)中讨论，*创建可重现的构建* *环境*。暂时我们假设我们正在使用标准系统安装运行 CMake。
+选择哪个包管理器取决于项目开发的背景和个人偏好。Conan 相比 vcpkg 有一个轻微的优势，因为它在更多平台上受支持，因为它可以在所有 Python 支持的地方运行。在功能和跨编译能力方面，两者大致相等。总体来说，Conan 提供了更多的高级配置选项和对包的控制，但代价是需要更复杂的处理。另一种处理本地依赖的方法是通过使用容器、sysroot 等创建完全隔离的环境。这将在*第九章*中讨论，*创建可重现的构建* *环境*。暂时我们假设我们正在使用标准系统安装运行 CMake。
 
 在处理项目特定的依赖时，使用包管理器进行依赖管理是推荐的做法。然而，有时包管理器不可用，这可能是因为一些神秘的公司政策或其他原因。在这种情况下，CMake 也支持将依赖项作为源代码下载并将其集成到项目中作为外部目标。
 
@@ -808,29 +806,29 @@ FetchContent_MakeAvailable(Project_B)
 
 图 5.2 – MyProject 声明 AwesomeLib 版本后的修正依赖关系图
 
-将依赖项作为源代码添加有一些优点，但也有一个主要缺点，那就是它会显著增加配置和构建时间。在 [*第 10 章*](B30947_10.xhtml#_idTextAnchor158)，《处理超构建中的分布式仓库和依赖关系》中，我们将讨论超构建和分布式仓库，并提供有关如何处理源代码依赖项的更多信息。
+将依赖项作为源代码添加有一些优点，但也有一个主要缺点，那就是它会显著增加配置和构建时间。在 *第十章*，《处理超构建中的分布式仓库和依赖关系》中，我们将讨论超构建和分布式仓库，并提供有关如何处理源代码依赖项的更多信息。
 
-在本章开始时，我们查看了`find_package`，它可以用来包含二进制依赖项，但我们没有讨论如何方便地使用CMake下载本地二进制依赖项。虽然可以使用`FetchContent`来完成此操作，但这并不是它的目的。相反，像Conan和vcpkg这样的专用包管理器更为适合。`FetchContent`在内部使用的是较旧且更复杂的`ExternalProject`模块。虽然`ExternalProject`提供了更多控制权，但使用起来也更复杂。接下来，我们来看一下如何使用它。
+在本章开始时，我们查看了`find_package`，它可以用来包含二进制依赖项，但我们没有讨论如何方便地使用 CMake 下载本地二进制依赖项。虽然可以使用`FetchContent`来完成此操作，但这并不是它的目的。相反，像 Conan 和 vcpkg 这样的专用包管理器更为适合。`FetchContent`在内部使用的是较旧且更复杂的`ExternalProject`模块。虽然`ExternalProject`提供了更多控制权，但使用起来也更复杂。接下来，我们来看一下如何使用它。
 
-### 使用ExternalProject
+### 使用 ExternalProject
 
 `ExternalProject`模块用于下载并构建那些没有完全集成到主项目中的外部项目。在构建外部项目时，构建是完全隔离的，这意味着它不会自动继承任何与架构或平台相关的设置。这种隔离可以避免目标或组件命名冲突。外部项目会创建一个主要目标和几个子目标，包含以下隔离的构建步骤：
 
-1.  `ExternalProject`可以通过多种方式下载内容，比如纯HTTPS下载，或通过访问版本控制系统，如Git、Subversion、Mercurial和CVS。如果内容是归档文件，下载步骤也会将其解压。
+1.  `ExternalProject`可以通过多种方式下载内容，比如纯 HTTPS 下载，或通过访问版本控制系统，如 Git、Subversion、Mercurial 和 CVS。如果内容是归档文件，下载步骤也会将其解压。
 
 1.  **更新和修补**：如果内容是从**源代码管理**（**SCM**）中拉取的，下载的源代码可以被修补或更新到最新版本。
 
-1.  **配置**：如果下载的源代码使用CMake，则执行配置步骤。对于非CMake项目，可以提供一个自定义命令来进行配置。
+1.  **配置**：如果下载的源代码使用 CMake，则执行配置步骤。对于非 CMake 项目，可以提供一个自定义命令来进行配置。
 
-1.  **构建**：默认情况下，依赖项使用与主项目相同的构建工具进行构建，但如果不希望如此，可以提供自定义命令。如果提供了自定义构建命令，则用户需要确保传递必要的编译器标志，以确保结果与ABI兼容。
+1.  **构建**：默认情况下，依赖项使用与主项目相同的构建工具进行构建，但如果不希望如此，可以提供自定义命令。如果提供了自定义构建命令，则用户需要确保传递必要的编译器标志，以确保结果与 ABI 兼容。
 
 1.  **安装**：可以将隔离的构建安装到本地，通常是主项目的构建树中的某个位置。
 
 1.  **测试**：如果外部内容附带了一组测试，主项目可以选择运行这些测试。默认情况下，不会运行测试。
 
-所有步骤，包括下载，都在构建时执行。因此，根据外部项目的不同，这可能会显著增加构建时间。CMake会缓存下载和构建内容，因此除非外部项目已更改，否则额外的开销主要是第一次运行时的开销。虽然可以为外部构建添加更多步骤，但对于大多数项目，默认步骤已经足够。稍后我们将看到，步骤可以根据需要进行自定义或省略。
+所有步骤，包括下载，都在构建时执行。因此，根据外部项目的不同，这可能会显著增加构建时间。CMake 会缓存下载和构建内容，因此除非外部项目已更改，否则额外的开销主要是第一次运行时的开销。虽然可以为外部构建添加更多步骤，但对于大多数项目，默认步骤已经足够。稍后我们将看到，步骤可以根据需要进行自定义或省略。
 
-在以下示例中，使用契约设计的`bertrand`库通过HTTPS下载并在当前的`build`目录中本地安装：
+在以下示例中，使用契约设计的`bertrand`库通过 HTTPS 下载并在当前的`build`目录中本地安装：
 
 ```cpp
 include(ExternalProject)
@@ -845,7 +843,7 @@ ExternalProject_Add(
 )
 ```
 
-请注意，`ExternalProject` 模块默认不可用，必须在第一行使用 `include(ExternalProject)` 引入。由于外部库安装在本地构建目录中，因此指定了 `INSTALL_DIR` 选项。由于 `bertrand` 本身是一个 CMake 项目，安装目录通过使用 `CMAKE_INSTALL_PREFIX` 变量传递给 `<INSTALL_DIR>` 以构建该项目。`<INSTALL_DIR>` 是一个占位符，指向 `INSTALL_DIR` 选项。`ExternalProject` 知道各种目录的占位符，如 `<SOURCE_DIR>`、`<BINARY_DIR>` 和 `<DOWNLOAD_DIR>`。有关完整列表，请查阅模块文档 [https://cmake.org/cmake/help/latest/module/ExternalProject.html](https://cmake.org/cmake/help/latest/module/ExternalProject.html)。
+请注意，`ExternalProject` 模块默认不可用，必须在第一行使用 `include(ExternalProject)` 引入。由于外部库安装在本地构建目录中，因此指定了 `INSTALL_DIR` 选项。由于 `bertrand` 本身是一个 CMake 项目，安装目录通过使用 `CMAKE_INSTALL_PREFIX` 变量传递给 `<INSTALL_DIR>` 以构建该项目。`<INSTALL_DIR>` 是一个占位符，指向 `INSTALL_DIR` 选项。`ExternalProject` 知道各种目录的占位符，如 `<SOURCE_DIR>`、`<BINARY_DIR>` 和 `<DOWNLOAD_DIR>`。有关完整列表，请查阅模块文档 [`cmake.org/cmake/help/latest/module/ExternalProject.html`](https://cmake.org/cmake/help/latest/module/ExternalProject.html)。
 
 验证你的下载
 
@@ -909,7 +907,7 @@ ExternalProject_Add(MyAutotoolsProject
 
 使用非 CMake 项目（例如这个项目）的一大问题是，它们没有定义直接使用依赖项所需的目标。因此，要在另一个目标中使用外部构建的库，通常需要将完整的库名称添加到 `target_link_libraries` 调用中。这个方法的主要缺点是，你需要手动维护不同平台上文件的名称和位置。`find_library` 或 `find_file` 调用几乎没什么用处，因为它们发生在配置时，而 `ExternalProject` 只会在构建时创建所需的文件。
 
-另一个常见的用例是使用 `ExternalProject` 为不同的目标平台构建现有源目录的内容。在这种情况下，处理下载的参数可以直接省略。如果外部项目使用 CMake 构建，可以将工具链文件作为 CMake 选项传递给外部项目。关于工具链文件的更多信息，请参阅 [*第 12 章*](B30947_12.xhtml#_idTextAnchor182)，*跨平台编译和自定义工具链*。一个常见的陷阱是，`ExternalProject` 不会识别外部项目源代码的任何变化，因此 CMake 可能不会重新构建它们。为了避免这种情况，应该传递 `BUILD_ALWAYS` 选项，但这会导致构建时间显著增加：
+另一个常见的用例是使用 `ExternalProject` 为不同的目标平台构建现有源目录的内容。在这种情况下，处理下载的参数可以直接省略。如果外部项目使用 CMake 构建，可以将工具链文件作为 CMake 选项传递给外部项目。关于工具链文件的更多信息，请参阅 *第十二章*，*跨平台编译和自定义工具链*。一个常见的陷阱是，`ExternalProject` 不会识别外部项目源代码的任何变化，因此 CMake 可能不会重新构建它们。为了避免这种情况，应该传递 `BUILD_ALWAYS` 选项，但这会导致构建时间显著增加：
 
 ```cpp
 ExternalProject_Add(ProjectForADifferentPlatform

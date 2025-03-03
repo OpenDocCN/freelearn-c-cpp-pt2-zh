@@ -1,14 +1,12 @@
-# 7
-
-# 与CMake无缝集成代码质量工具
+# 第七章：与 CMake 无缝集成代码质量工具
 
 到目前为止，我们集中于构建和安装项目，生成文档以及处理外部依赖项。编写高质量软件的另一个重要任务是测试，并通过其他手段确保代码质量达到预期水平。为了实现高代码质量，仅仅编写单元测试并偶尔执行是不够的。如果你想开发高质量的软件，拥有与构建系统轻松集成的合适测试工具不仅不是奢侈，而是必须的。只有构建和测试能够无缝配合，程序员才能专注于编写良好的测试，而不是花时间确保这些测试能够运行。像测试驱动开发这样的方式为软件质量带来了巨大价值。
 
 然而，提高质量的不仅仅是编写普通的测试。编写良好的测试是一回事；通过覆盖率报告检查测试的有效性，并通过静态代码分析确保整体代码质量是另一回事。
 
-虽然测试、覆盖率和静态代码分析有助于确定代码是否按预期运行，但一个常见的问题是，一些工具仅与特定编译器兼容，或需要特殊的编译器设置。为了利用这些工具，可能需要使用不同的编译器以不同的方式编译相同的源代码。幸运的是，CMake正是擅长这一点，这也是为什么CMake能够帮助提升代码质量，使得这些质量工具易于访问的原因。
+虽然测试、覆盖率和静态代码分析有助于确定代码是否按预期运行，但一个常见的问题是，一些工具仅与特定编译器兼容，或需要特殊的编译器设置。为了利用这些工具，可能需要使用不同的编译器以不同的方式编译相同的源代码。幸运的是，CMake 正是擅长这一点，这也是为什么 CMake 能够帮助提升代码质量，使得这些质量工具易于访问的原因。
 
-很多确保高代码质量的工具有一个好处，那就是它们通常可以自动化。随着如今CI/CD系统的普及，创建高程度的自动化检查以确保软件质量变得相当容易，尤其是使用CMake时，这些工具通常可以在定义软件构建方式的地方进行配置和执行。本章将教你如何使用CMake定义和协调测试，并创建代码覆盖率报告，以查看哪些部分的代码已被测试。我们还将探讨如何集成各种代码清理工具和静态代码分析器，在编译时就检查代码质量。我们会展示如何将所有这些工具集成在一起，以及如何创建一个专门的构建类型来运行静态代码质量工具。最后，我们还会看看如何设置微基准测试，检查代码的运行时性能。
+很多确保高代码质量的工具有一个好处，那就是它们通常可以自动化。随着如今 CI/CD 系统的普及，创建高程度的自动化检查以确保软件质量变得相当容易，尤其是使用 CMake 时，这些工具通常可以在定义软件构建方式的地方进行配置和执行。本章将教你如何使用 CMake 定义和协调测试，并创建代码覆盖率报告，以查看哪些部分的代码已被测试。我们还将探讨如何集成各种代码清理工具和静态代码分析器，在编译时就检查代码质量。我们会展示如何将所有这些工具集成在一起，以及如何创建一个专门的构建类型来运行静态代码质量工具。最后，我们还会看看如何设置微基准测试，检查代码的运行时性能。
 
 本章涵盖以下主要内容：
 
@@ -18,13 +16,13 @@
 
 +   清理代码
 
-+   使用CMake进行静态代码分析
++   使用 CMake 进行静态代码分析
 
 +   为质量工具创建自定义构建类型
 
 # 技术要求
 
-与之前的章节一样，示例在CMake 3.24下进行测试，并可以在以下任意编译器上运行：
+与之前的章节一样，示例在 CMake 3.24 下进行测试，并可以在以下任意编译器上运行：
 
 +   GCC 9 或更高版本
 
@@ -32,7 +30,7 @@
 
 +   MSVC 19 或更高版本
 
-一些关于代码覆盖率、清理工具和静态代码分析的示例需要 GCC 或 Clang 才能运行，无法在 MSVC 上运行。要在 Windows 上运行 Clang，请查看 [*第9章*](B30947_09.xhtml#_idTextAnchor146)，*创建可重现的构建* *环境*，该章节介绍了工具链文件的使用。一些示例需要安装 Catch2 单元测试套件才能编译。某些示例会从不同的在线位置拉取依赖项，因此也需要连接互联网。
+一些关于代码覆盖率、清理工具和静态代码分析的示例需要 GCC 或 Clang 才能运行，无法在 MSVC 上运行。要在 Windows 上运行 Clang，请查看 *第九章*，*创建可重现的构建* *环境*，该章节介绍了工具链文件的使用。一些示例需要安装 Catch2 单元测试套件才能编译。某些示例会从不同的在线位置拉取依赖项，因此也需要连接互联网。
 
 除了一个有效的编译器外，以下软件也用于示例中：
 
@@ -42,7 +40,7 @@
 
 +   `Clang-tidy`、`Cppcheck`、`Cpplint` 和 `include-what-you-use` 用于静态代码分析器的示例
 
-本书的所有示例和源代码都可以在 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition) 的 GitHub 仓库中找到。
+本书的所有示例和源代码都可以在 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition) 的 GitHub 仓库中找到。
 
 如果缺少某些软件，相关示例将从构建中排除。
 
@@ -209,13 +207,13 @@ ctest -I 1,10,2,6,8
 
 处理`-I`选项的繁琐以及添加新测试可能会重新分配编号，是这种方法在实践中很少使用的两个原因。通常，更倾向于通过标签或测试名称进行过滤。
 
-编写测试时的另一个常见陷阱是测试不够独立。因此，测试`2`可能意外地依赖于测试`1`的先前执行。为了防止这种意外依赖，CTest可以通过`--schedule-random`命令行参数随机化测试执行顺序。这将确保测试以任意顺序执行。
+编写测试时的另一个常见陷阱是测试不够独立。因此，测试`2`可能意外地依赖于测试`1`的先前执行。为了防止这种意外依赖，CTest 可以通过`--schedule-random`命令行参数随机化测试执行顺序。这将确保测试以任意顺序执行。
 
 ## 自动发现测试
 
-使用`add_test`定义测试是将测试暴露给CTest的一种方式。一个缺点是，这将把整个可执行文件注册为一个单独的测试。然而，在大多数情况下，一个可执行文件将包含许多单元测试，而不仅仅是一个，因此当其中一个测试失败时，可能很难确定究竟是哪个测试失败了。
+使用`add_test`定义测试是将测试暴露给 CTest 的一种方式。一个缺点是，这将把整个可执行文件注册为一个单独的测试。然而，在大多数情况下，一个可执行文件将包含许多单元测试，而不仅仅是一个，因此当其中一个测试失败时，可能很难确定究竟是哪个测试失败了。
 
-考虑一个包含以下测试代码的C++文件，假设Fibonacci函数包含一个bug，因此`Fibonacci(0)`不会返回`1`，而是返回其他值：
+考虑一个包含以下测试代码的 C++文件，假设 Fibonacci 函数包含一个 bug，因此`Fibonacci(0)`不会返回`1`，而是返回其他值：
 
 ```cpp
 TEST_CASE("Fibonacci(0) returns 1"){ REQUIRE(Fibonacci(0) == 1);}
@@ -238,7 +236,7 @@ The following tests FAILED:
           5 - Fibonacci (Failed)
 ```
 
-这样做对确定哪个测试用例失败并没有太大帮助。幸运的是，使用Catch2和GoogleTest时，可以通过将内部测试暴露给CTest来使它们作为常规测试执行。对于GoogleTest，CMake本身提供了执行此操作的模块；Catch2则在其自己的CMake集成中提供了这一功能。使用Catch2发现测试是通过`catch_discover_tests`，而对于GoogleTest，则使用`gtest_discover_tests`。以下示例将把在Catch2框架中编写的测试暴露给CTest：
+这样做对确定哪个测试用例失败并没有太大帮助。幸运的是，使用 Catch2 和 GoogleTest 时，可以通过将内部测试暴露给 CTest 来使它们作为常规测试执行。对于 GoogleTest，CMake 本身提供了执行此操作的模块；Catch2 则在其自己的 CMake 集成中提供了这一功能。使用 Catch2 发现测试是通过`catch_discover_tests`，而对于 GoogleTest，则使用`gtest_discover_tests`。以下示例将把在 Catch2 框架中编写的测试暴露给 CTest：
 
 ```cpp
 find_package(Catch2)
@@ -247,7 +245,7 @@ add_executable(Fibonacci)
 catch_discover_tests(Fibonacci)
 ```
 
-请注意，为了使该函数可用，必须包含`Catch`模块。对于GoogleTest，它的工作方式非常相似：
+请注意，为了使该函数可用，必须包含`Catch`模块。对于 GoogleTest，它的工作方式非常相似：
 
 ```cpp
 include(GoogleTest)
@@ -255,7 +253,7 @@ add_executable(Fibonacci)
 gtest_discover_tests(Fibonacci)
 ```
 
-当使用发现功能时，在测试可执行文件中定义的每个测试用例将被CTest视为其自己的测试。如果像这样暴露测试，则调用CTest的结果可能如下所示：
+当使用发现功能时，在测试可执行文件中定义的每个测试用例将被 CTest 视为其自己的测试。如果像这样暴露测试，则调用 CTest 的结果可能如下所示：
 
 ```cpp
     Start 5: Fibonacci(0) returns 1
@@ -272,13 +270,13 @@ The following tests FAILED:
           5 - Fibonacci(0) returns 1 (Failed)
 ```
 
-现在，我们可以清楚地看到哪些已定义的测试用例失败了。在这种情况下，`Fibonacci(0) returns 1` 测试用例没有按预期行为工作。当使用具有集成测试功能的编辑器或IDE时，这尤其有用。发现功能通过运行指定的可执行文件来工作，可以选择仅打印测试名称并将其内部注册到 CTest，因此每个构建步骤会有一些额外的开销。更细粒度地发现测试也有一个优点，即其执行可以更好地由 CMake 并行化，如本章的*并行运行测试和管理测试资源*部分所述。
+现在，我们可以清楚地看到哪些已定义的测试用例失败了。在这种情况下，`Fibonacci(0) returns 1` 测试用例没有按预期行为工作。当使用具有集成测试功能的编辑器或 IDE 时，这尤其有用。发现功能通过运行指定的可执行文件来工作，可以选择仅打印测试名称并将其内部注册到 CTest，因此每个构建步骤会有一些额外的开销。更细粒度地发现测试也有一个优点，即其执行可以更好地由 CMake 并行化，如本章的*并行运行测试和管理测试资源*部分所述。
 
 `gtest_discover_tests` 和 `catch_discover_tests` 都有多种选项，例如为测试名称添加前缀或后缀，或将属性列表添加到生成的测试中。有关这些函数的完整文档可以在这里找到：
 
-+   **Catch2**: [https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
++   **Catch2**: [`github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md`](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md)
 
-+   **GoogleTest**: [https://cmake.org/cmake/help/v3.21/module/GoogleTest.html](https://cmake.org/cmake/help/v3.21/module/GoogleTest.html)
++   **GoogleTest**: [`cmake.org/cmake/help/v3.21/module/GoogleTest.html`](https://cmake.org/cmake/help/v3.21/module/GoogleTest.html)
 
 Catch2 和 GoogleTest 只是众多测试框架中的两个；可能还有其他未广为人知的测试套件也具备相同功能。
 
@@ -309,7 +307,7 @@ set_tests_properties(SomeFailingTest PROPERTIES WILL_FAIL True)
 
 ## 处理超时和重试测试
 
-有时，我们不仅仅关注测试的成功或失败，还关注测试完成所需的时间。`TIMEOUT`测试属性使用一个秒数来确定测试的最大运行时间。如果测试超出了设定的时间，它将被终止并视为失败。以下命令将测试的执行时间限制为10秒：
+有时，我们不仅仅关注测试的成功或失败，还关注测试完成所需的时间。`TIMEOUT`测试属性使用一个秒数来确定测试的最大运行时间。如果测试超出了设定的时间，它将被终止并视为失败。以下命令将测试的执行时间限制为 10 秒：
 
 ```cpp
 set_tests_properties(timeout_test PROPERTIES TIMEOUT 10)
@@ -317,21 +315,21 @@ set_tests_properties(timeout_test PROPERTIES TIMEOUT 10)
 
 `TIMEOUT`属性通常对于那些有可能因某些原因进入无限循环或永远挂起的测试非常有用。
 
-另外，CTest还接受`--timeout`参数，设置一个全局超时，这个超时适用于所有没有指定`TIMEOUT`属性的测试。对于那些已定义`TIMEOUT`的测试，`CmakeLists.txt`中定义的超时会优先于命令行传递的超时设置。
+另外，CTest 还接受`--timeout`参数，设置一个全局超时，这个超时适用于所有没有指定`TIMEOUT`属性的测试。对于那些已定义`TIMEOUT`的测试，`CmakeLists.txt`中定义的超时会优先于命令行传递的超时设置。
 
-为了避免长时间的测试执行，CTest命令行接受`--stop-time`参数，该参数以当天的实时时间作为完整测试集的时间限制。以下命令会为每个测试设置一个默认的超时为30秒，且所有测试必须在23:59之前完成：
+为了避免长时间的测试执行，CTest 命令行接受`--stop-time`参数，该参数以当天的实时时间作为完整测试集的时间限制。以下命令会为每个测试设置一个默认的超时为 30 秒，且所有测试必须在 23:59 之前完成：
 
 ```cpp
 ctest --timeout 30 --stop-time 23:59
 ```
 
-有时，我们可能会遇到由于一些不可控因素而导致的测试超时。常见的情况是需要进行某种网络通信或依赖某种带宽有限资源的测试。有时，唯一能让测试继续运行的方法是重新尝试。为此，可以将`--repeat after-timeout:n`命令行参数传递给CTest，其中*n*是一个数字。
+有时，我们可能会遇到由于一些不可控因素而导致的测试超时。常见的情况是需要进行某种网络通信或依赖某种带宽有限资源的测试。有时，唯一能让测试继续运行的方法是重新尝试。为此，可以将`--repeat after-timeout:n`命令行参数传递给 CTest，其中*n*是一个数字。
 
 `--repeat`参数实际上有三个选项：
 
-+   `after-timeout`：如果发生超时，这会重新尝试测试若干次。通常，若发生重复超时，应将`--timeout`选项传递给CTest。
++   `after-timeout`：如果发生超时，这会重新尝试测试若干次。通常，若发生重复超时，应将`--timeout`选项传递给 CTest。
 
-+   `until-pass`：这个选项会一直重新运行测试，直到通过或者达到重试次数为止。在CI环境中，作为一般规则设置此选项是不推荐的，因为测试通常应该总是通过的。
++   `until-pass`：这个选项会一直重新运行测试，直到通过或者达到重试次数为止。在 CI 环境中，作为一般规则设置此选项是不推荐的，因为测试通常应该总是通过的。
 
 +   `until-fail`：测试会重新运行若干次，直到失败为止。这通常用于测试偶尔失败的情况，目的是找出这种失败发生的频率。`--repeat-until-fail`参数与`--repeat:until-fail:n`的作用完全相同。
 
@@ -367,18 +365,18 @@ Test project CMake-Best-Practices:
 3/3 Test #10: stop_server ...............   Passed    0.00 sec
 ```
 
-请注意，CTest是通过正则表达式过滤器调用的，仅匹配客户端测试，但CTest仍然启动了固定装置。为了避免在并行执行测试时过度加载测试固定装置，可以将它们定义为资源，如下一节所示。
+请注意，CTest 是通过正则表达式过滤器调用的，仅匹配客户端测试，但 CTest 仍然启动了固定装置。为了避免在并行执行测试时过度加载测试固定装置，可以将它们定义为资源，如下一节所示。
 
 ## 并行运行测试并管理测试资源
 
-如果一个项目有很多测试，并行执行它们会加速测试过程。默认情况下，CTest 按序列运行测试；通过向 CTest 调用传递`-j`选项，可以并行运行测试。或者，也可以在`CTEST_PARALLEL_LEVEL`环境变量中定义并行线程的数量。默认情况下，CTest假设每个测试只会在单个 CPU 上运行。如果一个测试需要多个处理器才能成功运行，则可以为该测试设置`PROCESSORS`属性，以定义所需的处理器数量：
+如果一个项目有很多测试，并行执行它们会加速测试过程。默认情况下，CTest 按序列运行测试；通过向 CTest 调用传递`-j`选项，可以并行运行测试。或者，也可以在`CTEST_PARALLEL_LEVEL`环境变量中定义并行线程的数量。默认情况下，CTest 假设每个测试只会在单个 CPU 上运行。如果一个测试需要多个处理器才能成功运行，则可以为该测试设置`PROCESSORS`属性，以定义所需的处理器数量：
 
 ```cpp
 add_test(NAME concurrency_test COMMAND concurrency_tests)
 set_tests_properties(concurrency_test PROPERTIES PROCESSORS 2)
 ```
 
-这将告诉CTest，`concurrency_test` 测试需要两个CPU才能运行。当使用 `-j 8` 并行运行测试时，`concurrency_test` 将占用八个并行执行“插槽”中的两个。如果此时，`PROCESSORS` 属性被设置为 `8`，则意味着没有其他测试可以与 `concurrency_test` 并行运行。当为 `PROCESSORS` 设置一个大于系统上可用的并行插槽或CPU数量的值时，测试将在整个池可用时运行。有时候，一些测试不仅需要特定数量的处理器，还需要独占运行，而不与任何其他测试一起运行。为了实现这一点，可以为测试设置 `RUN_SERIAL` 属性为 `true`。这可能会严重影响整体测试性能，因此使用时需要谨慎。一个更细粒度的控制方式是使用 `RESOURCE_LOCK` 属性，它包含一个字符串列表。这些字符串没有特别的含义，除了 CTest 会阻止两个测试并行运行，如果它们列出了相同的字符串。通过这种方式，可以实现部分序列化，而不会中止整个测试执行。这也是指定测试是否需要某个特定唯一资源（如某个文件、数据库等）的好方法。考虑以下示例：
+这将告诉 CTest，`concurrency_test` 测试需要两个 CPU 才能运行。当使用 `-j 8` 并行运行测试时，`concurrency_test` 将占用八个并行执行“插槽”中的两个。如果此时，`PROCESSORS` 属性被设置为 `8`，则意味着没有其他测试可以与 `concurrency_test` 并行运行。当为 `PROCESSORS` 设置一个大于系统上可用的并行插槽或 CPU 数量的值时，测试将在整个池可用时运行。有时候，一些测试不仅需要特定数量的处理器，还需要独占运行，而不与任何其他测试一起运行。为了实现这一点，可以为测试设置 `RUN_SERIAL` 属性为 `true`。这可能会严重影响整体测试性能，因此使用时需要谨慎。一个更细粒度的控制方式是使用 `RESOURCE_LOCK` 属性，它包含一个字符串列表。这些字符串没有特别的含义，除了 CTest 会阻止两个测试并行运行，如果它们列出了相同的字符串。通过这种方式，可以实现部分序列化，而不会中止整个测试执行。这也是指定测试是否需要某个特定唯一资源（如某个文件、数据库等）的好方法。考虑以下示例：
 
 ```cpp
 set_tests_properties(database_test_1 database_test_2 database_test_3
@@ -394,9 +392,9 @@ set_tests_properties(yet_another_test PROPERTIES RESOURCE_LOCK
 
 虽然技术上不是必需的，但如果 `RESOURCE_LOCK` 与 `FIXTURE_SETUP`、`FIXTURE_CLEANUP` 和 `FIXTURE_REQUIRED` 一起使用，最好为相同的资源使用相同的标识符。
 
-使用 `RESOURCE_LOCK` 管理测试的并行性在测试需要独占访问某些资源时非常方便。在大多数情况下，这完全足够管理并行性。从 CMake 3.16 开始，这可以通过 `RESOURCE_GROUPS` 属性在更细粒度的级别上进行控制。资源组不仅允许你指定*哪些*资源被使用，还允许你指定*使用多少*资源。常见的场景是定义特定贪婪操作可能需要的内存量，或者避免超过某个服务的连接限制。资源组通常在使用GPU进行通用计算的项目中出现，定义每个测试需要多少GPU插槽。
+使用 `RESOURCE_LOCK` 管理测试的并行性在测试需要独占访问某些资源时非常方便。在大多数情况下，这完全足够管理并行性。从 CMake 3.16 开始，这可以通过 `RESOURCE_GROUPS` 属性在更细粒度的级别上进行控制。资源组不仅允许你指定*哪些*资源被使用，还允许你指定*使用多少*资源。常见的场景是定义特定贪婪操作可能需要的内存量，或者避免超过某个服务的连接限制。资源组通常在使用 GPU 进行通用计算的项目中出现，定义每个测试需要多少 GPU 插槽。
 
-与简单的资源锁相比，资源组在复杂性上迈出了很大一步。要使用它们，CTest必须执行以下操作：
+与简单的资源锁相比，资源组在复杂性上迈出了很大一步。要使用它们，CTest 必须执行以下操作：
 
 +   **了解一个测试需要哪些资源才能运行**：这通过在项目中设置测试属性来定义
 
@@ -529,52 +527,52 @@ Gcov 生成的覆盖率信息可以通过 Gcovr 或 LCOV 工具汇总为报告�
 cmake -S <sourceDir> -B <BuildDir> -DCMAKE_CXX_FLAGS=--coverage
 ```
 
-另一种方法是定义各自的预设，如在[*第9章*](B30947_09.xhtml#_idTextAnchor146)中所述，*创建可复现的构建* *环境*。在构建代码覆盖率时，通常一个好的做法是启用调试信息并使用`-Og`标志禁用任何优化。此外，指定`-fkeep-inline-functions`和`-fkeep-static-consts`编译器标志将防止在函数未被使用的情况下优化掉静态和内联函数。这将确保所有可能的执行分支都被编译到代码中；否则，覆盖率报告可能会产生误导，特别是对于内联函数。
+另一种方法是定义各自的预设，如在*第九章*中所述，*创建可复现的构建* *环境*。在构建代码覆盖率时，通常一个好的做法是启用调试信息并使用`-Og`标志禁用任何优化。此外，指定`-fkeep-inline-functions`和`-fkeep-static-consts`编译器标志将防止在函数未被使用的情况下优化掉静态和内联函数。这将确保所有可能的执行分支都被编译到代码中；否则，覆盖率报告可能会产生误导，特别是对于内联函数。
 
 覆盖率报告不仅适用于单个可执行文件，还适用于库。但是，库必须在启用覆盖率标志的情况下编译。
 
 由于覆盖率的编译器标志是全局设置的，这些选项将传递给通过`FetchContent`或`ExternalProject`添加的项目，这可能会显著增加编译时间。
 
-使用启用覆盖率标志的GCC或Clang编译源代码将会在每个目标文件和可执行文件的构建目录中创建`.gcno`文件。这些文件包含关于各自编译单元中可用的调用和执行路径的Gcov元信息。为了找出哪些路径被使用，必须运行程序。
+使用启用覆盖率标志的 GCC 或 Clang 编译源代码将会在每个目标文件和可执行文件的构建目录中创建`.gcno`文件。这些文件包含关于各自编译单元中可用的调用和执行路径的 Gcov 元信息。为了找出哪些路径被使用，必须运行程序。
 
-查看Gcov和GCC的版本
+查看 Gcov 和 GCC 的版本
 
-提取代码覆盖率信息时常见的失败和挫折原因是GCC和Gcov的版本不匹配。请始终通过`g++ --version`和`gcov --version`检查它们是否相同。
+提取代码覆盖率信息时常见的失败和挫折原因是 GCC 和 Gcov 的版本不匹配。请始终通过`g++ --version`和`gcov --version`检查它们是否相同。
 
-在我们想要了解测试代码覆盖率的场景中，运行CTest将生成覆盖率结果。或者，直接运行可执行文件也会产生相同的结果。启用覆盖率的可执行文件将会在构建目录中生成`.gcda`文件，其中包含关于各自目标文件中调用的信息。
+在我们想要了解测试代码覆盖率的场景中，运行 CTest 将生成覆盖率结果。或者，直接运行可执行文件也会产生相同的结果。启用覆盖率的可执行文件将会在构建目录中生成`.gcda`文件，其中包含关于各自目标文件中调用的信息。
 
-一旦这些文件生成，运行Gcovr将会生成有关覆盖率的信息。默认情况下，Gcovr将信息输出到`stdout`，但它也可以生成HTML页面、JSON文件或SonarQube报告。
+一旦这些文件生成，运行 Gcovr 将会生成有关覆盖率的信息。默认情况下，Gcovr 将信息输出到`stdout`，但它也可以生成 HTML 页面、JSON 文件或 SonarQube 报告。
 
-一个常见的陷阱是，Gcovr期望所有源代码和目标文件都位于同一目录中，但这在CMake中并非如此。因此，我们必须通过`-r`选项将相应的目录传递给Gcov，如下所示：
+一个常见的陷阱是，Gcovr 期望所有源代码和目标文件都位于同一目录中，但这在 CMake 中并非如此。因此，我们必须通过`-r`选项将相应的目录传递给 Gcov，如下所示：
 
 ```cpp
 gcovr -r <SOURCE_DIR> <BINARY_DIR> -html
 ```
 
-这样的调用可能会生成一个看起来像这样的HTML文件：
+这样的调用可能会生成一个看起来像这样的 HTML 文件：
 
-![图7.1 – 覆盖率运行示例输出](img/B30947_07_01.jpg)
+![图 7.1 – 覆盖率运行示例输出](img/B30947_07_01.jpg)
 
-图7.1 – 覆盖率运行示例输出
+图 7.1 – 覆盖率运行示例输出
 
-Gcovr的另一个替代方案是LCOV，它的工作方式非常相似。与Gcovr不同，LCOV不能直接生成HTML或XML输出，而是将任何覆盖率信息组装成一个中间格式，然后可以通过各种转换器进行处理。为了生成HTML输出，通常使用`genhtml`工具。使用LCOV生成报告的命令可能如下所示：
+Gcovr 的另一个替代方案是 LCOV，它的工作方式非常相似。与 Gcovr 不同，LCOV 不能直接生成 HTML 或 XML 输出，而是将任何覆盖率信息组装成一个中间格式，然后可以通过各种转换器进行处理。为了生成 HTML 输出，通常使用`genhtml`工具。使用 LCOV 生成报告的命令可能如下所示：
 
 ```cpp
 lcov -c -d <BINARY_DIR> -o <OUTPUT_FILE>
 genhtml -o <HTML_OUTPUT_PATH> <LCOV_OUTPUT>
 ```
 
-使用LCOV生成的覆盖率报告可能如下所示：
+使用 LCOV 生成的覆盖率报告可能如下所示：
 
-![图7.2 – 使用LCOV生成的示例覆盖率报告](img/B30947_07_02.jpg)
+![图 7.2 – 使用 LCOV 生成的示例覆盖率报告](img/B30947_07_02.jpg)
 
-图7.2 – 使用LCOV生成的示例覆盖率报告
+图 7.2 – 使用 LCOV 生成的示例覆盖率报告
 
-请注意，这些调用只会为最后一次运行创建覆盖率报告。如果你想将它们汇总成一个时间序列，以查看代码覆盖率是增加还是减少，有许多CI工具可供使用，如Codecov和Cobertura，来完成这项工作。这些工具通常可以解析Gcovr或LCOV的输出，并将其汇总为精美的图形，展示覆盖率的趋势。有关Gcovr的详细文档可以在[https://gcovr.com/en/stable/](https://gcovr.com/en/stable/)找到。
+请注意，这些调用只会为最后一次运行创建覆盖率报告。如果你想将它们汇总成一个时间序列，以查看代码覆盖率是增加还是减少，有许多 CI 工具可供使用，如 Codecov 和 Cobertura，来完成这项工作。这些工具通常可以解析 Gcovr 或 LCOV 的输出，并将其汇总为精美的图形，展示覆盖率的趋势。有关 Gcovr 的详细文档可以在[`gcovr.com/en/stable/`](https://gcovr.com/en/stable/)找到。
 
-## 为MSVC创建覆盖率报告
+## 为 MSVC 创建覆盖率报告
 
-在使用MSVC构建软件时，`OpenCppCoverage`工具是Gcov的替代方案。它通过分析MSVC编译器生成的程序数据库（`.pdb`），而不是通过使用不同的标志重新编译源代码来工作。生成单个可执行文件的HTML覆盖率报告的命令可能如下所示：
+在使用 MSVC 构建软件时，`OpenCppCoverage`工具是 Gcov 的替代方案。它通过分析 MSVC 编译器生成的程序数据库（`.pdb`），而不是通过使用不同的标志重新编译源代码来工作。生成单个可执行文件的 HTML 覆盖率报告的命令可能如下所示：
 
 ```cpp
 OpenCppCoverage.exe --export_type html:coverage.html --
@@ -594,22 +592,22 @@ OpenCppCoverage.exe --input_coverage=program1.cov --input_coverage=
 
 这将把前两次运行的输入合并成一个公共报告。为了处理覆盖率信息，`export_type`选项必须设置为`binary`。
 
-覆盖率报告的一个常见用途是找出项目中由测试定义所覆盖的代码量。在这种情况下，使用CTest作为测试驱动程序是很方便的。由于CTest将实际测试作为子进程运行，因此必须将`--cover_children`选项传递给`OpenCppCoverage`。为了避免生成系统库的覆盖率报告，可能需要添加模块和源过滤器。命令可能如下所示：
+覆盖率报告的一个常见用途是找出项目中由测试定义所覆盖的代码量。在这种情况下，使用 CTest 作为测试驱动程序是很方便的。由于 CTest 将实际测试作为子进程运行，因此必须将`--cover_children`选项传递给`OpenCppCoverage`。为了避免生成系统库的覆盖率报告，可能需要添加模块和源过滤器。命令可能如下所示：
 
 ```cpp
 OpenCppCoverage.exe  --cover_children --modules <build_dir> --
   sources <source_dir> -- ctest.exe --build-config Debug
 ```
 
-这种方法的一个小缺点是，覆盖率报告会包括CTest本身的覆盖率报告。生成的HTML报告可能如下所示：
+这种方法的一个小缺点是，覆盖率报告会包括 CTest 本身的覆盖率报告。生成的 HTML 报告可能如下所示：
 
-![图7.3 – 使用OpenCppCoverage生成的覆盖率报告](img/B30947_07_03.jpg)
+![图 7.3 – 使用 OpenCppCoverage 生成的覆盖率报告](img/B30947_07_03.jpg)
 
-图7.3 – 使用OpenCppCoverage生成的覆盖率报告
+图 7.3 – 使用 OpenCppCoverage 生成的覆盖率报告
 
-如果你使用Visual Studio，命令行的替代方案是使用插件。插件可以在Visual Studio市场中找到：[https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin](https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin)
+如果你使用 Visual Studio，命令行的替代方案是使用插件。插件可以在 Visual Studio 市场中找到：[`marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin`](https://marketplace.visualstudio.com/items?itemName=OpenCppCoverage.OpenCppCoveragePlugin)
 
-要查看完整的文档，请参考 `OpenCppCoverage` 的 GitHub 页面：[https://github.com/OpenCppCoverage/OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage)
+要查看完整的文档，请参考 `OpenCppCoverage` 的 GitHub 页面：[`github.com/OpenCppCoverage/OpenCppCoverage`](https://github.com/OpenCppCoverage/OpenCppCoverage)
 
 知道代码测试覆盖了多少内容是了解代码质量的非常有价值的信息。事实上，在许多受监管的行业中，比如医疗、航空和汽车行业，监管机构可能要求提供代码覆盖率报告。然而，仅仅知道代码执行了多少是不够的；底层代码的质量更为重要。一些编译器提供了有用的工具，通过所谓的 sanitizer 来检测代码中的常见错误。在下一节中，您将学习如何使用 CMake 来应用这些 sanitizer。
 
@@ -639,14 +637,14 @@ Clang 套件在 sanitizers 的可用性方面处于领先地位，其次是 GCC�
 
 要在 GCC 或 Clang 中启用 ASan，必须传递`-fsanitize=<sanitizer>`编译器标志。对于 MSVC，相应的选项是`/fsanitize=<sanitizer>`。
 
-编译器标志通过`CMAKE_CXX_FLAGS`缓存变量传递给CMake。因此，从命令行调用启用 sanitizers 的 CMake 命令应该如下所示：
+编译器标志通过`CMAKE_CXX_FLAGS`缓存变量传递给 CMake。因此，从命令行调用启用 sanitizers 的 CMake 命令应该如下所示：
 
 ```cpp
 cmake -S <sourceDir> -B <BuildDir> -DCMAKE_CXX_FLAGS=-fsanitize=
   <sanitizer>
 ```
 
-在使用 CMake 预设时，也可以在其中定义包含编译器标志的缓存变量。预设在[*第 9 章*](B30947_09.xhtml#_idTextAnchor146)《创建可重现的构建环境》中有详细介绍。全局设置`sanitizer`选项也会影响在标志设置后使用`FetchContent`或`ExternalProject`的任何包含项目，因此在这里请小心操作。对于 ASan，使用在 GCC 和 Clang 中的`-fsanitizer=address`，在 MSVC 中使用`/fsanitizer=address`。MSan 通过`-fsanitize=memory`启用，LSan 通过`-fsanitize=leak`启用，TSan 通过`-fsanitize=thread`启用，UBSan 在撰写本文时仅在 GCC 和 Clang 中通过`-fsanitize=undefined`启用。为了获得 ASan、LSan 和 MSan 更简洁的输出，可以告诉编译器显式保留帧指针。通过在 GCC 和 Clang 中设置`-fno-omit-framepointer`来实现。MSVC 仅在 x86 构建中通过`/Oy-`选项支持此功能。
+在使用 CMake 预设时，也可以在其中定义包含编译器标志的缓存变量。预设在*第九章*《创建可重现的构建环境》中有详细介绍。全局设置`sanitizer`选项也会影响在标志设置后使用`FetchContent`或`ExternalProject`的任何包含项目，因此在这里请小心操作。对于 ASan，使用在 GCC 和 Clang 中的`-fsanitizer=address`，在 MSVC 中使用`/fsanitizer=address`。MSan 通过`-fsanitize=memory`启用，LSan 通过`-fsanitize=leak`启用，TSan 通过`-fsanitize=thread`启用，UBSan 在撰写本文时仅在 GCC 和 Clang 中通过`-fsanitize=undefined`启用。为了获得 ASan、LSan 和 MSan 更简洁的输出，可以告诉编译器显式保留帧指针。通过在 GCC 和 Clang 中设置`-fno-omit-framepointer`来实现。MSVC 仅在 x86 构建中通过`/Oy-`选项支持此功能。
 
 注意
 
@@ -728,13 +726,13 @@ Warning: Unused direct dependencies:
 
 # 为质量工具创建自定义构建类型
 
-到目前为止，我们讨论了CMake默认提供的构建类型，例如`Debug`、`Release`、`RelWithDebInfo`和`MinSizeRel`。这些构建类型可以通过自定义构建类型进行扩展，从而将全局标志传递给所有目标。对于依赖特定编译器标志的代码质量工具，提供自定义构建类型可以显著简化`CMakeLists.txt`，特别是对于大型项目。创建自定义构建类型通常比直接修改全局的`CMAKE_<LANG>_FLAGS`更为推荐。
+到目前为止，我们讨论了 CMake 默认提供的构建类型，例如`Debug`、`Release`、`RelWithDebInfo`和`MinSizeRel`。这些构建类型可以通过自定义构建类型进行扩展，从而将全局标志传递给所有目标。对于依赖特定编译器标志的代码质量工具，提供自定义构建类型可以显著简化`CMakeLists.txt`，特别是对于大型项目。创建自定义构建类型通常比直接修改全局的`CMAKE_<LANG>_FLAGS`更为推荐。
 
 不要覆盖`CMAKE_<LANG>_FLAGS`
 
 设置全局编译器选项时，应使用通用的`CMAKE_<LANG>_FLAGS`，并将其写入`CMakeLists.txt`文件中。这些标志应该在项目外部设置，可以通过命令行传递或通过工具链文件提供。如果在项目内部修改这些标志，容易与外部传递的设置发生冲突。
 
-对于像MSVC或Ninja Multi-Config这样的多配置生成器，可用的构建类型会存储在`CMAKE_CONFIGURATION_TYPES`缓存变量中。对于像Make或Ninja这样的单配置生成器，当前的构建类型会存储在`CMAKE_BUILD_TYPE`变量中。自定义构建类型应在顶级项目中定义。
+对于像 MSVC 或 Ninja Multi-Config 这样的多配置生成器，可用的构建类型会存储在`CMAKE_CONFIGURATION_TYPES`缓存变量中。对于像 Make 或 Ninja 这样的单配置生成器，当前的构建类型会存储在`CMAKE_BUILD_TYPE`变量中。自定义构建类型应在顶级项目中定义。
 
 可以在`CMakeLists.txt`中添加一个名为`Coverage`的自定义构建类型，示例如下：
 
@@ -763,11 +761,11 @@ endif()
 
 +   如果当前的生成器确实是一个多配置生成器，那么名为`Coverage`的自定义构建配置将被添加到`CMAKE_CONFIGURATION_TYPES`中，并在生成器中可用，但前提是它尚不存在。
 
-+   如果生成器是单配置生成器，则通过设置`CMAKE_BUILD_TYPE`缓存变量的`STRINGS`属性来添加`Coverage`构建类型的提示。这将在CMake GUI中创建一个下拉菜单，显示有效选项。为了方便起见，支持的构建类型存储在`KNOWN_BUILD_TYPES`变量中。
++   如果生成器是单配置生成器，则通过设置`CMAKE_BUILD_TYPE`缓存变量的`STRINGS`属性来添加`Coverage`构建类型的提示。这将在 CMake GUI 中创建一个下拉菜单，显示有效选项。为了方便起见，支持的构建类型存储在`KNOWN_BUILD_TYPES`变量中。
 
-+   由于当前构建类型通常是由外部为单配置生成器提供的，因此最好检查未知的构建类型，并在指定了未知的构建类型时中止配置。将消息打印为`FATAL_ERROR`将导致CMake停止构建。
++   由于当前构建类型通常是由外部为单配置生成器提供的，因此最好检查未知的构建类型，并在指定了未知的构建类型时中止配置。将消息打印为`FATAL_ERROR`将导致 CMake 停止构建。
 
-通过这种方式，`Coverage`构建类型被添加到CMake中，但此时构建类型尚未配置为向构建中添加自定义编译器和链接器标志。要定义这些标志，使用了两组缓存变量：
+通过这种方式，`Coverage`构建类型被添加到 CMake 中，但此时构建类型尚未配置为向构建中添加自定义编译器和链接器标志。要定义这些标志，使用了两组缓存变量：
 
 +   `CMAKE_<LANG>_FLAGS_<CONFIGURATION>`
 
@@ -819,13 +817,13 @@ set_property(GLOBAL APPEND PROPERTY DEBUG_CONFIGURATIONS Coverage)
 
 我们展示了如何使用 Gcov 设置代码覆盖率报告，以及如何定义自定义构建类型来传递必要的编译器标志。我们还介绍了如何将各种静态代码分析工具包含到 CMake 项目中，以及如何使用各种编译器的 sanitizer。
 
-在下一章中，我们将学习如何在CMake中使用外部程序，以及如何执行平台无关的任务。
+在下一章中，我们将学习如何在 CMake 中使用外部程序，以及如何执行平台无关的任务。
 
 # 问题
 
-1.  在CMake中，测试是如何定义的？
+1.  在 CMake 中，测试是如何定义的？
 
-1.  如何告诉CTest执行特定的测试？
+1.  如何告诉 CTest 执行特定的测试？
 
 1.  如何将一个不稳定的测试重复执行，直到它成功或失败？
 

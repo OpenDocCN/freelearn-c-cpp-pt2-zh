@@ -1,6 +1,4 @@
-# 13
-
-# 生成文档
+# 第十三章：生成文档
 
 高质量的代码不仅仅是编写得好、运行正常并经过测试——它还需要有完善的文档。文档能够帮助我们分享可能会丢失的信息，描绘更大的图景，提供上下文，揭示意图，最终——教育外部用户和维护者。
 
@@ -20,7 +18,7 @@
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中出现的代码文件，地址是：[https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch13](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch13)。
+你可以在 GitHub 上找到本章中出现的代码文件，地址是：[`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch13`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch13)。
 
 要构建本书中提供的示例，请始终使用推荐的命令：
 
@@ -33,7 +31,7 @@ cmake --build <build tree>
 
 # 将 Doxygen 添加到你的项目中
 
-用于从 C++ 源代码生成文档的最成熟和最流行的工具之一就是 Doxygen。当我说“成熟”时，我是认真的：第一个版本是由 Dimitri van Heesch 于 1997 年 10 月发布的。此后，它得到了巨大的发展，并得到了几乎 250 位贡献者的积极支持（[https://github.com/doxygen/doxygen](https://github.com/doxygen/doxygen)）。
+用于从 C++ 源代码生成文档的最成熟和最流行的工具之一就是 Doxygen。当我说“成熟”时，我是认真的：第一个版本是由 Dimitri van Heesch 于 1997 年 10 月发布的。此后，它得到了巨大的发展，并得到了几乎 250 位贡献者的积极支持（[`github.com/doxygen/doxygen`](https://github.com/doxygen/doxygen)）。
 
 你可能会担心将 Doxygen 纳入没有从一开始就使用文档生成的大型项目中的挑战。的确，注释每个函数的任务可能看起来非常繁重。然而，我鼓励你从小处开始。专注于记录你最近在最新提交中工作的元素。记住，即使是部分完成的文档也比完全没有要好，而且它逐渐有助于建立你项目的更全面的理解。
 
@@ -53,7 +51,7 @@ Doxygen 可以生成以下格式的文档：
 
 +   **微软编译的 HTML** 帮助 (.CHM)
 
-如果你在代码中使用注释按照 Doxygen 指定的格式提供额外信息，它会解析这些注释以丰富输出文件。此外，代码结构还将被分析以生成有用的图表和图示。后者是可选的，因为它需要外部的 Graphviz 工具（[https://graphviz.org/](https://graphviz.org/)）。
+如果你在代码中使用注释按照 Doxygen 指定的格式提供额外信息，它会解析这些注释以丰富输出文件。此外，代码结构还将被分析以生成有用的图表和图示。后者是可选的，因为它需要外部的 Graphviz 工具（[`graphviz.org/`](https://graphviz.org/)）。
 
 开发者应该首先考虑以下问题：*项目的用户只会接收文档，还是他们会自己生成文档（例如在从源代码构建时）*？第一个选项意味着文档会与二进制文件一起分发，或者在线提供，或者（不那么优雅地）与源代码一起提交到代码库中。
 
@@ -65,7 +63,7 @@ apt-get install doxygen graphviz
 
 Windows 版本的二进制文件也可以使用（请查看项目网站的*进一步阅读*部分）。
 
-然而，一些用户可能不愿意安装这些工具。我们必须决定是为用户生成文档，还是让他们在需要时添加依赖项。项目也可以像*第 9 章*中描述的那样，自动为用户添加这些依赖项，*管理 CMake 中的依赖项*。请注意，Doxygen 是使用 CMake 构建的，因此如果需要，你已经知道如何从源代码编译它。
+然而，一些用户可能不愿意安装这些工具。我们必须决定是为用户生成文档，还是让他们在需要时添加依赖项。项目也可以像*第九章*中描述的那样，自动为用户添加这些依赖项，*管理 CMake 中的依赖项*。请注意，Doxygen 是使用 CMake 构建的，因此如果需要，你已经知道如何从源代码编译它。
 
 当系统中安装了 Doxygen 和 Graphviz 时，我们可以将文档生成功能添加到项目中。与一些在线资料所建议的相反，这并不像看起来那么困难或复杂。我们无需创建外部配置文件，提供 Doxygen 可执行文件的路径，或添加自定义目标。自 CMake 3.9 起，我们可以使用来自 `FindDoxygen` 查找模块的 `doxygen_add_docs()` 函数，它会设置文档目标。
 
@@ -178,7 +176,7 @@ add_subdirectory(src bin)
 
 图 13.4：doxygen-awesome-css 主题下的 HTML 文档
 
-该主题不需要任何额外的依赖项，可以通过其 GitHub 页面轻松获取：[https://github.com/jothepro/doxygen-awesome-css](https://github.com/jothepro/doxygen-awesome-css)。
+该主题不需要任何额外的依赖项，可以通过其 GitHub 页面轻松获取：[`github.com/jothepro/doxygen-awesome-css`](https://github.com/jothepro/doxygen-awesome-css)。
 
 尽管一些在线资源推荐使用多种应用程序的组合，比如通过 Breathe 和 Exhale 扩展将 Doxygen 的输出与 Sphinx 配合使用，但这种方法可能会很复杂且依赖较多（例如需要 Python）。通常来说，更简洁的方法更为实际，尤其是对于那些并非每个成员都深度了解 CMake 的团队来说。
 
@@ -230,15 +228,15 @@ endmacro()
 
 记住，宏中的所有变量都在调用函数的作用域内设置。
 
-我们现在可以在生成的HTML文档中享受现代风格，并骄傲地与世界分享它。然而，我们的主题提供了一些JavaScript模块来增强体验。我们该如何包含它们呢？
+我们现在可以在生成的 HTML 文档中享受现代风格，并骄傲地与世界分享它。然而，我们的主题提供了一些 JavaScript 模块来增强体验。我们该如何包含它们呢？
 
-# 使用自定义HTML增强输出
+# 使用自定义 HTML 增强输出
 
-Doxygen Awesome提供了一些附加功能，可以通过在文档头部的HTML `<head>` 标签内包含一些JavaScript片段来启用。它们非常有用，因为它们允许在亮色模式和暗色模式之间切换，添加代码片段的**复制**按钮，段落标题的永久链接，以及互动目录。
+Doxygen Awesome 提供了一些附加功能，可以通过在文档头部的 HTML `<head>` 标签内包含一些 JavaScript 片段来启用。它们非常有用，因为它们允许在亮色模式和暗色模式之间切换，添加代码片段的**复制**按钮，段落标题的永久链接，以及互动目录。
 
-然而，实现这些功能需要将额外的代码复制到输出目录，并将其包含在生成的HTML文件中。
+然而，实现这些功能需要将额外的代码复制到输出目录，并将其包含在生成的 HTML 文件中。
 
-这是需要在`</head>`标签之前包含的JavaScript代码：
+这是需要在`</head>`标签之前包含的 JavaScript 代码：
 
 **ch13/cmake/extra_headers**
 
@@ -255,9 +253,9 @@ Doxygen Awesome提供了一些附加功能，可以通过在文档头部的HTML 
 </script> 
 ```
 
-如你所见，这段代码首先会包含一些JavaScript文件，然后初始化不同的扩展。不幸的是，这段代码不能简单地添加到某个变量中。相反，我们需要用自定义文件覆盖默认的头文件。这个覆盖可以通过在Doxygen的`HTML_HEADER`配置变量中提供文件路径来完成。
+如你所见，这段代码首先会包含一些 JavaScript 文件，然后初始化不同的扩展。不幸的是，这段代码不能简单地添加到某个变量中。相反，我们需要用自定义文件覆盖默认的头文件。这个覆盖可以通过在 Doxygen 的`HTML_HEADER`配置变量中提供文件路径来完成。
 
-若要创建一个自定义头文件而不硬编码整个内容，可以使用Doxygen的命令行工具生成默认的头文件，并在生成文档之前编辑它：
+若要创建一个自定义头文件而不硬编码整个内容，可以使用 Doxygen 的命令行工具生成默认的头文件，并在生成文档之前编辑它：
 
 ```cpp
 doxygen -w html header.html footer.html style.css 
@@ -265,13 +263,13 @@ doxygen -w html header.html footer.html style.css
 
 虽然我们不会使用或修改`footer.html`或`style.css`，但它们是必需的参数，因此我们仍然需要创建它们。
 
-最后，我们需要自动将`</head>`标签与`ch13/cmake/extra_headers`文件的内容进行连接，以包含所需的JavaScript。这可以通过Unix命令行工具`sed`来完成，它将原地编辑`header.html`文件：
+最后，我们需要自动将`</head>`标签与`ch13/cmake/extra_headers`文件的内容进行连接，以包含所需的 JavaScript。这可以通过 Unix 命令行工具`sed`来完成，它将原地编辑`header.html`文件：
 
 ```cpp
 sed -i '/<\/head>/r ch13/cmake/extra_headers' header.html 
 ```
 
-现在我们需要用CMake语言将这些步骤编码。以下是实现这一目标的宏：
+现在我们需要用 CMake 语言将这些步骤编码。以下是实现这一目标的宏：
 
 **ch13/02-doxygen-nice/cmake/Doxygen.cmake（片段）**
 
@@ -299,11 +297,11 @@ endmacro()
 
 这段代码看起来很复杂，但仔细检查后，你会发现它其实非常直接。它的功能如下：
 
-1.  将四个JavaScript文件复制到输出目录
+1.  将四个 JavaScript 文件复制到输出目录
 
-1.  执行`doxygen`命令以生成默认的HTML文件
+1.  执行`doxygen`命令以生成默认的 HTML 文件
 
-1.  执行`sed`命令以将所需的JavaScript注入头文件
+1.  执行`sed`命令以将所需的 JavaScript 注入头文件
 
 1.  使用自定义版本覆盖默认头文件
 
@@ -326,9 +324,9 @@ endfunction()
 
 本书没有涉及其他许多工具，因为我们专注于 CMake 支持的项目。不过，其中一些工具可能更适合你的使用场景。如果你感兴趣，可以访问我发现的两个有趣项目的官方网站：
 
-+   Adobe 的 Hyde ([https://github.com/adobe/hyde](https://github.com/adobe/hyde))：Hyde 针对 Clang 编译器，生成的 Markdown 文件可以被 Jekyll ([https://jekyllrb.com/](https://jekyllrb.com/)) 等工具使用，Jekyll 是一个由 GitHub 支持的静态页面生成器。
++   Adobe 的 Hyde ([`github.com/adobe/hyde`](https://github.com/adobe/hyde))：Hyde 针对 Clang 编译器，生成的 Markdown 文件可以被 Jekyll ([`jekyllrb.com/`](https://jekyllrb.com/)) 等工具使用，Jekyll 是一个由 GitHub 支持的静态页面生成器。
 
-+   Standardese ([https://github.com/standardese/standardese](https://github.com/standardese/standardese))：这个工具使用 libclang 来编译代码，并提供 HTML、Markdown、LaTex 和 man 页的输出。它的目标（相当大胆）是成为下一个 Doxygen。
++   Standardese ([`github.com/standardese/standardese`](https://github.com/standardese/standardese))：这个工具使用 libclang 来编译代码，并提供 HTML、Markdown、LaTex 和 man 页的输出。它的目标（相当大胆）是成为下一个 Doxygen。
 
 # 总结
 
@@ -346,16 +344,16 @@ endfunction()
 
 # 进一步阅读
 
-+   Doxygen 官方网站：[https://www.doxygen.nl/](https://www.doxygen.nl/)
++   Doxygen 官方网站：[`www.doxygen.nl/`](https://www.doxygen.nl/)
 
-+   `FindDoxygen` find-module 文档：[https://cmake.org/cmake/help/latest/module/FindDoxygen.html](https://cmake.org/cmake/help/latest/module/FindDoxygen.html)
++   `FindDoxygen` find-module 文档：[`cmake.org/cmake/help/latest/module/FindDoxygen.html`](https://cmake.org/cmake/help/latest/module/FindDoxygen.html)
 
-+   Doxygen 的 docblocks：[https://www.doxygen.nl/manual/docblocks.html#specialblock](https://www.doxygen.nl/manual/docblocks.html#specialblock)
++   Doxygen 的 docblocks：[`www.doxygen.nl/manual/docblocks.html#specialblock`](https://www.doxygen.nl/manual/docblocks.html#specialblock)
 
-# 加入我们社区的Discord
+# 加入我们社区的 Discord
 
-加入我们社区的Discord空间，与作者和其他读者进行讨论：
+加入我们社区的 Discord 空间，与作者和其他读者进行讨论：
 
-[https://discord.com/invite/vXN53A7ZcA](https://discord.com/invite/vXN53A7ZcA)
+[`discord.com/invite/vXN53A7ZcA`](https://discord.com/invite/vXN53A7ZcA)
 
 ![](img/QR_Code94081075213645359.png)

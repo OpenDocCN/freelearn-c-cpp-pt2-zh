@@ -1,6 +1,4 @@
-# 4
-
-# 打包、部署和安装 CMake 项目
+# 第四章：打包、部署和安装 CMake 项目
 
 正确地打包软件往往被编写和构建软件的过程所掩盖，然而它通常是确保任何软件项目成功和持久性的一个重要因素。打包是开发者创作与最终用户体验之间的桥梁，涵盖了从分发到安装和维护的方方面面。打包得当的软件不仅简化了部署过程，还增强了用户满意度、可靠性，并且便于无缝更新和修复漏洞。
 
@@ -18,9 +16,9 @@ CMake 内部有良好的支持和工具，使得安装和打包变得简单。�
 
 # 技术要求
 
-在深入本章之前，你应该对 CMake 中的目标有一个良好的理解（在[*第1章*](B30947_01.xhtml#_idTextAnchor015)《启动 CMake》和[*第3章*](B30947_03.xhtml#_idTextAnchor054)《创建 CMake 项目》中简要介绍，详细内容见其中）。本章将基于这些知识进行扩展。
+在深入本章之前，你应该对 CMake 中的目标有一个良好的理解（在*第一章*《启动 CMake》和*第三章*《创建 CMake 项目》中简要介绍，详细内容见其中）。本章将基于这些知识进行扩展。
 
-请从本书的 GitHub 仓库获取本章的示例，地址为 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。本章的示例内容位于 `chapter04/` 子文件夹中。
+请从本书的 GitHub 仓库获取本章的示例，地址为 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。本章的示例内容位于 `chapter04/` 子文件夹中。
 
 # 使 CMake 目标可安装
 
@@ -65,9 +63,9 @@ target_compile_features(ch4_ex01_executable PRIVATE cxx_std_11)
 install(TARGETS ch4_ex01_executable)
 ```
 
-在前面的代码中，定义了一个名为`ch4_ex01_executable`的可执行目标，并在接下来的两行中填充了它的属性。最后一行`install(...)`是我们感兴趣的部分，它告诉CMake为`ch4_ex01_executable`创建所需的安装代码。
+在前面的代码中，定义了一个名为`ch4_ex01_executable`的可执行目标，并在接下来的两行中填充了它的属性。最后一行`install(...)`是我们感兴趣的部分，它告诉 CMake 为`ch4_ex01_executable`创建所需的安装代码。
 
-为了检查`ch4_ex01_executable`是否可以被安装，让我们在`chapter 4`的根文件夹中通过CLI构建并安装该项目：
+为了检查`ch4_ex01_executable`是否可以被安装，让我们在`chapter 4`的根文件夹中通过 CLI 构建并安装该项目：
 
 ```cpp
 cmake -S . -B ./build -DCMAKE_BUILD_TYPE="Release"
@@ -79,7 +77,7 @@ cmake --install ./build --prefix /tmp/install-test
 
 与其为`cmake --install`指定`--prefix`参数，你也可以使用`CMAKE_INSTALL_PREFIX`变量来提供非默认的`install`前缀。
 
-在使用CMake与多配置生成器（如Ninja多配置和Visual Studio）时，请为`cmake --build`和`cmake --install`命令指定`--config`参数：
+在使用 CMake 与多配置生成器（如 Ninja 多配置和 Visual Studio）时，请为`cmake --build`和`cmake --install`命令指定`--config`参数：
 
 ```cpp
 # For multi-config generators:
@@ -101,7 +99,7 @@ cmake --install ./build --prefix /tmp/install-test --config Debug
 
 在前面输出的最后一行中，我们可以看到`ch4_ex01_executable`目标的*输出工件*——也就是说，`ch4_ex01_executable`二进制文件已经被安装。由于这是`ch4_ex01_executable`目标的唯一输出工件，我们可以得出结论，目标确实已经变得可以安装了。
 
-请注意，`ch4_ex01_executable`并没有直接安装到`/tmp/install-test`（前缀）目录中。相反，`install`命令将它放入了`bin/`子目录。这是因为CMake智能地判断了应该将什么类型的工件放到哪里。在传统的UNIX系统中，二进制文件通常放在`/usr/bin`，而库文件放在`/usr/lib`。CMake知道`add_executable()`命令会生成一个可执行的二进制工件，并将其放入`/bin`子目录。这些目录是CMake默认提供的，具体取决于目标类型。提供默认安装路径信息的CMake模块被称为`GNUInstallDirs`模块。`GNUInstallDirs`模块在被包含时定义了各种`CMAKE_INSTALL_`路径。下表显示了各个目标的默认安装目录：
+请注意，`ch4_ex01_executable`并没有直接安装到`/tmp/install-test`（前缀）目录中。相反，`install`命令将它放入了`bin/`子目录。这是因为 CMake 智能地判断了应该将什么类型的工件放到哪里。在传统的 UNIX 系统中，二进制文件通常放在`/usr/bin`，而库文件放在`/usr/lib`。CMake 知道`add_executable()`命令会生成一个可执行的二进制工件，并将其放入`/bin`子目录。这些目录是 CMake 默认提供的，具体取决于目标类型。提供默认安装路径信息的 CMake 模块被称为`GNUInstallDirs`模块。`GNUInstallDirs`模块在被包含时定义了各种`CMAKE_INSTALL_`路径。下表显示了各个目标的默认安装目录：
 
 | **目标类型** | **GNUInstallDirs 变量** | **内置默认值** |
 | --- | --- | --- |
@@ -127,7 +125,7 @@ install(TARGETS ch4_ex01_executable
 -- Installing: /tmp/install-test/qbin/ch4_ex01_executable
 ```
 
-现在，让我们看另一个示例。这次我们将安装一个 `STATIC` 库。让我们看看 [*第 4 章*](B30947_04.xhtml#_idTextAnchor071) 中的 `CMakeLists.txt` 文件，*示例 2*，它位于 `chapter04/ex02_static` 文件夹中。由于篇幅原因，注释和 `project(...)` 命令已被省略。让我们开始检查文件：
+现在，让我们看另一个示例。这次我们将安装一个 `STATIC` 库。让我们看看 *第四章* 中的 `CMakeLists.txt` 文件，*示例 2*，它位于 `chapter04/ex02_static` 文件夹中。由于篇幅原因，注释和 `project(...)` 命令已被省略。让我们开始检查文件：
 
 ```cpp
 add_library(ch4_ex02_static STATIC)
@@ -176,7 +174,7 @@ install (
 
 `install(FILES...)` 的一种替代形式是 `install(PROGRAMS...)`，它与 `install(FILES...)` 相同，区别在于它还为已安装的文件设置了 `OWNER_EXECUTE`、`GROUP_EXECUTE` 和 `WORLD_EXECUTE` 权限。对于必须由最终用户执行的二进制文件或脚本文件来说，这样做是有意义的。
 
-要理解 `install(FILES|PROGRAMS...)`，让我们看一个例子。我们将要查看的例子是 [*第 4 章*](B30947_04.xhtml#_idTextAnchor071)*，示例 3*（`chapter04/ex03_file`）。它实际上包含了三个文件：`chapter04_greeter_content`、`chapter04_greeter.py` 和 `CMakeLists.txt`。首先，让我们看看它的 `CMakeLists.txt` 文件：
+要理解 `install(FILES|PROGRAMS...)`，让我们看一个例子。我们将要查看的例子是 *第四章**，示例 3*（`chapter04/ex03_file`）。它实际上包含了三个文件：`chapter04_greeter_content`、`chapter04_greeter.py` 和 `CMakeLists.txt`。首先，让我们看看它的 `CMakeLists.txt` 文件：
 
 ```cpp
 install(FILES "${CMAKE_CURRENT_LIST_DIR}/chapter04_greeter_content"
@@ -236,7 +234,7 @@ install(DIRECTORY dir3 DESTINATION ${CMAKE_INSTALL_LOCALSTATEDIR}
   PATTERN "bin" EXCLUDE)
 ```
 
-在前面的示例中，我们使用了`FILES_MATCHING`参数来定义文件选择的标准。`FILES_MATCHING`后面可以跟`PATTERN`或`REGEX`参数。`PATTERN`允许您定义一个通配符模式，而`REGEX`允许您定义一个正则表达式。默认情况下，这些表达式用于包含文件。如果要排除符合标准的文件，可以在模式后添加`EXCLUDE`参数。请注意，这些过滤器不会应用于子目录名称，因为`FILES_MATCHING`参数的限制。我们还在最后一个`install(...)`命令中使用了`PATTERN`而没有加上`FILES_MATCHING`，这使得我们可以过滤子目录而非文件。这一次，只有`dir1`中扩展名为`.x`的文件、`dir2`中没有`.hpp`扩展名的文件以及`dir3`中除`bin`文件夹外的所有内容将被安装。这个示例可以在`chapter04/ex04_directory`文件夹中的[*Chapter 4*](B30947_04.xhtml#_idTextAnchor071)*，示例4*中找到。让我们编译并安装它，看看它是否执行了正确的操作：
+在前面的示例中，我们使用了`FILES_MATCHING`参数来定义文件选择的标准。`FILES_MATCHING`后面可以跟`PATTERN`或`REGEX`参数。`PATTERN`允许您定义一个通配符模式，而`REGEX`允许您定义一个正则表达式。默认情况下，这些表达式用于包含文件。如果要排除符合标准的文件，可以在模式后添加`EXCLUDE`参数。请注意，这些过滤器不会应用于子目录名称，因为`FILES_MATCHING`参数的限制。我们还在最后一个`install(...)`命令中使用了`PATTERN`而没有加上`FILES_MATCHING`，这使得我们可以过滤子目录而非文件。这一次，只有`dir1`中扩展名为`.x`的文件、`dir2`中没有`.hpp`扩展名的文件以及`dir3`中除`bin`文件夹外的所有内容将被安装。这个示例可以在`chapter04/ex04_directory`文件夹中的*Chapter 4**，示例 4*中找到。让我们编译并安装它，看看它是否执行了正确的操作：
 
 ```cpp
 cmake -S . -B ./build
@@ -291,7 +289,7 @@ cmake -- install ./build –prefix /tmp/install-test
 
 在上一节中，我们学习了如何使我们的项目可安装，以便他人可以通过安装它到他们的系统中来使用我们的项目。但有时候，仅仅交付制品并不足够。例如，如果你交付的是一个库，它必须也能方便地导入到另一个项目中——尤其是 CMake 项目中。在本节中，我们将学习如何让其他 CMake 项目更容易导入你的项目。
 
-如果被导入的项目具有适当的配置文件，则有一些便捷的方法可以导入库。一个突出的方式是利用 `find_package()` 方法（我们将在[*第 5 章*](B30947_05.xhtml#_idTextAnchor084)中讲解，*集成第三方库* 和 *依赖管理*）。如果你的消费者在工作流程中使用 CMake，他们会很高兴能够直接写 `find_package(your_project_name)`，并开始使用你的代码。在本节中，我们将学习如何生成所需的配置文件，以使 `find_package()` 能在你的项目中正常工作。
+如果被导入的项目具有适当的配置文件，则有一些便捷的方法可以导入库。一个突出的方式是利用 `find_package()` 方法（我们将在*第五章*中讲解，*集成第三方库* 和 *依赖管理*）。如果你的消费者在工作流程中使用 CMake，他们会很高兴能够直接写 `find_package(your_project_name)`，并开始使用你的代码。在本节中，我们将学习如何生成所需的配置文件，以使 `find_package()` 能在你的项目中正常工作。
 
 CMake 推荐的依赖管理方式是通过包（packages）。包用于传递 CMake 基于构建系统的依赖信息。包可以是 `Config-file` 包、`Find-module` 包或 `pkg-config` 包的形式。所有这些包类型都可以通过 `find_package()` 查找并使用。为了提高效率并遵循最佳实践，本节将仅关注 `Config-file` 包。其他方法，如 `find-modules` 和 `pkg-config` 包，通常被视为过时的变通方法，主要在没有配置文件的情况下使用，通常不推荐使用。让我们深入了解 `Config-file` 包，理解它们的优点和实现方式。
 
@@ -310,7 +308,7 @@ set(Foo_LIBRARIES ${PREFIX}/lib/foo-1.2/libfoo.a)
 
 和包配置文件一样，包版本文件也可以命名为 `<ProjectName>ConfigVersion.cmake` 或 `<projectname>-config-version.cmake`。CMake 期望在 `find_package(...)` 搜索路径中找到包配置文件和包版本文件。你可以在 CMake 的帮助下创建这些文件。`find_package(...)` 在查找包时会检查多个位置，其中之一就是 `<CMAKE_PREFIX_PATH>/cmake` 目录。在我们的例子中，我们将把 `config-file` 包配置文件放到这个文件夹中。
 
-为了创建 `config-file` 包，我们需要了解一些额外的内容，例如 `CmakePackageConfigHelpers` 模块。为了了解这些内容，让我们开始深入探讨一个实际的例子。我们将跟随 [*第 4 章*](B30947_04.xhtml#_idTextAnchor071)*，示例 5* 来学习如何构建一个 CMake 项目，将其组织成 `chapter04/ex05_config_file_package` 文件夹。首先，让我们检查 `chapter04/ex05_config_file_package` 目录中的 `CMakeLists.txt` 文件（注释和项目命令已省略以节省空间；另外，请注意，所有与主题无关的行将不被提及）：
+为了创建 `config-file` 包，我们需要了解一些额外的内容，例如 `CmakePackageConfigHelpers` 模块。为了了解这些内容，让我们开始深入探讨一个实际的例子。我们将跟随 *第四章**，示例 5* 来学习如何构建一个 CMake 项目，将其组织成 `chapter04/ex05_config_file_package` 文件夹。首先，让我们检查 `chapter04/ex05_config_file_package` 目录中的 `CMakeLists.txt` 文件（注释和项目命令已省略以节省空间；另外，请注意，所有与主题无关的行将不被提及）：
 
 ```cpp
 include(GNUInstallDirs)
@@ -408,7 +406,7 @@ target_compile_features(ch4_ex05_consumer PRIVATE cxx_std_11)
 target_link_libraries(ch4_ex05_consumer ch4_ex05_lib::ch4_ex05_lib)
 ```
 
-在前几行中，我们可以看到关于该项目是否是顶级项目的验证。由于这个示例旨在作为外部应用程序，它不应成为根示例项目的一部分。因此，我们可以保证使用由软件包导出的目标，而不是根项目的目标。根项目也不包括`ex05_consumer`文件夹。接下来，有一个`find_package(…)`调用，其中`ch4_ex05_lib`作为软件包名称给出。还明确要求该软件包的主版本为1；`find_package(…)`只能考虑`CONFIG`软件包，并且此`find_package(…)`调用中指定的软件包是必需的。在接下来的几行中，定义了一个常规可执行文件`ch4_ex05_consumer`，它在`ch4_ex05_lib`命名空间下链接到`ch4_ex05_lib`（`ch4_ex05_lib::ch4_ex05_lib`）。`ch4_ex05_lib::ch4_ex05_lib`就是我们在软件包中定义的实际目标。让我们来看一下源文件`src/main.cpp`：
+在前几行中，我们可以看到关于该项目是否是顶级项目的验证。由于这个示例旨在作为外部应用程序，它不应成为根示例项目的一部分。因此，我们可以保证使用由软件包导出的目标，而不是根项目的目标。根项目也不包括`ex05_consumer`文件夹。接下来，有一个`find_package(…)`调用，其中`ch4_ex05_lib`作为软件包名称给出。还明确要求该软件包的主版本为 1；`find_package(…)`只能考虑`CONFIG`软件包，并且此`find_package(…)`调用中指定的软件包是必需的。在接下来的几行中，定义了一个常规可执行文件`ch4_ex05_consumer`，它在`ch4_ex05_lib`命名空间下链接到`ch4_ex05_lib`（`ch4_ex05_lib::ch4_ex05_lib`）。`ch4_ex05_lib::ch4_ex05_lib`就是我们在软件包中定义的实际目标。让我们来看一下源文件`src/main.cpp`：
 
 ```cpp
 #include <chapter04/ex05/lib.hpp>
@@ -458,7 +456,7 @@ Hello, world!
 | TZST | Tar Zstandard 压缩档案 |
 | ZIP | Zip 压缩档案 |
 
-CPack使用CMake的安装机制来填充包的内容。CPack使用位于`CPackConfig.cmake`和`CPackSourceConfig.cmake`文件中的配置详情来生成包。这些文件可以手动填充，也可以通过CMake配合CPack模块自动生成。对于一个已有的CMake项目，使用CPack非常简单，只需要包含CPack模块，前提是项目已经有正确的`install(…)`命令。包含CPack模块会使CMake生成`CPackConfig.cmake`和`CPackSourceConfig.cmake`文件，这些文件是打包项目所需的CPack配置。此外，还会生成一个额外的`package`目标，用于构建步骤。这个步骤会构建项目并运行CPack，从而开始打包。当CPack配置文件已经正确填充时，无论是通过CMake还是用户，CPack都可以使用。CPack模块允许你自定义打包过程。可以设置大量的CPack变量，这些变量分为两类——通用变量和生成器特定变量。通用变量影响所有包生成器，而生成器特定变量仅影响特定类型的生成器。我们将检查最基本和最显著的变量，主要处理通用变量。以下表格展示了我们将在示例中使用的最常见的CPack变量：
+CPack 使用 CMake 的安装机制来填充包的内容。CPack 使用位于`CPackConfig.cmake`和`CPackSourceConfig.cmake`文件中的配置详情来生成包。这些文件可以手动填充，也可以通过 CMake 配合 CPack 模块自动生成。对于一个已有的 CMake 项目，使用 CPack 非常简单，只需要包含 CPack 模块，前提是项目已经有正确的`install(…)`命令。包含 CPack 模块会使 CMake 生成`CPackConfig.cmake`和`CPackSourceConfig.cmake`文件，这些文件是打包项目所需的 CPack 配置。此外，还会生成一个额外的`package`目标，用于构建步骤。这个步骤会构建项目并运行 CPack，从而开始打包。当 CPack 配置文件已经正确填充时，无论是通过 CMake 还是用户，CPack 都可以使用。CPack 模块允许你自定义打包过程。可以设置大量的 CPack 变量，这些变量分为两类——通用变量和生成器特定变量。通用变量影响所有包生成器，而生成器特定变量仅影响特定类型的生成器。我们将检查最基本和最显著的变量，主要处理通用变量。以下表格展示了我们将在示例中使用的最常见的 CPack 变量：
 
 | **变量名** | **描述** | **默认值** |
 | --- | --- | --- |
@@ -467,10 +465,10 @@ CPack使用CMake的安装机制来填充包的内容。CPack使用位于`CPackCo
 | CPACK_PACKAGE_VERSION_MAJOR | 包的主版本 | 项目的主版本 |
 | CPACK_PACKAGE_VERSION_MINOR | 包的次版本 | 项目的次版本 |
 | CPACK_PACKAGE_VERSION_PATCH | 包的补丁版本 | 项目的补丁版本 |
-| CPACK_GENERATOR | 使用的CPack生成器列表 | 无 |
+| CPACK_GENERATOR | 使用的 CPack 生成器列表 | 无 |
 | CPACK_THREADS | 支持并行时使用的线程数 | 1 |
 
-必须在包含CPack模块之前修改变量，否则将使用默认值。让我们通过一个例子来深入了解CPack的实际操作。我们将跟随[*第4章*](B30947_04.xhtml#_idTextAnchor071)，*示例6*（`chapter04/ex06_pack`）进行。这个示例是一个独立的项目，不是根项目的一部分。它是一个常规项目，包含名为`executable`和`library`的两个子目录。`executable`目录的`CMakeLists.txt`文件如下所示：
+必须在包含 CPack 模块之前修改变量，否则将使用默认值。让我们通过一个例子来深入了解 CPack 的实际操作。我们将跟随*第四章*，*示例 6*（`chapter04/ex06_pack`）进行。这个示例是一个独立的项目，不是根项目的一部分。它是一个常规项目，包含名为`executable`和`library`的两个子目录。`executable`目录的`CMakeLists.txt`文件如下所示：
 
 ```cpp
 add_executable(ch4_ex06_executable src/main.cpp)
@@ -496,7 +494,7 @@ install (
 )
 ```
 
-这些文件夹的`CMakeLists.txt`文件并没有什么特别之处。它们包含常规的可安装CMake目标，并且没有声明关于CPack的任何内容。让我们也看一下顶级`CMakeLists.txt`文件：
+这些文件夹的`CMakeLists.txt`文件并没有什么特别之处。它们包含常规的可安装 CMake 目标，并且没有声明关于 CPack 的任何内容。让我们也看一下顶级`CMakeLists.txt`文件：
 
 ```cpp
 cmake_minimum_required(VERSION 3.21)
@@ -589,7 +587,7 @@ endif()
 
 在前面的示例中，包含了 `InstallRequiredSystemLibraries` 模块。该模块是针对 Windows 进行定制的。包含该模块会创建安装编译器提供的库的指令，例如 MSVC 提供的 Visual Studio C++ 运行时库。通过将 `CMAKE_INSTALL_DEBUG_LIBRARIES` 变量设置为 true（如前面示例中所做），可以配置为包括库的调试版本。还有更多选项可以指示 CMake 安装额外的库，例如 Windows MFC 库、OpenMP 或用于在 Windows XP 或更早版本的 Windows 上进行应用本地部署的 Microsoft Universal CRT 库。
 
-模块的完整文档可以在这里找到：[https://cmake.org/cmake/help/latest/module/InstallRequiredSystemLibraries.html](https://cmake.org/cmake/help/latest/module/InstallRequiredSystemLibraries.html)
+模块的完整文档可以在这里找到：[`cmake.org/cmake/help/latest/module/InstallRequiredSystemLibraries.html`](https://cmake.org/cmake/help/latest/module/InstallRequiredSystemLibraries.html)
 
 包括编译器提供的库是一回事，但通常软件项目还会依赖其他库。如果这些库需要与项目一起打包，可以通过 `install()` 命令的 `RUNTIME_DEPENDENCIES` 选项来包含它们，如下所示：
 

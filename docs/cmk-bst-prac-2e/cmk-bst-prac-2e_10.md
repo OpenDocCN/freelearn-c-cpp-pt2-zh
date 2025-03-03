@@ -1,6 +1,4 @@
-# 8
-
-# 使用 CMake 执行自定义任务
+# 第八章：使用 CMake 执行自定义任务
 
 构建和发布软件可能是一个复杂的任务，任何工具都无法完成构建和发布项目所需的所有不同任务。在某些时候，您可能需要执行一个编译器或 CMake 功能没有涵盖的任务。常见任务包括归档构建成果、创建哈希以验证下载，或生成或自定义构建的输入文件。还有许多其他依赖于特定软件构建环境的专门任务。
 
@@ -34,7 +32,7 @@
 
 +   MSVC 19 或更高版本
 
-本章的所有示例和源代码可以在本书的 GitHub 仓库中找到，地址是 [https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。如果缺少任何软件，相应的示例将从构建中排除。
+本章的所有示例和源代码可以在本书的 GitHub 仓库中找到，地址是 [`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。如果缺少任何软件，相应的示例将从构建中排除。
 
 # 在 CMake 中使用外部程序
 
@@ -67,7 +65,7 @@ add_custom_target(Name [ALL] [command1 [args1...]]
                   [SOURCES src1 [src2...]])
 ```
 
-`add_custom_target`命令的核心是通过`COMMAND`选项传递的命令列表。虽然第一个命令可以在没有此选项的情况下传递，但最好在任何`add_custom_target`调用中始终添加`COMMAND`选项。默认情况下，只有在明确请求时，自定义目标才会执行，除非指定了`ALL`选项。自定义目标始终被认为是过时的，因此指定的命令会始终运行，无论它们是否重复产生相同的结果。通过`DEPENDS`关键字，可以使自定义目标依赖于通过`add_custom_command`函数定义的自定义命令的文件和输出，或依赖于其他目标。若要使自定义目标依赖于另一个目标，请使用`add_dependencies`函数。反过来也适用——任何目标都可以依赖于自定义目标。如果自定义目标创建了文件，可以在`BYPRODUCTS`选项下列出这些文件。列在其中的任何文件都会标记为`GENERATED`属性，CMake会用这个属性来判断构建是否过时，并找出需要清理的文件。然而，使用`add_custom_command`创建文件的任务可能更适合，如本节后续所述。
+`add_custom_target`命令的核心是通过`COMMAND`选项传递的命令列表。虽然第一个命令可以在没有此选项的情况下传递，但最好在任何`add_custom_target`调用中始终添加`COMMAND`选项。默认情况下，只有在明确请求时，自定义目标才会执行，除非指定了`ALL`选项。自定义目标始终被认为是过时的，因此指定的命令会始终运行，无论它们是否重复产生相同的结果。通过`DEPENDS`关键字，可以使自定义目标依赖于通过`add_custom_command`函数定义的自定义命令的文件和输出，或依赖于其他目标。若要使自定义目标依赖于另一个目标，请使用`add_dependencies`函数。反过来也适用——任何目标都可以依赖于自定义目标。如果自定义目标创建了文件，可以在`BYPRODUCTS`选项下列出这些文件。列在其中的任何文件都会标记为`GENERATED`属性，CMake 会用这个属性来判断构建是否过时，并找出需要清理的文件。然而，使用`add_custom_command`创建文件的任务可能更适合，如本节后续所述。
 
 默认情况下，这些命令在当前二进制目录中执行，该目录存储在`CMAKE_CURRENT_BINARY_DIRECTORY`缓存变量中。如有必要，可以通过`WORKING_DIRECTORY`选项更改此目录。此选项可以是绝对路径，也可以是相对路径，若为相对路径，则相对于当前二进制目录。
 
@@ -96,7 +94,7 @@ add_custom_target(CreateHash ALL
 
 +   `$<TARGET_FILE:target>`：这包含了目标的主二进制文件的完整路径，如`.exe`、`.so`或`.dll`。
 
-+   `$<TARGET_LINKER_FILE: target>`：这包含了用于与目标进行链接的文件的完整路径。通常是库文件本身，但在Windows上，`.lib`文件会与DLL相关联。
++   `$<TARGET_LINKER_FILE: target>`：这包含了用于与目标进行链接的文件的完整路径。通常是库文件本身，但在 Windows 上，`.lib`文件会与 DLL 相关联。
 
 +   `$<TARGET_SONAME_FILE: target>`：这包含了库文件及其完整名称，包括由`SOVERSION`属性设置的任何数字，如`.so.3`。
 
@@ -106,7 +104,7 @@ add_custom_target(CreateHash ALL
 
 ## 将自定义任务添加到现有目标
 
-有时，在构建目标时，你可能需要执行一个额外的外部任务。在CMake中，你可以使用`add_custom_command`来实现这一点，它有两种签名。一种用于将命令钩入现有的目标，另一种用于生成文件。我们将在本节后续部分讲解这一点。将命令添加到现有目标的签名如下所示：
+有时，在构建目标时，你可能需要执行一个额外的外部任务。在 CMake 中，你可以使用`add_custom_command`来实现这一点，它有两种签名。一种用于将命令钩入现有的目标，另一种用于生成文件。我们将在本节后续部分讲解这一点。将命令添加到现有目标的签名如下所示：
 
 ```cpp
 add_custom_command(TARGET <target>
@@ -122,7 +120,7 @@ add_custom_command(TARGET <target>
 
 大多数选项的工作方式与之前提到的`add_custom_target`类似。`TARGET`属性可以是当前目录中定义的任何目标，这是该命令的一个限制，尽管这很少成为问题。命令可以在以下时间钩入构建过程：
 
-+   `PRE_BUILD`：在Visual Studio中，此命令会在任何其他构建步骤之前执行。当你使用其他生成器时，它将在`PRE_LINK`命令之前执行。
++   `PRE_BUILD`：在 Visual Studio 中，此命令会在任何其他构建步骤之前执行。当你使用其他生成器时，它将在`PRE_LINK`命令之前执行。
 
 +   `PRE_LINK`：此命令将在源代码编译完成后执行，但在可执行文件或归档工具链接到静态库之前执行。
 
@@ -191,9 +189,9 @@ ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
 
 在这个示例中发生了几件事。首先，自定义命令将当前二进制目录中的 `main.cpp` 文件定义为 `OUTPUT` 文件。然后，定义了生成该文件的命令——这里使用了一个名为 `sourceFileGenerator` 的假设程序——它将消息文件转换为 `.cpp` 文件。`DEPENDS` 部分指出，每次 `message.txt` 文件发生变化时，都应重新运行该命令。
 
-后续创建了可执行文件的目标。由于可执行文件引用了在自定义命令的`OUTPUT`部分指定的`main.cpp`文件，CMake会隐式添加命令和目标之间的必要依赖关系。以这种方式使用自定义命令比使用`PRE_BUILD`指令更可靠且具有更好的移植性，因为它适用于所有生成器。
+后续创建了可执行文件的目标。由于可执行文件引用了在自定义命令的`OUTPUT`部分指定的`main.cpp`文件，CMake 会隐式添加命令和目标之间的必要依赖关系。以这种方式使用自定义命令比使用`PRE_BUILD`指令更可靠且具有更好的移植性，因为它适用于所有生成器。
 
-有时，为了创建所需的输出，可能需要多个命令。如果存在一个生成相同输出的先前命令，可以通过使用`APPEND`选项将命令链接起来。使用`APPEND`的自定义命令只能定义额外的`COMMAND`和`DEPENDS`选项；其他选项会被忽略。如果两个命令生成相同的输出文件，除非指定`APPEND`，CMake会打印出错误。这个功能主要用于当一个命令是可选执行时。考虑以下示例：
+有时，为了创建所需的输出，可能需要多个命令。如果存在一个生成相同输出的先前命令，可以通过使用`APPEND`选项将命令链接起来。使用`APPEND`的自定义命令只能定义额外的`COMMAND`和`DEPENDS`选项；其他选项会被忽略。如果两个命令生成相同的输出文件，除非指定`APPEND`，CMake 会打印出错误。这个功能主要用于当一个命令是可选执行时。考虑以下示例：
 
 ```cpp
 add_custom_command(OUTPUT archive.tar.gz
@@ -209,7 +207,7 @@ APPEND
 )
 ```
 
-在这个示例中，目标`MyTarget`的输出文件已经被添加到一个`tar.gz`归档中；之后，另一个文件被添加到相同的归档中。注意，第一个命令自动依赖于`MyTarget`，因为它使用了在命令中创建的二进制文件。然而，它不会通过构建自动执行。第二个自定义命令列出了与第一个命令相同的输出文件，但将压缩文件作为第二个输出添加。通过指定`APPEND`，第二个命令会在每次执行第一个命令时自动执行。如果缺少`APPEND`关键字，CMake会打印出类似如下的错误：
+在这个示例中，目标`MyTarget`的输出文件已经被添加到一个`tar.gz`归档中；之后，另一个文件被添加到相同的归档中。注意，第一个命令自动依赖于`MyTarget`，因为它使用了在命令中创建的二进制文件。然而，它不会通过构建自动执行。第二个自定义命令列出了与第一个命令相同的输出文件，但将压缩文件作为第二个输出添加。通过指定`APPEND`，第二个命令会在每次执行第一个命令时自动执行。如果缺少`APPEND`关键字，CMake 会打印出类似如下的错误：
 
 ```cpp
 CMake Error at CMakeLists.txt:30 (add_custom_command):
@@ -228,11 +226,11 @@ add_custom_target(create_archive ALL DEPENDS
 
 在这里，创建了一个名为`create_archive`的自定义目标，该目标作为`All`构建的一部分执行。由于它依赖于自定义命令的输出，因此构建该目标会调用自定义命令。自定义命令反过来依赖于`MyTarget`，因此如果`MyTarget`尚未是最新的，构建`create_archive`也会触发`MyTarget`的构建。
 
-`add_custom_command`和`add_custom_target`自定义任务都会在CMake的构建步骤中执行。如果需要，也可以在配置时添加任务。我们将在下一节中讨论这个问题。
+`add_custom_command`和`add_custom_target`自定义任务都会在 CMake 的构建步骤中执行。如果需要，也可以在配置时添加任务。我们将在下一节中讨论这个问题。
 
 # 在配置时执行自定义任务
 
-要在配置时执行自定义任务，可以使用`execute_process`函数。常见的需求是，如果构建在开始之前需要额外的信息，或者需要更新文件以便重新运行CMake。另一个常见的情况是，当`CMakeLists.txt`文件或其他输入文件在配置步骤中生成时，尽管这也可以通过专用的`configure_file`命令实现，正如本章稍后所展示的那样。
+要在配置时执行自定义任务，可以使用`execute_process`函数。常见的需求是，如果构建在开始之前需要额外的信息，或者需要更新文件以便重新运行 CMake。另一个常见的情况是，当`CMakeLists.txt`文件或其他输入文件在配置步骤中生成时，尽管这也可以通过专用的`configure_file`命令实现，正如本章稍后所展示的那样。
 
 `execute_process` 函数的工作方式与我们之前看到的 `add_custom_target` 和 `add_custom_command` 函数非常相似。然而，有一个区别是，`execute_process` 可以将输出捕获到变量或文件中的 `stdout` 和 `stderr`。`execute_process` 的函数签名如下：
 
@@ -312,7 +310,7 @@ target_compile_definitions(SomeExe PRIVATE VERSION=
 file(COPY_FILE old_file new_file)
 ```
 
-有几种文件操作可用，例如 `file(REMOVE)` 和 `file(REMOVE_RECURSE)` 用于删除文件或目录树，`file(RENAME)` 用于移动文件，`file(CHMOD)` 用于更改支持该操作的系统上的权限。`file` 命令的完整文档请参见：[https://cmake.org/cmake/help/latest/command/file.html](https://cmake.org/cmake/help/latest/command/file.html)。
+有几种文件操作可用，例如 `file(REMOVE)` 和 `file(REMOVE_RECURSE)` 用于删除文件或目录树，`file(RENAME)` 用于移动文件，`file(CHMOD)` 用于更改支持该操作的系统上的权限。`file` 命令的完整文档请参见：[`cmake.org/cmake/help/latest/command/file.html`](https://cmake.org/cmake/help/latest/command/file.html)。
 
 但如果我们想要同时复制和修改一个文件该怎么办呢？在*配置时执行自定义任务*一节中，我们看到了一个示例，其中获取了 git 修订版本并作为预处理器定义传递给编译器。更好的做法是生成一个包含必要信息的头文件。虽然直接回显代码片段并将其写入文件是可行的，但这样做是危险的，因为它可能会导致平台特定的代码。CMake 的解决方案是 `configure_file` 命令，它可以将文件从一个位置复制到另一个位置并在此过程中修改其内容。`configure_file` 的函数签名如下：
 
@@ -340,9 +338,9 @@ set(GREETER "The Universe")
 configure_file(hello.txt.in hello.txt)
 ```
 
-在这个示例中，生成的`hello.txt`文件将包含`Hello World from The Universe`。如果将`@ONLY`选项传递给`configure_file`，只有`@GREETER@`会被替换，生成的内容将是`Hello ${GUEST} from The Universe`。使用`@ONLY`在你转换可能包含大括号括起来的变量的CMake文件时非常有用，这些变量不应该被替换。`ESCAPE_QUOTES`会在目标文件中用反斜杠转义任何引号。默认情况下，`configure_file`会转换换行符，以便目标文件与当前平台匹配。默认行为可以通过设置`NEWLINE_STYLE`来改变。`UNIX`或`LF`将使用`\n`作为换行符，而`DOS`、`WIN32`和`CRLF`将使用`\r\n`。同时设置`NEWLINE_STYLE`和`COPYONLY`选项将导致错误。请注意，设置`COPYONLY`不会影响换行符样式。
+在这个示例中，生成的`hello.txt`文件将包含`Hello World from The Universe`。如果将`@ONLY`选项传递给`configure_file`，只有`@GREETER@`会被替换，生成的内容将是`Hello ${GUEST} from The Universe`。使用`@ONLY`在你转换可能包含大括号括起来的变量的 CMake 文件时非常有用，这些变量不应该被替换。`ESCAPE_QUOTES`会在目标文件中用反斜杠转义任何引号。默认情况下，`configure_file`会转换换行符，以便目标文件与当前平台匹配。默认行为可以通过设置`NEWLINE_STYLE`来改变。`UNIX`或`LF`将使用`\n`作为换行符，而`DOS`、`WIN32`和`CRLF`将使用`\r\n`。同时设置`NEWLINE_STYLE`和`COPYONLY`选项将导致错误。请注意，设置`COPYONLY`不会影响换行符样式。
 
-让我们回到我们希望将git修订版编译到可执行文件中的示例。在这里，我们将编写一个头文件作为输入。它可能包含如下内容：
+让我们回到我们希望将 git 修订版编译到可执行文件中的示例。在这里，我们将编写一个头文件作为输入。它可能包含如下内容：
 
 ```cpp
 #define CMAKE_BEST_PRACTICES_VERSION "@GIT_REVISION@"
@@ -357,9 +355,9 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src
   /version.h @ONLY)
 ```
 
-如前一节中的示例所示，版本信息是作为编译定义传递的，git修订版首先通过`execute_process`获取。随后，文件通过`configure_file`进行复制，`@GIT_REVISION@`被替换为当前提交的短哈希值。
+如前一节中的示例所示，版本信息是作为编译定义传递的，git 修订版首先通过`execute_process`获取。随后，文件通过`configure_file`进行复制，`@GIT_REVISION@`被替换为当前提交的短哈希值。
 
-当你使用预处理器定义时，`configure_file`会将所有形如`#cmakedefine VAR ...`的行替换为`#define VAR`或`/* undef VAR */`，具体取决于`VAR`是否包含CMake解释为`true`或`false`的值。
+当你使用预处理器定义时，`configure_file`会将所有形如`#cmakedefine VAR ...`的行替换为`#define VAR`或`/* undef VAR */`，具体取决于`VAR`是否包含 CMake 解释为`true`或`false`的值。
 
 假设有一个名为`version.in.h`的文件，其中包含以下两行：
 
@@ -396,29 +394,29 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h @ONLY)
 /* #undef GIT_REVISION */
 ```
 
-总而言之，`configure_file`命令非常有用，可以为构建准备输入。除了生成源文件外，它常用于生成CMake文件，这些文件随后会被包含在`CMakeLists.txt`文件中。其优点之一是它允许你独立于平台复制和修改文件，这在跨平台工作时是一个重要的优势。由于`configure_file`和`execute_process`常常一起使用，因此确保执行的命令也是平台无关的。
+总而言之，`configure_file`命令非常有用，可以为构建准备输入。除了生成源文件外，它常用于生成 CMake 文件，这些文件随后会被包含在`CMakeLists.txt`文件中。其优点之一是它允许你独立于平台复制和修改文件，这在跨平台工作时是一个重要的优势。由于`configure_file`和`execute_process`常常一起使用，因此确保执行的命令也是平台无关的。
 
-在下一节中，你将学习如何使用CMake来定义平台无关的命令和脚本。
+在下一节中，你将学习如何使用 CMake 来定义平台无关的命令和脚本。
 
-# 使用CMake进行平台无关命令
+# 使用 CMake 进行平台无关命令
 
-CMake成功的一个关键因素是它允许你在多种平台上构建相同的软件。相反，这意味着`CMakeLists.txt`必须以不假设某个平台或编译器必须使用的方式编写。这可能会很具挑战性，特别是当你在处理自定义任务时。在这种情况下，`cmake`命令行工具提供的`-E`标志非常有帮助，它可以用于执行常见任务，例如文件操作和创建哈希。大多数`cmake -E`命令用于与文件相关的操作，如创建、复制、重命名和删除文件，以及创建目录。在支持文件系统链接的系统上，CMake还可以在文件之间创建符号链接或硬链接。自CMake版本3.21以来，大多数操作也可以通过使用`file()`命令来实现，但并非所有操作都可以。值得注意的是，创建哈希值时，可以使用`cmake –``E <algorithm>`以平台无关的方式进行。
+CMake 成功的一个关键因素是它允许你在多种平台上构建相同的软件。相反，这意味着`CMakeLists.txt`必须以不假设某个平台或编译器必须使用的方式编写。这可能会很具挑战性，特别是当你在处理自定义任务时。在这种情况下，`cmake`命令行工具提供的`-E`标志非常有帮助，它可以用于执行常见任务，例如文件操作和创建哈希。大多数`cmake -E`命令用于与文件相关的操作，如创建、复制、重命名和删除文件，以及创建目录。在支持文件系统链接的系统上，CMake 还可以在文件之间创建符号链接或硬链接。自 CMake 版本 3.21 以来，大多数操作也可以通过使用`file()`命令来实现，但并非所有操作都可以。值得注意的是，创建哈希值时，可以使用`cmake –``E <algorithm>`以平台无关的方式进行。
 
-此外，CMake可以使用`tar`命令创建文件归档，并使用`cat`命令连接文本文件。它还可以用于为文件创建各种哈希值。
+此外，CMake 可以使用`tar`命令创建文件归档，并使用`cat`命令连接文本文件。它还可以用于为文件创建各种哈希值。
 
-还有一些操作可以提供关于当前系统信息的信息。`capabilities`操作将打印出CMake的能力，例如了解支持的生成器和当前正在运行的CMake版本。`environment`命令将打印出已设置的环境变量列表。
+还有一些操作可以提供关于当前系统信息的信息。`capabilities`操作将打印出 CMake 的能力，例如了解支持的生成器和当前正在运行的 CMake 版本。`environment`命令将打印出已设置的环境变量列表。
 
-可以通过运行`cmake -E`而不带任何其他参数来获取命令行选项的完整参考。CMake的在线文档可以在[https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-command-line-tool](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-command-line-tool)找到。
+可以通过运行`cmake -E`而不带任何其他参数来获取命令行选项的完整参考。CMake 的在线文档可以在[`cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-command-line-tool`](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-command-line-tool)找到。
 
 平台无关的文件操作
 
 每当需要通过自定义任务执行文件操作时，请使用`cmake –``E`。
 
-使用`cmake -E`，在大多数情况下可以做得相当远。但是，有时需要执行更复杂的操作。为此，CMake可以在脚本模式下运行，执行CMake文件。
+使用`cmake -E`，在大多数情况下可以做得相当远。但是，有时需要执行更复杂的操作。为此，CMake 可以在脚本模式下运行，执行 CMake 文件。
 
-## 执行CMake文件作为脚本
+## 执行 CMake 文件作为脚本
 
-CMake的脚本模式在创建跨平台脚本时非常强大。这是因为它允许您创建完全与平台无关的脚本。通过调用`cmake -P <script>.cmake`，执行指定的CMake文件。脚本文件可能不包含定义构建目标的任何命令。可以使用`-D`标志将参数作为变量传递，但必须在`-P`选项之前执行此操作。或者，参数仅可以在脚本名称之后追加，以便可以使用`CMAKE_ARGV[n]`变量检索它们。参数的数量存储在`CMAKE_ARGC`变量中。以下脚本演示了如何使用位置参数生成文件的哈希并将其存储在另一个文件中：
+CMake 的脚本模式在创建跨平台脚本时非常强大。这是因为它允许您创建完全与平台无关的脚本。通过调用`cmake -P <script>.cmake`，执行指定的 CMake 文件。脚本文件可能不包含定义构建目标的任何命令。可以使用`-D`标志将参数作为变量传递，但必须在`-P`选项之前执行此操作。或者，参数仅可以在脚本名称之后追加，以便可以使用`CMAKE_ARGV[n]`变量检索它们。参数的数量存储在`CMAKE_ARGC`变量中。以下脚本演示了如何使用位置参数生成文件的哈希并将其存储在另一个文件中：
 
 ```cpp
 cmake_minimum_required(VERSION 3.21)
@@ -471,17 +469,17 @@ COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 )
 ```
 
-将CMake的脚本模式与在项目的配置或构建阶段执行自定义命令的各种方式结合使用，为您在定义构建过程时提供了很大的自由，甚至适用于不同的平台。然而，需注意的是，向构建过程中添加过多的逻辑可能会使其维护变得比预期更加困难。每当您需要编写脚本或向`CMakeLists.txt`文件中添加自定义命令时，最好先休息一下，考虑一下这一步是否属于构建过程，还是应该留给用户在设置开发环境时处理。
+将 CMake 的脚本模式与在项目的配置或构建阶段执行自定义命令的各种方式结合使用，为您在定义构建过程时提供了很大的自由，甚至适用于不同的平台。然而，需注意的是，向构建过程中添加过多的逻辑可能会使其维护变得比预期更加困难。每当您需要编写脚本或向`CMakeLists.txt`文件中添加自定义命令时，最好先休息一下，考虑一下这一步是否属于构建过程，还是应该留给用户在设置开发环境时处理。
 
 # 总结
 
-在本章中，您学习了如何通过执行外部任务和程序来定制构建。我们介绍了如何将自定义构建操作作为目标添加，如何将它们添加到现有目标中，以及如何在配置步骤期间执行它们。我们探讨了如何通过命令生成文件，以及如何使用`configure_file`命令复制和修改文件。最后，我们学习了如何使用CMake命令行工具以平台无关的方式执行任务。
+在本章中，您学习了如何通过执行外部任务和程序来定制构建。我们介绍了如何将自定义构建操作作为目标添加，如何将它们添加到现有目标中，以及如何在配置步骤期间执行它们。我们探讨了如何通过命令生成文件，以及如何使用`configure_file`命令复制和修改文件。最后，我们学习了如何使用 CMake 命令行工具以平台无关的方式执行任务。
 
-定制CMake构建的能力是一个非常强大的资产，但它也往往会使构建变得更加脆弱，因为当执行任何自定义任务时，构建的复杂性通常会增加。虽然有时不可避免，但依赖于除编译器和链接器之外的外部程序的安装可能意味着某些软件无法在未安装或不可用这些程序的平台上构建。这意味着，必须特别小心，确保自定义任务在可能的情况下不会假设使用CMake的系统有什么特定的配置。最后，执行自定义任务可能会对构建系统带来性能负担，尤其是当它们在每次构建时进行大量工作时。
+定制 CMake 构建的能力是一个非常强大的资产，但它也往往会使构建变得更加脆弱，因为当执行任何自定义任务时，构建的复杂性通常会增加。虽然有时不可避免，但依赖于除编译器和链接器之外的外部程序的安装可能意味着某些软件无法在未安装或不可用这些程序的平台上构建。这意味着，必须特别小心，确保自定义任务在可能的情况下不会假设使用 CMake 的系统有什么特定的配置。最后，执行自定义任务可能会对构建系统带来性能负担，尤其是当它们在每次构建时进行大量工作时。
 
 然而，如果您小心处理自定义构建步骤，它们是增加构建凝聚力的一个很好的方式，因为许多与构建相关的任务可以在构建定义的位置进行定义。这可以使自动化任务（如创建构建产物的哈希值或将所有文档打包成一个公共档案）变得更加容易。
 
-在下一章中，您将学习如何使构建环境在不同系统之间具有可移植性。您将学习如何使用预设来定义配置CMake项目的常见方式，如何将您的构建环境打包到容器中，以及如何使用`sysroots`来定义工具链和库，以便它们在不同系统之间具有可移植性。
+在下一章中，您将学习如何使构建环境在不同系统之间具有可移植性。您将学习如何使用预设来定义配置 CMake 项目的常见方式，如何将您的构建环境打包到容器中，以及如何使用`sysroots`来定义工具链和库，以便它们在不同系统之间具有可移植性。
 
 # 问题
 
@@ -497,7 +495,7 @@ COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 
 1.  如何控制`configure_file`的替换行为？
 
-1.  CMake命令行工具执行任务的两个标志是什么？
+1.  CMake 命令行工具执行任务的两个标志是什么？
 
 # 答案
 

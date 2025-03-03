@@ -1,6 +1,4 @@
-# 6
-
-# 自动生成文档
+# 第六章：自动生成文档
 
 文档无疑是所有项目中不可或缺的一部分。文档传递的是用户无法直接获得的信息，它是一种分享项目意图、功能、能力和限制的方式，使技术人员和非技术人员都能参与项目的工作。然而，编写文档确实是一个费时的过程。因此，利用现有的工具来生成文档非常重要。
 
@@ -18,7 +16,7 @@
 
 # 技术要求
 
-在深入本章内容之前，你应该对[*第 4 章*](B30947_04.xhtml#_idTextAnchor071)《打包、部署和安装 CMake 项目》和[*第 5 章*](B30947_05.xhtml#_idTextAnchor084)《集成第三方库和依赖管理》有一个清晰的了解。本章将使用的技术都已在这两章中涵盖。此外，建议从[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06)获取本章的示例内容。所有示例都假设你将使用项目提供的开发环境容器，相关链接为：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。这是一个类似于 Debian 的环境，已经预先安装了所有必要的依赖。如果使用不同的环境，命令和输出可能会有所不同。如果你没有使用提供的 Docker 容器，请确保你已经在环境中安装了 Doxygen、PlantUML 和 Graphviz。有关安装详细信息，请查阅你的包管理器索引。
+在深入本章内容之前，你应该对*第四章*《打包、部署和安装 CMake 项目》和*第五章*《集成第三方库和依赖管理》有一个清晰的了解。本章将使用的技术都已在这两章中涵盖。此外，建议从[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/tree/main/chapter06)获取本章的示例内容。所有示例都假设你将使用项目提供的开发环境容器，相关链接为：[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition)。这是一个类似于 Debian 的环境，已经预先安装了所有必要的依赖。如果使用不同的环境，命令和输出可能会有所不同。如果你没有使用提供的 Docker 容器，请确保你已经在环境中安装了 Doxygen、PlantUML 和 Graphviz。有关安装详细信息，请查阅你的包管理器索引。
 
 让我们通过学习如何从现有代码生成文档，来深入了解文档的领域。
 
@@ -32,7 +30,7 @@
 
 Doxygen 是一个非常流行的 C++ 项目文档生成软件，它可以从代码中生成文档。Doxygen 理解 C 和 C++ 语法，并能够像编译器一样查看代码结构。这使得 Doxygen 可以深入了解软件项目的结构，查看所有类定义、命名空间、匿名函数、封装、变量、继承关系等内容。Doxygen 将这些信息与程序员编写的内联代码文档结合起来。最终的结果是兼容在线和离线阅读的各种格式的人类可读文档。
 
-为了能够理解代码注释，Doxygen 要求注释必须符合一组预定义的格式。如何创建 Doxygen 可以理解的代码注释的完整文档可以在这里找到：[https://www.doxygen.nl/manual/docblocks.html](https://www.doxygen.nl/manual/docblocks.html)。在我们的示例中，我们将使用**Javadoc**风格的注释，这种注释方式常见，但你可以根据个人偏好选择适合的方式。下面是一个 C++ 函数的 Javadoc 注释示例：
+为了能够理解代码注释，Doxygen 要求注释必须符合一组预定义的格式。如何创建 Doxygen 可以理解的代码注释的完整文档可以在这里找到：[`www.doxygen.nl/manual/docblocks.html`](https://www.doxygen.nl/manual/docblocks.html)。在我们的示例中，我们将使用**Javadoc**风格的注释，这种注释方式常见，但你可以根据个人偏好选择适合的方式。下面是一个 C++ 函数的 Javadoc 注释示例：
 
 ```cpp
 /**
@@ -134,7 +132,7 @@ set(DOXYGEN_QUIET YES)
 
 +   `DOXYGEN_QUIET`：抑制生成的 Doxygen 输出到**标准输出**（**stdout**）。
 
-Doxygen 的选项集合非常广泛，提供了比我们所覆盖的选项更多的功能。如果你想进一步自定义文档生成，请查看在 [https://www.doxygen.nl/manual/config.html](https://www.doxygen.nl/manual/config.html) 上列出的完整参数列表。要在 CMake 中设置任何 Doxygen 选项，请在变量名之前添加 `DOXYGEN_` 前缀，并使用 `set()` 设置所需的值。说完这些附注后，让我们回到示例代码。前面显示的 CMake 代码后面是目标声明。以下代码行定义了一个常规的静态库，包含我们示例代码的文档：
+Doxygen 的选项集合非常广泛，提供了比我们所覆盖的选项更多的功能。如果你想进一步自定义文档生成，请查看在 [`www.doxygen.nl/manual/config.html`](https://www.doxygen.nl/manual/config.html) 上列出的完整参数列表。要在 CMake 中设置任何 Doxygen 选项，请在变量名之前添加 `DOXYGEN_` 前缀，并使用 `set()` 设置所需的值。说完这些附注后，让我们回到示例代码。前面显示的 CMake 代码后面是目标声明。以下代码行定义了一个常规的静态库，包含我们示例代码的文档：
 
 ```cpp
 add_library(ch6_ex01_doxdocgen_lib STATIC)
@@ -281,7 +279,7 @@ Doxygen 需要 `dot` 工具来渲染图表。`dot` 工具包含在 Graphviz 软�
 
 在上一部分，我们学习了如何利用 Doxygen 为我们的 CMake 项目生成图表和文档，但并非每个图表都能从代码中推断出来。我们可能想要绘制自定义图表，以说明一个实体与外部系统之间的复杂关系，而这些关系在代码上下文中是无法体现的。为了解决这个问题，显而易见的选择是将该上下文以某种方式引入到代码或注释中，再次利用文档生成。那么，正如预期的那样，这也是 Doxygen 可以做到的。Doxygen 允许在注释中嵌入 PlantUML 图表，这将使我们能够绘制任何 PlantUML 支持的图表。但在开始将 PlantUML 代码放入 Doxygen 注释之前，有一件小事需要处理：在 Doxygen 中启用 PlantUML 支持。我们已经有了一个起点。让我们开始吧！
 
-在 Doxygen 中启用 PlantUML 支持非常简单。Doxygen 需要一个 `PLANTUML_JAR_PATH` 变量，该变量必须设置为 `plantuml.jar` 文件在环境中的位置。因此，我们需要找出该文件的位置。为此，我们将使用 `find_path(...)` CMake 函数。`find_path(...)` 函数与 `find_program(...)` 类似，不同之处在于它用于定位文件路径，而不是程序位置。也就是说，我们应该能够通过 `find_path(...)` 找到 `plantuml.jar` 的路径，然后将该路径提供给 Doxygen，接下来就可以……获利了！让我们来验证这个理论。我们将按照 `第 6 章` `- 示例 02` 来进行这一部分的操作。照例，我们先来查看示例代码的 `CMakeLists.txt` 文件，文件位于 `chapter06/ex02_doxplantuml/CMakeLists.txt` 路径下。从 `find_path(...)` 调用开始，具体如下：
+在 Doxygen 中启用 PlantUML 支持非常简单。Doxygen 需要一个 `PLANTUML_JAR_PATH` 变量，该变量必须设置为 `plantuml.jar` 文件在环境中的位置。因此，我们需要找出该文件的位置。为此，我们将使用 `find_path(...)` CMake 函数。`find_path(...)` 函数与 `find_program(...)` 类似，不同之处在于它用于定位文件路径，而不是程序位置。也就是说，我们应该能够通过 `find_path(...)` 找到 `plantuml.jar` 的路径，然后将该路径提供给 Doxygen，接下来就可以……获利了！让我们来验证这个理论。我们将按照 `第六章` `- 示例 02` 来进行这一部分的操作。照例，我们先来查看示例代码的 `CMakeLists.txt` 文件，文件位于 `chapter06/ex02_doxplantuml/CMakeLists.txt` 路径下。从 `find_path(...)` 调用开始，具体如下：
 
 ```cpp
 find_path(PLANTUML_JAR_PATH NAMES plantuml.jar HINTS
@@ -295,7 +293,7 @@ set(DOXYGEN_PLANTUML_JAR_PATH "${PLANTUML_JAR_PATH}")
 set(DOXYGEN_QUIET YES)
 ```
 
-在这里的`find_path(...)`调用中，`PLANTUML_JAR_PATH`是输出变量的名称。`NAMES`是将在搜索位置中查找的文件名。`HINTS`是除默认搜索位置之外的额外路径。这些路径对于在非标准位置发现文件非常有用。最后，`REQUIRED`参数用于将`plantuml.jar`作为一个必需项，因此当找不到`plantuml.jar`时，CMake 会失败并退出。以下的 Doxygen 配置部分与我们之前的示例《第 6 章 示例 01》完全相同，只不过我们将`DOXYGEN_PLANTUML_JAR_PATH`设置为通过`find_path(...)`调用找到的 PlantUML 目录路径。此外，未在此示例中需要的变量也被省略了。此时，Doxygen 应该能够使用 PlantUML。让我们通过一个示例 PlantUML 图表来测试一下，它被嵌入到了 `src/main.cpp` 源文件中，如下所示：
+在这里的`find_path(...)`调用中，`PLANTUML_JAR_PATH`是输出变量的名称。`NAMES`是将在搜索位置中查找的文件名。`HINTS`是除默认搜索位置之外的额外路径。这些路径对于在非标准位置发现文件非常有用。最后，`REQUIRED`参数用于将`plantuml.jar`作为一个必需项，因此当找不到`plantuml.jar`时，CMake 会失败并退出。以下的 Doxygen 配置部分与我们之前的示例《第六章 示例 01》完全相同，只不过我们将`DOXYGEN_PLANTUML_JAR_PATH`设置为通过`find_path(...)`调用找到的 PlantUML 目录路径。此外，未在此示例中需要的变量也被省略了。此时，Doxygen 应该能够使用 PlantUML。让我们通过一个示例 PlantUML 图表来测试一下，它被嵌入到了 `src/main.cpp` 源文件中，如下所示：
 
 ```cpp
  /**
@@ -342,13 +340,13 @@ google-chrome build/ex02_doxplantuml/docs/html/main_8cpp.html
 
 # 使用 CPack 打包和分发文档
 
-打包文档与打包软件及其构件并没有什么不同——毕竟，文档本身就是项目的一个构件。因此，我们将使用在[*第 4 章*](B30947_04.xhtml#_idTextAnchor071)《打包、部署和安装 CMake 项目》中学到的技术来打包我们的文档。
+打包文档与打包软件及其构件并没有什么不同——毕竟，文档本身就是项目的一个构件。因此，我们将使用在*第四章*《打包、部署和安装 CMake 项目》中学到的技术来打包我们的文档。
 
 注意
 
-如果你还没有阅读[*第 4 章*](B30947_04.xhtml#_idTextAnchor071)《打包、部署和安装 CMake 项目》，强烈建议在阅读本节之前先阅读该章节。
+如果你还没有阅读*第四章*《打包、部署和安装 CMake 项目》，强烈建议在阅读本节之前先阅读该章节。
 
-为了说明这一部分，我们将回到`第6章` `- 示例01`。我们将使我们在这个示例中生成的文档可安装并可打包。让我们重新回到位于`chapter06/ex01_doxdocgen/`文件夹中的`CMakeLists.txt`文件。通过以下代码，我们将使`html`和`man`文档可安装：
+为了说明这一部分，我们将回到`第六章` `- 示例 01`。我们将使我们在这个示例中生成的文档可安装并可打包。让我们重新回到位于`chapter06/ex01_doxdocgen/`文件夹中的`CMakeLists.txt`文件。通过以下代码，我们将使`html`和`man`文档可安装：
 
 ```cpp
 include(GNUInstallDirs)
@@ -360,7 +358,7 @@ install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/man/"
     ch6_ex01_man)
 ```
 
-记得我们之前在[*第4章*](B30947_04.xhtml#_idTextAnchor071)中使用`install(DIRECTORY...)`来安装任何类型的文件夹，同时保持其结构吗？*打包、部署和安装 CMake 项目*？这正是我们在这里所做的。我们通过安装`docs/html`和`docs/man`到`GNUInstallDirs`模块提供的默认文档和man页面目录中，使生成的文档可安装。此外，还要记住，如果某个内容是可安装的，那么它也意味着可以打包，因为 CMake 可以从`install(...)`调用生成所需的打包代码。所以，让我们也包括`CPack`模块，以便为这个示例启用打包功能。代码在以下片段中展示：
+记得我们之前在*第四章*中使用`install(DIRECTORY...)`来安装任何类型的文件夹，同时保持其结构吗？*打包、部署和安装 CMake 项目*？这正是我们在这里所做的。我们通过安装`docs/html`和`docs/man`到`GNUInstallDirs`模块提供的默认文档和 man 页面目录中，使生成的文档可安装。此外，还要记住，如果某个内容是可安装的，那么它也意味着可以打包，因为 CMake 可以从`install(...)`调用生成所需的打包代码。所以，让我们也包括`CPack`模块，以便为这个示例启用打包功能。代码在以下片段中展示：
 
 ```cpp
 set(CPACK_PACKAGE_NAME cbp_chapter6_example01)
@@ -387,27 +385,27 @@ dpkg -x build/pak/cbp_chapter6_example01-1.0-Linux.deb
 export MANPATH=/tmp/ch6-ex01/usr/share/man/
 ```
 
-提取完成后，文档应能在`/tmp/ch6-ex01/usr/share`路径下访问。由于我们使用了非默认路径，因此我们使用`MANPATH`环境变量让`man`命令知道我们的文档路径。让我们先检查是否可以通过调用`man`命令访问man页面，如下所示：
+提取完成后，文档应能在`/tmp/ch6-ex01/usr/share`路径下访问。由于我们使用了非默认路径，因此我们使用`MANPATH`环境变量让`man`命令知道我们的文档路径。让我们先检查是否可以通过调用`man`命令访问 man 页面，如下所示：
 
 ```cpp
 man chapter6_ex01_calculator
 ```
 
-`chapter6_ex01_calculator`的名称是由Doxygen根据`chapter6::ex01::calculator`类名自动推断出来的。你应该能够看到我们在上一节中讨论的man页面输出。
+`chapter6_ex01_calculator`的名称是由 Doxygen 根据`chapter6::ex01::calculator`类名自动推断出来的。你应该能够看到我们在上一节中讨论的 man 页面输出。
 
 到目前为止，我们已经学习了很多关于生成和打包文档的内容。接下来，我们将学习如何生成 CMake 目标的依赖图。
 
 # 创建 CMake 目标的依赖图
 
-在前面的部分中，我们已经涵盖了软件代码的文档编写和图形化，但在一个大型项目中，我们可能还需要对CMake代码进行文档化和可视化。CMake目标之间的关系可能非常复杂，这可能使得追踪所有依赖关系变得困难。幸运的是，CMake通过提供一个显示所有目标之间依赖关系的图表来帮助我们。通过调用`cmake --graphviz=my-project.dot /path/to/build/dir`，CMake将生成包含目标相互依赖关系的DOT语言文件。DOT语言是一种描述图的语言，可以被多种程序解释，其中最著名的是免费的Graphviz。DOT文件可以转换为图像，甚至可以使用Graphviz中的`dot`命令行工具，如下所示：`dot -Tpng filename.dot -o out.png`。
+在前面的部分中，我们已经涵盖了软件代码的文档编写和图形化，但在一个大型项目中，我们可能还需要对 CMake 代码进行文档化和可视化。CMake 目标之间的关系可能非常复杂，这可能使得追踪所有依赖关系变得困难。幸运的是，CMake 通过提供一个显示所有目标之间依赖关系的图表来帮助我们。通过调用`cmake --graphviz=my-project.dot /path/to/build/dir`，CMake 将生成包含目标相互依赖关系的 DOT 语言文件。DOT 语言是一种描述图的语言，可以被多种程序解释，其中最著名的是免费的 Graphviz。DOT 文件可以转换为图像，甚至可以使用 Graphviz 中的`dot`命令行工具，如下所示：`dot -Tpng filename.dot -o out.png`。
 
-如[*第3章*](B30947_03.xhtml#_idTextAnchor054)所示，提供了更多的目标，让我们在该章节的`build`文件夹中运行此命令。这将生成类似于以下的输出：
+如*第三章*所示，提供了更多的目标，让我们在该章节的`build`文件夹中运行此命令。这将生成类似于以下的输出：
 
 ![](img/B30947_06_08.jpg)
 
-图6.8 – 使用DOT语言可视化的第3章项目结构
+图 6.8 – 使用 DOT 语言可视化的第三章项目结构
 
-行为和选项可以通过`CMakeGraphVizOptions`中提供的变量进行控制。在创建DOT图时，CMake会在`PROJECT_SOURCE_DIR`和`PROJECT_BINARY_DIR`目录中查找名为`CMakeGraphVizOptions.cmake`的文件，如果找到，将使用其中提供的值。这样的配置文件示例如下：
+行为和选项可以通过`CMakeGraphVizOptions`中提供的变量进行控制。在创建 DOT 图时，CMake 会在`PROJECT_SOURCE_DIR`和`PROJECT_BINARY_DIR`目录中查找名为`CMakeGraphVizOptions.cmake`的文件，如果找到，将使用其中提供的值。这样的配置文件示例如下：
 
 ```cpp
 set(GRAPHVIZ_GRAPH_NAME "CMake Best Practices")
@@ -415,7 +413,7 @@ set(GRAPHVIZ_GENERATE_PER_TARGET FALSE)
 set(GRAPHVIZ_GENERATE_DEPENDERS FALSE)
 ```
 
-默认情况下，CMake会为所有目标创建依赖图。将`GRAPHVIZ_GENERATE_PER_TARGET`和`GRAPHVIZ_GENERATE_DEPENDERS`设置为`FALSE`将减少生成的文件数量。所有可用选项的完整列表可以在CMake文档中的[https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)找到。
+默认情况下，CMake 会为所有目标创建依赖图。将`GRAPHVIZ_GENERATE_PER_TARGET`和`GRAPHVIZ_GENERATE_DEPENDERS`设置为`FALSE`将减少生成的文件数量。所有可用选项的完整列表可以在 CMake 文档中的[`cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html`](https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html)找到。
 
 # 总结
 

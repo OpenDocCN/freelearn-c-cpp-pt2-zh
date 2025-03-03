@@ -1,6 +1,4 @@
-# 10
-
-# 为共享打包项目
+# 第十章：为共享打包项目
 
 在本章中，我们将讨论 *Minimal CMake* 的最后一个主要主题——打包。这是将我们构建的软件转化为可以共享的格式的过程。当然，您也可以在没有打包步骤的情况下共享软件，但这样做通常是一个手动过程，容易出错，也不符合平台的预期规范——例如，Windows 的图形安装程序、macOS 的磁盘映像（`.dmg`）或 Linux（Ubuntu）Debian 包（`.deb`）。
 
@@ -22,17 +20,17 @@
 
 # 技术要求
 
-为了跟随本书的进度，请确保你满足 [*第1章*](B21152_01.xhtml#_idTextAnchor019)《入门》中概述的要求。这些要求包括：
+为了跟随本书的进度，请确保你满足 *第一章*《入门》中概述的要求。这些要求包括：
 
 +   一台安装有最新 **操作** **系统**（**OS**）的 Windows、Mac 或 Linux 机器
 
 +   一个可用的 C/C++ 编译器（如果你还没有，建议使用系统默认的编译器）
 
-本章中的代码示例可以通过以下链接找到：[https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake)。
+本章中的代码示例可以通过以下链接找到：[`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake)。
 
 # 理解 CPack
 
-通过终端使用 `cpack`。理解 CPack 最好的方式是把它看作是 CMake 安装命令的封装工具。在 [*第8章*](B21152_08.xhtml#_idTextAnchor183)，《使用超级构建简化入门》中，我们已经完成了为我们的应用程序创建安装命令的过程，也就是说，我们已经做了打包应用程序所需的工作。CPack 的作用是处理与安装软件相关的特定平台约定，它能很好地抽象化这些工作，使你无需过多担心。
+通过终端使用 `cpack`。理解 CPack 最好的方式是把它看作是 CMake 安装命令的封装工具。在 *第八章*，《使用超级构建简化入门》中，我们已经完成了为我们的应用程序创建安装命令的过程，也就是说，我们已经做了打包应用程序所需的工作。CPack 的作用是处理与安装软件相关的特定平台约定，它能很好地抽象化这些工作，使你无需过多担心。
 
 打包的优势在于，能够避免让用户自己构建我们的软件。我们之前讨论过的与从安装目录（`app/install/bin` 文件夹）运行应用程序、将 DLL 复制到 Windows 上正确的文件夹以及库搜索路径（我们在 Linux/macOS 上执行的 `RPATH` 处理）相关的主题，已经为此做好了准备，使打包步骤变得更加简单。
 
@@ -50,9 +48,9 @@ CPack 提供了多个包生成器，这些生成器的指定方式类似于我�
 Shaders not found. Have you built them using compile-shader-<platform>.sh/bat script?
 ```
 
-很可能你已经构建了着色器（特别是在我们在 [*第8章*](B21152_08.xhtml#_idTextAnchor183) 中添加了自定义命令来自动为我们完成此操作之后，*使用超级构建简化入门*）；问题是，当从主目录运行时，我们的应用程序会在 `~/shaders/build` 中寻找着色器，而不是在 `path/to/app/install/bin/shaders/build` 中。与 Windows 相比，macOS 和 Linux 上的情况要更复杂一些。在 Windows 上通过图形界面启动应用程序时，工作目录默认会设置为包含可执行文件的文件夹，但在 macOS 和 Linux 上，工作目录会是用户的主目录（`~/` 或 `$HOME`）。
+很可能你已经构建了着色器（特别是在我们在 *第八章* 中添加了自定义命令来自动为我们完成此操作之后，*使用超级构建简化入门*）；问题是，当从主目录运行时，我们的应用程序会在 `~/shaders/build` 中寻找着色器，而不是在 `path/to/app/install/bin/shaders/build` 中。与 Windows 相比，macOS 和 Linux 上的情况要更复杂一些。在 Windows 上通过图形界面启动应用程序时，工作目录默认会设置为包含可执行文件的文件夹，但在 macOS 和 Linux 上，工作目录会是用户的主目录（`~/` 或 `$HOME`）。
 
-为了解决这个问题，我们需要更新我们的应用程序，使其相对于可执行文件加载资源文件，而不是当前工作目录。为了实现这一点，我们需要查询应用程序在运行时的当前目录。根据使用的平台不同，这有多种方法（例如，macOS 上的 `_NSGetExecutablePath`，Linux 上的 `readlink`，Windows 上的 `GetModuleFileName`，以及其他一些替代方法）。幸运的是，既然我们使用的是 SDL 2，我们可以使用一个名为 `SDL_GetBasePath` 的工具函数（更多信息请参见 [https://wiki.libsdl.org/SDL2/SDL_GetBasePath](https://wiki.libsdl.org/SDL2/SDL_GetBasePath)），它可以为我们处理所有这些跨平台的情况（它还处理了 macOS 特定的包的差异）。
+为了解决这个问题，我们需要更新我们的应用程序，使其相对于可执行文件加载资源文件，而不是当前工作目录。为了实现这一点，我们需要查询应用程序在运行时的当前目录。根据使用的平台不同，这有多种方法（例如，macOS 上的 `_NSGetExecutablePath`，Linux 上的 `readlink`，Windows 上的 `GetModuleFileName`，以及其他一些替代方法）。幸运的是，既然我们使用的是 SDL 2，我们可以使用一个名为 `SDL_GetBasePath` 的工具函数（更多信息请参见 [`wiki.libsdl.org/SDL2/SDL_GetBasePath`](https://wiki.libsdl.org/SDL2/SDL_GetBasePath)），它可以为我们处理所有这些跨平台的情况（它还处理了 macOS 特定的包的差异）。
 
 我们将对`CMakeLists.txt`文件和`main.cpp`文件做几个小改动，以支持这一点。从`ch10/part-1/app`中的`CMakeLists.txt`文件开始，我们将把着色器从其原始位置复制到我们的`build`文件夹，以确保从那里启动可执行文件能够按预期工作。为了使事情更加清晰，我们将删除`shader/build`文件夹，并将编译后的`bin`文件安装到一个名为`shader`的新文件夹中，位于应用程序旁边（稍后我们会相应更新`main.cpp`文件）。
 
@@ -79,7 +77,7 @@ add_custom_command(
   VERBATIM)
 ```
 
-我们将使用`copy_directory`命令，将`shader/build`文件夹的内容复制到目标位置的子文件夹`shader`中。需要注意的是，复制着色器的自定义命令并没有明确依赖于之前的编译着色器的自定义命令。这可能意味着，如果编译着色器失败，这个命令仍然会执行，但没有效果（或失败）。如[*第8章*](B21152_08.xhtml#_idTextAnchor183)中讨论的，*使用超级构建简化入门*，我们可以使用`add_custom_command`的`OUTPUT`变体，并使用`DEPENDS`参数确保第二个`add_custom_command`仅在第一个成功后运行。由于`TARGET`版本更简单，我们将继续使用它来演示后续的例子，但在某些情况下，`OUTPUT`版本会非常有用（有关更多细节，请参见[https://cmake.org/cmake/help/latest/command/add_custom_command.html](https://cmake.org/cmake/help/latest/command/add_custom_command.html)）。为了保持与安装布局一致，我们还需要稍微修改我们之前创建的安装命令，将我们的着色器复制到安装树中。我们不再复制整个`shader/build`文件夹，而是将内容复制到一个新的名为`shader`的文件夹中。我们可以使用以下命令实现：
+我们将使用`copy_directory`命令，将`shader/build`文件夹的内容复制到目标位置的子文件夹`shader`中。需要注意的是，复制着色器的自定义命令并没有明确依赖于之前的编译着色器的自定义命令。这可能意味着，如果编译着色器失败，这个命令仍然会执行，但没有效果（或失败）。如*第八章*中讨论的，*使用超级构建简化入门*，我们可以使用`add_custom_command`的`OUTPUT`变体，并使用`DEPENDS`参数确保第二个`add_custom_command`仅在第一个成功后运行。由于`TARGET`版本更简单，我们将继续使用它来演示后续的例子，但在某些情况下，`OUTPUT`版本会非常有用（有关更多细节，请参见[`cmake.org/cmake/help/latest/command/add_custom_command.html`](https://cmake.org/cmake/help/latest/command/add_custom_command.html)）。为了保持与安装布局一致，我们还需要稍微修改我们之前创建的安装命令，将我们的着色器复制到安装树中。我们不再复制整个`shader/build`文件夹，而是将内容复制到一个新的名为`shader`的文件夹中。我们可以使用以下命令实现：
 
 ```cpp
 install(
@@ -138,7 +136,7 @@ cpack --config build/multi-ninja-super/--config 提供 CPackConfig.cmake 文件�
 
             CPack 常见属性
 
-            除了 `include(CPack)` 命令外，还有许多 CPack 变量可以设置，用来配置打包项目的各种设置。有些变量是所有 CPack 生成器共享的（完整的列表可以在 [https://cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators](https://cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators) 查阅），还有些变量是特定于某个生成器的——例如，macOS 上的 CPack Bundle 生成器以 `CPACK_BUNDLE_` 开头（它的完整变量列表可以在 [https://cmake.org/cmake/help/latest/cpack_gen/bundle.html](https://cmake.org/cmake/help/latest/cpack_gen/bundle.html) 查阅）。并非所有通用的 CPack 变量都适用于每个生成器，但它们会适用于多个生成器（例如，`CPACK_PACKAGE_EXECUTABLES` 就被 NSIS、WiX 和 Inno Setup 生成器使用）。
+            除了 `include(CPack)` 命令外，还有许多 CPack 变量可以设置，用来配置打包项目的各种设置。有些变量是所有 CPack 生成器共享的（完整的列表可以在 [`cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators`](https://cmake.org/cmake/help/latest/module/CPack.html#variables-common-to-all-cpack-generators) 查阅），还有些变量是特定于某个生成器的——例如，macOS 上的 CPack Bundle 生成器以 `CPACK_BUNDLE_` 开头（它的完整变量列表可以在 [`cmake.org/cmake/help/latest/cpack_gen/bundle.html`](https://cmake.org/cmake/help/latest/cpack_gen/bundle.html) 查阅）。并非所有通用的 CPack 变量都适用于每个生成器，但它们会适用于多个生成器（例如，`CPACK_PACKAGE_EXECUTABLES` 就被 NSIS、WiX 和 Inno Setup 生成器使用）。
 
             我们将从最基本的常见变量开始（还有许多其他变量被省略；你可以随意尝试这些变量并将它们添加到你未来的项目中）。我们将首先指定的是 `CPACK_PACKAGE_NAME`：
 
@@ -156,14 +154,14 @@ set(
   PROJECT_NAME) and the second is a friendly name for the application once the package has been installed by a user (this makes sure things such as the Start Menu icon on Windows has this name).
 			That’s it for the common variables; we could specify other properties about the project, such as the version, description, and vendor, but we’ll skip those for now. Next, we’re going to look at our Windows NSIS installer and what other variables are needed.
 			The CPack Windows NSIS package
-			To create something that resembles a traditional Windows installer for our application, we’re going to use the NSIS package. If you don’t already have this installed, you can download it from [https://nsis.sourceforge.io/Download](https://nsis.sourceforge.io/Download) (the examples in this book were tested with NSIS `3.10`). Once this is installed, specifying the NSIS generator in CPack should work (if you don’t have it installed, you’ll get an error that CPack can’t find NSIS).
+			To create something that resembles a traditional Windows installer for our application, we’re going to use the NSIS package. If you don’t already have this installed, you can download it from [`nsis.sourceforge.io/Download`](https://nsis.sourceforge.io/Download) (the examples in this book were tested with NSIS `3.10`). Once this is installed, specifying the NSIS generator in CPack should work (if you don’t have it installed, you’ll get an error that CPack can’t find NSIS).
 			The NSIS installer should more or less work out of the box with our current setup; all we need to do is run the following command (the exact build folder shown here, `build/multi-ninja`, may differ in your case):
 
 ```
 
-cpack --config build/multi-ninja/CPackConfig.cmake -G package。运行安装程序将引导我们完成一系列步骤，然后将安装文件复制到C:\Program Files\minimal-cmake_game-of-life 0.1.1。开始菜单快捷方式也会添加到C:\ProgramData\Microsoft\Windows\Start Menu\Programs\minimal-cmake_game-of-life 0.1.1。
+cpack --config build/multi-ninja/CPackConfig.cmake -G package。运行安装程序将引导我们完成一系列步骤，然后将安装文件复制到 C:\Program Files\minimal-cmake_game-of-life 0.1.1。开始菜单快捷方式也会添加到 C:\ProgramData\Microsoft\Windows\Start Menu\Programs\minimal-cmake_game-of-life 0.1.1。
 
-            我们设置的两个初始`CPACK_NSIS_`变量是为了给安装程序的欢迎屏幕一个友好的标题，并确保在高DPI显示器上显示清晰：
+            我们设置的两个初始`CPACK_NSIS_`变量是为了给安装程序的欢迎屏幕一个友好的标题，并确保在高 DPI 显示器上显示清晰：
 
 ```cpp
 set(CPACK_NSIS_PACKAGE_NAME "Minimal CMake - Game of Life")
@@ -172,9 +170,9 @@ set(CPACK_NSIS_MANIFEST_DPI_AWARE true)
 
             有一个重要的东西我们还缺少，以使我们的应用程序看起来更专业，那就是图标（不幸的是，接下来的章节我们大部分时间都要花在这个上，因为每个平台的图标处理方式不同）。
 
-            我们首先需要创建一个符合Windows预期格式的图标。一个非常棒的工具是`.ico`文件，位于`ch10/part-2/app/packaging/windows`，名为`mc_icon.ico`，但了解如何为自己的图标执行此操作未来会很有帮助。
+            我们首先需要创建一个符合 Windows 预期格式的图标。一个非常棒的工具是`.ico`文件，位于`ch10/part-2/app/packaging/windows`，名为`mc_icon.ico`，但了解如何为自己的图标执行此操作未来会很有帮助。
 
-            一旦图标文件可用，我们需要添加一个特定于NSIS CPack的变量来引用它。这个CPack选项是`CPACK_NSIS_MUI_ICON`：
+            一旦图标文件可用，我们需要添加一个特定于 NSIS CPack 的变量来引用它。这个 CPack 选项是`CPACK_NSIS_MUI_ICON`：
 
 ```cpp
 set(
@@ -182,9 +180,9 @@ set(
   "${CMAKE_SOURCE_DIR}/packaging/windows/mc_icon.ico")
 ```
 
-            这将把我们创建的图标与NSIS安装程序关联起来，因此在通过安装程序时，我们将在窗口的左上角和Windows任务栏看到该图标。但是，这不会为安装后的应用程序创建图标。为此，我们需要暂时跳出CPack，并在我们的`CMakeLists.txt`文件中做一个小更新。我们还必须添加一个Windows所需的额外文件。
+            这将把我们创建的图标与 NSIS 安装程序关联起来，因此在通过安装程序时，我们将在窗口的左上角和 Windows 任务栏看到该图标。但是，这不会为安装后的应用程序创建图标。为此，我们需要暂时跳出 CPack，并在我们的`CMakeLists.txt`文件中做一个小更新。我们还必须添加一个 Windows 所需的额外文件。
 
-            我们需要添加的文件叫做资源定义脚本，以`.rc`扩展名结尾（要了解更多关于Windows资源文件的信息，请访问[https://learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files](https://learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files)）。
+            我们需要添加的文件叫做资源定义脚本，以`.rc`扩展名结尾（要了解更多关于 Windows 资源文件的信息，请访问[`learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files`](https://learn.microsoft.com/en-us/windows/win32/menurc/about-resource-files)）。
 
             该文件包含以下内容：
 
@@ -199,7 +197,7 @@ target_sources(
   ${PROJECT_NAME} PRIVATE packaging/windows/icon.rc)
 ```
 
-            通过这个更改，我们将看到应用程序的开始菜单和桌面快捷方式使用的图标。有更多的CPack NSIS选项可以进一步自定义安装程序体验，我们暂时跳过这些；完整列表请访问[https://cmake.org/cmake/help/latest/cpack_gen/nsis.html](https://cmake.org/cmake/help/latest/cpack_gen/nsis.html)。
+            通过这个更改，我们将看到应用程序的开始菜单和桌面快捷方式使用的图标。有更多的 CPack NSIS 选项可以进一步自定义安装程序体验，我们暂时跳过这些；完整列表请访问[`cmake.org/cmake/help/latest/cpack_gen/nsis.html`](https://cmake.org/cmake/help/latest/cpack_gen/nsis.html)。
 
             另一个需要注意的小细节，虽然这略微超出了 CPack 的范围，但属于让我们的应用程序准备好发布的范畴，那就是隐藏启动应用程序时出现的控制台窗口。这一点可能之前不太显眼，因为我们大部分时间都是从终端启动应用程序。你可能已经注意到，当从 Windows GUI 启动时，会在后台出现一个控制台窗口，显示我们添加的调试控制台输出。这个窗口在开发过程中可能很有用，但对于 `Release` 版本来说，最好将其隐藏。可以通过将 `WIN32_EXECUTABLE` 属性传递给 `set_target_properties` 来实现，并确保只有在 CMake 配置设置为 `Release` 时才进行设置。
 
@@ -261,8 +259,8 @@ set(CPACK_BUNDLE_STARTUP_COMMAND
 			We’ll walk through each line to understand what it’s doing and why it’s needed:
 
 				*   The first line (`CPACK_BUNDLE_NAME`) simply sets the name of the application bundle. This is the name that will appear inside the bundle when it’s opened and dragged to the application folder.
-				*   The second line (`CPACK_BUNDLE_PLIST`) refers to an information property list (`info.plist` for short) that is used to store metadata about the application. This is the mechanism used by macOS and iOS to store configuration information for applications (to learn more about information property lists, go to [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)). There’s a lot of properties that can be added to this file, but for our purposes, we only need one for the time being, and that’s the `CFBundleIconFile` property. This will refer to the icon file in the bundle, which will share the name of the bundle (this is different from the name of the icon file (`gol.icns`) before packaging; the `.icns` file is renamed to match the value of `CPACK_BUNDLE_NAME` inside the bundle). The `info.plist` file will be added to the `Contents` folder of the bundle.
-				*   The third variable (`CPACK_BUNDLE_ICON`) refers to the icon file to use for the bundle. The file we’re using here is `gol.icns`, which was generated by running the `generate-icons.sh` script in the packaging folder. It internally uses `sips` ([https://ss64.com/mac/sips.html](https://ss64.com/mac/sips.html)) on macOS to generate icons of increasing size (all power of 2 dimensions) from a source image (for things to work, ensure that the source image you use is 1,024 x 1,024 pixels in size), and then it uses `iconutil` ([https://www.unix.com/man-page/osx/1/iconutil/](https://www.unix.com/man-page/osx/1/iconutil/)) to create the `.icns` file for CPack (and our `info.plist` file) to refer to. With these changes, we’ll get an icon for our bundle and application after it’s installed.
+				*   The second line (`CPACK_BUNDLE_PLIST`) refers to an information property list (`info.plist` for short) that is used to store metadata about the application. This is the mechanism used by macOS and iOS to store configuration information for applications (to learn more about information property lists, go to [`developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html`](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)). There’s a lot of properties that can be added to this file, but for our purposes, we only need one for the time being, and that’s the `CFBundleIconFile` property. This will refer to the icon file in the bundle, which will share the name of the bundle (this is different from the name of the icon file (`gol.icns`) before packaging; the `.icns` file is renamed to match the value of `CPACK_BUNDLE_NAME` inside the bundle). The `info.plist` file will be added to the `Contents` folder of the bundle.
+				*   The third variable (`CPACK_BUNDLE_ICON`) refers to the icon file to use for the bundle. The file we’re using here is `gol.icns`, which was generated by running the `generate-icons.sh` script in the packaging folder. It internally uses `sips` ([`ss64.com/mac/sips.html`](https://ss64.com/mac/sips.html)) on macOS to generate icons of increasing size (all power of 2 dimensions) from a source image (for things to work, ensure that the source image you use is 1,024 x 1,024 pixels in size), and then it uses `iconutil` ([`www.unix.com/man-page/osx/1/iconutil/`](https://www.unix.com/man-page/osx/1/iconutil/)) to create the `.icns` file for CPack (and our `info.plist` file) to refer to. With these changes, we’ll get an icon for our bundle and application after it’s installed.
 				*   The last variable (`CPACK_BUNDLE_STARTUP_COMMAND`) holds a path to a small helper startup script to ensure that we can launch our application from the bundle. This file will be copied to `Contents/MacOS` inside the bundle.
 
 			The content of the file it refers to (`bundle-run.sh`) is as follows:
@@ -306,7 +304,7 @@ endif()
 
             第一个命令将我们的`.desktop`文件复制到数据根目录，相对于我们选择的安装文件夹（默认情况下，这是`<install-folder>/share`）。根据惯例，`.desktop`文件通常会位于`share`下的`applications`文件夹中，因此我们将`applications`附加到`CMAKE_INSTALL_DATAROOTDIR`。图标本身会在`share/icons`中查找，因此我们需要确保将其也复制到该位置。
 
-            在这个例子中，我们使用了Debian包生成器；当我们安装包时，文件将被复制到平台标准位置（`/usr/share/icons`、`/usr/share/applications`、`/usr/bin`等）。这样做的好处是，我们不需要在`.desktop`文件中硬编码绝对路径，因为可执行文件和图标可以在预期的位置找到。
+            在这个例子中，我们使用了 Debian 包生成器；当我们安装包时，文件将被复制到平台标准位置（`/usr/share/icons`、`/usr/share/applications`、`/usr/bin`等）。这样做的好处是，我们不需要在`.desktop`文件中硬编码绝对路径，因为可执行文件和图标可以在预期的位置找到。
 
             为了完整性，`.desktop`文件的内容如下：
 
@@ -321,17 +319,17 @@ Type=Application
 Categories=Development
 ```
 
-            由于我们正在创建一个窗口化应用程序，我们将`Terminal`设置为`false`，并添加一些额外的元数据，帮助描述我们构建的应用程序类型（有关`.desktop`文件的更多信息，请参见[https://wiki.archlinux.org/title/Desktop_entries](https://wiki.archlinux.org/title/Desktop_entries)以获取有用的概述）。请注意，在指定图标时，我们不包括扩展名；我们只需要提供名称。
+            由于我们正在创建一个窗口化应用程序，我们将`Terminal`设置为`false`，并添加一些额外的元数据，帮助描述我们构建的应用程序类型（有关`.desktop`文件的更多信息，请参见[`wiki.archlinux.org/title/Desktop_entries`](https://wiki.archlinux.org/title/Desktop_entries)以获取有用的概述）。请注意，在指定图标时，我们不包括扩展名；我们只需要提供名称。
 
-            为了支持Linux上的Debian包，我们唯一需要做的代码更改是提供包的维护者名称。可以使用以下命令来实现：
+            为了支持 Linux 上的 Debian 包，我们唯一需要做的代码更改是提供包的维护者名称。可以使用以下命令来实现：
 
 ```cpp
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "<maintainer-email>")
 ```
 
-            这是一个有用的方法，用户可以在遇到问题或有反馈时联系包的所有者/维护者。此字段是必须提供的；否则，CPack会返回错误并且不会生成Debian包。
+            这是一个有用的方法，用户可以在遇到问题或有反馈时联系包的所有者/维护者。此字段是必须提供的；否则，CPack 会返回错误并且不会生成 Debian 包。
 
-            应用这些更改到我们的`CMakeLists.txt`文件后，我们现在可以运行CPack并提供DEB包生成器。在构建项目的发布配置（例如，`cmake --build build/multi-ninja --config Release`）之后，只需从`ch10/part-2/app`目录运行以下命令：
+            应用这些更改到我们的`CMakeLists.txt`文件后，我们现在可以运行 CPack 并提供 DEB 包生成器。在构建项目的发布配置（例如，`cmake --build build/multi-ninja --config Release`）之后，只需从`ch10/part-2/app`目录运行以下命令：
 
 ```cpp
 cpack --config build/multi-ninja/CPackConfig.cmake -G .deb file in the package folder. To install the package to the system, use the following command:
@@ -365,7 +363,7 @@ sudo dpkg -P minimal-cmake_game-of-life
 
 set_target_properties(
 
-${PROJECT_NAME} PROPERTIES Minimal CMake - Game of Life.app位于build/<preset>/<config>文件夹中，而不是我们迄今为止看到的可执行文件和松散的文件集合，包括库和资源。事实上，`.app`文件只是一个包含所有这些文件的文件夹；唯一的区别是它以一个稍微整洁的包的形式呈现。从Finder中，如果右键点击`.app`文件并点击CMakeLists.txt文件（查看ch10/part-3/app/CMakeLists.txt以查看完整示例）。
+${PROJECT_NAME} PROPERTIES Minimal CMake - Game of Life.app 位于 build/<preset>/<config>文件夹中，而不是我们迄今为止看到的可执行文件和松散的文件集合，包括库和资源。事实上，`.app`文件只是一个包含所有这些文件的文件夹；唯一的区别是它以一个稍微整洁的包的形式呈现。从 Finder 中，如果右键点击`.app`文件并点击 CMakeLists.txt 文件（查看 ch10/part-3/app/CMakeLists.txt 以查看完整示例）。
 
             可执行文件最终会被放入一个名为 `MacOS` 的文件夹中，我们的共享库（`.dylib` 文件）会被添加到名为 `Frameworks` 的文件夹中。最后，我们的着色器（以及 `.icns` 文件）会被添加到一个名为 `Resources` 的文件夹中。这个布局是 macOS 应用程序的标准布局，CMake 使得支持它相对容易。值得一提的改动是对 `set_target_properties` 的 `INSTALL_RPATH` 命令进行了小的更新，将 `Frameworks` 添加到搜索路径中：
 
@@ -554,7 +552,7 @@ multi-ninja-super-package-linux
 
 			At the time of writing, workflow presets do not currently support the `condition` property we used for other presets. This means that it’s not possible to hide the workflow presets for other platforms, but they will fail to run, as we’ve specified which package preset is allowed on which platform already. It is possible that workflow presets will be updated in the future to inherit `condition` properties from the steps they use; however, there is no timeframe for when this may happen. This topic is an ongoing area of discussion within the CMake community.
 			Other uses for CPack
-			In addition to the main packaging and installer logic we’ve covered so far in this chapter, there are a couple more uses for CPack that are worth mentioning briefly. The first is the ability to use a standard archive format (such as `.zip`, `.7z`, or `.tar.gz`) to create a snapshot of an application at a certain point in time. It might be useful to do this to share a work-in-progress build with someone before sending them a full installer (running the application from the extracted folder will work and will not affect the wider system). It can also be useful to keep an archive of builds for milestones or releases you can then go back to easily in the future (this is commonly done in the *Tags and Releases* section of projects on GitHub. A good example is a tool such as `ripgrep` ([https://github.com/BurntSushi/ripgrep/releases](https://github.com/BurntSushi/ripgrep/releases)). For a full list of archive formats (and other package generators), run `cpack --help`.
+			In addition to the main packaging and installer logic we’ve covered so far in this chapter, there are a couple more uses for CPack that are worth mentioning briefly. The first is the ability to use a standard archive format (such as `.zip`, `.7z`, or `.tar.gz`) to create a snapshot of an application at a certain point in time. It might be useful to do this to share a work-in-progress build with someone before sending them a full installer (running the application from the extracted folder will work and will not affect the wider system). It can also be useful to keep an archive of builds for milestones or releases you can then go back to easily in the future (this is commonly done in the *Tags and Releases* section of projects on GitHub. A good example is a tool such as `ripgrep` ([`github.com/BurntSushi/ripgrep/releases`](https://github.com/BurntSushi/ripgrep/releases)). For a full list of archive formats (and other package generators), run `cpack --help`.
 			There is also one more file generated by CPack that we haven’t covered yet, and that’s `CPackSourceConfig.cmake`. By providing this file to the `cpack` `--config` argument, it’s possible to create an archive of the source directory itself, not the built artifacts. We must do a little bit of work to tell CPack which files not to include, which we achieve by setting the `CPACK_SOURCE_IGNORE_FILES` variable before invoking the `include(CPack)` command.
 			The following is an example from `ch10/part-5/app/CMakeLists.txt`:
 

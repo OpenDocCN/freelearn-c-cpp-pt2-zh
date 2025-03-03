@@ -1,14 +1,12 @@
-# 12
+# 第十二章：跨平台编译自定义工具链
 
-# 跨平台编译自定义工具链
+CMake 的一个强大特性是它对跨平台软件构建的支持。简单来说，这意味着通过 CMake，可以将任何平台的项目构建为任何其他平台的软件，只要在运行 CMake 的系统上提供必要的工具。在构建软件时，我们通常谈论编译器和链接器，它们当然是构建软件的必需工具。然而，如果我们仔细看看，构建软件时通常还涉及一些其他工具、库和文件。统称这些工具、库和文件通常被称为 CMake 中的工具链。
 
-CMake的一个强大特性是它对跨平台软件构建的支持。简单来说，这意味着通过CMake，可以将任何平台的项目构建为任何其他平台的软件，只要在运行CMake的系统上提供必要的工具。在构建软件时，我们通常谈论编译器和链接器，它们当然是构建软件的必需工具。然而，如果我们仔细看看，构建软件时通常还涉及一些其他工具、库和文件。统称这些工具、库和文件通常被称为CMake中的工具链。
-
-到目前为止，本书中的所有示例都是针对CMake运行所在的系统构建的。在这些情况下，CMake通常能很好地找到正确的工具链。然而，如果软件是为另一个平台构建的，通常必须由开发者指定工具链。工具链定义可能相对简单，仅指定目标平台，或者可能复杂到需要指定单个工具的路径，甚至是为了为特定芯片组创建二进制文件而指定特定的编译器标志。
+到目前为止，本书中的所有示例都是针对 CMake 运行所在的系统构建的。在这些情况下，CMake 通常能很好地找到正确的工具链。然而，如果软件是为另一个平台构建的，通常必须由开发者指定工具链。工具链定义可能相对简单，仅指定目标平台，或者可能复杂到需要指定单个工具的路径，甚至是为了为特定芯片组创建二进制文件而指定特定的编译器标志。
 
 在交叉编译的上下文中，工具链通常伴随有`root`文件夹，用于查找编译和链接软件所需的库和文件，以便将软件编译到预期的目标平台。
 
-虽然交叉编译一开始可能让人感到害怕，但使用CMake正确配置时，它通常并不像看起来那样困难。本章将介绍如何使用工具链文件以及如何自己编写工具链文件。我们将详细探讨在软件构建的不同阶段涉及哪些工具。最后，我们将介绍如何设置CMake，使其能够通过模拟器运行测试。
+虽然交叉编译一开始可能让人感到害怕，但使用 CMake 正确配置时，它通常并不像看起来那样困难。本章将介绍如何使用工具链文件以及如何自己编写工具链文件。我们将详细探讨在软件构建的不同阶段涉及哪些工具。最后，我们将介绍如何设置 CMake，使其能够通过模拟器运行测试。
 
 本章将涵盖以下主要内容：
 
@@ -20,23 +18,23 @@ CMake的一个强大特性是它对跨平台软件构建的支持。简单来说
 
 +   测试工具链的支持特性
 
-本章结束时，你将熟练掌握如何处理现有的工具链，并了解如何使用CMake为不同平台构建和测试软件。我们将深入探讨如何测试编译器的某个特性，以确定它是否适合我们的用途。
+本章结束时，你将熟练掌握如何处理现有的工具链，并了解如何使用 CMake 为不同平台构建和测试软件。我们将深入探讨如何测试编译器的某个特性，以确定它是否适合我们的用途。
 
 # 技术要求
 
-与前几章一样，示例是用CMake 3.25进行测试的，并在以下任一编译器上运行：
+与前几章一样，示例是用 CMake 3.25 进行测试的，并在以下任一编译器上运行：
 
-+   **GNU编译器集合9**（**GCC 9**）或更新版本，包括用于**arm硬浮动**（**armhf**）架构的交叉编译器
++   **GNU 编译器集合 9**（**GCC 9**）或更新版本，包括用于**arm 硬浮动**（**armhf**）架构的交叉编译器
 
-+   Clang 12或更新版本
++   Clang 12 或更新版本
 
 +   **Microsoft Visual Studio C++ 19**（**MSVC 19**）或更新版本
 
-+   对于Android示例，**Android原生开发工具包**（**Android NDK**）23b或更新版本是必需的。安装说明可以在官方的Android开发文档中找到：[https://developer.android.com/studio/projects/install-ndk](https://developer.android.com/studio/projects/install-ndk)。
++   对于 Android 示例，**Android 原生开发工具包**（**Android NDK**）23b 或更新版本是必需的。安装说明可以在官方的 Android 开发文档中找到：[`developer.android.com/studio/projects/install-ndk`](https://developer.android.com/studio/projects/install-ndk)。
 
 +   对于 Apple 嵌入式示例，建议使用 Xcode 12 或更新版本，以及**iOS 软件开发工具包 12.4**（**iOS SDK 12.4**）。
 
-本书的所有示例和源代码都可以在 GitHub 仓库中找到。如果缺少任何软件，相应的示例将从构建中排除。仓库地址在这里：[https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
+本书的所有示例和源代码都可以在 GitHub 仓库中找到。如果缺少任何软件，相应的示例将从构建中排除。仓库地址在这里：[`github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/`](https://github.com/PacktPublishing/CMake-Best-Practices---2nd-Edition/)。
 
 # 使用现有的跨平台工具链文件
 
@@ -72,9 +70,9 @@ cmake  --toolchain arm64.toolchain.cmake -S <SourceDir> -B <BuildDir>
 },
 ```
 
-`toolchainFile`选项支持宏扩展，具体描述请参见[*第9章*](B30947_09.xhtml#_idTextAnchor146)，*创建可复现的构建环境*。如果工具链文件的路径是相对路径，CMake会先在`build`目录下查找，如果在那里没有找到文件，它会从源目录开始查找。由于`CMAKE_TOOLCHAIN_FILE`是一个缓存变量，它只需要在第一次运行CMake时指定；之后的运行将使用缓存的值。
+`toolchainFile`选项支持宏扩展，具体描述请参见*第九章*，*创建可复现的构建环境*。如果工具链文件的路径是相对路径，CMake 会先在`build`目录下查找，如果在那里没有找到文件，它会从源目录开始查找。由于`CMAKE_TOOLCHAIN_FILE`是一个缓存变量，它只需要在第一次运行 CMake 时指定；之后的运行将使用缓存的值。
 
-在第一次运行时，CMake会执行一些内部查询来确定工具链支持哪些功能。这无论是否使用工具链文件指定工具链，或使用默认系统工具链时，都会发生。有关这些测试是如何执行的更深入的介绍，请参考*测试工具链支持的功能*部分。CMake将在第一次运行时输出各种功能和属性的测试结果，类似如下：
+在第一次运行时，CMake 会执行一些内部查询来确定工具链支持哪些功能。这无论是否使用工具链文件指定工具链，或使用默认系统工具链时，都会发生。有关这些测试是如何执行的更深入的介绍，请参考*测试工具链支持的功能*部分。CMake 将在第一次运行时输出各种功能和属性的测试结果，类似如下：
 
 ```cpp
 -- The CXX compiler identification is GNU 9.3.0
@@ -95,15 +93,15 @@ cmake  --toolchain arm64.toolchain.cmake -S <SourceDir> -B <BuildDir>
 
 功能检测通常发生在`CMakeLists.txt`文件中的第一次调用`project()`时。但是，任何启用先前禁用的语言的后续`project()`调用都会触发进一步的检测。如果在`CMakeLists.txt`文件中使用`enable_language()`来启用额外的编程语言，也会发生同样的情况。
 
-由于工具链的功能和测试结果是被缓存的，因此无法更改已配置构建目录的工具链。CMake可能会检测到工具链已经更改，但通常情况下，替换缓存变量是不完全的。因此，在更改工具链之前，应该完全删除构建目录。
+由于工具链的功能和测试结果是被缓存的，因此无法更改已配置构建目录的工具链。CMake 可能会检测到工具链已经更改，但通常情况下，替换缓存变量是不完全的。因此，在更改工具链之前，应该完全删除构建目录。
 
 配置后切换工具链
 
 在切换工具链之前，请始终完全清空构建目录。仅删除`CMakeCache.txt`文件是不够的，因为与工具链相关的内容可能会被缓存到不同的位置。如果你经常为多个平台构建项目，使用为每个工具链分配的独立构建目录可以显著加快开发过程。
 
-CMake的工作方式是一个项目应该使用相同的工具链来进行所有操作。因此，直接支持使用多个工具链的方式并不存在。如果确实需要这样做，那么需要将需要不同工具链的项目部分配置为子构建，具体方法请参见[*第10章*](B30947_10.xhtml#_idTextAnchor158)，*在超构建中处理分布式仓库和依赖关系*。
+CMake 的工作方式是一个项目应该使用相同的工具链来进行所有操作。因此，直接支持使用多个工具链的方式并不存在。如果确实需要这样做，那么需要将需要不同工具链的项目部分配置为子构建，具体方法请参见*第十章*，*在超构建中处理分布式仓库和依赖关系*。
 
-工具链应尽可能保持精简，并且与任何项目完全解耦。理想情况下，它们可以在不同的项目中复用。通常，工具链文件是与用于交叉编译的任何SDK或sysroot一起捆绑的。然而，有时它们需要手动编写。
+工具链应尽可能保持精简，并且与任何项目完全解耦。理想情况下，它们可以在不同的项目中复用。通常，工具链文件是与用于交叉编译的任何 SDK 或 sysroot 一起捆绑的。然而，有时它们需要手动编写。
 
 # 创建工具链文件
 
@@ -117,7 +115,7 @@ CMake的工作方式是一个项目应该使用相同的工具链来进行所有
 
 +   如果是跨编译，指向 sysroot 并可能指向任何暂存目录。
 
-+   设置 CMake `find_` 命令的搜索顺序提示。更改搜索顺序是项目可能定义的内容，是否应将其放在工具链文件中或由项目处理是有争议的。有关 `find_` 命令的详细信息，请参见 [*第 5 章*](B30947_05.xhtml#_idTextAnchor084)，*集成第三方库和依赖管理*。
++   设置 CMake `find_` 命令的搜索顺序提示。更改搜索顺序是项目可能定义的内容，是否应将其放在工具链文件中或由项目处理是有争议的。有关 `find_` 命令的详细信息，请参见 *第五章*，*集成第三方库和依赖管理*。
 
 一个执行所有这些操作的示例工具链可能如下所示：
 
@@ -156,9 +154,9 @@ cmake -G "Visual Studio 2019" -A Win32 -T host=x64
 
 当使用预设时，`architecture` 设置可以在配置预设中使用，以达到相同的效果。一旦定义了目标系统，就可以定义用于实际构建软件的工具。
 
-一些编译器，如 Clang 和 `CMAKE_<LANG>_COMPILER_TARGET` 变量也被使用。对于 Clang，值是目标三元组，如 `arm-linux-gnueabihf`，而对于 QNX GCC，编译器名称和目标的值如 `gcc_ntoarmv7le`。Clang 的支持三元组在其官方文档中有描述，网址为 [https://clang.llvm.org/docs/CrossCompilation.html](https://clang.llvm.org/docs/CrossCompilation.html)。
+一些编译器，如 Clang 和 `CMAKE_<LANG>_COMPILER_TARGET` 变量也被使用。对于 Clang，值是目标三元组，如 `arm-linux-gnueabihf`，而对于 QNX GCC，编译器名称和目标的值如 `gcc_ntoarmv7le`。Clang 的支持三元组在其官方文档中有描述，网址为 [`clang.llvm.org/docs/CrossCompilation.html`](https://clang.llvm.org/docs/CrossCompilation.html)。
 
-对于 QNX 可用的选项，应该参考 QNX 文档，网址为 [https://www.qnx.com/developers/docs/](https://www.qnx.com/developers/docs/)。
+对于 QNX 可用的选项，应该参考 QNX 文档，网址为 [`www.qnx.com/developers/docs/`](https://www.qnx.com/developers/docs/)。
 
 所以，使用 Clang 的工具链文件可能如下所示：
 
@@ -208,9 +206,9 @@ set(CMAKE_MODULE_LINKER_FLAGS_INIT -m32)
 
 ## 设置 sysroot
 
-在进行交叉编译时，所有链接的依赖项显然也必须与目标平台匹配，一种常见的处理方法是创建一个 sysroot，它是目标系统的根文件系统，存储在一个文件夹中。虽然 sysroot 可以包含完整的系统，但通常会被精简到仅提供所需内容。sysroot 的详细描述见于 [*第 9 章*](B30947_09.xhtml#_idTextAnchor146)，*创建可重现的* *构建环境*。
+在进行交叉编译时，所有链接的依赖项显然也必须与目标平台匹配，一种常见的处理方法是创建一个 sysroot，它是目标系统的根文件系统，存储在一个文件夹中。虽然 sysroot 可以包含完整的系统，但通常会被精简到仅提供所需内容。sysroot 的详细描述见于 *第九章*，*创建可重现的* *构建环境*。
 
-设置 sysroot 通过将 `CMAKE_SYSROOT` 设置为其路径来完成。如果设置了该值，CMake 默认会首先在 sysroot 中查找库和头文件，除非另有说明，正如在 [*第 5 章*](B30947_05.xhtml#_idTextAnchor084)，*集成第三方库和依赖管理* 中所述。在大多数情况下，CMake 还会自动设置必要的编译器和链接器标志，以便工具与 sysroot 一起工作。
+设置 sysroot 通过将 `CMAKE_SYSROOT` 设置为其路径来完成。如果设置了该值，CMake 默认会首先在 sysroot 中查找库和头文件，除非另有说明，正如在 *第五章*，*集成第三方库和依赖管理* 中所述。在大多数情况下，CMake 还会自动设置必要的编译器和链接器标志，以便工具与 sysroot 一起工作。
 
 如果构建产物不应直接安装到 sysroot 中，可以设置 `CMAKE_STAGING_PREFIX` 变量以提供替代的安装路径。通常在以下情况时需要这样做：sysroot 应保持干净或当它被挂载为只读时。请注意，`CMAKE_STAGING_PREFIX` 设置不会将该目录添加到 `CMAKE_SYSTEM_PREFIX_PATH`，因此，只有当工具链中的 `CMAKE_FIND_ROOT_PATH_MODE_PACKAGE` 变量设置为 `BOTH` 或 `NEVER` 时，暂存目录中安装的内容才能通过 `find_package()` 找到。
 
@@ -218,42 +216,42 @@ set(CMAKE_MODULE_LINKER_FLAGS_INIT -m32)
 
 ## 针对 Android 进行交叉编译
 
-过去，Android的NDK与不同CMake版本之间的兼容性有时关系并不顺畅，因为NDK的新版本往往不再以与以前版本相同的方式与CMake协作。然而，从r23版本开始，这一情况得到了极大的改善，因为Android NDK现在使用CMake内部对工具链的支持。结合CMake 3.21或更高版本，为Android构建变得相对方便，因此推荐使用这些或更新的版本。关于Android NDK与CMake集成的官方文档可以在此处找到：[https://developer.android.com/ndk/guides/cmake](https://developer.android.com/ndk/guides/cmake)。
+过去，Android 的 NDK 与不同 CMake 版本之间的兼容性有时关系并不顺畅，因为 NDK 的新版本往往不再以与以前版本相同的方式与 CMake 协作。然而，从 r23 版本开始，这一情况得到了极大的改善，因为 Android NDK 现在使用 CMake 内部对工具链的支持。结合 CMake 3.21 或更高版本，为 Android 构建变得相对方便，因此推荐使用这些或更新的版本。关于 Android NDK 与 CMake 集成的官方文档可以在此处找到：[`developer.android.com/ndk/guides/cmake`](https://developer.android.com/ndk/guides/cmake)。
 
-从r23版本开始，NDK提供了自己的CMake工具链文件，位于`<NDK_ROOT>/build/cmake/android.toolchain.cmake`，可以像任何常规的工具链文件一样使用。NDK还包括所有必要的工具，以支持基于Clang的工具链，因此通常不需要定义其他工具。要控制目标平台，应通过命令行或使用CMake预设传递以下CMake变量：
+从 r23 版本开始，NDK 提供了自己的 CMake 工具链文件，位于`<NDK_ROOT>/build/cmake/android.toolchain.cmake`，可以像任何常规的工具链文件一样使用。NDK 还包括所有必要的工具，以支持基于 Clang 的工具链，因此通常不需要定义其他工具。要控制目标平台，应通过命令行或使用 CMake 预设传递以下 CMake 变量：
 
-+   `ANDROID_ABI`：指定`armeabi-v7a`、`arm64-v8a`、`x86`和`x86_64`。在为Android进行交叉编译时，这个变量应该始终设置。
++   `ANDROID_ABI`：指定`armeabi-v7a`、`arm64-v8a`、`x86`和`x86_64`。在为 Android 进行交叉编译时，这个变量应该始终设置。
 
-+   `ANDROID_ARM_NEON`：为`armeabi-v7a`启用NEON支持。该变量不会影响其他ABI版本。使用r21版本以上的NDK时，默认启用NEON支持，通常不需要禁用它。
++   `ANDROID_ARM_NEON`：为`armeabi-v7a`启用 NEON 支持。该变量不会影响其他 ABI 版本。使用 r21 版本以上的 NDK 时，默认启用 NEON 支持，通常不需要禁用它。
 
-+   `ANDROID_ARM_MODE`：指定是否为`armeabi-v7a`生成ARM或Thumb指令。有效值为`thumb`或`arm`。该变量不会影响其他ABI版本。
++   `ANDROID_ARM_MODE`：指定是否为`armeabi-v7a`生成 ARM 或 Thumb 指令。有效值为`thumb`或`arm`。该变量不会影响其他 ABI 版本。
 
 +   `ANDROID_LD`：决定使用默认的链接器还是来自`llvm`的实验性`lld`。有效的值为`default`或`lld`，但由于`lld`处于实验阶段，这个变量通常在生产构建中被省略。
 
-+   `ANDROID_PLATFORM`：指定最低的`$API_LEVEL`，`android-$API_LEVEL`，或`android-$API_LETTER`格式，其中`$API_LEVEL`是一个数字，`$API_LETTER`是平台的版本代码。`ANDROID_NATIVE_API_LEVEL`是该变量的别名。虽然设置API级别并非严格必要，但通常会进行设置。
++   `ANDROID_PLATFORM`：指定最低的`$API_LEVEL`，`android-$API_LEVEL`，或`android-$API_LETTER`格式，其中`$API_LEVEL`是一个数字，`$API_LETTER`是平台的版本代码。`ANDROID_NATIVE_API_LEVEL`是该变量的别名。虽然设置 API 级别并非严格必要，但通常会进行设置。
 
-+   `ANDROID_STL`：指定使用哪种`c++_static`（默认值）、`c++_shared`、`none`或`system`。现代C++支持需要使用`c++_shared`或`c++_static`。`system`库仅提供`new`和`delete`以及C库头文件的C++封装，而`none`则完全不提供STL支持。
++   `ANDROID_STL`：指定使用哪种`c++_static`（默认值）、`c++_shared`、`none`或`system`。现代 C++支持需要使用`c++_shared`或`c++_static`。`system`库仅提供`new`和`delete`以及 C 库头文件的 C++封装，而`none`则完全不提供 STL 支持。
 
-调用CMake来配置Android构建的命令可能如下所示：
+调用 CMake 来配置 Android 构建的命令可能如下所示：
 
 ```cpp
 cmake -S . -B build --toolchain <NDK_DIR>/build/cmake/android
   .toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=23
 ```
 
-这个调用将指定需要API级别23或更高的构建，这对应于Android 6.0或更高版本的32位ARM **中央处理** **单元** (**CPU**)。
+这个调用将指定需要 API 级别 23 或更高的构建，这对应于 Android 6.0 或更高版本的 32 位 ARM **中央处理** **单元** (**CPU**)。
 
-使用NDK提供的工具链的替代方案是将CMake指向Android NDK的位置，这对于r23版本之后的NDK是推荐的方式。然后，目标平台的配置通过相应的CMake变量进行。通过将`CMAKE_SYSTEM_NAME`变量设置为`android`，并将`CMAKE_ANDROID_NDK`变量设置为Android NDK的位置，CMake会被告知使用NDK。这可以通过命令行或在工具链文件中完成。或者，如果设置了`ANDROID_NDK_ROOT`或`ANDROID_NDK` *环境变量*，它们将被用作`CMAKE_ANDROID_NDK`的值。
+使用 NDK 提供的工具链的替代方案是将 CMake 指向 Android NDK 的位置，这对于 r23 版本之后的 NDK 是推荐的方式。然后，目标平台的配置通过相应的 CMake 变量进行。通过将`CMAKE_SYSTEM_NAME`变量设置为`android`，并将`CMAKE_ANDROID_NDK`变量设置为 Android NDK 的位置，CMake 会被告知使用 NDK。这可以通过命令行或在工具链文件中完成。或者，如果设置了`ANDROID_NDK_ROOT`或`ANDROID_NDK` *环境变量*，它们将被用作`CMAKE_ANDROID_NDK`的值。
 
-当以这种方式使用NDK时，配置是通过定义变量来实现的，而不是直接调用NDK工具链文件时所用的`CMAKE_`等效变量，如下所示：
+当以这种方式使用 NDK 时，配置是通过定义变量来实现的，而不是直接调用 NDK 工具链文件时所用的`CMAKE_`等效变量，如下所示：
 
-+   `CMAKE_ANDROID_API`或`CMAKE_SYSTEM_VERSION`用于指定要构建的最低API级别
++   `CMAKE_ANDROID_API`或`CMAKE_SYSTEM_VERSION`用于指定要构建的最低 API 级别
 
-+   `CMAKE_ANDROID_ARCH_ABI`用于指示要使用的ABI模式
++   `CMAKE_ANDROID_ARCH_ABI`用于指示要使用的 ABI 模式
 
-+   `CMAKE_ANDROID_STL_TYPE`指定要使用的STL
++   `CMAKE_ANDROID_STL_TYPE`指定要使用的 STL
 
-配置CMake与Android NDK的示例工具链文件可能如下所示：
+配置 CMake 与 Android NDK 的示例工具链文件可能如下所示：
 
 ```cpp
 set(CMAKE_SYSTEM_NAME Android)
@@ -263,21 +261,21 @@ set(CMAKE_ANDROID_NDK /path/to/the/android-ndk-r23b)
 set(CMAKE_ANDROID_STL_TYPE c++_static)
 ```
 
-当使用Visual Studio生成器为Android进行交叉编译时，CMake要求使用*NVIDIA Nsight Tegra Visual Studio Edition*或*Visual Studio for Android工具*，它们使用Android NDK。使用Visual Studio构建Android二进制文件时，可以通过将`CMAKE_ANDROID_NDK`变量设置为NDK的位置，利用CMake的内置Android NDK支持。
+当使用 Visual Studio 生成器为 Android 进行交叉编译时，CMake 要求使用*NVIDIA Nsight Tegra Visual Studio Edition*或*Visual Studio for Android 工具*，它们使用 Android NDK。使用 Visual Studio 构建 Android 二进制文件时，可以通过将`CMAKE_ANDROID_NDK`变量设置为 NDK 的位置，利用 CMake 的内置 Android NDK 支持。
 
-随着NDK的最近版本和3.20及更高版本的CMake，Android的本地代码交叉编译变得更加简单。交叉编译的另一个特殊情况是当目标是Apple的iOS、tvOS或watchOS时。
+随着 NDK 的最近版本和 3.20 及更高版本的 CMake，Android 的本地代码交叉编译变得更加简单。交叉编译的另一个特殊情况是当目标是 Apple 的 iOS、tvOS 或 watchOS 时。
 
-## 为iOS、tvOS或watchOS进行交叉编译
+## 为 iOS、tvOS 或 watchOS 进行交叉编译
 
-推荐的为Apple的iPhone、Apple TV或Apple手表进行交叉编译的方式是使用Xcode生成器。苹果对用于这些设备构建应用的工具有相当严格的限制，因此需要使用macOS或运行macOS的**虚拟机**（**VM**）。虽然使用Makefiles或Ninja文件也是可能的，但它们需要更深入的苹果生态系统知识才能正确配置。
+推荐的为 Apple 的 iPhone、Apple TV 或 Apple 手表进行交叉编译的方式是使用 Xcode 生成器。苹果对用于这些设备构建应用的工具有相当严格的限制，因此需要使用 macOS 或运行 macOS 的**虚拟机**（**VM**）。虽然使用 Makefiles 或 Ninja 文件也是可能的，但它们需要更深入的苹果生态系统知识才能正确配置。
 
-为这些设备进行交叉编译时，需要使用Apple设备的SDK，并将`CMAKE_SYSTEM_NAME`变量设置为`iOS`、`tvOS`或`watchOS`，如下所示：
+为这些设备进行交叉编译时，需要使用 Apple 设备的 SDK，并将`CMAKE_SYSTEM_NAME`变量设置为`iOS`、`tvOS`或`watchOS`，如下所示：
 
 ```cpp
 cmake -S <SourceDir> -B <BuildDir> -G Xcode -DCMAKE_SYSTEM_NAME=iOS
 ```
 
-对于合理现代的SDK和CMake版本为3.14或更高版本时，通常这就是所需要的所有配置。默认情况下，系统上可用的最新设备SDK将被使用，但如果需要，可以通过将`CMAKE_OSX_SYSROOT`变量设置为SDK路径来选择不同的SDK。如果需要，还可以通过`CMAKE_OSX_DEPLOYMENT_TARGET`变量指定最低目标平台版本。
+对于合理现代的 SDK 和 CMake 版本为 3.14 或更高版本时，通常这就是所需要的所有配置。默认情况下，系统上可用的最新设备 SDK 将被使用，但如果需要，可以通过将`CMAKE_OSX_SYSROOT`变量设置为 SDK 路径来选择不同的 SDK。如果需要，还可以通过`CMAKE_OSX_DEPLOYMENT_TARGET`变量指定最低目标平台版本。
 
 在为 iPhone、Apple TV 或 Apple Watch 进行交叉编译时，目标可以是实际设备，也可以是随不同 SDK 提供的设备模拟器。然而，Xcode 内置支持在构建过程中切换目标，因此 CMake 不需要运行两次。如果选择了 Xcode 生成器，CMake 会内部使用 `xcodebuild` 命令行工具，该工具支持 `-sdk` 选项来选择所需的 SDK。在通过 CMake 构建时，可以像这样传递此选项：
 
@@ -297,7 +295,7 @@ Apple 嵌入式平台要求对某些构建产物进行强制签名。对于 Xcod
 
 要定义用于运行测试的仿真器，使用`CROSSCOMPILING_EMULATOR`目标属性。它可以为单个目标设置，也可以通过设置`CMAKE_CROSSCOMPILING_EMULATOR`缓存变量来全局设置，该变量包含一个用分号分隔的命令和参数列表，用于运行仿真器。如果全局设置，则该命令将被添加到`add_test()`、`add_custom_command()`和`add_custom_target()`中指定的所有命令之前，并且它将用于运行任何由`try_run()`命令生成的可执行文件。这意味着所有用于构建的自定义命令也必须能够在仿真器中访问并运行。`CROSSCOMPILING_EMULATOR`属性不一定必须是一个实际的仿真器——它可以是任何任意程序，例如一个将二进制文件复制到目标机器并在那里执行的脚本。
 
-设置`CMAKE_CROSSCOMPILING_EMULATOR`应该通过工具链文件、命令行或配置的前缀进行。一个用于交叉编译C++代码到ARM的工具链文件示例如下，它使用流行的开源仿真器*QEMU*来运行测试：
+设置`CMAKE_CROSSCOMPILING_EMULATOR`应该通过工具链文件、命令行或配置的前缀进行。一个用于交叉编译 C++代码到 ARM 的工具链文件示例如下，它使用流行的开源仿真器*QEMU*来运行测试：
 
 ```cpp
 set(CMAKE_SYSTEM_NAME Linux)
@@ -314,7 +312,7 @@ set(CMAKE_CROSSCOMPILING_EMULATOR "qemu-arm;-L;${CMAKE_SYSROOT}")
 add_test(NAME exampleTest COMMAND exampleExe)
 ```
 
-当运行CTest时，不是直接运行`exampleExe`，而是将`test`命令转换为如下形式：
+当运行 CTest 时，不是直接运行`exampleExe`，而是将`test`命令转换为如下形式：
 
 ```cpp
 qemu-arm "-L" "/path/to/arm/sysroot/" "/path/to/build-dir/
@@ -423,9 +421,9 @@ cmake_pop_check_state()
 
 ## 工具链和语言特性的常见检查
 
-对于一些最常见的功能检查，例如检查编译器标志是否支持或头文件是否存在，CMake提供了方便的模块。从CMake 3.19版本开始，提供了通用模块，可以将语言作为参数，但相应的`Check<LANG>...`特定语言模块仍然可以使用。
+对于一些最常见的功能检查，例如检查编译器标志是否支持或头文件是否存在，CMake 提供了方便的模块。从 CMake 3.19 版本开始，提供了通用模块，可以将语言作为参数，但相应的`Check<LANG>...`特定语言模块仍然可以使用。
 
-一个非常基础的测试，用于检查某个语言的编译器是否可用，可以通过`CheckLanguage`模块来完成。如果未设置`CMAKE_<LANG>_COMPILER`变量，它可以用来检查某个语言的编译器是否可用。例如，检查Fortran是否可用的示例如下：
+一个非常基础的测试，用于检查某个语言的编译器是否可用，可以通过`CheckLanguage`模块来完成。如果未设置`CMAKE_<LANG>_COMPILER`变量，它可以用来检查某个语言的编译器是否可用。例如，检查 Fortran 是否可用的示例如下：
 
 ```cpp
 include(CheckLanguage)
@@ -439,7 +437,7 @@ endif()
 
 如果检查成功，则会设置相应的`CMAKE_<LANG>_COMPILER`变量。如果在检查之前该变量已设置，则不会产生任何影响。
 
-`CheckCompilerFlag`提供了`check_compiler_flag()`函数，用于检查当前编译器是否支持某个标志。在内部，会编译一个非常简单的程序，并解析输出以获取诊断信息。该检查假设`CMAKE_<LANG>_FLAGS`中已存在的任何编译器标志都能成功运行；否则，`check_compiler_flag()`函数将始终失败。以下示例检查C++编译器是否支持`-Wall`标志：
+`CheckCompilerFlag`提供了`check_compiler_flag()`函数，用于检查当前编译器是否支持某个标志。在内部，会编译一个非常简单的程序，并解析输出以获取诊断信息。该检查假设`CMAKE_<LANG>_FLAGS`中已存在的任何编译器标志都能成功运行；否则，`check_compiler_flag()`函数将始终失败。以下示例检查 C++编译器是否支持`-Wall`标志：
 
 ```cpp
 include(CheckCompilerFlag)
@@ -448,7 +446,7 @@ check_compiler_flag(CXX -Wall WALL_FLAG_SUPPORTED)
 
 如果`-Wall`标志被支持，则`WALL_FLAG_SUPPORTED`缓存变量将为`true`；否则为`false`。
 
-用于检查链接器标志的相应模块叫做`CheckLinkerFlag`，其工作方式与检查编译器标志类似，但链接器标志不会直接传递给链接器。由于链接器通常是通过编译器调用的，因此传递给链接器的额外标志可以使用如`-Wl`或`-Xlinker`等前缀，告诉编译器将该标志传递过去。由于该标志是编译器特定的，CMake提供了`LINKER:`前缀来自动替换命令。例如，要向链接器传递生成执行时间和内存消耗统计信息的标志，可以使用以下命令：
+用于检查链接器标志的相应模块叫做`CheckLinkerFlag`，其工作方式与检查编译器标志类似，但链接器标志不会直接传递给链接器。由于链接器通常是通过编译器调用的，因此传递给链接器的额外标志可以使用如`-Wl`或`-Xlinker`等前缀，告诉编译器将该标志传递过去。由于该标志是编译器特定的，CMake 提供了`LINKER:`前缀来自动替换命令。例如，要向链接器传递生成执行时间和内存消耗统计信息的标志，可以使用以下命令：
 
 ```cpp
 include(CheckLinkerFlag)
@@ -459,7 +457,7 @@ check_linker_flag(CXX LINKER:-stats LINKER_STATS_FLAG_SUPPORTED)
 
 其他有用的模块用于检查各种内容，包括`CheckLibraryExists`、`CheckIncludeFile`和`CheckIncludeFileCXX`模块，用于检查某个库或包含文件是否存在于某些位置。
 
-CMake还提供了更多详细的检查，可能非常特定于某个项目——例如，`CheckSymbolExists`和`CheckSymbolExistsCXX`模块检查某个符号是否存在，无论它是作为预处理器定义、变量还是函数。`CheckStructHasMember`将检查结构体是否具有某个成员，而`CheckTypeSize`可以检查非用户类型的大小，并使用`CheckPrototypeDefinition`检查C和C++函数原型的定义。
+CMake 还提供了更多详细的检查，可能非常特定于某个项目——例如，`CheckSymbolExists`和`CheckSymbolExistsCXX`模块检查某个符号是否存在，无论它是作为预处理器定义、变量还是函数。`CheckStructHasMember`将检查结构体是否具有某个成员，而`CheckTypeSize`可以检查非用户类型的大小，并使用`CheckPrototypeDefinition`检查 C 和 C++函数原型的定义。
 
 正如我们所见，CMake 提供了很多检查，随着 CMake 的发展，可用的检查列表可能会不断增加。虽然在某些情况下检查是有用的，但我们应该小心不要让测试的数量过多。检查的数量和复杂度将对配置步骤的速度产生很大影响，同时有时并不会带来太多好处。在一个项目中有很多检查，也可能意味着该项目存在不必要的复杂性。
 

@@ -1,4 +1,4 @@
-# 4  
+# 第四章：4  
 
 # 设置你的第一个 CMake 项目
 
@@ -30,7 +30,7 @@
 
 # 技术要求  
 
-你可以在 GitHub 上找到本章中出现的代码文件，链接为 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04)。
+你可以在 GitHub 上找到本章中出现的代码文件，链接为 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch04)。
 
 要构建本书中提供的示例，始终使用推荐的命令：
 
@@ -43,7 +43,7 @@ cmake --build <build tree>
 
 # 理解基本的指令和命令
 
-在*第 1 章*，*CMake 入门*中，我们已经看过了一个简单的项目定义。让我们再来回顾一下。它是一个包含几个配置语言处理器命令的 `CMakeLists.txt` 文件的目录：
+在*第一章*，*CMake 入门*中，我们已经看过了一个简单的项目定义。让我们再来回顾一下。它是一个包含几个配置语言处理器命令的 `CMakeLists.txt` 文件的目录：
 
 **chapter01/01-hello/CMakeLists.txt**
 
@@ -65,7 +65,7 @@ add_executable(Hello hello.cpp)
 
 策略可以影响 CMake 的各个方面，包括其他重要命令，如 `project()`。因此，重要的是在 `CMakeLists.txt` 文件中首先设置你正在使用的版本。否则，你将收到警告和错误。
 
-每个 CMake 版本都会引入大量策略。然而，除非你在将旧项目升级到最新 CMake 版本时遇到问题，否则不必深入了解这些策略的细节。在这种情况下，建议参考官方文档，获取有关策略的全面信息和指导：[https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)。
+每个 CMake 版本都会引入大量策略。然而，除非你在将旧项目升级到最新 CMake 版本时遇到问题，否则不必深入了解这些策略的细节。在这种情况下，建议参考官方文档，获取有关策略的全面信息和指导：[`cmake.org/cmake/help/latest/manual/cmake-policies.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)。
 
 ## 定义语言和元数据
 
@@ -121,7 +121,7 @@ PROJECT_BINARY_DIR, <PROJECT-NAME>_BINARY_DIR
 
 CMake 默认启用 C 和 C++，所以你可能需要明确指定只使用 `CXX` 来配置你的 C++ 项目。为什么？`project()` 命令会检测并测试你选择的语言所支持的编译器，因此声明所需的语言可以帮助你在配置阶段节省时间，跳过不必要的语言检查。
 
-指定 `VERSION` 关键字将自动设置可以用于配置包或在头文件中暴露以供编译期间使用的变量（我们将在 *第7章*，*使用 CMake 编译 C++ 源代码* 的 *配置头文件* 部分中讲解）：
+指定 `VERSION` 关键字将自动设置可以用于配置包或在头文件中暴露以供编译期间使用的变量（我们将在 *第七章*，*使用 CMake 编译 C++ 源代码* 的 *配置头文件* 部分中讲解）：
 
 ```cpp
 PROJECT_VERSION, <PROJECT-NAME>_VERSION
@@ -145,7 +145,7 @@ PROJECT_HOMEPAGE_URL, <PROJECT-NAME>_HOMEPAGE_URL
 
 随着我们的解决方案在代码行数和文件数量上的增长，我们很快意识到必须解决一个迫在眉睫的挑战：要么开始划分项目，要么面临被复杂性淹没的风险。我们可以通过两种方式解决这个问题：拆分 CMake 代码和将源文件移动到子目录中。在这两种情况下，我们的目标都是遵循名为 **关注点分离** 的设计原则。简而言之，我们将代码拆分为更小的部分，将密切相关的功能组合在一起，同时保持其他代码部分分离，以建立清晰的边界。
 
-我们在 *第1章*，*CMake 入门* 中谈到了划分 CMake 代码时讨论的列表文件。我们讲解了 `include()` 命令，它允许 CMake 执行来自外部文件的代码。
+我们在 *第一章*，*CMake 入门* 中谈到了划分 CMake 代码时讨论的列表文件。我们讲解了 `include()` 命令，它允许 CMake 执行来自外部文件的代码。
 
 这种方法有助于关注点分离，但仅仅有一点点——专门的代码被提取到独立的文件中，甚至可以跨不相关的项目共享，但如果作者不小心，它仍然可能污染全局变量作用域，带入其中的内部逻辑。
 
@@ -163,7 +163,7 @@ add_executable(Rental
 ) 
 ```
 
-这看起来很好，但正如你所看到的，我们仍然在顶层文件中包含了来自嵌套目录的源文件列表！为了增加关注点分离，我们可以将源列表提取到另一个listfile中，并将其存储在`sources`变量中：
+这看起来很好，但正如你所看到的，我们仍然在顶层文件中包含了来自嵌套目录的源文件列表！为了增加关注点分离，我们可以将源列表提取到另一个 listfile 中，并将其存储在`sources`变量中：
 
 **ch04/02-include/cars/cars.cmake**
 
@@ -188,7 +188,7 @@ add_executable(Rental
 ) 
 ```
 
-CMake实际上会将`sources`设置为与`add_executable`相同的作用域，并将变量填充为所有文件。这个解决方案是可行的，但也有一些缺陷：
+CMake 实际上会将`sources`设置为与`add_executable`相同的作用域，并将变量填充为所有文件。这个解决方案是可行的，但也有一些缺陷：
 
 +   **嵌套目录中的变量会污染顶层作用域（反之亦然）**：
 
@@ -251,7 +251,7 @@ add_subdirectory(cars)
 target_link_libraries(Rental PRIVATE cars) 
 ```
 
-最后一行用于将`cars`目录中的产物链接到`Rental`可执行文件。这是一个特定于目标的命令，我们将在下一章中详细讨论：*第5章*，*与目标一起工作*。
+最后一行用于将`cars`目录中的产物链接到`Rental`可执行文件。这是一个特定于目标的命令，我们将在下一章中详细讨论：*第五章*，*与目标一起工作*。
 
 让我们看看嵌套的列表文件长什么样：
 
@@ -329,35 +329,35 @@ target_include_directories(cars PUBLIC .)
 
 在 *图 4.1* 中，我们看到 `src` 目录根目录下有一个 `CMakeLists.txt` 文件 – 它将配置关键的项目设置，并包含所有来自嵌套目录的列表文件。`app1` 目录（在 *图 4.2* 中可见）包含另一个 `CMakeLists.txt` 文件，以及 `.cpp` 实现文件：`class_a.cpp` 和 `class_b.cpp`。还有一个包含可执行程序入口点的 `main.cpp` 文件。`CMakeLists.txt` 文件应该定义一个目标，使用这些源文件来构建一个可执行文件 – 接下来的一章中我们将学习如何做到这一点。
 
-我们的头文件被放置在`include`目录中，可以用于为其他C++翻译单元声明符号。
+我们的头文件被放置在`include`目录中，可以用于为其他 C++翻译单元声明符号。
 
 接下来，我们有一个`lib3`目录，它包含专门用于该可执行文件的库（在项目其他地方或外部使用的库应该位于`src`目录中）。这种结构提供了极大的灵活性，并且允许轻松扩展项目。当我们继续添加更多类时，我们可以方便地将它们分组到库中，以提高编译速度。让我们看看一个库是怎样的：
 
 ![](img/B19844_04_03.png)
 
-图4.3：库的目录结构
+图 4.3：库的目录结构
 
-库应遵循与可执行文件相同的结构，但有一个小区别：一个可选的`lib1`目录被添加到包含目录中。当库计划在项目外部使用时，该目录会被包含。它包含其他项目在编译过程中将使用的公共头文件。当我们开始构建自己的库时，我们将在*第7章*，*使用CMake编译C++源文件*中进一步讨论这个话题。
+库应遵循与可执行文件相同的结构，但有一个小区别：一个可选的`lib1`目录被添加到包含目录中。当库计划在项目外部使用时，该目录会被包含。它包含其他项目在编译过程中将使用的公共头文件。当我们开始构建自己的库时，我们将在*第七章*，*使用 CMake 编译 C++源文件*中进一步讨论这个话题。
 
 所以，我们已经讨论了文件在目录结构中的布局方式。现在，是时候看看各个`CMakeLists.txt`文件是如何汇聚在一起形成一个完整的项目，并且它们在更大场景中的作用是什么。
 
 ![](img/B19844_04_04.png)
 
-图4.4：CMake如何在一个项目中合并列表文件
+图 4.4：CMake 如何在一个项目中合并列表文件
 
-在前面的图中，每个框表示一个`CMakeLists.txt`列表文件，位于每个目录中，而斜体标签表示每个文件执行的操作（从上到下）。让我们从CMake的角度再次分析这个项目（有关所有详细信息，请查看`ch04/05-structure`目录中的示例）：
+在前面的图中，每个框表示一个`CMakeLists.txt`列表文件，位于每个目录中，而斜体标签表示每个文件执行的操作（从上到下）。让我们从 CMake 的角度再次分析这个项目（有关所有详细信息，请查看`ch04/05-structure`目录中的示例）：
 
-1.  执行从项目根目录开始——也就是从位于源代码树顶部的`CMakeLists.txt`列表文件开始。该文件将设置CMake的最低要求版本及适当的策略，设置项目名称、支持的语言和全局变量，并包含`cmake`目录中的文件，以便它们的内容在全局范围内可用。
+1.  执行从项目根目录开始——也就是从位于源代码树顶部的`CMakeLists.txt`列表文件开始。该文件将设置 CMake 的最低要求版本及适当的策略，设置项目名称、支持的语言和全局变量，并包含`cmake`目录中的文件，以便它们的内容在全局范围内可用。
 
 1.  下一步是通过调用`add_subdirectory(src bin)`命令进入`src`目录的范围（我们希望将编译的产物放在`<binary_tree>/bin`而不是`<binary_tree>/src`）。
 
-1.  CMake读取`src/CMakeLists.txt`文件，发现它的唯一目的是添加四个嵌套的子目录：`app1`、`app2`、`lib1`和`lib2`。
+1.  CMake 读取`src/CMakeLists.txt`文件，发现它的唯一目的是添加四个嵌套的子目录：`app1`、`app2`、`lib1`和`lib2`。
 
-1.  CMake进入`app1`的变量范围，了解另一个嵌套的库`lib3`，它有自己的`CMakeLists.txt`文件；然后进入`lib3`的范围。正如你可能注意到的，这是一个深度优先遍历目录结构。
+1.  CMake 进入`app1`的变量范围，了解另一个嵌套的库`lib3`，它有自己的`CMakeLists.txt`文件；然后进入`lib3`的范围。正如你可能注意到的，这是一个深度优先遍历目录结构。
 
-1.  `lib3`库添加了一个与其同名的静态库目标。CMake返回到`app1`的父范围。
+1.  `lib3`库添加了一个与其同名的静态库目标。CMake 返回到`app1`的父范围。
 
-1.  `app1`子目录添加了一个依赖于`lib3`的可执行文件。CMake返回到`src`的父范围。
+1.  `app1`子目录添加了一个依赖于`lib3`的可执行文件。CMake 返回到`src`的父范围。
 
 1.  CMake 会继续进入剩余的嵌套作用域并执行它们的 listfiles，直到所有 `add_subdirectory()` 调用完成。
 
@@ -413,7 +413,7 @@ endif()
 
 还有一些包含`HOST`关键字的变量，记住它们明确引用的是主机系统。否则，所有变量引用的都是目标系统（通常情况下，这也是主机系统，除非我们在进行交叉编译）。
 
-如果你有兴趣深入了解交叉编译，我建议参考 CMake 文档：[https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html)。
+如果你有兴趣深入了解交叉编译，我建议参考 CMake 文档：[`cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html)。
 
 ## 缩写变量
 
@@ -546,9 +546,9 @@ Target "Standard" requires the language dialect "CXX23" (with compiler extension
 
 ## 厂商特定的扩展
 
-根据你所在组织实施的政策，你可能会对允许或禁用特定供应商扩展感兴趣。这些扩展是什么呢？我们可以这样说，C++标准的进展对于一些编译器生产商的需求来说有点慢，所以他们决定为语言添加自己的增强功能——如果你喜欢的话，叫做*扩展*。例如，C++ **技术报告1**（**TR1**）是一个库扩展，它在这些功能普及之前就引入了正则表达式、智能指针、哈希表和随机数生成器。为了支持GNU项目发布的这类插件，CMake会用`-std=gnu++14`替换标准编译器标志（`-std=c++14`）。
+根据你所在组织实施的政策，你可能会对允许或禁用特定供应商扩展感兴趣。这些扩展是什么呢？我们可以这样说，C++标准的进展对于一些编译器生产商的需求来说有点慢，所以他们决定为语言添加自己的增强功能——如果你喜欢的话，叫做*扩展*。例如，C++ **技术报告 1**（**TR1**）是一个库扩展，它在这些功能普及之前就引入了正则表达式、智能指针、哈希表和随机数生成器。为了支持 GNU 项目发布的这类插件，CMake 会用`-std=gnu++14`替换标准编译器标志（`-std=c++14`）。
 
-一方面，这可能是期望的，因为它提供了一些方便的功能。另一方面，如果你切换到不同的编译器（或者你的用户这样做了），你的代码将失去可移植性，无法编译通过。这也是一个按目标设置的属性，存在一个默认变量`CMAKE_CXX_EXTENSIONS`。CMake在这里更为宽容，允许使用扩展，除非我们特别告诉它不要使用：
+一方面，这可能是期望的，因为它提供了一些方便的功能。另一方面，如果你切换到不同的编译器（或者你的用户这样做了），你的代码将失去可移植性，无法编译通过。这也是一个按目标设置的属性，存在一个默认变量`CMAKE_CXX_EXTENSIONS`。CMake 在这里更为宽容，允许使用扩展，除非我们特别告诉它不要使用：
 
 ```cpp
 set(CMAKE_CXX_EXTENSIONS OFF) 
@@ -585,7 +585,7 @@ endif()
 
 正如你可能猜到的，针对我们使用的每个特性编写测试文件是一项艰巨的任务。即使是 CMake 的作者也建议只检查某些高级的 **元特性** 是否存在：`cxx_std_98`、`cxx_std_11`、`cxx_std_14`、`cxx_std_17`、`cxx_std_20`、`cxx_std_23` 和 `cxx_std_26`。每个 **元特性** 表示编译器支持特定的 C++ 标准。如果你愿意，可以像我们在前面的例子中那样使用它们。
 
-CMake 已知的特性完整列表可以在文档中找到：[https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html)。
+CMake 已知的特性完整列表可以在文档中找到：[`cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html`](https://cmake.org/cmake/help/latest/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html)。
 
 ## 编译测试文件
 
@@ -626,13 +626,13 @@ message("output:\n" ${output})
 
 这个命令一开始可能让人觉得有些复杂，但实际上只有几个参数是必需的，用于编译和运行一个非常基础的测试文件。我还额外使用了可选的`RUN_OUTPUT_VARIABLE`关键字来收集来自`stdout`的输出。
 
-下一步是通过使用一些我们将在实际项目中使用的现代C++特性，来扩展我们的基本测试文件——或许可以通过添加一个变参模板，看看目标机器上的编译器是否能够处理它。
+下一步是通过使用一些我们将在实际项目中使用的现代 C++特性，来扩展我们的基本测试文件——或许可以通过添加一个变参模板，看看目标机器上的编译器是否能够处理它。
 
-最后，我们可以在条件块中检查收集到的输出是否符合我们的预期，并且当出现问题时，`message(SEND_ERROR <error>)`会被打印出来。记住，`SEND_ERROR`关键字允许CMake继续配置阶段，但会阻止生成构建系统。这对于在中止构建之前显示所有遇到的错误非常有用。现在我们已经知道如何确保编译可以完全完成。接下来，我们将讨论禁用源代码目录构建的问题。
+最后，我们可以在条件块中检查收集到的输出是否符合我们的预期，并且当出现问题时，`message(SEND_ERROR <error>)`会被打印出来。记住，`SEND_ERROR`关键字允许 CMake 继续配置阶段，但会阻止生成构建系统。这对于在中止构建之前显示所有遇到的错误非常有用。现在我们已经知道如何确保编译可以完全完成。接下来，我们将讨论禁用源代码目录构建的问题。
 
 # 禁用源代码目录构建
 
-在*第1章*，*CMake入门*中，我们讨论了源代码目录构建，并且建议始终指定构建路径为源代码之外。这不仅可以让构建树更干净、`.gitignore`文件更简单，还能减少你意外覆盖或删除源文件的风险。
+在*第一章*，*CMake 入门*中，我们讨论了源代码目录构建，并且建议始终指定构建路径为源代码之外。这不仅可以让构建树更干净、`.gitignore`文件更简单，还能减少你意外覆盖或删除源文件的风险。
 
 如果你想提前停止构建，可以使用以下检查：
 
@@ -647,9 +647,9 @@ endif()
 message("Build successful!") 
 ```
 
-如果你想了解更多关于STR前缀和变量引用的信息，请回顾*第2章*，*CMake语言*。
+如果你想了解更多关于 STR 前缀和变量引用的信息，请回顾*第二章*，*CMake 语言*。
 
-但是请注意，无论你在前面的代码中做什么，似乎CMake仍然会创建一个`CMakeFiles/`目录和一个`CMakeCache.txt`文件。
+但是请注意，无论你在前面的代码中做什么，似乎 CMake 仍然会创建一个`CMakeFiles/`目录和一个`CMakeCache.txt`文件。
 
 你可能会在网上看到一些建议，使用未文档化的变量来确保用户在任何情况下都不能在源目录中写入。依赖于未文档化的变量来限制在源目录中的写入是不推荐的。这些变量可能在所有版本中都不起作用，并且可能在没有警告的情况下被移除或修改。
 
@@ -657,9 +657,9 @@ message("Build successful!")
 
 # 总结
 
-本章介绍了有价值的概念，为构建健壮和具有未来保障的项目奠定了坚实的基础。我们讨论了设置最小CMake版本，以及配置项目的基本方面，如名称、语言和元数据字段。建立这些基础使得我们的项目能够有效地扩展。
+本章介绍了有价值的概念，为构建健壮和具有未来保障的项目奠定了坚实的基础。我们讨论了设置最小 CMake 版本，以及配置项目的基本方面，如名称、语言和元数据字段。建立这些基础使得我们的项目能够有效地扩展。
 
-我们探索了项目划分，比较了基本的`include()`与`add_subdirectory`的使用，后者带来了诸如作用域变量管理、简化路径和增加模块化等好处。能够创建嵌套项目并分别构建它们，在逐步将代码分解为更独立的单元时证明是有用的。在理解了可用的划分机制之后，我们深入探讨了如何创建透明、弹性和可扩展的项目结构。我们考察了CMake如何遍历listfile以及配置步骤的正确顺序。接下来，我们研究了如何为目标和主机机器设置环境作用域，它们之间的差异是什么，以及通过不同查询可以获得哪些关于平台和系统的信息。我们还介绍了工具链配置，包括指定所需的C++版本、处理特定供应商的编译器扩展以及启用重要的优化。我们学习了如何测试编译器所需的功能，并执行示例文件以测试编译支持。
+我们探索了项目划分，比较了基本的`include()`与`add_subdirectory`的使用，后者带来了诸如作用域变量管理、简化路径和增加模块化等好处。能够创建嵌套项目并分别构建它们，在逐步将代码分解为更独立的单元时证明是有用的。在理解了可用的划分机制之后，我们深入探讨了如何创建透明、弹性和可扩展的项目结构。我们考察了 CMake 如何遍历 listfile 以及配置步骤的正确顺序。接下来，我们研究了如何为目标和主机机器设置环境作用域，它们之间的差异是什么，以及通过不同查询可以获得哪些关于平台和系统的信息。我们还介绍了工具链配置，包括指定所需的 C++版本、处理特定供应商的编译器扩展以及启用重要的优化。我们学习了如何测试编译器所需的功能，并执行示例文件以测试编译支持。
 
 尽管到目前为止涉及的技术方面对于项目至关重要，但它们不足以使项目真正有用。为了增加项目的实用性，我们需要理解**目标（targets）**的概念。我们之前简要地提到过这一话题，但现在我们已经准备好全面探讨它，因为我们已经充分理解了相关的基础知识。在下一章中将介绍的目标（targets），将在进一步提升项目的功能性和有效性方面发挥关键作用。
 
@@ -667,13 +667,13 @@ message("Build successful!")
 
 有关本章涉及主题的更多信息，请参阅以下链接：
 
-+   关注点分离：[https://nalexn.github.io/separation-of-concerns/](https://nalexn.github.io/separation-of-concerns/)
++   关注点分离：[`nalexn.github.io/separation-of-concerns/`](https://nalexn.github.io/separation-of-concerns/)
 
-+   完整的CMake变量参考：[https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)
++   完整的 CMake 变量参考：[`cmake.org/cmake/help/latest/manual/cmake-variables.7.html`](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)
 
-+   `try_compile` 和 `try_run` 参考文献：[https://cmake.org/cmake/help/latest/command/try_compile.html](https://cmake.org/cmake/help/latest/command/try_compile.html), [https://cmake.org/cmake/help/latest/command/try_run.html](https://cmake.org/cmake/help/latest/command/try_run.html)
++   `try_compile` 和 `try_run` 参考文献：[`cmake.org/cmake/help/latest/command/try_compile.html`](https://cmake.org/cmake/help/latest/command/try_compile.html), [`cmake.org/cmake/help/latest/command/try_run.html`](https://cmake.org/cmake/help/latest/command/try_run.html)
 
-+   CheckIPOSupported 参考文献：[https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html](https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html)
++   CheckIPOSupported 参考文献：[`cmake.org/cmake/help/latest/module/CheckIPOSupported.html`](https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html)
 
 # 留下评论！
 

@@ -1,6 +1,4 @@
-# 15
-
-# 创建你的专业项目
+# 第十五章：创建你的专业项目
 
 我们已经掌握了构建专业项目所需的所有知识，包括结构化、构建、依赖管理、测试、分析、安装和打包。现在，是时候通过创建一个连贯的专业项目来应用这些技能了。重要的是要理解，即使是微不足道的程序也能从自动化质量检查和将原始代码转化为完整解决方案的无缝流程中受益。的确，实现这些检查和流程是一个重要的投资，因为它需要许多步骤才能正确设置一切。尤其是将这些机制添加到现有的代码库时，这些代码库通常庞大而复杂。这就是为什么从一开始就使用 CMake 并尽早建立所有必要的流程是有益的。这样配置起来更简单，也更高效，因为这些质量控制和构建自动化最终需要集成到长期项目中。
 
@@ -22,7 +20,7 @@
 
 # 技术要求
 
-你可以在 GitHub 上找到本章中的代码文件，地址为 [https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch15](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch15)。
+你可以在 GitHub 上找到本章中的代码文件，地址为 [`github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch15`](https://github.com/PacktPublishing/Modern-CMake-for-Cpp-2E/tree/main/examples/ch15)。
 
 要构建本书中提供的示例，请始终使用推荐的命令：
 
@@ -57,37 +55,37 @@ ctest
 
 图 15.1：在终端中执行的我们的项目的文本用户界面，支持鼠标操作
 
-通常，项目要么生成面向用户的可执行文件，要么生成供开发者使用的库。项目同时生成这两者的情况比较少见，尽管也会发生。例如，一些应用程序会附带独立的SDK或库，帮助开发插件。另一个例子是一个包含使用示例的库。我们的项目属于后一类，展示了该库的功能。
+通常，项目要么生成面向用户的可执行文件，要么生成供开发者使用的库。项目同时生成这两者的情况比较少见，尽管也会发生。例如，一些应用程序会附带独立的 SDK 或库，帮助开发插件。另一个例子是一个包含使用示例的库。我们的项目属于后一类，展示了该库的功能。
 
 我们将通过回顾章节列表、回想每个章节的内容，并选择我们将用于构建应用程序的技术和工具来开始规划：
 
-+   *第1章*，*CMake的第一步*：
++   *第一章*，*CMake 的第一步*：
 
-本章提供了关于CMake的基本信息，包括安装和命令行使用方法，以构建项目。它还涵盖了项目文件的基本信息，如它们的作用、典型命名约定和特殊性。
+本章提供了关于 CMake 的基本信息，包括安装和命令行使用方法，以构建项目。它还涵盖了项目文件的基本信息，如它们的作用、典型命名约定和特殊性。
 
-+   *第2章*，*CMake语言*：
++   *第二章*，*CMake 语言*：
 
-我们介绍了编写正确CMake列表文件和脚本所需的工具，涵盖了基本的代码内容，如注释、命令调用和参数。我们解释了变量、列表和控制结构，并介绍了一些有用的命令。这些基础将贯穿整个项目。
+我们介绍了编写正确 CMake 列表文件和脚本所需的工具，涵盖了基本的代码内容，如注释、命令调用和参数。我们解释了变量、列表和控制结构，并介绍了一些有用的命令。这些基础将贯穿整个项目。
 
-+   *第3章*，*在流行的IDE中使用CMake*：
++   *第三章*，*在流行的 IDE 中使用 CMake*：
 
-我们讨论了三种IDE——CLion、VS Code和Visual Studio IDE——并强调了它们的优点。在我们的最终项目中，选择使用哪个IDE（或是否使用IDE）由你决定。一旦决定，你可以在Dev容器中开始这个项目，只需通过几步构建一个Docker镜像（或者直接从Docker Hub获取）。在容器中运行镜像可以确保开发环境与生产环境一致。
+我们讨论了三种 IDE——CLion、VS Code 和 Visual Studio IDE——并强调了它们的优点。在我们的最终项目中，选择使用哪个 IDE（或是否使用 IDE）由你决定。一旦决定，你可以在 Dev 容器中开始这个项目，只需通过几步构建一个 Docker 镜像（或者直接从 Docker Hub 获取）。在容器中运行镜像可以确保开发环境与生产环境一致。
 
-+   *第4章*，*设置你的第一个CMake项目*：
++   *第四章*，*设置你的第一个 CMake 项目*：
 
-配置项目至关重要，因为它决定了生效的CMake策略、命名、版本控制和编程语言。我们将利用这一章来影响构建过程的基本行为。
+配置项目至关重要，因为它决定了生效的 CMake 策略、命名、版本控制和编程语言。我们将利用这一章来影响构建过程的基本行为。
 
 我们还将遵循既定的项目划分和结构来确定目录和文件的布局，并利用系统发现变量适应不同的构建环境。工具链配置是另一个关键方面，它使我们能够强制指定一个特定的 C++ 版本和编译器支持的标准。按照本章的建议，我们将禁用源代码内构建，以保持工作空间的整洁。
 
-+   *第 5 章*，*与目标一起工作*：
++   *第五章*，*与目标一起工作*：
 
 在这里，我们了解了每个现代 CMake 项目如何广泛使用目标。我们当然也会使用目标来定义一些库和可执行文件（既用于测试，也用于生产），以保持项目的组织性，并确保遵守**DRY**（**Don’t Repeat Yourself**）原则。通过学习目标属性和传递使用要求（传播属性），我们将能够将配置保持在目标定义附近。
 
-+   *第 6 章*，*使用生成器表达式*：
++   *第六章*，*使用生成器表达式*：
 
 生成器表达式在整个项目中被大量使用。我们将尽量使这些表达式保持简单明了。项目将包含自定义命令，以生成 Valgrind 和覆盖率报告的文件。此外，我们还将使用目标钩子，特别是 `PRE_BUILD`，来清理覆盖率插桩过程产生的 `.gcda` 文件。
 
-+   *第 7 章*，*使用 CMake 编译 C++ 源代码*：
++   *第七章*，*使用 CMake 编译 C++ 源代码*：
 
 没有 C++ 项目是不需要编译的。基础知识非常简单，但 CMake 允许我们以多种方式调整这一过程：扩展目标的源文件、配置优化器、提供调试信息。对于这个项目，默认的编译标志已经足够，但我们还是会稍微玩一下预处理器：
 
@@ -97,7 +95,7 @@ ctest
 
 不需要 Unity 构建——这个项目不会大到需要添加它们才有意义。
 
-+   *第 8 章*，*链接可执行文件和库*：
++   *第八章*，*链接可执行文件和库*：
 
 我们将获得有关链接的一般信息，这在任何项目中默认都是有用的。此外，由于这个项目包含一个库，我们将明确引用一些特定的构建指令，具体如下：
 
@@ -107,31 +105,31 @@ ctest
 
 本章还概述了如何隔离 `main()` 函数以进行测试，这是我们将采用的做法。
 
-+   *第 9 章*，*在 CMake 中管理依赖项*：
++   *第九章*，*在 CMake 中管理依赖项*：
 
-为了增强项目的吸引力，我们将引入一个外部依赖项：一个基于文本的 UI 库。*第 9 章* 探讨了管理依赖项的各种方法。选择将很简单：`FetchContent` 工具模块通常是推荐的且最方便的。
+为了增强项目的吸引力，我们将引入一个外部依赖项：一个基于文本的 UI 库。*第九章* 探讨了管理依赖项的各种方法。选择将很简单：`FetchContent` 工具模块通常是推荐的且最方便的。
 
-+   *第 10 章*，*使用 C++20 模块*：
++   *第十章*，*使用 C++20 模块*：
 
 尽管我们已经探讨了 C++20 模块的使用以及支持此功能的环境要求（CMake 3.28，最新编译器），但其广泛支持仍然不足。为了确保项目的可访问性，我们暂时不会引入模块。
 
-+   *第11章*，*测试框架*：
++   *第十一章*，*测试框架*：
 
 实施适当的自动化测试对于确保我们解决方案的质量在时间的推移中保持一致至关重要。我们将集成 CTest，并组织我们的项目以便于测试，应用之前提到的 `main()` 函数分离。
 
 本章讨论了两个测试框架：Catch2 和 GTest 配合 GMock；我们将使用后者。为了获取详细的覆盖率信息，我们将使用 LCOV 生成 HTML 报告。
 
-+   *第12章*，*程序分析工具*：
++   *第十二章*，*程序分析工具*：
 
 对于静态分析，我们可以选择一系列工具：Clang-Tidy，Cpplint，Cppcheck，include-what-you-use 和 link-what-you-use。我们将选择 Cppcheck，因为 Clang-Tidy 与使用 GCC 构建的预编译头文件兼容性较差。
 
 动态分析将使用 Valgrind 的 Memcheck 工具进行，并辅以 Memcheck-cover 包装器生成 HTML 报告。此外，我们的源代码将在构建过程中通过 ClangFormat 自动格式化。
 
-+   *第13章*，*生成文档：*
++   *第十三章*，*生成文档：*
 
 提供文档在将库作为我们项目的一部分时是至关重要的。CMake 通过使用 `Doxygen` 实现文档生成的自动化。我们将在更新的设计中采用这种方法，并结合 `doxygen-awesome-css` 主题。
 
-+   *第14章*，*安装与打包*：
++   *第十四章*，*安装与打包*：
 
 最后，我们将配置解决方案的安装和打包，并准备文件形成如上所述的包，同时包括目标定义。我们将通过包含 `GNUInstallDirs` 模块，安装解决方案及构建目标的产物到相应目录。我们还将配置一些组件来模块化解决方案，并为与 CPack 的使用做准备。
 
@@ -149,17 +147,17 @@ ctest
 
 图 15.2：逻辑目标的结构
 
-让我们按照构建顺序来探索结构。首先，我们编译`calc_obj`，一个**目标库**。如果需要回顾目标库，请查看*第5章*，*与目标合作*。然后，我们应关注**静态** **库**和**共享库**。
+让我们按照构建顺序来探索结构。首先，我们编译`calc_obj`，一个**目标库**。如果需要回顾目标库，请查看*第五章*，*与目标合作*。然后，我们应关注**静态** **库**和**共享库**。
 
 ## 共享库与静态库
 
-在*第8章*，*链接可执行文件和库*中，我们介绍了共享库和静态库。我们指出，当多个程序使用相同的库时，共享库可以减少整体内存使用。此外，用户通常已经安装了流行的库，或者知道如何快速安装它们。
+在*第八章*，*链接可执行文件和库*中，我们介绍了共享库和静态库。我们指出，当多个程序使用相同的库时，共享库可以减少整体内存使用。此外，用户通常已经安装了流行的库，或者知道如何快速安装它们。
 
 更重要的是，**共享库**是独立的文件，必须放置在特定路径中，以便动态链接器能够找到它们。相比之下，**静态库**直接嵌入到可执行文件中，这使得使用时更快，因为无需额外步骤来定位内存中的代码。
 
 作为库的作者，我们可以决定提供静态版本还是共享版本，或者我们可以同时提供这两种版本，并将此决定留给使用我们库的程序员。由于我们在应用我们的知识，我们将提供两个版本。
 
-`calc_test`目标，包括用于验证库核心功能的单元测试，将使用静态库。虽然我们从相同的*目标文件*构建这两种类型的库，但测试任一库类型都是可以接受的，因为它们的功能应该是相同的。与`calc_console_static`目标关联的控制台应用程序将使用共享库。该目标还链接了一个外部依赖项，即Arthur Sonzogni的功能终端（X）用户界面（FTXUI）库（*进一步阅读*部分有指向GitHub项目的链接）。
+`calc_test`目标，包括用于验证库核心功能的单元测试，将使用静态库。虽然我们从相同的*目标文件*构建这两种类型的库，但测试任一库类型都是可以接受的，因为它们的功能应该是相同的。与`calc_console_static`目标关联的控制台应用程序将使用共享库。该目标还链接了一个外部依赖项，即 Arthur Sonzogni 的功能终端（X）用户界面（FTXUI）库（*进一步阅读*部分有指向 GitHub 项目的链接）。
 
 最后的两个目标，`calc_console`和`calc_console_test`，旨在解决测试可执行文件中的常见问题：测试框架和可执行文件提供的多个入口点的冲突。为避免此问题，我们故意将`main()`函数隔离到一个引导目标`calc_console`中，它仅调用`calc_console_static`中的主要功能。
 
@@ -173,15 +171,15 @@ ctest
 
 +   `test`包含上述库和可执行文件的测试。
 
-+   `cmake`包含CMake用于构建和安装项目的工具模块和辅助文件。
++   `cmake`包含 CMake 用于构建和安装项目的工具模块和辅助文件。
 
 +   *根目录*包含顶级配置和文档文件。
 
-这个结构（如*图15.3*所示）确保了关注点的清晰分离，便于项目的导航和维护：
+这个结构（如*图 15.3*所示）确保了关注点的清晰分离，便于项目的导航和维护：
 
 ![](img/B19844_15_03.png)
 
-图15.3：项目的目录结构
+图 15.3：项目的目录结构
 
 以下是每个四个主要目录中的文件完整列表：
 
@@ -193,19 +191,19 @@ ctest
 | `./src` | `./cmake` |
 | `CMakeLists.txt``calc/CMakeLists.txt``calc/CalcConfig.cmake``calc/basic.cpp``calc/include/calc/basic.h``calc_console/CMakeLists.txt``calc_console/bootstrap.cpp``calc_console/include/tui.h``calc_console/tui.cpp` | `BuildInfo.cmake``Coverage.cmake``CppCheck.cmake``Doxygen.cmake``Format.cmake``GetFTXUI.cmake``Packaging.cmake``Memcheck.cmake``NoInSourceBuilds.cmake``Testing.cmake``buildinfo.h.in``doxygen_extra_headers` |
 
-表15.1：项目文件结构
+表 15.1：项目文件结构
 
-虽然看起来CMake引入了相当大的开销，且`cmake`目录最初包含的内容比实际的业务代码还多，但随着项目功能的扩展，这种动态会发生变化。最初建立一个清晰、有序的项目结构需要付出较大的努力，但可以放心，这项投资在未来将带来显著的回报。
+虽然看起来 CMake 引入了相当大的开销，且`cmake`目录最初包含的内容比实际的业务代码还多，但随着项目功能的扩展，这种动态会发生变化。最初建立一个清晰、有序的项目结构需要付出较大的努力，但可以放心，这项投资在未来将带来显著的回报。
 
-本章将详细讲解*表15.1*中提到的所有文件，并逐步分析它们的功能以及在项目中的作用。这个过程将分为四个步骤：构建、测试、安装和提供文档。
+本章将详细讲解*表 15.1*中提到的所有文件，并逐步分析它们的功能以及在项目中的作用。这个过程将分为四个步骤：构建、测试、安装和提供文档。
 
 # 构建和管理依赖项
 
-所有构建过程都遵循相同的程序。我们从顶层的列表文件开始，向下推进到项目的源代码树中。*图15.4*展示了构建过程中的项目文件，括号中的数字表示CMake脚本执行的顺序。
+所有构建过程都遵循相同的程序。我们从顶层的列表文件开始，向下推进到项目的源代码树中。*图 15.4*展示了构建过程中的项目文件，括号中的数字表示 CMake 脚本执行的顺序。
 
 ![](img/B19844_15_04.png)
 
-图15.4：构建阶段使用的文件
+图 15.4：构建阶段使用的文件
 
 顶层的`CMakeLists.txt`（1）列表文件配置了项目：
 
@@ -222,7 +220,7 @@ add_subdirectory(test)
 include(Packaging) 
 ```
 
-我们首先指定项目的基本信息，并设置CMake工具模块的路径（即项目中的`cmake`目录）。然后，我们通过自定义模块来防止源代码构建。接着，我们启用`CTest`模块（CMake内置的测试模块）。此步骤应该在项目的根目录进行，因为该命令会在相对于源代码树位置的二进制树中创建`CTestTestfile.cmake`文件。如果放在其他地方，将导致`ctest`无法找到它。
+我们首先指定项目的基本信息，并设置 CMake 工具模块的路径（即项目中的`cmake`目录）。然后，我们通过自定义模块来防止源代码构建。接着，我们启用`CTest`模块（CMake 内置的测试模块）。此步骤应该在项目的根目录进行，因为该命令会在相对于源代码树位置的二进制树中创建`CTestTestfile.cmake`文件。如果放在其他地方，将导致`ctest`无法找到它。
 
 接下来，我们包括两个关键目录：
 
@@ -363,9 +361,9 @@ target_link_libraries(calc_console calc_console_static)
 
 1.  实现头文件预编译，这里仅用`<string>`头文件作为示例，尽管更大的项目可能会包含更多头文件。
 
-1.  包含一个自定义CMake模块，用于获取FTXUI依赖项。
+1.  包含一个自定义 CMake 模块，用于获取 FTXUI 依赖项。
 
-1.  将业务代码与共享的`calc_shared`库和FTXUI组件链接。
+1.  将业务代码与共享的`calc_shared`库和 FTXUI 组件链接。
 
 1.  添加一个自定义模块，用于生成构建信息并将其嵌入到产物中。
 
@@ -394,17 +392,17 @@ GIT_TAG        v0.11
 FetchContent_MakeAvailable(FTXTUI) 
 ```
 
-我们正在使用推荐的`FetchContent`方法，该方法在*第9章*《*CMake中的依赖管理*》中有详细介绍。唯一不同的是调用了`option()`命令，这使我们可以绕过FTXUI的漫长构建步骤，并防止其安装步骤影响此项目的安装过程。有关更多详细信息，请参阅*进一步阅读*部分。
+我们正在使用推荐的`FetchContent`方法，该方法在*第九章*《*CMake 中的依赖管理*》中有详细介绍。唯一不同的是调用了`option()`命令，这使我们可以绕过 FTXUI 的漫长构建步骤，并防止其安装步骤影响此项目的安装过程。有关更多详细信息，请参阅*进一步阅读*部分。
 
 `calc_console`目录的列表文件包含另一个与构建相关的自定义实用模块：`BuildInfo`。该模块将捕获三条信息，并将其显示在可执行文件中：
 
-+   当前Git提交的SHA。
++   当前 Git 提交的 SHA。
 
 +   构建时间戳。
 
 +   顶级列表文件中指定的项目版本。
 
-正如我们在*第7章*《*使用CMake编译C++源代码*》中学到的，CMake可以捕获构建时的值并通过模板文件将其传递给C++代码，例如使用一个结构体：
+正如我们在*第七章*《*使用 CMake 编译 C++源代码*》中学到的，CMake 可以捕获构建时的值并通过模板文件将其传递给 C++代码，例如使用一个结构体：
 
 **ch15/01-full-project/cmake/buildinfo.h.in**
 
@@ -440,7 +438,7 @@ endfunction()
 
 生成的头文件如果需要，可以与多个不同的消费者共享。在这种情况下，你可能希望在列表文件的顶部添加`include_guard(GLOBAL)`，以避免为每个目标都运行`git`命令。
 
-在深入实现控制台计算器之前，我想强调的是，你不需要深入理解`tui.cpp`文件或FTXUI库的复杂细节，因为这对我们当前的目的并不重要。相反，让我们关注代码中的高亮部分：
+在深入实现控制台计算器之前，我想强调的是，你不需要深入理解`tui.cpp`文件或 FTXUI 库的复杂细节，因为这对我们当前的目的并不重要。相反，让我们关注代码中的高亮部分：
 
 **ch15/01-full-project/src/calc_console/tui.cpp**
 
@@ -473,9 +471,9 @@ Component getTui() {
 } 
 ```
 
-这段代码提供了`getTui()`函数，该函数返回一个`ftxui::Component`对象，这个对象封装了交互式UI元素，如标签、文本字段、分隔符和边框。对于那些好奇这些元素的详细工作原理的人，更多的资料可以在*进一步阅读*部分找到。
+这段代码提供了`getTui()`函数，该函数返回一个`ftxui::Component`对象，这个对象封装了交互式 UI 元素，如标签、文本字段、分隔符和边框。对于那些好奇这些元素的详细工作原理的人，更多的资料可以在*进一步阅读*部分找到。
 
-更重要的是，*包含指令*链接到`calc_obj`目标和`BuildInfo`模块中的头文件。交互从lambda函数开始，调用`Calc::Sum`，并使用`text()`函数显示结果。
+更重要的是，*包含指令*链接到`calc_obj`目标和`BuildInfo`模块中的头文件。交互从 lambda 函数开始，调用`Calc::Sum`，并使用`text()`函数显示结果。
 
 在构建时收集的`buildinfo.h`中的值会以类似的方式使用，并在运行时显示给用户。
 
@@ -500,15 +498,15 @@ int main(int argc, char** argv) {
 } 
 ```
 
-这段简短的代码初始化了一个带有FTXUI的交互式控制台屏幕，显示`getTui()`返回的`Component`对象，并在循环中处理键盘输入。所有`src`目录下的文件都已处理完毕，我们现在可以继续进行程序的测试和分析。
+这段简短的代码初始化了一个带有 FTXUI 的交互式控制台屏幕，显示`getTui()`返回的`Component`对象，并在循环中处理键盘输入。所有`src`目录下的文件都已处理完毕，我们现在可以继续进行程序的测试和分析。
 
 # 测试和程序分析
 
-程序分析和测试是确保我们解决方案质量的重要组成部分。例如，在运行测试代码时，使用Valgrind更加有效（因为它具有一致性和覆盖率）。因此，我们将把测试和程序分析配置在同一位置。*图 15.5* 展示了执行流程和设置它们所需的文件：
+程序分析和测试是确保我们解决方案质量的重要组成部分。例如，在运行测试代码时，使用 Valgrind 更加有效（因为它具有一致性和覆盖率）。因此，我们将把测试和程序分析配置在同一位置。*图 15.5* 展示了执行流程和设置它们所需的文件：
 
 ![](img/B19844_15_05.png)
 
-图15.5：用于启用测试和程序分析的文件
+图 15.5：用于启用测试和程序分析的文件
 
 括号中的数字表示处理列表文件的顺序。从顶级列表文件开始，并添加`src`和`test`目录：
 
@@ -601,7 +599,7 @@ endfunction()
 # ... 
 ```
 
-这个实现与 *第11章* 中介绍的实现略有不同，因为它现在在输出路径中包括了目标名称，以防止名称冲突。接下来，我们需要一个函数来清除之前的覆盖率结果：
+这个实现与 *第十一章* 中介绍的实现略有不同，因为它现在在输出路径中包括了目标名称，以防止名称冲突。接下来，我们需要一个函数来清除之前的覆盖率结果：
 
 **ch15/01-full-project/cmake/Coverage.cmake (续)**
 
@@ -639,7 +637,7 @@ cmake --build <build-tree> -t coverage-calc_test
 cmake --build <build-tree> -t coverage-calc_console_test 
 ```
 
-接下来，我们希望对我们定义的多个目标进行动态程序分析，因此，要应用在 *第12章* 中介绍的 Memcheck 模块，*程序分析工具*，我们需要稍作调整，以扫描多个目标。
+接下来，我们希望对我们定义的多个目标进行动态程序分析，因此，要应用在 *第十二章* 中介绍的 Memcheck 模块，*程序分析工具*，我们需要稍作调整，以扫描多个目标。
 
 ## 准备 Memcheck 模块
 
@@ -677,7 +675,7 @@ function(AddMemcheck target)
 endfunction() 
 ```
 
-我们稍微改进了 *第12章* 中的 `AddMemcheck()` 函数，以便处理多个目标。我们使 `REPORT_PATH` 变量针对每个目标特定。
+我们稍微改进了 *第十二章* 中的 `AddMemcheck()` 函数，以便处理多个目标。我们使 `REPORT_PATH` 变量针对每个目标特定。
 
 要生成 Memcheck 报告，请使用以下命令（请注意，当使用 `Debug` 构建类型进行配置时，生成报告更为有效）：
 
@@ -785,7 +783,7 @@ target_link_libraries(calc_console_test
 **CleanCoverage(calc_console_static)** 
 ```
 
-通过这些步骤，CTestr已设置好运行我们的测试并收集覆盖率。接下来，我们将添加启用静态分析的指令，因为我们希望在第一次构建以及后续所有构建中都保持项目的高质量。
+通过这些步骤，CTestr 已设置好运行我们的测试并收集覆盖率。接下来，我们将添加启用静态分析的指令，因为我们希望在第一次构建以及后续所有构建中都保持项目的高质量。
 
 ## 添加静态分析工具
 
@@ -812,7 +810,7 @@ target_link_libraries(calc_console_test
 **AddCppCheck(calc_console_static)** 
 ```
 
-我们仍然需要定义`Format`和`CppCheck`函数。从`Format()`开始，我们借用了*第12章*，*程序分析工具*中描述的代码：
+我们仍然需要定义`Format`和`CppCheck`函数。从`Format()`开始，我们借用了*第十二章*，*程序分析工具*中描述的代码：
 
 **ch15/01-full-project/cmake/Format.cmake**
 
@@ -844,11 +842,11 @@ function(AddCppCheck target)
 endfunction() 
 ```
 
-这很简单方便。你可能会发现它与Clang-Tidy模块（见*第12章*，*程序分析工具*）有些相似，展示了CMake在功能上的一致性。
+这很简单方便。你可能会发现它与 Clang-Tidy 模块（见*第十二章*，*程序分析工具*）有些相似，展示了 CMake 在功能上的一致性。
 
 `cppcheck`的参数如下：
 
-+   `--enable=warning`：启用警告信息。要启用更多检查，请参阅Cppcheck手册（见*进一步阅读*部分）。
++   `--enable=warning`：启用警告信息。要启用更多检查，请参阅 Cppcheck 手册（见*进一步阅读*部分）。
 
 +   `--error-exitcode=1`：设置当`cppcheck`检测到问题时返回的错误代码。可以是`1`到`255`之间的任何数字（因为`0`表示成功），尽管某些数字可能被系统保留。
 
@@ -856,13 +854,13 @@ endfunction()
 
 # 安装和打包
 
-*图15.6*显示了我们将如何配置项目进行安装和打包：
+*图 15.6*显示了我们将如何配置项目进行安装和打包：
 
 ![](img/B19844_15_06.png)
 
-图15.6：配置安装和打包的文件
+图 15.6：配置安装和打包的文件
 
-顶层的listfile包括`Packaging`工具模块：
+顶层的 listfile 包括`Packaging`工具模块：
 
 **ch15/01-full-project/CMakeLists.txt（片段）**
 
@@ -873,13 +871,13 @@ endfunction()
 **include****(Packaging)** 
 ```
 
-`Packaging`模块详细描述了项目的包配置，我们将在*使用CPack打包*部分中探讨。我们现在的重点是安装三个主要组件：
+`Packaging`模块详细描述了项目的包配置，我们将在*使用 CPack 打包*部分中探讨。我们现在的重点是安装三个主要组件：
 
-+   Calc库的工件：静态和共享库、头文件以及目标导出文件
++   Calc 库的工件：静态和共享库、头文件以及目标导出文件
 
-+   Calc库的包定义配置文件
++   Calc 库的包定义配置文件
 
-+   Calc控制台可执行文件
++   Calc 控制台可执行文件
 
 一切都已规划好，现在是配置库的安装的时候了。
 
@@ -902,7 +900,7 @@ install(TARGETS calc_obj calc_shared calc_static
 ) 
 ```
 
-对于UNIX系统，我们还配置了共享库的安装后注册，使用`ldconfig`：
+对于 UNIX 系统，我们还配置了共享库的安装后注册，使用`ldconfig`：
 
 **ch15/01-full-project/src/calc/CMakeLists.txt（续）**
 
@@ -914,7 +912,7 @@ if (UNIX)
 endif() 
 ```
 
-为了在其他CMake项目中启用可重用性，我们将通过生成并安装一个目标导出文件和一个引用它的配置文件来打包该库：
+为了在其他 CMake 项目中启用可重用性，我们将通过生成并安装一个目标导出文件和一个引用它的配置文件来打包该库：
 
 **ch15/01-full-project/src/calc/CMakeLists.txt（续）**
 
@@ -1000,7 +998,7 @@ CPack: - package: .../packages/Calc-1.0.0-Linux.tar.gz generated.
 
 +   一般文档（涵盖所有其他非技术文档）
 
-正如我们在*第 13 章*中看到的，*生成文档*，大部分技术文档可以通过 CMake 使用 `Doxygen` 自动生成。
+正如我们在*第十三章*中看到的，*生成文档*，大部分技术文档可以通过 CMake 使用 `Doxygen` 自动生成。
 
 ## 生成技术文档
 
@@ -1028,7 +1026,7 @@ FetchContent_Declare(doxygen-awesome-css
 FetchContent_MakeAvailable(doxygen-awesome-css) 
 ```
 
-然后，我们需要一个函数来创建生成文档的目标。我们将调整在*第13章*《生成文档》中介绍的代码，以支持多个目标：
+然后，我们需要一个函数来创建生成文档的目标。我们将调整在*第十三章*《生成文档》中介绍的代码，以支持多个目标：
 
 **ch15/01-full-project/cmake/Doxygen.cmake（续）**
 
@@ -1091,7 +1089,7 @@ endfunction()
 
 +   `BUGS`: 提供已知问题和报告新问题的详细信息
 
-CMake不会直接与这些文件交互，因为它们不涉及自动处理或脚本。然而，它们的存在对于一个良好文档化的C++项目至关重要。以下是每个文档的最小示例：
+CMake 不会直接与这些文件交互，因为它们不涉及自动处理或脚本。然而，它们的存在对于一个良好文档化的 C++项目至关重要。以下是每个文档的最小示例：
 
 **ch15/01-full-project/README.md**
 
@@ -1106,7 +1104,7 @@ This application is written in C++ and built with CMake.
 - License is in the LICENSE file 
 ```
 
-这很简短，可能有点傻。注意`.md`扩展名——它代表*Markdown*，这是一种基于文本的格式化语言，易于阅读。像GitHub这样的站点和许多文本编辑器会以丰富的格式呈现这些文件。
+这很简短，可能有点傻。注意`.md`扩展名——它代表*Markdown*，这是一种基于文本的格式化语言，易于阅读。像 GitHub 这样的站点和许多文本编辑器会以丰富的格式呈现这些文件。
 
 我们的`INSTALL`文件将如下所示：
 
@@ -1134,7 +1132,7 @@ cmake --build <temporary-directory> -t doxygen-calc
 cmake --build <temporary-directory> -t doxygen-calc_console 
 ```
 
-`LICENSE`文件有点棘手，因为它需要一些版权法方面的专业知识（以及其他方面）。我们可以像许多其他项目一样，使用现成的开源软件许可证，而不是自己编写所有条款。对于这个项目，我们将使用MIT许可证，它非常宽松。请查看*进一步阅读*部分，获取一些有用的参考资料：
+`LICENSE`文件有点棘手，因为它需要一些版权法方面的专业知识（以及其他方面）。我们可以像许多其他项目一样，使用现成的开源软件许可证，而不是自己编写所有条款。对于这个项目，我们将使用 MIT 许可证，它非常宽松。请查看*进一步阅读*部分，获取一些有用的参考资料：
 
 **ch15/01-full-project/LICENSE**
 
@@ -1145,7 +1143,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 ```
 
-最后，我们有`CHANGELOG`。如前所述，保持文件中的变更记录很有帮助，这样使用你项目的开发者可以轻松找到支持他们所需功能的版本。例如，可能有用的是说明在版本0.8.2中为库添加了乘法功能。像以下这样简单的内容已经非常有帮助：
+最后，我们有`CHANGELOG`。如前所述，保持文件中的变更记录很有帮助，这样使用你项目的开发者可以轻松找到支持他们所需功能的版本。例如，可能有用的是说明在版本 0.8.2 中为库添加了乘法功能。像以下这样简单的内容已经非常有帮助：
 
 **ch15/01-full-project/CHANGELOG**
 
@@ -1169,29 +1167,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 现在这个项目已经准备好安装，因此我们使用迄今为止学到的技术为库和可执行文件创建了适当的安装条目，并为 CPack 准备了一个包配置。最后的任务是确保项目的文档是正确的，因此我们设置了自动文档生成（使用 Doxygen），并编写了一些基础文档来处理软件分发中的非技术性方面。
 
-这使我们完成了项目配置，现在我们可以轻松地使用几个精确的 CMake 命令来构建并安装它。但如果我们能只用一个简单的命令来完成整个过程呢？让我们在最后一章：*第16章*，*编写 CMake 预设*中探索如何做到这一点。
+这使我们完成了项目配置，现在我们可以轻松地使用几个精确的 CMake 命令来构建并安装它。但如果我们能只用一个简单的命令来完成整个过程呢？让我们在最后一章：*第十六章*，*编写 CMake 预设*中探索如何做到这一点。
 
 # 进一步阅读
 
 如需更多信息，您可以参考以下链接：
 
-+   构建静态库和共享库：[https://stackoverflow.com/q/2152077](https://stackoverflow.com/q/2152077)
++   构建静态库和共享库：[`stackoverflow.com/q/2152077`](https://stackoverflow.com/q/2152077)
 
-+   一个 FXTUI 库项目：[https://github.com/ArthurSonzogni/FTXUI](https://github.com/ArthurSonzogni/FTXUI)
++   一个 FXTUI 库项目：[`github.com/ArthurSonzogni/FTXUI`](https://github.com/ArthurSonzogni/FTXUI)
 
-+   `option()` 命令的文档：[https://cmake.org/cmake/help/latest/command/option.html](https://cmake.org/cmake/help/latest/command/option.html)
++   `option()` 命令的文档：[`cmake.org/cmake/help/latest/command/option.html`](https://cmake.org/cmake/help/latest/command/option.html)
 
-+   Google 的开源软件发布准备：[https://opensource.google/docs/releasing/preparing/](https://opensource.google/docs/releasing/preparing/)
++   Google 的开源软件发布准备：[`opensource.google/docs/releasing/preparing/`](https://opensource.google/docs/releasing/preparing/)
 
-+   为什么我们不能为 GCC 预编译头使用 Clang-Tidy：[https://gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104](https://gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104)
++   为什么我们不能为 GCC 预编译头使用 Clang-Tidy：[`gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104`](https://gitlab.kitware.com/cmake/cmake/-/issues/22081#note_943104)
 
-+   Cppcheck 手册：[https://cppcheck.sourceforge.io/manual.pdf](https://cppcheck.sourceforge.io/manual.pdf)
++   Cppcheck 手册：[`cppcheck.sourceforge.io/manual.pdf`](https://cppcheck.sourceforge.io/manual.pdf)
 
-+   如何编写 README：[https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/)
++   如何编写 README：[`www.freecodecamp.org/news/how-to-write-a-good-readme-file/`](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/)
 
-+   GitHub 项目的 Creative Commons 许可证：[https://github.com/santisoler/cc-licenses](https://github.com/santisoler/cc-licenses)
++   GitHub 项目的 Creative Commons 许可证：[`github.com/santisoler/cc-licenses`](https://github.com/santisoler/cc-licenses)
 
-+   GitHub 常用的项目许可证：[https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)
++   GitHub 常用的项目许可证：[`docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository`](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)
 
 # 留下评论！
 

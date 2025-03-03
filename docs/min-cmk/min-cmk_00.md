@@ -50,27 +50,27 @@ CMake 绝非完美，但今天，它在 C 和 C++ 领域无处不在，并且由
 
 # 本书内容概览
 
-[*第1章*](B21152_01.xhtml#_idTextAnchor019)，*入门*，涵盖了无论你是使用Windows、macOS还是Linux，都能启动和运行CMake所需的一切。
+*第一章*，*入门*，涵盖了无论你是使用 Windows、macOS 还是 Linux，都能启动和运行 CMake 所需的一切。
 
-[*第2章*](B21152_02.xhtml#_idTextAnchor032)，*你好，CMake!*，带你快速浏览CMake，介绍了一些最基本的概念以及我们将在本书中构建的应用程序的核心。
+*第二章*，*你好，CMake!*，带你快速浏览 CMake，介绍了一些最基本的概念以及我们将在本书中构建的应用程序的核心。
 
-[*第3章*](B21152_03.xhtml#_idTextAnchor065)，*使用FetchContent与外部依赖*，展示了如何引入我们的第一个外部依赖，以最小的努力增强应用程序。
+*第三章*，*使用 FetchContent 与外部依赖*，展示了如何引入我们的第一个外部依赖，以最小的努力增强应用程序。
 
-[*第4章*](B21152_04.xhtml#_idTextAnchor086)，*为FetchContent创建库*，换个角度，展示了如何创建一个库，之后可以被`FetchContent`使用。
+*第四章*，*为 FetchContent 创建库*，换个角度，展示了如何创建一个库，之后可以被`FetchContent`使用。
 
-[*第5章*](B21152_05.xhtml#_idTextAnchor141)，*简化CMake配置*，转向关注如何设置CMake，以尽可能高效地工作，并消除冗长的命令。
+*第五章*，*简化 CMake 配置*，转向关注如何设置 CMake，以尽可能高效地工作，并消除冗长的命令。
 
-[*第6章*](B21152_06.xhtml#_idTextAnchor152)，*安装依赖与ExternalProject_Add*，在[*第5章*](B21152_05.xhtml#_idTextAnchor141)的基础上，向你展示了如何最好地处理项目中的更大依赖。
+*第六章*，*安装依赖与 ExternalProject_Add*，在*第五章*的基础上，向你展示了如何最好地处理项目中的更大依赖。
 
-[*第7章*](B21152_07.xhtml#_idTextAnchor170)，*为你的库添加安装支持*，详细讲解了如何使你的库可安装，以便像我们在[*第6章*](B21152_06.xhtml#_idTextAnchor152)中探讨的依赖一样使用。
+*第七章*，*为你的库添加安装支持*，详细讲解了如何使你的库可安装，以便像我们在*第六章*中探讨的依赖一样使用。
 
-[*第8章*](B21152_08.xhtml#_idTextAnchor183)，*使用超级构建简化入门*，回到简化项目的主题，演示了如何通过一个命令构建你的项目和多个外部依赖。
+*第八章*，*使用超级构建简化入门*，回到简化项目的主题，演示了如何通过一个命令构建你的项目和多个外部依赖。
 
-[*第9章*](B21152_09.xhtml#_idTextAnchor195)，*为项目编写测试*，探讨了测试的重要性，并概述了CTest如何帮助巩固各种类型的测试。
+*第九章*，*为项目编写测试*，探讨了测试的重要性，并概述了 CTest 如何帮助巩固各种类型的测试。
 
-[*第10章*](B21152_10.xhtml#_idTextAnchor214)，*为共享打包项目*，讲解了在将你的项目准备好与他人共享时，解决最后一个难题。
+*第十章*，*为共享打包项目*，讲解了在将你的项目准备好与他人共享时，解决最后一个难题。
 
-[*第11章*](B21152_11.xhtml#_idTextAnchor228)，*支持工具与下一步*，探讨了更广泛的CMake生态系统，并介绍了一系列能够与CMake本身互补的工具，还分享了一些关于未来学习CMake的主题和资源。
+*第十一章*，*支持工具与下一步*，探讨了更广泛的 CMake 生态系统，并介绍了一系列能够与 CMake 本身互补的工具，还分享了一些关于未来学习 CMake 的主题和资源。
 
 # 充分利用本书
 
@@ -94,9 +94,9 @@ CMake 绝非完美，但今天，它在 C 和 C++ 领域无处不在，并且由
 
 # 下载示例代码文件
 
-你可以从 [https://github.com/PacktPublishing/Minimal-CMake](https://github.com/PacktPublishing/Minimal-CMake) 下载本书的示例代码文件。如果代码有更新，它会在 GitHub 仓库中进行更新。
+你可以从 [`github.com/PacktPublishing/Minimal-CMake`](https://github.com/PacktPublishing/Minimal-CMake) 下载本书的示例代码文件。如果代码有更新，它会在 GitHub 仓库中进行更新。
 
-我们还提供了其他来自我们丰富书籍和视频目录的代码包，详情请访问 [https://github.com/PacktPublishing/](https://github.com/PacktPublishing/)。快来看看吧！
+我们还提供了其他来自我们丰富书籍和视频目录的代码包，详情请访问 [`github.com/PacktPublishing/`](https://github.com/PacktPublishing/)。快来看看吧！
 
 # 使用的约定
 
@@ -131,7 +131,7 @@ Shaders not found. Have you built them using compile-shader-<platform>.sh/bat sc
 
 **勘误表**：尽管我们已尽最大努力确保内容的准确性，错误还是有可能发生。如果你发现书中有错误，我们非常感激你能将其报告给我们。请访问 [www.packtpub.com/support/errata](http://www.packtpub.com/support/errata) 并填写表格。
 
-**盗版**：如果你在互联网上发现任何我们作品的非法副本，无论形式如何，我们将非常感激你提供相关位置或网站名称。请通过[版权@packtpub.com](mailto:copyright@packtpub.com)与我们联系，并附上相关材料的链接。
+**盗版**：如果你在互联网上发现任何我们作品的非法副本，无论形式如何，我们将非常感激你提供相关位置或网站名称。请通过版权@packtpub.com 与我们联系，并附上相关材料的链接。
 
 如果你有兴趣成为作者：如果你在某个主题上有专业知识，并且有意编写或贡献书籍，请访问[authors.packtpub.com](http://authors.packtpub.com)。
 
@@ -141,7 +141,7 @@ Shaders not found. Have you built them using compile-shader-<platform>.sh/bat sc
 
 你的评论对我们和技术社区至关重要，将帮助我们确保提供优质内容。
 
-# 下载本书的免费PDF副本
+# 下载本书的免费 PDF 副本
 
 感谢你购买本书！
 
@@ -149,7 +149,7 @@ Shaders not found. Have you built them using compile-shader-<platform>.sh/bat sc
 
 你的电子书购买与所选设备不兼容吗？
 
-别担心，现在每本Packt书籍都附赠免费的DRM免保护PDF版本。
+别担心，现在每本 Packt 书籍都附赠免费的 DRM 免保护 PDF 版本。
 
 在任何地方、任何设备上阅读。直接从你最喜欢的技术书籍中搜索、复制和粘贴代码到你的应用中。
 
@@ -161,8 +161,8 @@ Shaders not found. Have you built them using compile-shader-<platform>.sh/bat sc
 
 ![](img/B21152_QR_Free_PDF.jpg)
 
-[https://packt.link/free-ebook/9781835087312](https://packt.link/free-ebook/9781835087312)
+[`packt.link/free-ebook/9781835087312`](https://packt.link/free-ebook/9781835087312)
 
 1.  提交你的购买凭证
 
-1.  就这些！我们将直接通过电子邮件发送你的免费PDF及其他优惠。
+1.  就这些！我们将直接通过电子邮件发送你的免费 PDF 及其他优惠。

@@ -2,11 +2,11 @@
 
 # 杂项命令
 
-每种语言都包括一些用于各种任务的实用命令，CMake也不例外。它提供了用于算术运算、按位操作、字符串操作以及列表和文件操作的工具。尽管由于功能增强和多个模块的发展，这些命令的需求有所减少，但在高度自动化的项目中，它们仍然是必不可少的。如今，您可能会发现它们在使用`cmake -P <filename>`调用的CMake脚本中更为有用。
+每种语言都包括一些用于各种任务的实用命令，CMake 也不例外。它提供了用于算术运算、按位操作、字符串操作以及列表和文件操作的工具。尽管由于功能增强和多个模块的发展，这些命令的需求有所减少，但在高度自动化的项目中，它们仍然是必不可少的。如今，您可能会发现它们在使用`cmake -P <filename>`调用的 CMake 脚本中更为有用。
 
-因此，本附录总结了CMake命令和其多种模式，作为方便的离线参考或官方文档的简化版。要获取更详细的信息，请查阅提供的链接。
+因此，本附录总结了 CMake 命令和其多种模式，作为方便的离线参考或官方文档的简化版。要获取更详细的信息，请查阅提供的链接。
 
-此参考适用于CMake 3.26.6。
+此参考适用于 CMake 3.26.6。
 
 在本*附录*中，我们将涵盖以下主要内容：
 
@@ -20,9 +20,9 @@
 
 # `string()`命令
 
-`string()`命令用于操作字符串。它提供了多种模式，执行不同的操作：搜索和替换、操作、比较、哈希、生成和JSON操作（自CMake 3.19版本起提供最后一个）。
+`string()`命令用于操作字符串。它提供了多种模式，执行不同的操作：搜索和替换、操作、比较、哈希、生成和 JSON 操作（自 CMake 3.19 版本起提供最后一个）。
 
-完整的详细信息可以在在线文档中找到：[https://cmake.org/cmake/help/latest/command/string.html](https://cmake.org/cmake/help/latest/command/string.html)。
+完整的详细信息可以在在线文档中找到：[`cmake.org/cmake/help/latest/command/string.html`](https://cmake.org/cmake/help/latest/command/string.html)。
 
 请注意，接受`string()`模式的`<input>`参数将接受多个`<input>`值，并在执行命令之前将它们连接起来，因此：
 
@@ -36,13 +36,13 @@ string(PREPEND myVariable "a" "b" "c")
 string(PREPEND myVariable "abc") 
 ```
 
-可用的`string()`模式包括搜索和替换、操作、比较、哈希、生成和JSON。
+可用的`string()`模式包括搜索和替换、操作、比较、哈希、生成和 JSON。
 
 ## 搜索和替换
 
 以下模式可用：
 
-+   `string(FIND <haystack> <pattern> <out> [REVERSE])`在`<haystack>`字符串中搜索`<pattern>`并将找到的位置以整数形式写入`<out>`变量。如果使用了`REVERSE`标志，它将从字符串的末尾向前搜索。此操作仅适用于ASCII字符串（不支持多字节字符）。
++   `string(FIND <haystack> <pattern> <out> [REVERSE])`在`<haystack>`字符串中搜索`<pattern>`并将找到的位置以整数形式写入`<out>`变量。如果使用了`REVERSE`标志，它将从字符串的末尾向前搜索。此操作仅适用于 ASCII 字符串（不支持多字节字符）。
 
 +   `string(REPLACE <pattern> <replace> <out> <input>)`将`<input>`中的所有`<pattern>`替换为`<replace>`，并将结果存储在`<out>`变量中。
 
@@ -182,7 +182,7 @@ string(JSON <out> [ERROR_VARIABLE <error>] <operation + args>)
 
 完整的详细信息可以在在线文档中找到：
 
-[https://cmake.org/cmake/help/latest/command/list.html](https://cmake.org/cmake/help/latest/command/list.html)
+[`cmake.org/cmake/help/latest/command/list.html`](https://cmake.org/cmake/help/latest/command/list.html)
 
 可用的 `list()` 模式类别包括读取、搜索、修改和排序。
 
@@ -250,7 +250,7 @@ list(FIND <list> <needle> <out>)
 
 完整的详细信息可以在在线文档中找到：
 
-[https://cmake.org/cmake/help/latest/command/file.html](https://cmake.org/cmake/help/latest/command/file.html)
+[`cmake.org/cmake/help/latest/command/file.html`](https://cmake.org/cmake/help/latest/command/file.html)
 
 可用的`file()`模式类别包括读取、写入、文件系统、路径转换、传输、锁定和归档。
 
@@ -266,7 +266,7 @@ list(FIND <list> <needle> <out>)
 
 +   `file(TIMESTAMP <filename> <out> [<format>])` 生成`<filename>`文件的时间戳字符串表示，并将其存储到`<out>`变量中。可选接受一个`<format>`字符串。
 
-+   `file(GET_RUNTIME_DEPENDENCIES [...])` 获取指定文件的运行时依赖项。这是一个高级命令，仅在`install(CODE)`或`install(SCRIPT)`场景中使用。从CMake 3.21版本开始可用。
++   `file(GET_RUNTIME_DEPENDENCIES [...])` 获取指定文件的运行时依赖项。这是一个高级命令，仅在`install(CODE)`或`install(SCRIPT)`场景中使用。从 CMake 3.21 版本开始可用。
 
 ## 写入
 
@@ -276,7 +276,7 @@ list(FIND <list> <needle> <out>)
 
 +   `file({TOUCH | TOUCH_NOCREATE} [<filename>...])` 更新`<filename>`的时间戳。如果文件不存在，则仅在`TOUCH`模式下创建该文件。
 
-+   `file(GENERATE OUTPUT <output-file> [...])` 是一个高级模式，它为当前CMake生成器的每个构建配置生成一个输出文件。
++   `file(GENERATE OUTPUT <output-file> [...])` 是一个高级模式，它为当前 CMake 生成器的每个构建配置生成一个输出文件。
 
 +   `file(CONFIGURE OUTPUT <output-file> CONTENT <content> [...])` 与`GENERATE_OUTPUT`类似，但还会通过将变量占位符替换为值来配置生成的文件。
 
@@ -294,7 +294,7 @@ list(FIND <list> <needle> <out>)
 
 +   `file(COPY <file>... DESTINATION <dir> [...])`将文件复制到`<dir>`目标路径。它提供了过滤、设置权限、符号链接链跟踪等选项。
 
-+   `file(COPY_FILE <file> <destination> [...])`将单个文件复制到`<destination>`路径。从CMake 3.21版本开始提供。
++   `file(COPY_FILE <file> <destination> [...])`将单个文件复制到`<destination>`路径。从 CMake 3.21 版本开始提供。
 
 +   `file(SIZE <filename> <out>)`读取`<filename>`的字节大小，并将其存储在`<out>`变量中。
 
@@ -310,11 +310,11 @@ list(FIND <list> <needle> <out>)
 
 以下模式可用：
 
-+   `file(REAL_PATH <path> <out> [BASE_DIRECTORY <dir>])`计算从相对路径到绝对路径，并将其存储在`<out>`变量中。它可以选择性地接受`<dir>`作为基础目录。从CMake 3.19版本开始提供。
++   `file(REAL_PATH <path> <out> [BASE_DIRECTORY <dir>])`计算从相对路径到绝对路径，并将其存储在`<out>`变量中。它可以选择性地接受`<dir>`作为基础目录。从 CMake 3.19 版本开始提供。
 
 +   `file(RELATIVE_PATH <out> <directory> <file>)`计算`<file>`相对于`<directory>`的路径，并将其存储在`<out>`变量中。
 
-+   `file({TO_CMAKE_PATH | TO_NATIVE_PATH} <path> <out>)`将`<path>`转换为CMake路径（目录以正斜杠分隔），转换为平台的本地路径，并反向转换。结果存储在`<out>`变量中。
++   `file({TO_CMAKE_PATH | TO_NATIVE_PATH} <path> <out>)`将`<path>`转换为 CMake 路径（目录以正斜杠分隔），转换为平台的本地路径，并反向转换。结果存储在`<out>`变量中。
 
 ## 传输
 
@@ -322,7 +322,7 @@ list(FIND <list> <needle> <out>)
 
 +   `file(DOWNLOAD <url> [<path>] [...])`从`<url>`下载文件并将其存储在`<path>`中。
 
-+   `file(UPLOAD <file> <url> [...])`将`<file>`上传到URL。
++   `file(UPLOAD <file> <url> [...])`将`<file>`上传到 URL。
 
 ## 锁定
 
@@ -365,7 +365,7 @@ file(ARCHIVE_EXTRACT INPUT <archive> [DESTINATION <dir>]
 
 CMake 还支持一些简单的算术运算。详细信息请参阅在线文档：
 
-[https://cmake.org/cmake/help/latest/command/math.html](https://cmake.org/cmake/help/latest/command/math.html)
+[`cmake.org/cmake/help/latest/command/math.html`](https://cmake.org/cmake/help/latest/command/math.html)
 
 要评估一个数学表达式并将其作为字符串存储在 `<out>` 变量中，可以选择 `<format>`（`HEXADECIMAL` 或 `DECIMAL`），使用以下签名：
 
